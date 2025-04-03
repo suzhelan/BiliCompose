@@ -2,18 +2,40 @@ package top.sacz.biz.home.api
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.Parameters
+import io.ktor.http.contentType
+import io.ktor.http.formUrlEncode
 import io.ktor.http.parameters
 import io.ktor.http.path
-import io.ktor.http.takeFrom
-import top.sacz.bili.api.AppConfig
+import kotlinx.serialization.json.JsonObject
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.ktorClient
 import top.sacz.biz.home.model.Video
 
+suspend fun main() {
+    val feedApi = FeedApi()
+    feedApi.getFeed()
+
+}
+
 class FeedApi {
-    val URL = AppConfig.API_BASE_URL
+
+    suspend fun checkUpdate() : JsonObject {
+        val body =Parameters.build { append("version", "1") }
+        return ktorClient.post {
+            url {
+                host = "qstory.sacz.top"
+                path("/update/hasUpdate")
+            }
+            contentType(ContentType.Application.FormUrlEncoded)
+            setBody(body.formUrlEncode())
+        }.body()
+    }
     suspend fun getFeed(): Response<Video> {
-        val params = mapOf(
+        val params: MutableMap<String, Any?> = mutableMapOf(
             "fnval" to 272,
             "fnver" to 1,
             "force_host" to 0,
@@ -33,17 +55,18 @@ class FeedApi {
             "recsys_mode" to 0,
             "s_locale" to "zh_CN",
             "video_mode" to 1,
-            "voice_balance" to 1
+            "voice_balance" to 1,
         )
 
         return ktorClient.get {
             url {
-                takeFrom(URL)
-                path("x/v2/feed/index")
+                path("/x/v2/feed/index")
                 parameters {
-
+                    for ((key, value) in params) {
+                        append(key, value.toString())
+                    }
                 }
-             }
+            }
         }.body()
     }
 }

@@ -1,7 +1,6 @@
 package top.sacz.bili.api
 
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.TreeMap
@@ -24,9 +23,9 @@ actual object AppSigner {
             if (queryBuilder.isNotEmpty()) {
                 queryBuilder.append('&')
             }
-            queryBuilder.append(URLEncoder.encode(key, StandardCharsets.UTF_8))
+            queryBuilder.append(URLEncoder.encode(key, "UTF-8"))
                 .append('=')
-                .append(URLEncoder.encode(value?.toString(), StandardCharsets.UTF_8))
+                .append(URLEncoder.encode(value?.toString(), "UTF-8"))
         }
         return generateMD5(queryBuilder.append(appSec).toString())
     }
