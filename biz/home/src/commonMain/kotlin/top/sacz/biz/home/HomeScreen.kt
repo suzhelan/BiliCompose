@@ -1,5 +1,8 @@
 package top.sacz.biz.home
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Favorite
@@ -9,11 +12,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.compose.viewModel
+import top.sacz.bili.api.Response
+import top.sacz.biz.home.model.VideoList
+import top.sacz.biz.home.viewmodel.FeedViewModel
 
 enum class AppDestinations(
     val label: String,
@@ -53,7 +63,30 @@ fun HomeScreen() {
 
 @Composable
 fun CustomView(contentDescription: String) {
-    Text(text = contentDescription)
+    val viewModel : FeedViewModel = viewModel()
+    val videoListResponse by viewModel.recommendedLevelList.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getFeed()
+    }
+    //垂直布局
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Text(text = contentDescription)
+        Text(
+            text =
+                when (videoListResponse) {
+                    is Response.Success -> {
+                        (videoListResponse as Response.Success<VideoList>).data.toString()
+                    }
+                    is Response.Error -> {
+                        "Error"
+                    }
+                    else -> {
+                        "Loading"
+                    }
+                }
+        )
+    }
 }
 
 fun main() {
