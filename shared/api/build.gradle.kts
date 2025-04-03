@@ -1,5 +1,6 @@
 plugins {
     id("compose-plugin.library")
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 
