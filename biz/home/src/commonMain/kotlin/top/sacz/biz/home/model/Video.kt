@@ -4,6 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class VideoList(
+    @SerialName("items")
+    val items: List<Video> = emptyList(),
+)
+@Serializable
 data class Video(
     @SerialName("args") val args: Args = Args(),
     @SerialName("can_play") val canPlay: Int = 0,
@@ -35,12 +40,12 @@ data class Video(
 
 @Serializable
 data class Args(
-    @SerialName("aid") val aid: Int = 0,
+    @SerialName("aid") val aid: Long = 0,
     @SerialName("rid") val rid: Int = 0,
     @SerialName("rname") val rname: String = "",
     @SerialName("tid") val tid: Int = 0,
     @SerialName("tname") val tname: String = "",
-    @SerialName("up_id") val upId: Int = 0,
+    @SerialName("up_id") val upId: Long = 0,
     @SerialName("up_name") val upName: String = ""
 )
 
@@ -62,8 +67,9 @@ data class GotoIcon(
 
 @Serializable
 data class PlayerArgs(
-    @SerialName("aid") val aid: Int = 0,
-    @SerialName("cid") val cid: Int = 0,
+    // 修改aid和cid为Long类型以支持大数值
+    @SerialName("aid") val aid: Long = 0,
+    @SerialName("cid") val cid: Long = 0,
     @SerialName("duration") val duration: Int = 0,
     @SerialName("type") val type: String = ""
 )

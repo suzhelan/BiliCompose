@@ -13,6 +13,18 @@ plugins {
 val composeExtension = extensions.findByType(ComposeExtension::class)
 
 configure<KotlinMultiplatformExtension> {
+    if (BuildVersionConfig.ENABLE_IOS) {
+        listOf(
+            iosX64(),
+            iosArm64(),
+            iosSimulatorArm64()
+        ).forEach { iosTarget ->
+            iosTarget.binaries.framework {
+                baseName = "ComposeApp"
+                isStatic = true
+            }
+        }
+    }
     jvm()
     sourceSets.commonMain.dependencies {
         // 添加常用依赖

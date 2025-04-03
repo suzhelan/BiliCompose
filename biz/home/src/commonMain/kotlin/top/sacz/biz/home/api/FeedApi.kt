@@ -13,18 +13,18 @@ import io.ktor.http.path
 import kotlinx.serialization.json.JsonObject
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.ktorClient
-import top.sacz.biz.home.model.Video
+import top.sacz.biz.home.model.VideoList
 
 suspend fun main() {
     val feedApi = FeedApi()
-    feedApi.getFeed()
-
+    val feedList = feedApi.getFeed()
+    println(feedList.data)
 }
 
 class FeedApi {
 
     suspend fun checkUpdate() : JsonObject {
-        val body =Parameters.build { append("version", "1") }
+        val body = Parameters.build { append("version", "1") }
         return ktorClient.post {
             url {
                 host = "qstory.sacz.top"
@@ -34,7 +34,8 @@ class FeedApi {
             setBody(body.formUrlEncode())
         }.body()
     }
-    suspend fun getFeed(): Response<Video> {
+
+    suspend fun getFeed(): Response<VideoList> {
         val params: MutableMap<String, Any?> = mutableMapOf(
             "fnval" to 272,
             "fnver" to 1,
