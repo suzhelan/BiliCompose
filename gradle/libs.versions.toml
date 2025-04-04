@@ -1,20 +1,20 @@
 [versions]
 agp = "8.9.1"
-constraintlayoutCompose = "1.1.1"
 androidx-activityCompose = "1.10.1"
 androidx-appcompat = "1.7.0"
 androidx-lifecycle = "2.8.4"
 androidx-material = "1.12.0"
 compose-multiplatform = "1.7.3"
+constraintlayoutComposeMultiplatform = "0.5.1"
 kotlin = "2.1.20"
 kotlinx-coroutines = "1.10.1"
 navigationCompose = "2.8.0-alpha13"
-ktor = "3.1.1"
+ktor = "3.1.2"
 logback = "1.5.18"
 
 material3-adaptive = "1.1.0"
 
-kotlinx-serialization = "1.8.0"
+kotlinx-serialization = "1.8.1"
 
 [libraries]
 # Gradle plugins
@@ -28,9 +28,11 @@ kotlin-compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose
 #comon libraries
 lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
-androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "compose-multiplatform" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+constraintlayout-compose-multiplatform = { module = "tech.annexflow.compose:constraintlayout-compose-multiplatform", version.ref = "constraintlayoutComposeMultiplatform" }
+constraintlayout-compose-multiplatform-shard = { group = "tech.annexflow.compose", name = "constraintlayout-compose-multiplatform-shard", version.ref = "constraintlayoutComposeMultiplatform" }
+constraintlayout-compose-multiplatform-shard-core = { group = "tech.annexflow.compose", name = "constraintlayout-compose-multiplatform-shard-core", version.ref = "constraintlayoutComposeMultiplatform" }
 
 #kotlin序列化
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
