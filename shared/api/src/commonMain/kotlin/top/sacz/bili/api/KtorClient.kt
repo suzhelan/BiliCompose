@@ -1,7 +1,6 @@
 package top.sacz.bili.api
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.Charsets
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -28,9 +27,6 @@ val commonParams = mutableMapOf(
 
 
 val ktorClient = HttpClient {
-    Charsets {
-
-    }
     install(DefaultRequest) {
         url {
             protocol = URLProtocol.HTTPS

@@ -7,11 +7,13 @@ import io.ktor.http.path
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.ktorClient
 import top.sacz.biz.home.model.VideoList
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 
 class FeedApi {
 
-
+    @OptIn(ExperimentalTime::class)
     suspend fun getFeed(): Response.Success<VideoList> {
         val params: MutableMap<String, Any?> = mutableMapOf(
             "fnval" to 272,
@@ -29,6 +31,7 @@ class FeedApi {
             "open_event" to "",
             "platform" to "android",
             "pull" to false,
+            "idx" to Clock.System.now().epochSeconds.toString(),
             "qn" to 32,
             "recsys_mode" to 0,
             "s_locale" to "zh_CN",

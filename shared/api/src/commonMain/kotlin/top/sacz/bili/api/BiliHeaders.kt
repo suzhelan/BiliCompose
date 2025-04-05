@@ -1,16 +1,44 @@
 package top.sacz.bili.api
 
+
 import io.ktor.util.encodeBase64
 import io.ktor.utils.io.core.toByteArray
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
 import top.sacz.bili.api.proto.FawkesReq
+import top.sacz.bili.api.proto.Locale
+import top.sacz.bili.api.proto.LocaleIds
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-val grpcHeaders : MutableMap<String, String>
+
+val commonHeaders: MutableMap<String, String>
+    get() {
+        val result = mutableMapOf(
+            "app-key" to "android64",
+            "bili-http-engine" to "ignet",
+            "buvid" to BiliHeaders.buvid,
+            "env" to "prod",
+            "fp_local" to "c8c083bf5dc97732052c66ff0260851a2024110401353817dd863b003f0a9388",
+            "fp_remote" to "c8c083bf5dc97732052c66ff0260851a2024110401353817dd863b003f0a9388",
+            "guestid" to "23797428340613",
+            "session_id" to BiliHeaders.sessionId,
+            "user-agent" to BiliHeaders.userAgent,
+            "x-bili-aurora-eid" to BiliHeaders.auroraEid,
+            "x-bili-locale-bin" to BiliHeaders.Bin.localBin,
+            "x-bili-metadata-ip-region" to "CN",
+            "x-bili-metadata-legal-region" to "CN",
+            "x-bili-mid" to "479396940",
+            "x-bili-ticket" to "eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM3MjcxNzAsImlhdCI6MTc0MzY5ODA3MCwiYnV2aWQiOiJYVTVDNzg2NUUzREE2NzAwNENCMkFCNkFFNTY3OTZCRTM0RTVEIn0.ytZygV5hTYkulQ6V9wUT3BC1k-zQxqnJMgDOZCYPMOw",
+            "x-bili-trace-id" to BiliHeaders.traceId
+        )
+        return result
+    }
+
+val grpcHeaders: MutableMap<String, String>
     get() {
         val result = mutableMapOf(
             "user-agent" to "${BiliHeaders.userAgent} grpc-java-cronet/1.36.1",
@@ -21,31 +49,62 @@ val grpcHeaders : MutableMap<String, String>
             "x-bili-trace-id" to BiliHeaders.traceId,
         )
         if (false) {
-            result["authorization"] ="identify_v1 {access_key}"
+            result["authorization"] = "identify_v1 {access_key}"
         }
         result["buvid"] = BiliHeaders.buvid
         result["bili-http-engine"] = "cronet"
         result["te"] = "trailers"
-        result["x-bili-fawkes-req-bin"] = ProtoBuf.encodeToByteArray(FawkesReq.serializer(), FawkesReq(
-            appkey = "1d8b6e7d45233436",
-            env = "prod",
-            sessionId = "随机八位字符串"
-        )).encodeBase64()
+        result["x-bili-fawkes-req-bin"] = BiliHeaders.Bin.fawkesReqBin
         return result
     }
-object BiliHeaders {
-    val userAgent ="Mozilla/5.0 BiliDroid/1.46.2 (bbcallen@gmail.com) os/android model/vivo mobi_app/android_hd build/2001100 channel/yingyongbao innerVer/2001100 osVer/14 network/2"
 
+object BiliHeaders {
+    val userAgent =
+        "Mozilla/5.0 BiliDroid/1.46.2 (bbcallen@gmail.com) os/android model/vivo mobi_app/android_hd build/2001100 channel/yingyongbao innerVer/2001100 osVer/14 network/2"
     val buvid: String by lazy { generateBuvid() }
     val traceId: String by lazy { genTraceId() }
     val auroraEid: String by lazy { genAuroraEid(0L) }
     val deviceId: String by lazy { genDeviceId() }
 
+    val sessionId: String by lazy { genSessionId() }
     private val random = Random.Default
+
+    object Bin {
+        val localBin: String by lazy { genLocalBin() }
+        val fawkesReqBin: String by lazy { genFawkesReqBin() }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        private fun genFawkesReqBin(): String {
+            val fawkesReq = FawkesReq(
+                appkey = "1d8b6e7d45233436", env = "prod", sessionId = "随机八位字符串"
+            )
+            val byteArray = ProtoBuf.encodeToByteArray(FawkesReq.serializer(), fawkesReq)
+            val base64 = byteArray.encodeBase64()
+            return base64.replace("=", "")
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        private fun genLocalBin(): String {
+            val localProto = Locale(
+                cLocale = LocaleIds(language = "zh", script = "", region = "CN"),
+                sLocale = LocaleIds(language = "zh", script = "", region = "CN"),
+                simCode = "",
+                timezone = "Asia/Shanghai"
+            )
+            val byteArray = ProtoBuf.encodeToByteArray(Locale.serializer(), localProto)
+            val base64 = byteArray.encodeBase64()
+            return base64.replace("=", "")
+        }
+    }
+
+    //生成随机八位hex
+    private fun genSessionId(): String {
+        return genRandomString(8)
+    }
 
     @OptIn(ExperimentalEncodingApi::class)
     private fun genAuroraEid(uid: Long): String {
-        if (uid == 0L) return "0"
+        if (uid == 0L) return ""
         // 1. 将 UID 转为字节数组
         val uidStr = uid.toString()
         val midBytes = uidStr.toByteArray()
@@ -59,8 +118,7 @@ object BiliHeaders {
             result[i] = (midBytes[i].toInt() xor keyByte.toInt()).toByte()
         }
         // 3. Base64编码（不带padding）
-        return Base64.encode(result)
-            .replace("=", "")
+        return Base64.encode(result).replace("=", "")
     }
 
     @OptIn(ExperimentalTime::class)
@@ -105,25 +163,20 @@ object BiliHeaders {
 
     private fun genRandomString(length: Int): String {
         val charPool: List<Char> = ('a'..'z') + ('0'..'9')
-        return (1..length)
-            .map { Random.nextInt(0, charPool.size) }
-            .map(charPool::get)
-            .joinToString("")
+        return (1..length).map {
+            Random.nextInt(0, charPool.size)
+        }.map(charPool::get).joinToString("")
     }
 
     private fun generateBuvid(): String {
-        val md5Str = List(32) { random.nextInt(16).toString(16) }
-            .joinToString("")
-            .uppercase()
+        val md5Str = List(32) { random.nextInt(16).toString(16) }.joinToString("").uppercase()
         return "XY${md5Str[2]}${md5Str[12]}${md5Str[22]}$md5Str"
     }
 
     @OptIn(ExperimentalTime::class)
     private fun genDeviceId(): String {
-        val yyyyMMddHHmmss = Clock.System.now()
-            .toString()
-            .replace(Regex("[-:TZ]"), "")
-            .substring(0, 14)
+        val yyyyMMddHHmmss =
+            Clock.System.now().toString().replace(Regex("[-:TZ]"), "").substring(0, 14)
         val randomHex32 = List(32) { random.nextInt(16).toString(16) }.joinToString("")
         val randomHex16 = List(16) { random.nextInt(16).toString(16) }.joinToString("")
         val deviceID = randomHex32 + yyyyMMddHHmmss + randomHex16
