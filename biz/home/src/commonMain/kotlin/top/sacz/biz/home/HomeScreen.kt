@@ -20,13 +20,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
-import top.sacz.bili.api.BiliHeaders
+import top.sacz.bili.api.Response
 import top.sacz.biz.home.viewmodel.FeedViewModel
 
 enum class AppDestinations(
     val label: String, val icon: ImageVector, val contentDescription: String
 ) {
-    HOME("Home", Icons.Rounded.Home, "HOME"), Mine("My", Icons.Rounded.Person, "My")
+    HOME("Home", Icons.Rounded.Home, "HOME"),
+    Mine("My", Icons.Rounded.Person, "My")
 }
 
 @Composable
@@ -66,8 +67,19 @@ fun CustomView(contentDescription: String) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Text(text = contentDescription)
         Text(
-            text = BiliHeaders.localBin
+            text = when (val response = videoListResponse) {
+                is Response.Success -> {
+                    response.data.toString()
+                }
 
+                is Response.Error -> {
+                    response.message
+                }
+
+                else -> {
+                    "Loading"
+                }
+            }
         )
     }
 }

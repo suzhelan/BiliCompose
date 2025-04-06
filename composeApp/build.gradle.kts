@@ -13,23 +13,21 @@ kotlin {
             jvmTarget.set(BuildVersionConfig.JVM_TARGET)
         }
     }
-    
+
     listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
+        iosX64(), iosArm64(), iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
         }
     }
-    
+
     jvm("desktop")
-    
+
     sourceSets {
         val desktopMain by getting
-        
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -86,9 +84,12 @@ compose.desktop {
         mainClass = "top.sacz.bili.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "top.sacz.bili"
+            targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "BiliCompose"
             packageVersion = "1.0.0"
+            windows {
+                shortcut = true
+            }
         }
     }
 }
