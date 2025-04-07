@@ -7,7 +7,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("com.squareup.okio:okio:3.10.2")
             implementation(libs.ktor.client.core)
             implementation(compose.components.resources)
             implementation(libs.lifecycle.viewmodel.compose)

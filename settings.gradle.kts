@@ -26,5 +26,5 @@ includeBuild("build-plugin")
 
 include(":composeApp")
 include(":server")
-include(":shared:api")
+include(":shared:api",":shared:storage")
 include(":biz:home")

@@ -29,6 +29,7 @@ kotlin {
         val desktopMain by getting
 
         androidMain.dependencies {
+            implementation(projects.shared.storage)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }

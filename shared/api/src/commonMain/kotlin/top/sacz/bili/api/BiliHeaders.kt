@@ -73,6 +73,7 @@ object BiliHeaders {
         val localBin: String by lazy { genLocalBin() }
         val fawkesReqBin: String by lazy { genFawkesReqBin() }
 
+
         @OptIn(ExperimentalSerializationApi::class)
         private fun genFawkesReqBin(): String {
             val fawkesReq = FawkesReq(
