@@ -24,15 +24,15 @@ val commonHeaders: MutableMap<String, String>
             "env" to "prod",
             "fp_local" to "c8c083bf5dc97732052c66ff0260851a2024110401353817dd863b003f0a9388",
             "fp_remote" to "c8c083bf5dc97732052c66ff0260851a2024110401353817dd863b003f0a9388",
-            "guestid" to "23797428340613",
+//            "guestid" to "23797428340613",
             "session_id" to BiliHeaders.sessionId,
             "user-agent" to BiliHeaders.userAgent,
             "x-bili-aurora-eid" to BiliHeaders.auroraEid,
             "x-bili-locale-bin" to BiliHeaders.Bin.localBin,
             "x-bili-metadata-ip-region" to "CN",
             "x-bili-metadata-legal-region" to "CN",
-            "x-bili-mid" to "479396940",
-            "x-bili-ticket" to "eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM3MjcxNzAsImlhdCI6MTc0MzY5ODA3MCwiYnV2aWQiOiJYVTVDNzg2NUUzREE2NzAwNENCMkFCNkFFNTY3OTZCRTM0RTVEIn0.ytZygV5hTYkulQ6V9wUT3BC1k-zQxqnJMgDOZCYPMOw",
+//            "x-bili-mid" to "479396940",
+//            "x-bili-ticket" to "eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM3MjcxNzAsImlhdCI6MTc0MzY5ODA3MCwiYnV2aWQiOiJYVTVDNzg2NUUzREE2NzAwNENCMkFCNkFFNTY3OTZCRTM0RTVEIn0.ytZygV5hTYkulQ6V9wUT3BC1k-zQxqnJMgDOZCYPMOw",
             "x-bili-trace-id" to BiliHeaders.traceId
         )
         return result
@@ -65,7 +65,10 @@ object BiliHeaders {
     val traceId: String by lazy { genTraceId() }
     val auroraEid: String by lazy { genAuroraEid(0L) }
     val deviceId: String by lazy { genDeviceId() }
-
+    val statistics: String by lazy {
+    """
+    {"appId":1,"platform":3,"version":"7.27.0","abtest":""}
+    """ }
     val sessionId: String by lazy { genSessionId() }
     private val random = Random.Default
 

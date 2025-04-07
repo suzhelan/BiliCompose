@@ -20,6 +20,7 @@ dependencyResolutionManagement {
         maven { url = uri("https://maven.aliyun.com/repository/google/") }
         maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin/") }
         maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://jogamp.org/deployment/maven/") }
     }
 }
 includeBuild("build-plugin")
@@ -27,4 +28,4 @@ includeBuild("build-plugin")
 include(":composeApp")
 include(":server")
 include(":shared:api",":shared:storage")
-include(":biz:home")
+include(":biz:home",":biz:login")

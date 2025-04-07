@@ -2,6 +2,7 @@ package top.sacz.biz.home
 
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,7 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
-import top.sacz.bili.api.Response
+import com.multiplatform.webview.web.WebView
+import com.multiplatform.webview.web.rememberWebViewState
 import top.sacz.biz.home.viewmodel.FeedViewModel
 
 enum class AppDestinations(
@@ -37,7 +39,7 @@ fun HomeScreen() {
     //在横屏设备导航栏在左侧 竖屏在底部
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            AppDestinations.entries.forEach {
+            AppDestinations.entries.forEach { //遍历枚举
                 item(
                     icon = {
                         Icon(
@@ -59,6 +61,7 @@ fun CustomView(contentDescription: String) {
     val viewModel: FeedViewModel = viewModel()
     val videoListResponse by viewModel.recommendedLevelList.collectAsState()
 
+    val webViewState = rememberWebViewState("https://github.com/KevinnZou/compose-webview-multiplatform")
     LaunchedEffect(contentDescription) {
         viewModel.getFeed()
     }
@@ -66,20 +69,9 @@ fun CustomView(contentDescription: String) {
     //垂直布局
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Text(text = contentDescription)
-        Text(
-            text = when (val response = videoListResponse) {
-                is Response.Success -> {
-                    response.data.toString()
-                }
-
-                is Response.Error -> {
-                    response.message
-                }
-
-                else -> {
-                    "Loading"
-                }
-            }
+        WebView(
+            state = webViewState,
+            modifier = Modifier.fillMaxSize()
         )
     }
 }

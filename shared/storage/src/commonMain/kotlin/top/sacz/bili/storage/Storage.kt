@@ -9,7 +9,7 @@ import top.sacz.bili.storage.config.SettingsConfig.factor
 /**
  * 存储配置类
  */
-class Storage(val database: String) {
+class Storage(private val database: String) {
     val settings = factor.create(database)
 
     /**

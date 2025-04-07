@@ -6,6 +6,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.URLProtocol
+import io.ktor.http.headers
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlin.time.Clock
@@ -25,7 +26,31 @@ val commonParams = mutableMapOf(
 )
 
 
-
+fun getKtorClient(baseUrl: String) : HttpClient {
+    return HttpClient {
+        headers {
+            for ((key, value) in commonHeaders) {
+                append(key, value)
+            }
+        }
+        install(DefaultRequest) {
+            url {
+                protocol = URLProtocol.HTTPS
+                host = baseUrl
+            }
+        }
+        install(Logging) {
+            level = LogLevel.ALL
+        }
+        install(ContentNegotiation) {
+            json(Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+                explicitNulls = false
+            })
+        }
+    }
+}
 val ktorClient = HttpClient {
     install(DefaultRequest) {
         url {
