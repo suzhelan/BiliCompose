@@ -2,6 +2,7 @@ package top.sacz.bili.storage
 
 
 import com.russhwolf.settings.contains
+import com.russhwolf.settings.set
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import top.sacz.bili.storage.config.SettingsConfig.factor
@@ -12,6 +13,16 @@ import top.sacz.bili.storage.config.SettingsConfig.factor
 class Storage(private val database: String) {
     val settings = factor.create(database)
 
+    fun hasKey(key: String): Boolean = settings.hasKey(key)
+
+    fun remove(key: String) {
+        settings.remove(key)
+    }
+
+    fun clear() {
+        settings.clear()
+    }
+
     /**
      * 获取对象
      * @param key 键
@@ -19,6 +30,7 @@ class Storage(private val database: String) {
      * @return 对象
      */
     inline fun <reified T> getObject(key: String, default: T): T {
+        settings[key] = 0
         val defaultValue = Json.encodeToString(default)
         return Json.decodeFromString(settings.getString(key, defaultValue))
     }
@@ -61,6 +73,7 @@ class Storage(private val database: String) {
         }
         return Json.decodeFromString(serializer, settings.getStringOrNull(key)!!)
     }
+
     /**
      * 存储对象
      * @param key 键

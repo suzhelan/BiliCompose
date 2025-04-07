@@ -14,6 +14,7 @@ kotlin {
             implementation(libs.material3.adaptive.navigation.suite)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(projects.shared.api)
+            implementation(projects.shared.storage)
         }
     }
 
