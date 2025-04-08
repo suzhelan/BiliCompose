@@ -7,7 +7,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.kevinnzou:compose-webview-multiplatform:1.9.40")
             implementation(libs.ktor.client.core)
             implementation(compose.components.resources)
             implementation(libs.lifecycle.viewmodel.compose)

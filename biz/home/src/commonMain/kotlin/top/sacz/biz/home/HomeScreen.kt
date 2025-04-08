@@ -2,7 +2,6 @@ package top.sacz.biz.home
 
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,9 +20,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.multiplatform.webview.web.WebView
-import com.multiplatform.webview.web.rememberWebViewState
+import top.sacz.bili.storage.Storage
+import top.sacz.bili.storage.ext.get
+import top.sacz.bili.storage.ext.set
 import top.sacz.biz.home.viewmodel.FeedViewModel
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 enum class AppDestinations(
     val label: String, val icon: ImageVector, val contentDescription: String
@@ -56,22 +58,22 @@ fun HomeScreen() {
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun CustomView(contentDescription: String) {
     val viewModel: FeedViewModel = viewModel()
     val videoListResponse by viewModel.recommendedLevelList.collectAsState()
 
-    val webViewState = rememberWebViewState("https://github.com/KevinnZou/compose-webview-multiplatform")
     LaunchedEffect(contentDescription) {
         viewModel.getFeed()
+        val storage = Storage("bili")
+        storage["token"] = Uuid.random().toString().replace("-", "")
+        val token : String = storage["token"]!!
+        println(token)
     }
 
     //垂直布局
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Text(text = contentDescription)
-        WebView(
-            state = webViewState,
-            modifier = Modifier.fillMaxSize()
-        )
     }
 }

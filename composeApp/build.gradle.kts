@@ -43,7 +43,6 @@ kotlin {
             implementation(projects.biz.home)
         }
         desktopMain.dependencies {
-            implementation("dev.datlag:kcef:2025.03.23")
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
         }
@@ -83,16 +82,6 @@ dependencies {
 
 compose.desktop {
     application {
-        buildTypes.release.proguard {
-            configurationFiles.from("compose-desktop.pro")
-        }
-        jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
-        jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED") // recommended but not necessary
-
-        if (System.getProperty("os.name").contains("Mac")) {
-            jvmArgs("--add-opens", "java.desktop/sun.lwawt=ALL-UNNAMED")
-            jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
-        }
         mainClass = "top.sacz.bili.MainKt"
 
         nativeDistributions {
