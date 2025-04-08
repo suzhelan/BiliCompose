@@ -26,6 +26,5 @@ dependencyResolutionManagement {
 includeBuild("build-plugin")
 
 include(":composeApp")
-include(":server")
-include(":shared:api",":shared:storage")
+include(":shared:api",":shared:storage",":shared:common")
 include(":biz:home",":biz:login")
