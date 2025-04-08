@@ -28,12 +28,19 @@ fun BehavioralValidation() {
     var jsResult by remember {
         mutableStateOf("wait click")
     }
-    val navigator = rememberWebViewNavigator()
-    val webViewState = rememberWebViewStateWithHTMLData(htmlDataState)
-    val jsBridge = rememberWebViewJsBridge()
 
+    //从html文件/字符串渲染
+    val webViewState = rememberWebViewStateWithHTMLData(htmlDataState)
+
+    //导航控制 可以调用js方法 以及页面的回退等常规操作
+    val navigator = rememberWebViewNavigator()
+
+    //监听js调用native
+    val jsBridge = rememberWebViewJsBridge()
     LaunchedEffect(jsBridge) {
+        //监听js调用native
         jsBridge.register(GreetJsMessageHandler())
+        //获取 biz/login/src/commonMain/composeResources/files/geetest.html
         htmlDataState = Res.readBytes("files/geetest.html").decodeToString()
     }
 
@@ -41,9 +48,10 @@ fun BehavioralValidation() {
         val text = webViewState.let {
             "${it.pageTitle ?: ""} ${it.loadingState} ${it.lastLoadedUrl ?: ""}"
         }
+        //native 调用 js方法
         TextButton(onClick = {
-            navigator.evaluateJavaScript("getFinalResult()") {
-                jsResult = it
+            navigator.evaluateJavaScript("getFinalResult()") { returnMessage ->
+                jsResult = returnMessage
             }
         }) {
             Text(text = "jsResult : $jsResult")

@@ -11,8 +11,6 @@
                 JSON.stringify("{name:'张三',age:18}"),
                 function(response) {
                     const data = JSON.parse(response);
-                    document.getElementById("result").innerHTML =
-                        `姓名: ${data.name}<br>年龄: ${data.age}`;
                     console.log("Native 返回:", data);
                 }
             );
