@@ -15,25 +15,20 @@ actual object SettingsConfig {
         override fun create(name: String?): Settings {
             val userHome = System.getProperty("user.home")
             val properties = Properties()
-            if (name == null) {
-                val defaultPath = File("./data/prop/default.prop").toPath()
-                if (!Files.exists(defaultPath)) {
-                    Files.createFile(defaultPath)
-                }
-                properties.load(Files.newBufferedReader(defaultPath))
-                return PropertiesSettings(properties) {
-                    properties.store(Files.newBufferedWriter(defaultPath), "")
-                }
-            } else {
-                val toPath = File("./data/prop/$name.prop").toPath()
-                if (!Files.exists(toPath)) {
-                    Files.createFile(toPath)
-                }
-                properties.load(Files.newBufferedReader(toPath))
-                return PropertiesSettings(properties) {
-                    properties.store(Files.newBufferedWriter(toPath), "")
-                }
+            var dataPath = File("./data/prop/default.prop").toPath()
+            if (name != null) {
+                dataPath = File("./data/prop/$name.prop").toPath()
             }
+
+            if (!Files.exists(dataPath)) {
+                Files.createDirectories(dataPath.parent)
+                Files.createFile(dataPath)
+            }
+            properties.load(Files.newBufferedReader(dataPath))
+            return PropertiesSettings(properties) {
+                properties.store(Files.newBufferedWriter(dataPath), "This is a data file created by BiliCompose , Do not delete")
+            }
+
         }
     }
 }

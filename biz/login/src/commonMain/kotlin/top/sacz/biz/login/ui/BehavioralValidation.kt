@@ -2,8 +2,8 @@ package top.sacz.biz.login.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,7 +49,7 @@ fun BehavioralValidation() {
             "${it.pageTitle ?: ""} ${it.loadingState} ${it.lastLoadedUrl ?: ""}"
         }
         //native 调用 js方法
-        TextButton(onClick = {
+        FilledTonalButton(onClick = {
             navigator.evaluateJavaScript("getFinalResult()") { returnMessage ->
                 jsResult = returnMessage
             }
