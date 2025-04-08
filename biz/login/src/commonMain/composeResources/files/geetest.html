@@ -1,0 +1,32 @@
+<!--标准html头-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>JsBridge</title>
+    <script type="text/javascript">
+        function h5CallNative(){
+            window.kmpJsBridge.callNative(
+                "getUserInfo",
+                JSON.stringify("{name:'张三',age:18}"),
+                function(response) {
+                    const data = JSON.parse(response);
+                    document.getElementById("result").innerHTML =
+                        `姓名: ${data.name}<br>年龄: ${data.age}`;
+                    console.log("Native 返回:", data);
+                }
+            );
+        }
+        function getFinalResult() {
+            return "最终得分: " + Math.random().toFixed(2);
+        }
+    </script>
+</head>
+<body>
+
+<button onclick="h5CallNative()">H5调用原生</button>
+
+<p id="demo"></p>
+
+</body>
+</html>

@@ -19,7 +19,7 @@ import kotlin.uuid.Uuid
 suspend fun main() {
     val captchaLoginApi = SmsLoginApi()
     val captcha = captchaLoginApi.getCountryCode()
-
+    captchaLoginApi.captcha()
 }
 
 class SmsLoginApi {

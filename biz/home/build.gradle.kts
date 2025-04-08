@@ -12,6 +12,7 @@ kotlin {
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.material3.adaptive.navigation.suite)
             implementation(libs.constraintlayout.compose.multiplatform)
+            implementation(projects.biz.login)
             implementation(projects.shared.api)
             implementation(projects.shared.storage)
         }

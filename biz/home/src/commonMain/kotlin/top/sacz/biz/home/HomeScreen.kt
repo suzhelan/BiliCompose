@@ -1,13 +1,17 @@
 package top.sacz.biz.home
 
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
@@ -24,6 +28,7 @@ import top.sacz.bili.storage.Storage
 import top.sacz.bili.storage.ext.get
 import top.sacz.bili.storage.ext.set
 import top.sacz.biz.home.viewmodel.FeedViewModel
+import top.sacz.biz.login.ui.BehavioralValidation
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -34,6 +39,7 @@ enum class AppDestinations(
     Mine("My", Icons.Rounded.Person, "My")
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
 
@@ -54,7 +60,11 @@ fun HomeScreen() {
                     onClick = { currentDestination = it })
             }
         }) {
-        CustomView(currentDestination.contentDescription)
+        Scaffold { padding ->
+            Box(modifier = Modifier.padding(padding)) {
+                CustomView(currentDestination.contentDescription)
+            }
+        }
     }
 }
 
@@ -68,12 +78,14 @@ fun CustomView(contentDescription: String) {
         viewModel.getFeed()
         val storage = Storage("bili")
         storage["token"] = Uuid.random().toString().replace("-", "")
-        val token : String = storage["token"]!!
+        val token: String = storage["token"]!!
         println(token)
     }
 
     //垂直布局
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Text(text = contentDescription)
+        BehavioralValidation()
     }
 }
+
