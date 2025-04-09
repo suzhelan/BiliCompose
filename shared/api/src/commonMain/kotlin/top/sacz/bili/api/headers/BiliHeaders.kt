@@ -1,4 +1,4 @@
-package top.sacz.bili.api
+package top.sacz.bili.api.headers
 
 
 import io.ktor.util.encodeBase64
@@ -37,6 +37,7 @@ val commonHeaders: MutableMap<String, String>
         )
         return result
     }
+
 
 val grpcHeaders: MutableMap<String, String>
     get() {

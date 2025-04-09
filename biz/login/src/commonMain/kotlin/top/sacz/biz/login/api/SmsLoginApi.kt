@@ -8,7 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.parameters
 import top.sacz.bili.api.AppConfig
-import top.sacz.bili.api.BiliHeaders
+import top.sacz.bili.api.headers.BiliHeaders
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.getKtorClient
 import top.sacz.biz.login.model.Captcha

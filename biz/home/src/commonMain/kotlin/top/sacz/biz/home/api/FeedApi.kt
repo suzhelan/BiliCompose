@@ -4,8 +4,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.parameters
 import io.ktor.http.path
+import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.Response
-import top.sacz.bili.api.ktorClient
+import top.sacz.bili.api.getKtorClient
 import top.sacz.biz.home.model.VideoList
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -39,7 +40,7 @@ class FeedApi {
             "voice_balance" to 1,
         )
 
-        return ktorClient.get {
+        return getKtorClient(AppConfig.APP_BASE_URL).get {
             url {
                 path("/x/v2/feed/index")
                 parameters {

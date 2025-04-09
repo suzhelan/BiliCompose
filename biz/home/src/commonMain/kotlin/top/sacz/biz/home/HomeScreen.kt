@@ -2,10 +2,7 @@ package top.sacz.biz.home
 
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
@@ -15,22 +12,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.lifecycle.viewmodel.compose.viewModel
-import top.sacz.bili.storage.Storage
-import top.sacz.bili.storage.ext.get
-import top.sacz.bili.storage.ext.set
-import top.sacz.biz.home.viewmodel.FeedViewModel
-import top.sacz.biz.login.ui.BehavioralValidation
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import top.sacz.biz.home.ui.RecommendedVideoPage
 
 enum class AppDestinations(
     val label: String, val icon: ImageVector, val contentDescription: String
@@ -68,24 +56,10 @@ fun HomeScreen() {
     }
 }
 
-@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun CustomView(contentDescription: String) {
-    val viewModel: FeedViewModel = viewModel()
-    val videoListResponse by viewModel.recommendedLevelList.collectAsState()
-
-    LaunchedEffect(contentDescription) {
-        viewModel.getFeed()
-        val storage = Storage("bili")
-        storage["token"] = Uuid.random().toString().replace("-", "")
-        val token: String = storage["token"]!!
-        println(token)
-    }
-
     //垂直布局
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        Text(text = contentDescription)
-        BehavioralValidation()
-    }
+    RecommendedVideoPage()
+
 }
 

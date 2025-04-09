@@ -15,12 +15,12 @@ data class Video(
     @SerialName("card_goto") val cardGoto: String = "", // 卡片跳转类型，视频为"av"
     @SerialName("card_type") val cardType: String = "", // 卡片类型，视频为"small_cover_v2"
     @SerialName("cover") val cover: String = "", // 封面URL
-    @SerialName("cover_left1_content_description") val coverLeft1ContentDescription: String = "", // 播放量描述，如"8.9万观看"
-    @SerialName("cover_left2_content_description") val coverLeft2ContentDescription: String = "", // 弹幕数描述，如"250弹幕"
-    @SerialName("cover_left_icon1") val coverLeftIcon1: Int = 0,
+    @SerialName("cover_left_1_content_description") val coverLeft1ContentDescription: String = "", // 播放量描述，如"8.9万观看"
+    @SerialName("cover_left_2_content_description") val coverLeft2ContentDescription: String = "", // 弹幕数描述，如"250弹幕"
+    @SerialName("cover_left_icon_1") val coverLeftIcon1: Int = 0,
     @SerialName("cover_left_icon2") val coverLeftIcon2: Int = 0,
-    @SerialName("cover_left_text1") val coverLeftText1: String = "", // 播放量，如"8.9万"
-    @SerialName("cover_left_text2") val coverLeftText2: String = "", // 弹幕数，如"250"
+    @SerialName("cover_left_text_1") val coverLeftText1: String = "", // 播放量，如"8.9万"
+    @SerialName("cover_left_text_2") val coverLeftText2: String = "", // 弹幕数，如"250"
     @SerialName("cover_right_content_description") val coverRightContentDescription: String = "", // 视频长度描述，如"1分钟20秒"
     @SerialName("cover_right_text") val coverRightText: String = "", // 视频长度，如"1:20"
     @SerialName("desc_button") val descButton: DescButton = DescButton(), // UP主信息

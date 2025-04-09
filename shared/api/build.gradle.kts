@@ -19,6 +19,8 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
+            implementation(libs.coil.network.ktor3)
+            implementation(libs.coil.compose)
 //            api(libs.logback)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)

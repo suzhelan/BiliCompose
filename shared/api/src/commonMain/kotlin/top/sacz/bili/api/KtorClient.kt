@@ -5,10 +5,12 @@ import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.header
 import io.ktor.http.URLProtocol
 import io.ktor.http.headers
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import top.sacz.bili.api.headers.commonHeaders
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -28,15 +30,13 @@ val commonParams = mutableMapOf(
 
 fun getKtorClient(baseUrl: String) : HttpClient {
     return HttpClient {
-        headers {
-            for ((key, value) in commonHeaders) {
-                append(key, value)
-            }
-        }
         install(DefaultRequest) {
             url {
                 protocol = URLProtocol.HTTPS
                 host = baseUrl
+            }
+            for ((key, value) in commonHeaders) {
+                header(key, value)
             }
         }
         install(Logging) {
@@ -52,10 +52,15 @@ fun getKtorClient(baseUrl: String) : HttpClient {
     }
 }
 val ktorClient = HttpClient {
+    headers {
+        for ((key, value) in commonHeaders) {
+            append(key, value)
+        }
+    }
     install(DefaultRequest) {
         url {
             protocol = URLProtocol.HTTPS
-            host = AppConfig.APP_BASE_URL
+            host = AppConfig.API_BASE_URL
         }
     }
     install(Logging) {

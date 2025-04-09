@@ -41,6 +41,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(projects.biz.home)
+            implementation(projects.shared.api)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

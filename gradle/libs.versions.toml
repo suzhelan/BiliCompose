@@ -4,6 +4,8 @@ androidx-activityCompose = "1.10.1"
 androidx-appcompat = "1.7.0"
 androidx-lifecycle = "2.8.4"
 androidx-material = "1.12.0"
+
+coilNetworkKtor3 = "3.1.0"
 compose-multiplatform = "1.7.3"
 composeWebviewMultiplatform = "1.9.40"
 constraintlayoutComposeMultiplatform = "0.5.1"
@@ -29,6 +31,8 @@ compose-multiplatfrom-gradle-plugin = { module = "org.jetbrains.compose:org.jetb
 kotlin-compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 
 #comon libraries
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilNetworkKtor3" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilNetworkKtor3" }
 lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "compose-multiplatform" }
