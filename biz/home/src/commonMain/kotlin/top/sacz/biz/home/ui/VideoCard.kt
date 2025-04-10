@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FeaturedPlayList
 import androidx.compose.material.icons.outlined.SmartDisplay
@@ -91,6 +92,7 @@ fun VideoCard(video: Video) {
                     fontSize = 11.sp,
                     style = TextStyle(color = Color.White)
                 )
+
                 //间距
                 Spacer(Modifier.width(10.dp))
 
@@ -104,6 +106,13 @@ fun VideoCard(video: Video) {
                     text = video.coverLeftText2,
                     fontSize = 11.sp,
                     style = TextStyle(color = Color.White)
+                )
+                //视频时长位于最右侧
+                Text(
+                    text = video.coverRightText,
+                    fontSize = 11.sp,
+                    style = TextStyle(color = Color.White),
+                    modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End)
                 )
             }
         }

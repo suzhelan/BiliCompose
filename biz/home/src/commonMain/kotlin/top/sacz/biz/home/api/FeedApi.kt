@@ -2,7 +2,7 @@ package top.sacz.biz.home.api
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.http.parameters
+import io.ktor.client.request.parameter
 import io.ktor.http.path
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.Response
@@ -43,10 +43,8 @@ class FeedApi {
         return getKtorClient(AppConfig.APP_BASE_URL).get {
             url {
                 path("/x/v2/feed/index")
-                parameters {
-                    for ((key, value) in params) {
-                        append(key, value.toString())
-                    }
+                for ((key, value) in params) {
+                    parameter(key, value)
                 }
             }
         }.body()

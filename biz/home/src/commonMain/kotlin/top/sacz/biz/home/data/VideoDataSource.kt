@@ -20,11 +20,14 @@ class VideoDataSource : PagingSource<Int, Video>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Video> {
         return try {
             val currentKey = params.key ?: firstPageIndex
+            if (currentKey != 1 && params is LoadParams.Refresh) {
+                return LoadResult.Page(emptyList(), prevKey = null, nextKey = 1)
+            }
             val response = api.getFeed()
             val items = response.data.items
             LoadResult.Page(
                 data = items,
-                prevKey = if (currentKey == firstPageIndex) null else currentKey - 1,
+                prevKey = null/*if (currentKey == firstPageIndex) null else currentKey - 1*/,
                 //我们的数据是无限的 所以填入Int.MAX_VALUE,返回null 表示仍然会继续加载更多,如果数据有限 那把Int.MAX_VALUE换成page总数
                 nextKey = if (currentKey == Int.MAX_VALUE) null else currentKey + 1
             )
