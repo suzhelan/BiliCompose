@@ -4,16 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FeaturedPlayList
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,12 +34,9 @@ fun EmptyCard() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
+            .height(230.dp)
     ) {
-        //加载动画
-        Box(modifier = Modifier.fillMaxWidth().height(120.dp)) {
 
-        }
     }
 }
 
@@ -62,9 +60,6 @@ fun VideoCard(video: Video) {
                 modifier = Modifier.fillMaxSize(),
                 model = video.cover,
                 error = { Icon(Icons.Rounded.Error, contentDescription = null) },
-                loading = {
-                    CircularProgressIndicator()
-                },
                 contentDescription = video.title
             )
             //用来做底部渐黑的效果
@@ -96,6 +91,9 @@ fun VideoCard(video: Video) {
                     fontSize = 11.sp,
                     style = TextStyle(color = Color.White)
                 )
+                //间距
+                Spacer(Modifier.width(10.dp))
+
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.FeaturedPlayList,
                     contentDescription = null,
