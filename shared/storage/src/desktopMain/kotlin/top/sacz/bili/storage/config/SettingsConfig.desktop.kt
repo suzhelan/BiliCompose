@@ -8,7 +8,6 @@ import java.util.Properties
 
 actual object SettingsConfig {
     actual val factor: Settings.Factory = PropertiesSettingsFactory()
-    actual val platform: String = "DESKTOP"
 
     class PropertiesSettingsFactory : Settings.Factory {
 

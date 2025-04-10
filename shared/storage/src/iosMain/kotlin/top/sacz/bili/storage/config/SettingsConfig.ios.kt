@@ -5,5 +5,4 @@ import com.russhwolf.settings.Settings
 
 actual object SettingsConfig {
     actual val factor: Settings.Factory = NSUserDefaultsSettings.Factory()
-    actual val platform: String = "IOS"
 }

@@ -12,5 +12,4 @@ actual object SettingsConfig {
     actual val factor: Settings.Factory by lazy {
         SharedPreferencesSettings.Factory(context)
     }
-    actual val platform: String = "ANDROID"
 }
