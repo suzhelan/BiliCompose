@@ -12,6 +12,7 @@ constraintlayoutComposeMultiplatform = "0.5.1"
 kotlin = "2.1.20"
 kotlinx-coroutines = "1.10.1"
 multiplatformSettings = "1.3.0"
+napier = "2.7.1"
 navigationCompose = "2.8.0-alpha13"
 ktor = "3.1.2"
 logback = "1.5.18"
@@ -38,6 +39,7 @@ lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "compose-multiplatform" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 constraintlayout-compose-multiplatform = { module = "tech.annexflow.compose:constraintlayout-compose-multiplatform", version.ref = "constraintlayoutComposeMultiplatform" }
 constraintlayout-compose-multiplatform-shard = { group = "tech.annexflow.compose", name = "constraintlayout-compose-multiplatform-shard", version.ref = "constraintlayoutComposeMultiplatform" }

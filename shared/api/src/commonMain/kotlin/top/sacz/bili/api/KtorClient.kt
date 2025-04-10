@@ -1,13 +1,15 @@
 package top.sacz.bili.api
 
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.http.URLProtocol
-import io.ktor.http.headers
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import top.sacz.bili.api.headers.commonHeaders
@@ -28,7 +30,7 @@ val commonParams = mutableMapOf(
 )
 
 
-fun getKtorClient(baseUrl: String) : HttpClient {
+fun getKtorClient(baseUrl: String): HttpClient {
     return HttpClient {
         install(DefaultRequest) {
             url {
@@ -41,7 +43,13 @@ fun getKtorClient(baseUrl: String) : HttpClient {
         }
         install(Logging) {
             level = LogLevel.ALL
-        }
+            logger = object : Logger {
+                override fun log(message: String) {
+                    Napier.v("HTTPClient", null, message)
+                }
+            }
+        }.also { Napier.base(DebugAntilog()) }
+
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
@@ -51,26 +59,4 @@ fun getKtorClient(baseUrl: String) : HttpClient {
         }
     }
 }
-val ktorClient = HttpClient {
-    headers {
-        for ((key, value) in commonHeaders) {
-            append(key, value)
-        }
-    }
-    install(DefaultRequest) {
-        url {
-            protocol = URLProtocol.HTTPS
-            host = AppConfig.API_BASE_URL
-        }
-    }
-    install(Logging) {
-        level = LogLevel.ALL
-    }
-    install(ContentNegotiation) {
-        json(Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            explicitNulls = false
-        })
-    }
-}
+
