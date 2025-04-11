@@ -16,6 +16,7 @@ class GeeTestViewModel : ViewModel() {
     val captcha = _captcha.asStateFlow()
 
     fun getGeeTestCaptcha() = viewModelScope.launch {
+        _captcha.value = Response.Loading
         _captcha.value = apiCall {
             GeeTestApi().captcha()
         }
