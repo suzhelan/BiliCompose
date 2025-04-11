@@ -5,12 +5,13 @@ import com.multiplatform.webview.jsbridge.JsMessage
 import com.multiplatform.webview.web.WebViewNavigator
 
 // 定义消息处理器
-class StatusJsMessageHandler : IJsMessageHandler {
+class StatusJsMessageHandler(val verifyCallback: (String) -> Unit) : IJsMessageHandler {
     override fun handle(
         message: JsMessage,
         navigator: WebViewNavigator?,
         callback: (String) -> Unit
     ) {
+        verifyCallback(message.params)
         callback("ComposeResult:OK") // 回调给 JS
     }
 

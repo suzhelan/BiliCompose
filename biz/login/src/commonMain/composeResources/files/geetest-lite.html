@@ -81,11 +81,11 @@
             https: true
         }, handler);
         //返回给原生端 json格式的调用结果
-        return {
-            success: true,
-            gt: gt,
-            challenge: challenge
-        };
+        return JSON.stringify({
+            eventType: "init",
+            timestamp: Date.now(),
+            data: {}
+        });
     }
 
 
