@@ -2,7 +2,6 @@ package top.sacz.bili.biz.login.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.multiplatform.webview.web.WebViewNavigator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -19,14 +18,6 @@ class GeeTestViewModel : ViewModel() {
         _captcha.value = Response.Loading
         _captcha.value = apiCall {
             GeeTestApi().captcha()
-        }
-    }
-
-    fun startVerify(navigator: WebViewNavigator, gt: String, challenge: String) {
-        val script = "startVerify('$gt','$challenge')"
-        println(script)
-        navigator.evaluateJavaScript(script) { returnMessage ->
-            println("jsResult : $returnMessage")
         }
     }
 

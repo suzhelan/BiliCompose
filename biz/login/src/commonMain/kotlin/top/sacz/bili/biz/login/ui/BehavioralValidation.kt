@@ -1,12 +1,17 @@
 package top.sacz.bili.biz.login.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import bilicompose.biz.login.generated.resources.Res
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
 import com.multiplatform.webview.web.WebView
@@ -36,7 +41,12 @@ fun BehavioralValidation(
         //监听js调用native
         jsBridge.register(StatusJsMessageHandler(verifyCallback))
     }
-    Text("${webViewState.pageTitle ?: ""} ${webViewState.loadingState} ${webViewState.lastLoadedUrl ?: ""}")
+    Text(
+        text = "${webViewState.pageTitle ?: ""} ${webViewState.loadingState}",
+        modifier = Modifier.fillMaxWidth().padding(
+            top = 10.dp
+        ).wrapContentWidth(align = Alignment.CenterHorizontally)
+    )
     //请求到了 进行展示webview以进行验证
     WebView(
         navigator = navigator,

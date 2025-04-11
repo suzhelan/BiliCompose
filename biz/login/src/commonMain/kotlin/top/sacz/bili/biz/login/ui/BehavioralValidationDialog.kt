@@ -1,7 +1,7 @@
 package top.sacz.bili.biz.login.ui
 
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
@@ -39,7 +39,7 @@ fun BehavioralValidationDialog(viewModel: GeeTestViewModel = viewModel()) {
             modifier = Modifier
                 .padding(20.dp)
                 .fillMaxWidth()
-                .height(500.dp),
+                .fillMaxHeight(0.5f)
         ) {
             BehavioralValidation(geetest) { callbackParam ->
 
