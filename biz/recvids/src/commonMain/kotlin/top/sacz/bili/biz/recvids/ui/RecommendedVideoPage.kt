@@ -1,4 +1,4 @@
-package top.sacz.bili.biz.home.ui
+package top.sacz.bili.biz.recvids.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
+import top.sacz.bili.biz.home.ui.EmptyCard
+import top.sacz.bili.biz.home.ui.VideoCard
 import top.sacz.bili.biz.recvids.viewmodel.FeedViewModel
 
 

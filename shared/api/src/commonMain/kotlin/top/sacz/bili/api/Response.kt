@@ -12,6 +12,9 @@ sealed class Response<out T> {
         val ttl: Int,
         val data: T
     ) : Response<T>()
-    data class Error(val code: Int, val message: String) : Response<Nothing>()
+    data class Error(val code: Int, val msg: String, val cause : Throwable = ApiException(
+        code, msg,
+        cause = Throwable()
+    )) : Response<Nothing>()
 }
 

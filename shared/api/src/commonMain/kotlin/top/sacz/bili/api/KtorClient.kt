@@ -45,7 +45,7 @@ fun getKtorClient(baseUrl: String): HttpClient {
             level = LogLevel.ALL
             logger = object : Logger {
                 override fun log(message: String) {
-                    Napier.v("HTTPClient", null, message)
+                    Napier.d(message, null, "HttpClient")
                 }
             }
         }.also { Napier.base(DebugAntilog()) }

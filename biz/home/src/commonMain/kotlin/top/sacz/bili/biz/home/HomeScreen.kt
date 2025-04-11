@@ -1,6 +1,5 @@
 package top.sacz.bili.biz.home
 
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
@@ -13,8 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import top.sacz.bili.biz.home.ui.RecommendedVideoPage
-
+import top.sacz.bili.biz.login.ui.BehavioralValidation
+import top.sacz.bili.biz.recvids.ui.RecommendedVideoPage
 
 enum class AppDestinations(
     val label: String, val icon: ImageVector, val contentDescription: String
@@ -45,18 +44,14 @@ fun HomeScreen() {
             }
         }) {
         when (currentDestination) {
-            AppDestinations.HOME -> RecommendedVideoPage()
+            AppDestinations.HOME -> {
+                RecommendedVideoPage()
+            }
             AppDestinations.Mine -> {
-
+                BehavioralValidation()
             }
         }
     }
 }
 
-@Composable
-fun CustomView(contentDescription: String) {
-    //垂直布局
-    RecommendedVideoPage()
-
-}
 

@@ -11,16 +11,10 @@ import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.api.headers.BiliHeaders
-import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.CountryList
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-suspend fun main() {
-    val captchaLoginApi = SmsLoginApi()
-    val captcha = captchaLoginApi.getCountryCode()
-    captchaLoginApi.captcha()
-}
 
 class SmsLoginApi {
 
@@ -69,10 +63,5 @@ class SmsLoginApi {
         return getKtorClient(baseUrl).get("/web/generic/country/list").body()
     }
 
-    /**
-     * 进行人机验证
-     */
-    suspend fun captcha(): Response.Success<Captcha> {
-        return getKtorClient(baseUrl).get("x/passport-login/captcha?source=main_web").body()
-    }
+
 }

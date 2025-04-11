@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+        }
+
+        .loading-circle {
+            width: 100%;
+            height: 100%;
+            border: 3px solid #e0e0e0; /* 更细的边框 */
+            border-top: 3px solid #c6aad8; /* Material 3 主题色 */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 8px rgba(138, 219, 248, 0.3); /* 增加阴影效果 */
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #captcha-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+    <title>极验验证</title>
+</head>
+<body>
+
+<div class="loading">
+    <div class="loading-circle"></div>
+</div>
+
+<div id="captcha-container"></div>
+
+<script src="https://static.geetest.com/static/js/gt.0.4.9.js"></script>
+
+<script>
+
+    const handler = function (captchaObj) {
+        captchaObj.appendTo('#captcha-container');
+        captchaObj.onReady(() => {
+            document.querySelector('.loading').style.display = 'none';
+            document.getElementById('captcha-container').style.display = 'block';
+            notifyNative('ready')
+        });
+        captchaObj.onSuccess(() => {
+            const result = captchaObj.getValidate();
+            notifyNative('success', result);
+        });
+        captchaObj.onError(() => notifyNative('error'));
+        captchaObj.onClose(() => notifyNative('close'));
+    };
+
+    // 暴露给原生调用的启动方法
+    function startVerify(gt, challenge) {
+        initGeetest({
+            gt: gt,
+            challenge: challenge,
+            offline: false,
+            new_captcha: true,
+            product: "popup", // 产品形式，包括：float，popup
+            width: "100%",
+            https: true
+        }, handler);
+        //返回给原生端 json格式的调用结果
+        return {
+            success: true,
+            gt: gt,
+            challenge: challenge
+        };
+    }
+
+
+    // 通知原生状态
+    function notifyNative(type, data = {}) {
+        const payload = JSON.stringify({
+            eventType: type,
+            timestamp: Date.now(),
+            data: data
+        });
+
+        if (window.kmpJsBridge && window.kmpJsBridge.callNative) {
+            window.kmpJsBridge.callNative("onStatus", payload, (response) => {
+                console.log("Native response:", response);
+            });
+        } else {
+            console.warn("Native bridge not available");
+        }
+    }
+
+
+</script>
+</body>
+</html>
