@@ -12,7 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import top.sacz.bili.biz.login.ui.BehavioralValidationDialog
+import top.sacz.bili.biz.login.ui.SmsLoginContent
 import top.sacz.bili.biz.recvids.ui.RecommendedVideoPage
 
 enum class AppDestinations(
@@ -49,7 +49,7 @@ fun HomeScreen() {
             }
 
             AppDestinations.Mine -> {
-                BehavioralValidationDialog()
+                SmsLoginContent()
             }
         }
     }
