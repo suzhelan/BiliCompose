@@ -8,15 +8,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FeaturedPlayList
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,8 +28,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import top.sacz.bili.biz.recvids.model.Video
 
@@ -51,6 +56,7 @@ fun VideoCard(video: Video) {
             .clickable {
                 //点击事件
                 //跳转到视频详情页
+
             }
     ) {
         //上半部分 封面
@@ -116,5 +122,43 @@ fun VideoCard(video: Video) {
                 )
             }
         }
+        //下半部分 各种文字信息
+        //视频标题
+        Text(
+            text = video.title,
+            maxLines = 2,
+            minLines = 2,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.fillMaxWidth().padding(start = 5.dp, end = 5.dp)
+        )
+        //
+        Row(
+            modifier = Modifier.fillMaxWidth().fillMaxSize().padding(start = 5.dp, end = 5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (video.rCmdReasonStyle != null) {
+                val cmdReasonStyle = video.rCmdReasonStyle
+                Text(
+                    text = cmdReasonStyle.text,
+                    fontSize = 10.sp,
+                    modifier = Modifier.background(
+                        shape = RoundedCornerShape(2.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer
+                    ).padding(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 2.dp)
+                )
+            } else {
+                AsyncImage(
+                    model = video.gotoIcon.iconUrl,
+                    contentDescription = null,
+                    modifier = Modifier.size(
+                        height = 25.dp,
+                        width = 25.dp
+                    )
+                )
+            }
+            Text(text = video.descButton.text)
+        }
     }
 }
+

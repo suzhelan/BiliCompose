@@ -8,6 +8,7 @@ data class VideoList(
     @SerialName("items")
     val items: List<Video> = emptyList(),
 )
+
 @Serializable
 data class Video(
     @SerialName("args") val args: Args = Args(),
@@ -26,6 +27,7 @@ data class Video(
     @SerialName("desc_button") val descButton: DescButton = DescButton(), // UP主信息
     @SerialName("goto") val goto: String = "",
     @SerialName("goto_icon") val gotoIcon: GotoIcon = GotoIcon(),
+    @SerialName("rcmd_reason_style") val rCmdReasonStyle: RCmdReasonStyle? = null,
     @SerialName("idx") val idx: Int = 0,
     @SerialName("official_icon") val officialIcon: Int = 0,
     @SerialName("param") val `param`: String = "", // 视频aid
@@ -63,6 +65,38 @@ data class GotoIcon(
     @SerialName("icon_night_url") val iconNightUrl: String = "",
     @SerialName("icon_url") val iconUrl: String = "",
     @SerialName("icon_width") val iconWidth: Int = 0
+)
+
+/**
+ *       "rcmd_reason_style": {
+ *           "text": "2万点赞",
+ *           "text_color": "#FF6633",
+ *           "bg_color": "#FFF1ED",
+ *           "border_color": "#FFF1ED",
+ *           "text_color_night": "#BF5330",
+ *           "bg_color_night": "#3D2D29",
+ *           "border_color_night": "#3D2D29",
+ *           "bg_style": 1
+ *        }
+ */
+@Serializable
+data class RCmdReasonStyle(
+    @SerialName("bg_color")
+    val bgColor: String,
+    @SerialName("bg_color_night")
+    val bgColorNight: String,
+    @SerialName("bg_style")
+    val bgStyle: Int,
+    @SerialName("border_color")
+    val borderColor: String,
+    @SerialName("border_color_night")
+    val borderColorNight: String,
+    @SerialName("text")
+    val text: String,
+    @SerialName("text_color")
+    val textColor: String,
+    @SerialName("text_color_night")
+    val textColorNight: String
 )
 
 @Serializable
