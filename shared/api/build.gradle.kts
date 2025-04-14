@@ -17,7 +17,6 @@ kotlin {
             implementation(libs.ktor.client.darwin)
         }
         commonMain.dependencies {
-            implementation(libs.napier)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
             implementation(libs.coil.network.ktor3)
@@ -25,6 +24,8 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kotlinx.serialization.protobuf)
+            //只用到个日志打印
+            implementation(projects.shared.common)
         }
     }
 }

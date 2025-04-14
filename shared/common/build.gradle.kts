@@ -1,12 +1,12 @@
 plugins {
-    id("compose-plugin.library")
+    id("compose-plugin")
 }
 
 
 kotlin {
     sourceSets {
         commonMain.dependencies {
-
+            implementation(libs.napier)
         }
     }
 }
