@@ -21,10 +21,11 @@ dependencyResolutionManagement {
         maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin/") }
         maven { url = uri("https://jitpack.io") }
         maven { url = uri("https://jogamp.org/deployment/maven/") }
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
 includeBuild("build-plugin")
 
 include(":composeApp")
-include(":shared:api",":shared:storage",":shared:common")
+include(":shared:api",":shared:storage",":shared:common",":shared:navigation")
 include(":biz:home", ":biz:login", ":biz:recvids")

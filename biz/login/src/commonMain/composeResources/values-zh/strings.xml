@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="content_to_login">去登录</string>
+    <string name="text_enter_phone_number">输入手机号</string>
+    <string name="text_verification_code">验证码</string>
     <string name="title_mobile_phone_number_login">输入手机验证码登录</string>
 </resources>

@@ -12,7 +12,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import top.sacz.bili.biz.login.ui.SmsLoginContent
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import top.sacz.bili.biz.login.ui.NotLoginContent
 import top.sacz.bili.biz.recvids.ui.RecommendedVideoPage
 
 enum class AppDestinations(
@@ -22,10 +24,18 @@ enum class AppDestinations(
     Mine("My", Icons.Rounded.Person, "MY")
 }
 
+object HomeScreen : Screen {
+    override val key: ScreenKey
+        get() = "/home"
+
+    @Composable
+    override fun Content() {
+        _HomeScreen()
+    }
+}
 
 @Composable
-fun HomeScreen() {
-
+private fun _HomeScreen() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     //在横屏设备导航栏在左侧 竖屏在底部
     NavigationSuiteScaffold(
@@ -49,7 +59,7 @@ fun HomeScreen() {
             }
 
             AppDestinations.Mine -> {
-                SmsLoginContent()
+                NotLoginContent()
             }
         }
     }

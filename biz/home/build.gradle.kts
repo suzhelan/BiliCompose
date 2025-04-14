@@ -10,7 +10,7 @@ kotlin {
             implementation(libs.material3.adaptive.navigation.suite)
             implementation(projects.biz.login)
             implementation(projects.biz.recvids)
-
+            implementation(libs.voyager.navigator)
         }
     }
 
