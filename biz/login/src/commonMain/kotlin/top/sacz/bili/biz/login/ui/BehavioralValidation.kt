@@ -13,10 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,6 +23,9 @@ import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import top.sacz.bili.api.Response
 import top.sacz.bili.biz.login.js.StatusJsMessageHandler
@@ -42,15 +42,13 @@ fun BehavioralValidationDialog(
     verifyCallback: (String) -> Unit
 ) {
     val geetest by viewModel.captcha.collectAsState()
-    LaunchedEffect(UInt) {
+    LaunchedEffect(Unit) {
         viewModel.getGeeTestCaptcha()
     }
-    var isShow by remember {
-        mutableStateOf(true)
-    }
+    val isShow by viewModel.isShowDialog.collectAsState()
     if (!isShow) return
     BasicAlertDialog(onDismissRequest = {
-        isShow = false
+        viewModel.dismissDialog()
     }) {
         Card(
             modifier = Modifier
@@ -59,7 +57,8 @@ fun BehavioralValidationDialog(
                 .fillMaxHeight(0.5f)
         ) {
             BehavioralValidation(geetest) { callbackParam ->
-
+                verifyCallback(callbackParam)
+                viewModel.dismissDialog()
             }
         }
     }
@@ -71,8 +70,10 @@ fun BehavioralValidation(
     response: Response<Captcha>,
     verifyCallback: (String) -> Unit,
 ) {
-    val htmlDataState by produceState(initialValue = "await") {
-        value = Res.readBytes("files/geetest-lite.html").decodeToString()
+    val htmlDataState by produceState(initialValue = "") {
+        value = withContext(Dispatchers.IO) {
+            return@withContext Res.readBytes("files/geetest-lite.html").decodeToString()
+        }
     }
     //从html文件/字符串渲染
     val webViewState = rememberWebViewStateWithHTMLData(htmlDataState)

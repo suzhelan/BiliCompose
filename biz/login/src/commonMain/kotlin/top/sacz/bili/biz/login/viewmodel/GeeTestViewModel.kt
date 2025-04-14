@@ -21,4 +21,13 @@ class GeeTestViewModel : ViewModel() {
         }
     }
 
+    private val _isShowDialog = MutableStateFlow(true)
+    val isShowDialog = _isShowDialog.asStateFlow()
+    fun isShowDialog() {
+        _isShowDialog.value = true
+    }
+
+    fun dismissDialog() {
+        _isShowDialog.value = false
+    }
 }
