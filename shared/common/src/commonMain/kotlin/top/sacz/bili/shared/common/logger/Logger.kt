@@ -1,8 +1,14 @@
 package top.sacz.bili.shared.common.logger
 
+import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 
 object Logger {
+    init {
+        Napier.base(
+            DebugAntilog()
+        )
+    }
     fun d(tag: String = "Default", message: String) {
         Napier.d(message, null, tag)
     }

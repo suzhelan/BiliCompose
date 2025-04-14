@@ -1,7 +1,6 @@
 package top.sacz.bili.api
 
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
+
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -45,10 +44,10 @@ fun getKtorClient(baseUrl: String): HttpClient {
             level = LogLevel.ALL
             logger = object : Logger {
                 override fun log(message: String) {
-                    Napier.d(message, null, "HttpClient")
+                    top.sacz.bili.shared.common.logger.Logger.d("KtorClient", message)
                 }
             }
-        }.also { Napier.base(DebugAntilog()) }
+        }
 
         install(ContentNegotiation) {
             json(Json {
