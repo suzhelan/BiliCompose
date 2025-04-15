@@ -8,6 +8,7 @@ import top.sacz.bili.api.ApiException
 import top.sacz.bili.api.Response
 import top.sacz.bili.shared.common.logger.Logger
 
+
 suspend inline fun <T> apiCall(crossinline call: suspend CoroutineScope.() -> Response<T>): Response<T> {
     return withContext(Dispatchers.IO) {
         try {

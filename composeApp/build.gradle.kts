@@ -28,15 +28,12 @@ kotlin {
     sourceSets {
         val desktopMain by getting
 
-        val skikoVersion = "0.9.4"
         androidMain.dependencies {
             implementation(projects.shared.storage)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
-            implementation("org.jetbrains.skiko:skiko:$skikoVersion")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
