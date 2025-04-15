@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,13 +70,13 @@ fun SmsLoginContent(modifier: Modifier, viewModel: SmsLoginViewModel = viewModel
     }
 
     //打开选择国际代号弹窗
-    var openSelectAnAreaCode by rememberSaveable {
+    var openSelectAnAreaCode by remember {
         mutableStateOf(false)
     }
 
     //国家列表包含区号
     val countryList by viewModel.countryList.collectAsState()
-
+    //获取国家区号
     LaunchedEffect(Unit) {
         viewModel.getCountryCode()
     }
@@ -92,41 +93,37 @@ fun SmsLoginContent(modifier: Modifier, viewModel: SmsLoginViewModel = viewModel
         OutlinedTextField(
             value = inputPhoneNumber,
             onValueChange = { input ->
-                // Filter to allow only digits
                 if (input.all { it.isDigit() }) {
                     inputPhoneNumber = input
                 }
             },
             label = { Text(stringResource(Res.string.text_enter_phone_number)) },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            ),
-            modifier = Modifier
-                .fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth(),
             leadingIcon = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    //电话图标
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(start = 10.dp)
+                ) {
                     Icon(imageVector = Icons.Rounded.Call, contentDescription = "")
-                    //区号文本
-                    TextButton(onClick = {
-                        openSelectAnAreaCode = true
-                    }) {
+                    TextButton(onClick = { openSelectAnAreaCode = true }) {
                         Text(text = "+${areaCode.countryId}")
                     }
-                    if (openSelectAnAreaCode && countryList is Response.Success<CountryList>)
-                        _SelectNumberArea(
-                            countryList as Response.Success<CountryList>
-                        ) { select ->
-                            openSelectAnAreaCode = false
+                    _SelectNumberArea(
+                        show = openSelectAnAreaCode,
+                        response = countryList,
+                        onSelect = { select ->
                             areaCode = select
-                        }
+                        },
+                        onDismiss = { openSelectAnAreaCode = false }
+                    )
                 }
             }
         )
         OutlinedTextField(
             value = inputVerificationCode,
             onValueChange = { input ->
-                // Filter to allow only digits
                 if (input.all { it.isDigit() }) {
                     inputVerificationCode = input
                 }
@@ -144,45 +141,67 @@ fun SmsLoginContent(modifier: Modifier, viewModel: SmsLoginViewModel = viewModel
     }
 }
 
+/**
+ * 选择国际区号弹窗
+ */
 @Composable
 private fun _SelectNumberArea(
-    response: Response.Success<CountryList>,
-    onSelect: (Country) -> Unit
+    show: Boolean,
+    response: Response<CountryList>,
+    onSelect: (Country) -> Unit,
+    onDismiss: () -> Unit
 ) {
-    var expanded by rememberSaveable {
-        mutableStateOf(true)
-    }
     DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = {
-            expanded = false
-        },
+        expanded = show,
+        onDismissRequest = onDismiss,
     ) {
-        response.data.common.forEach {
-            DropdownMenuItem(
-                text = {
-                    Text(text = "${it.cname} +${it.countryId}")
-                },
-                onClick = {
-                    expanded = false
-                    onSelect(it)
+        when (response) {
+            is Response.Success -> {
+                //常用国家区号列表
+                response.data.common.forEach { country ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = "${country.cname} +${country.countryId}")
+                        },
+                        onClick = {
+                            onSelect(country)
+                            onDismiss()
+                        }
+                    )
                 }
-            )
-        }
-        response.data.others.forEach {
-            DropdownMenuItem(
-                text = {
-                    Text(text = "${it.cname} +${it.countryId}")
-                },
-                onClick = {
-                    expanded = false
-                    onSelect(it)
+                //其他国家区号列表
+                response.data.others.forEach { country ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = "${country.cname} +${country.countryId}")
+                        },
+                        onClick = {
+                            onSelect(country)
+                            onDismiss()
+                        }
+                    )
                 }
-            )
+            }
+            //加载中...
+            is Response.Loading -> {
+                DropdownMenuItem(
+                    text = {
+                        LoadingDots(modifier = Modifier.fillMaxWidth())
+                    },
+                    onClick = {}
+                )
+            }
+
+            else -> {
+
+            }
         }
     }
 }
 
+/**
+ * 三点 加载动画
+ */
 @Composable
 private fun LoadingDots(
     modifier: Modifier = Modifier,
@@ -192,7 +211,11 @@ private fun LoadingDots(
     val delays = listOf(0, 200, 400) // 每个点的动画延迟
     val infiniteTransition = rememberInfiniteTransition()
 
-    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
         delays.forEachIndexed { index, delay ->
             val alpha by infiniteTransition.animateFloat(
                 initialValue = 0.3f,
