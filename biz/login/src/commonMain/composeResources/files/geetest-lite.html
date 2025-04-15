@@ -59,14 +59,14 @@
         captchaObj.onReady(() => {
             document.querySelector('.loading').style.display = 'none';
             document.getElementById('captcha-container').style.display = 'block';
-            notifyNative('ready')
+            notifyNative('ready', null);
         });
         captchaObj.onSuccess(() => {
             const result = captchaObj.getValidate();
             notifyNative('success', result);
         });
-        captchaObj.onError(() => notifyNative('error'));
-        captchaObj.onClose(() => notifyNative('close'));
+        captchaObj.onError(() => notifyNative('error', null));
+        captchaObj.onClose(() => notifyNative('close', null));
     };
 
     // 暴露给原生调用的启动方法
@@ -84,13 +84,13 @@
         return JSON.stringify({
             eventType: "init",
             timestamp: Date.now(),
-            data: {}
+            data: null
         });
     }
 
 
     // 通知原生状态
-    function notifyNative(type, data = {}) {
+    function notifyNative(type, data) {
         const payload = JSON.stringify({
             eventType: type,
             timestamp: Date.now(),

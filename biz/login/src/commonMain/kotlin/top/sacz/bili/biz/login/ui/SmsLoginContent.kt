@@ -49,11 +49,14 @@ import bilicompose.biz.login.generated.resources.Res
 import bilicompose.biz.login.generated.resources.text_enter_phone_number
 import bilicompose.biz.login.generated.resources.text_verification_code
 import bilicompose.biz.login.generated.resources.title_mobile_phone_number_login
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.rememberToasterState
 import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.api.Response
 import top.sacz.bili.biz.login.model.Country
 import top.sacz.bili.biz.login.model.CountryList
 import top.sacz.bili.biz.login.viewmodel.SmsLoginViewModel
+import top.sacz.bili.shared.common.logger.Logger
 
 /**
  * 手机号验证码登录
@@ -84,12 +87,44 @@ fun SmsLoginContent(modifier: Modifier, viewModel: SmsLoginViewModel = viewModel
         mutableStateOf(Country("中国", "86", 0))
     }
 
+    //展示人机验证的dialog
+    var showVerificationDialog by remember {
+        mutableStateOf(false)
+    }
+    val toaster = rememberToasterState()
+    BehavioralValidationDialog(
+        visible = showVerificationDialog,
+        verifyCallback = { verifyResults ->
+            Logger.d("人机验证结果：$verifyResults")
+            when (verifyResults.eventType) {
+                "close" -> {
+                    showVerificationDialog = false
+                    toaster.show("人机验证关闭")
+                }
+
+                "success" -> {
+                    showVerificationDialog = false
+                    toaster.show("人机验证成功")
+                }
+
+                "error" -> {
+                    showVerificationDialog = false
+                    toaster.show("人机验证失败")
+                }
+            }
+        },
+        onDismiss = {
+            showVerificationDialog = false
+        }
+    )
     Column(
         modifier = modifier.padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Toaster(state = toaster)
         Text(stringResource(Res.string.title_mobile_phone_number_login))
         Spacer(modifier = Modifier.height(20.dp))
+        //手机号输入框
         OutlinedTextField(
             value = inputPhoneNumber,
             onValueChange = { input ->
@@ -121,6 +156,7 @@ fun SmsLoginContent(modifier: Modifier, viewModel: SmsLoginViewModel = viewModel
                 }
             }
         )
+        //验证码输入框
         OutlinedTextField(
             value = inputVerificationCode,
             onValueChange = { input ->
@@ -136,6 +172,14 @@ fun SmsLoginContent(modifier: Modifier, viewModel: SmsLoginViewModel = viewModel
                 .fillMaxWidth(),
             leadingIcon = {
                 Icon(imageVector = Icons.Rounded.Sms, contentDescription = "")
+            },
+            trailingIcon = {
+                //点击获取验证码后进行人机验证
+                TextButton(onClick = {
+                    showVerificationDialog = true
+                }) {
+                    Text(text = "获取验证码")
+                }
             }
         )
     }

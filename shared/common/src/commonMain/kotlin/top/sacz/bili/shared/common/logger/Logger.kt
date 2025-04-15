@@ -9,6 +9,9 @@ object Logger {
             DebugAntilog()
         )
     }
+    fun d(message: String) {
+        d("Default", message)
+    }
     fun d(tag: String = "Default", message: String) {
         Napier.d(message, null, tag)
     }

@@ -26,10 +26,13 @@ import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import top.sacz.bili.api.Response
 import top.sacz.bili.biz.login.js.StatusJsMessageHandler
 import top.sacz.bili.biz.login.model.Captcha
+import top.sacz.bili.biz.login.model.VerifyResult
 import top.sacz.bili.biz.login.viewmodel.GeeTestViewModel
 
 /**
@@ -39,16 +42,19 @@ import top.sacz.bili.biz.login.viewmodel.GeeTestViewModel
 @Composable
 fun BehavioralValidationDialog(
     viewModel: GeeTestViewModel = viewModel(),
-    verifyCallback: (String) -> Unit
+    verifyCallback: (VerifyResult) -> Unit,
+    visible: Boolean,
+    onDismiss: () -> Unit
 ) {
     val geetest by viewModel.captcha.collectAsState()
-    LaunchedEffect(Unit) {
-        viewModel.getGeeTestCaptcha()
+    LaunchedEffect(visible) {
+        if (visible) {
+            viewModel.getGeeTestCaptcha()
+        }
     }
-    val isShow by viewModel.isShowDialog.collectAsState()
-    if (!isShow) return
+    if (!visible) return
     BasicAlertDialog(onDismissRequest = {
-        viewModel.dismissDialog()
+        onDismiss()
     }) {
         Card(
             modifier = Modifier
@@ -58,7 +64,6 @@ fun BehavioralValidationDialog(
         ) {
             BehavioralValidation(geetest) { callbackParam ->
                 verifyCallback(callbackParam)
-                viewModel.dismissDialog()
             }
         }
     }
@@ -68,9 +73,9 @@ fun BehavioralValidationDialog(
 @Composable
 fun BehavioralValidation(
     response: Response<Captcha>,
-    verifyCallback: (String) -> Unit,
+    verifyCallback: (VerifyResult) -> Unit,
 ) {
-    val htmlDataState by produceState(initialValue = "") {
+    val htmlDataState by produceState(initialValue = "await") {
         value = withContext(Dispatchers.IO) {
             return@withContext Res.readBytes("files/geetest-lite.html").decodeToString()
         }
@@ -82,8 +87,8 @@ fun BehavioralValidation(
     //监听js调用native
     val jsBridge = rememberWebViewJsBridge()
     LaunchedEffect(jsBridge) {
-        //监听js调用native
-        jsBridge.register(StatusJsMessageHandler(verifyCallback))
+        val handler = StatusJsMessageHandler(verifyCallback)
+        jsBridge.register(handler)
     }
     Text(
         text = "${webViewState.pageTitle ?: ""} ${webViewState.loadingState}",
@@ -103,7 +108,8 @@ fun BehavioralValidation(
         val challenge = response.data.geetest.challenge
         val script = "startVerify('$gt','$challenge')"
         navigator.evaluateJavaScript(script) { returnMessage ->
-            verifyCallback(returnMessage)
+            val rawJson = Json.parseToJsonElement(returnMessage).jsonPrimitive.content
+            verifyCallback(Json.decodeFromString(VerifyResult.serializer(), rawJson))
         }
     }
 }
