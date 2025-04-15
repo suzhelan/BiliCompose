@@ -1,6 +1,7 @@
 package top.sacz.bili.biz.login.api
 
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -12,6 +13,7 @@ import top.sacz.bili.api.Response
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.api.headers.BiliHeaders
 import top.sacz.bili.biz.login.model.CountryList
+import top.sacz.bili.biz.login.model.SendSmsResult
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -37,10 +39,10 @@ class SmsLoginApi {
         geeChallenge: String, // 极验 challenge
         geeValidate: String, // 极验 result
         geeSeccode: String, // 极验 result +'|jordan'
-    ): Response.Success<Unit> {
+    ): Response.Success<SendSmsResult> {
         return getKtorClient(baseUrl).post("/x/passport-login/sms/send") {
             contentType(ContentType.Application.FormUrlEncoded)
-            setBody(parameters {
+            val body = FormDataContent(parameters {
                 append("cid", cid)
                 append("tel", tel)
                 append("login_session_id", Uuid.random().toString().replace("-", ""))
@@ -53,6 +55,7 @@ class SmsLoginApi {
                 append("local_id", BiliHeaders.buvid)
                 append("statistics", BiliHeaders.statistics)
             })
+            setBody(body)
         }.body()
     }
 

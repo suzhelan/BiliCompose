@@ -20,10 +20,4 @@ class GeeTestViewModel : ViewModel() {
             GeeTestApi().captcha()
         }
     }
-
-    // GeeTestViewModel.kt
-    fun resetCaptcha() {
-        _captcha.value = Response.Loading
-    }
-
 }

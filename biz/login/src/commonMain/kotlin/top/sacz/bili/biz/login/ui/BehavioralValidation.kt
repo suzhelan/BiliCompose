@@ -11,13 +11,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.login.generated.resources.Res
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
 import com.multiplatform.webview.web.WebView
@@ -26,14 +24,12 @@ import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import top.sacz.bili.api.Response
 import top.sacz.bili.biz.login.js.StatusJsMessageHandler
 import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.VerifyResult
-import top.sacz.bili.biz.login.viewmodel.GeeTestViewModel
+import top.sacz.bili.shared.common.logger.Logger
 
 /**
  * 进行行为验证的Dialog
@@ -41,17 +37,11 @@ import top.sacz.bili.biz.login.viewmodel.GeeTestViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BehavioralValidationDialog(
-    viewModel: GeeTestViewModel = viewModel(),
+    geetest: Response<Captcha>,
     verifyCallback: (VerifyResult) -> Unit,
     visible: Boolean,
     onDismiss: () -> Unit
 ) {
-    val geetest by viewModel.captcha.collectAsState()
-    LaunchedEffect(visible) {
-        if (visible) {
-            viewModel.getGeeTestCaptcha()
-        }
-    }
     if (!visible) return
     BasicAlertDialog(onDismissRequest = {
         onDismiss()
@@ -62,9 +52,7 @@ fun BehavioralValidationDialog(
                 .fillMaxWidth()
                 .fillMaxHeight(0.5f)
         ) {
-            BehavioralValidation(geetest) { callbackParam ->
-                verifyCallback(callbackParam)
-            }
+            BehavioralValidation(geetest,verifyCallback)
         }
     }
 }
@@ -103,13 +91,16 @@ fun BehavioralValidation(
         state = webViewState,
         modifier = Modifier.fillMaxSize()
     )
-    if (htmlDataState != "await" && response is Response.Success) {
-        val gt = response.data.geetest.gt
-        val challenge = response.data.geetest.challenge
-        val script = "startVerify('$gt','$challenge')"
-        navigator.evaluateJavaScript(script) { returnMessage ->
-            val rawJson = Json.parseToJsonElement(returnMessage).jsonPrimitive.content
-            verifyCallback(Json.decodeFromString(VerifyResult.serializer(), rawJson))
+    LaunchedEffect(response) { // 当 response 变化时才执行
+        if (htmlDataState != "await" && response is Response.Success) {
+            Logger.d("BehavioralValidation", "Res $response")
+            val gt = response.data.geetest.gt
+            val challenge = response.data.geetest.challenge
+            val script = "startVerify('$gt','$challenge')"
+            navigator.evaluateJavaScript(script) { returnMessage ->
+         /*       val rawJson = Json.parseToJsonElement(returnMessage).jsonPrimitive.content
+                verifyCallback(Json.decodeFromString(VerifyResult.serializer(), rawJson))
+*/            }
         }
     }
 }

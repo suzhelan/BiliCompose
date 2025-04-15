@@ -66,7 +66,7 @@
             notifyNative('success', result);
         });
         captchaObj.onError(() => notifyNative('error', null));
-        captchaObj.onClose(() => notifyNative('close', null));
+        captchaObj.onClose(() => notifyNative('open', null));
     };
 
     // 暴露给原生调用的启动方法

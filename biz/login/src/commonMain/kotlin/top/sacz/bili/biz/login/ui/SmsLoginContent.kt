@@ -53,16 +53,26 @@ import com.dokar.sonner.Toaster
 import com.dokar.sonner.rememberToasterState
 import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.api.Response
+import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.Country
 import top.sacz.bili.biz.login.model.CountryList
+import top.sacz.bili.biz.login.model.VerifyResult
+import top.sacz.bili.biz.login.viewmodel.GeeTestViewModel
 import top.sacz.bili.biz.login.viewmodel.SmsLoginViewModel
 import top.sacz.bili.shared.common.logger.Logger
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * 手机号验证码登录
  */
+@OptIn(ExperimentalTime::class)
 @Composable
-fun SmsLoginContent(modifier: Modifier, viewModel: SmsLoginViewModel = viewModel()) {
+fun SmsLoginContent(
+    modifier: Modifier,
+    viewModel: SmsLoginViewModel = viewModel(),
+    geeTestViewModel: GeeTestViewModel = viewModel()
+) {
     //手机号输入
     var inputPhoneNumber by rememberSaveable {
         mutableStateOf("")
@@ -79,39 +89,61 @@ fun SmsLoginContent(modifier: Modifier, viewModel: SmsLoginViewModel = viewModel
 
     //国家列表包含区号
     val countryList by viewModel.countryList.collectAsState()
+    //请求申请极验的结果
+    val geetest by geeTestViewModel.captcha.collectAsState()
     //获取国家区号
     LaunchedEffect(Unit) {
         viewModel.getCountryCode()
     }
+    //用户选择的国家区号
     var areaCode by remember {
-        mutableStateOf(Country("中国", "86", 0))
+        mutableStateOf(Country("中国", "86", 1))
     }
-
     //展示人机验证的dialog
     var showVerificationDialog by remember {
         mutableStateOf(false)
     }
+    //人机验证结果
+    var geetestVerificationResult by remember {
+        mutableStateOf(VerifyResult(null, "await", Clock.System.now().epochSeconds))
+    }
+    val countdown by viewModel.sendCountdown.collectAsState()
+
+    //订阅人机验证结果
+    LaunchedEffect(geetestVerificationResult) {
+        when (geetestVerificationResult.eventType) {
+            "success" -> {
+                val geetestResult = geetestVerificationResult.data!!
+                Logger.d("人机验证成功")
+                showVerificationDialog = false
+                viewModel.sendSms(
+                    areaCode.id.toString(),
+                    inputPhoneNumber,
+                    (geetest as Response.Success<Captcha>).data.token,
+                    (geetest as Response.Success<Captcha>).data.geetest.challenge,
+                    geetestResult.geetestValidate,
+                    geetestResult.geetestSeccode
+                )
+            }
+
+            "error" -> {
+                Logger.d("人机验证失败")
+                showVerificationDialog = false
+            }
+
+            "close" -> {
+                Logger.d("人机验证关闭")
+                showVerificationDialog = false
+            }
+        }
+    }
     val toaster = rememberToasterState()
     BehavioralValidationDialog(
+        geetest = geetest,
         visible = showVerificationDialog,
         verifyCallback = { verifyResults ->
             Logger.d("人机验证结果：$verifyResults")
-            when (verifyResults.eventType) {
-                "close" -> {
-                    showVerificationDialog = false
-                    toaster.show("人机验证关闭")
-                }
-
-                "success" -> {
-                    showVerificationDialog = false
-                    toaster.show("人机验证成功")
-                }
-
-                "error" -> {
-                    showVerificationDialog = false
-                    toaster.show("人机验证失败")
-                }
-            }
+            geetestVerificationResult = verifyResults
         },
         onDismiss = {
             showVerificationDialog = false
@@ -175,10 +207,14 @@ fun SmsLoginContent(modifier: Modifier, viewModel: SmsLoginViewModel = viewModel
             },
             trailingIcon = {
                 //点击获取验证码后进行人机验证
-                TextButton(onClick = {
-                    showVerificationDialog = true
-                }) {
-                    Text(text = "获取验证码")
+                TextButton(
+                    onClick = {
+                        showVerificationDialog = true
+                        geeTestViewModel.getGeeTestCaptcha()
+                    },
+                    enabled = countdown == 0
+                ) {
+                    Text(text = if (countdown == 0) "获取验证码" else "${countdown}s")
                 }
             }
         )
