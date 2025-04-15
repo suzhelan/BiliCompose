@@ -1,14 +1,17 @@
 package top.sacz.bili.biz.recvids.model
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Serializable
 data class VideoList(
     @SerialName("items")
     val items: List<Video> = emptyList(),
 )
 
+@Immutable
 @Serializable
 data class Video(
     @SerialName("args") val args: Args = Args(),
@@ -40,6 +43,7 @@ data class Video(
     @SerialName("uri") val uri: String = "" // 跳转链接
 )
 
+@Immutable
 @Serializable
 data class Args(
     @SerialName("aid") val aid: Long = 0,
@@ -47,10 +51,11 @@ data class Args(
     @SerialName("rname") val rname: String = "",
     @SerialName("tid") val tid: Int = 0,
     @SerialName("tname") val tname: String = "",
-    @SerialName("up_id") val upId: Long = 0,
-    @SerialName("up_name") val upName: String = ""
+    @SerialName("up_id") val upId: Long = 0,//up主id
+    @SerialName("up_name") val upName: String = ""//up主名称
 )
 
+@Immutable
 @Serializable
 data class DescButton(
     @SerialName("event") val event: String = "",
@@ -59,6 +64,7 @@ data class DescButton(
     @SerialName("uri") val uri: String = "" // 跳转链接
 )
 
+@Immutable
 @Serializable
 data class GotoIcon(
     @SerialName("icon_height") val iconHeight: Int = 0,
@@ -79,6 +85,7 @@ data class GotoIcon(
  *           "bg_style": 1
  *        }
  */
+@Immutable
 @Serializable
 data class RCmdReasonStyle(
     @SerialName("bg_color")
@@ -99,6 +106,7 @@ data class RCmdReasonStyle(
     val textColorNight: String
 )
 
+@Immutable
 @Serializable
 data class PlayerArgs(
     @SerialName("aid") val aid: Long = 0, // 视频aid
@@ -107,6 +115,7 @@ data class PlayerArgs(
     @SerialName("type") val type: String = ""
 )
 
+@Immutable
 @Serializable
 data class ThreePoint(
     @SerialName("dislike_reasons") val dislikeReasons: List<DislikeReason> = emptyList(),
@@ -114,6 +123,7 @@ data class ThreePoint(
     @SerialName("watch_later") val watchLater: Int = 0
 )
 
+@Immutable
 @Serializable
 data class ThreePointV2(
     @SerialName("icon") val icon: String = "",
@@ -123,6 +133,7 @@ data class ThreePointV2(
     @SerialName("type") val type: String = ""
 )
 
+@Immutable
 @Serializable
 data class DislikeReason(
     @SerialName("id") val id: Int = 0,
@@ -130,6 +141,7 @@ data class DislikeReason(
     @SerialName("toast") val toast: String = ""
 )
 
+@Immutable
 @Serializable
 data class Feedback(
     @SerialName("id") val id: Int = 0,
@@ -137,6 +149,7 @@ data class Feedback(
     @SerialName("toast") val toast: String = ""
 )
 
+@Immutable
 @Serializable
 data class Reason(
     @SerialName("id") val id: Int = 0,

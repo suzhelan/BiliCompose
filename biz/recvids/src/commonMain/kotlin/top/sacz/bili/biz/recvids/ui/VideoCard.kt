@@ -1,7 +1,6 @@
-package top.sacz.bili.biz.home.ui
+package top.sacz.bili.biz.recvids.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -53,11 +52,6 @@ fun VideoCard(video: Video) {
         modifier = Modifier
             .fillMaxWidth()
             .height(230.dp)
-            .clickable {
-                //点击事件
-                //跳转到视频详情页
-
-            }
     ) {
         //上半部分 封面
         Box(modifier = Modifier.fillMaxWidth().height(150.dp)) {
@@ -134,7 +128,7 @@ fun VideoCard(video: Video) {
         )
         //
         Row(
-            modifier = Modifier.fillMaxWidth().fillMaxSize().padding(start = 5.dp, end = 5.dp),
+            modifier = Modifier.fillMaxSize().padding(start = 5.dp, end = 5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (video.rCmdReasonStyle != null) {
@@ -145,19 +139,20 @@ fun VideoCard(video: Video) {
                     modifier = Modifier.background(
                         shape = RoundedCornerShape(2.dp),
                         color = MaterialTheme.colorScheme.secondaryContainer
-                    ).padding(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 2.dp)
+                    ).padding(start = 3.dp, end = 3.dp, top = 0.5.dp, bottom = 0.5.dp)
                 )
             } else {
                 AsyncImage(
-                    model = video.gotoIcon.iconUrl,
+                    model = video.gotoIcon.iconNightUrl,
                     contentDescription = null,
                     modifier = Modifier.size(
-                        height = 25.dp,
-                        width = 25.dp
+                        height = 16.dp,
+                        width = 16.dp
                     )
                 )
             }
-            Text(text = video.descButton.text)
+            Spacer(Modifier.width(5.dp))
+            Text(text = video.args.upName, fontSize = 10.sp)
         }
     }
 }

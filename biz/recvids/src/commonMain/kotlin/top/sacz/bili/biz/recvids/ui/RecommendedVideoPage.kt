@@ -8,13 +8,15 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
+
 import app.cash.paging.compose.collectAsLazyPagingItems
-import top.sacz.bili.biz.home.ui.EmptyCard
-import top.sacz.bili.biz.home.ui.VideoCard
+import app.cash.paging.compose.itemKey
 import top.sacz.bili.biz.recvids.viewmodel.FeedViewModel
 
 
@@ -23,7 +25,7 @@ import top.sacz.bili.biz.recvids.viewmodel.FeedViewModel
 fun RecommendedVideoPage(viewModel: FeedViewModel = viewModel()) {
 
     val lazyPagingItems = viewModel.recommendedListFlow.collectAsLazyPagingItems()
-    val isRefreshing = lazyPagingItems.loadState.refresh is LoadState.Loading
+    val isRefreshing by derivedStateOf { lazyPagingItems.loadState.refresh is LoadState.Loading }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -40,13 +42,18 @@ fun RecommendedVideoPage(viewModel: FeedViewModel = viewModel()) {
         ) {
             //骨架屏
             if (lazyPagingItems.itemCount == 0) {
-                items(20) {
+                items(10) {
                     EmptyCard()
                 }
             }
-            items(lazyPagingItems.itemCount) { index ->
+            items(
+                count = lazyPagingItems.itemCount,
+                key = lazyPagingItems.itemKey { it.param }
+            ) { index ->
                 val video = lazyPagingItems[index]
-                VideoCard(video!!)
+                if (video != null) {
+                    VideoCard(video)
+                }
             }
         }
     }
