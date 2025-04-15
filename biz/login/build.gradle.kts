@@ -1,9 +1,14 @@
 plugins {
-    id("compose-plugin")
+    id("compose-plugin.library")
     alias(libs.plugins.kotlinx.serialization)
 }
 
 kotlin {
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(BuildVersionConfig.JVM_TARGET)
+        }
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -21,5 +26,3 @@ kotlin {
     }
 
 }
-
-

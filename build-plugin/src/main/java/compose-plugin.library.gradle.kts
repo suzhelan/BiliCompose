@@ -1,16 +1,15 @@
 
-import org.jetbrains.compose.ComposePlugin
 
 //应用常用插件
 
 plugins {
-    //multiplatform
+    //multiplatform (kmp)
     id("org.jetbrains.kotlin.multiplatform")
     //android模块
     id("com.android.library")
     //compose
     id("org.jetbrains.compose")
-    //kotlin
+    //kotlin (cmp)
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
@@ -37,7 +36,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // 添加常用依赖
-            val compose = ComposePlugin.Dependencies(project)
             // Compose
             api(compose.runtime)
             api(compose.foundation)
