@@ -46,7 +46,7 @@ actual object AppSigner {
                 "MD5"
             )
             val digest = md.digest(input.toByteArray())
-            val sb = StringBuilder()
+            val sb = StringBuffer()
             for (b in digest) {
                 sb.append(String.format("%02x", b))
             }
