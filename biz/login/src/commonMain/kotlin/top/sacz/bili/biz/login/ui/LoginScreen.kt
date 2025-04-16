@@ -8,13 +8,18 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.launch
 
 object LoginScreen : Screen {
     override val key: ScreenKey
@@ -30,6 +35,8 @@ object LoginScreen : Screen {
 @Composable
 private fun _LoginScreen() {
     val navigator = LocalNavigator.currentOrThrow
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     //登录界面内容
     Scaffold(
         topBar = {
@@ -47,8 +54,15 @@ private fun _LoginScreen() {
                     )
                 }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
-        SmsLoginContent(modifier = Modifier.padding(paddingValues))
+        SmsLoginContent(modifier = Modifier.padding(paddingValues)) { message ->
+            scope.launch {
+                snackbarHostState.showSnackbar(message)
+            }
+        }
     }
 }

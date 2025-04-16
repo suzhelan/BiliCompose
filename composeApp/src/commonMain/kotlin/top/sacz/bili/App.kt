@@ -18,6 +18,7 @@ fun App() {
     //判断是否深色模式
     val isDarkTheme = isSystemInDarkTheme()
     MaterialTheme(colorScheme = if (isDarkTheme) darkColorScheme() else lightColorScheme()) {
+
         Navigator(HomeScreen) { navigator ->
             SlideTransition(navigator)
         }

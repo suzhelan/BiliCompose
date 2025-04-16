@@ -47,10 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.login.generated.resources.Res
 import bilicompose.biz.login.generated.resources.text_enter_phone_number
+import bilicompose.biz.login.generated.resources.text_send_verification_code
 import bilicompose.biz.login.generated.resources.text_verification_code
 import bilicompose.biz.login.generated.resources.title_mobile_phone_number_login
-import com.dokar.sonner.Toaster
-import com.dokar.sonner.rememberToasterState
+import bilicompose.biz.login.generated.resources.verify_error
+import bilicompose.biz.login.generated.resources.verify_success
 import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.api.Response
 import top.sacz.bili.biz.login.model.Captcha
@@ -59,7 +60,6 @@ import top.sacz.bili.biz.login.model.CountryList
 import top.sacz.bili.biz.login.model.VerifyResult
 import top.sacz.bili.biz.login.viewmodel.GeeTestViewModel
 import top.sacz.bili.biz.login.viewmodel.SmsLoginViewModel
-import top.sacz.bili.shared.common.logger.Logger
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -71,7 +71,8 @@ import kotlin.time.ExperimentalTime
 fun SmsLoginContent(
     modifier: Modifier,
     viewModel: SmsLoginViewModel = viewModel(),
-    geeTestViewModel: GeeTestViewModel = viewModel()
+    geeTestViewModel: GeeTestViewModel = viewModel(),
+    showToast : (String) -> Unit = {}
 ) {
     //手机号输入
     var inputPhoneNumber by rememberSaveable {
@@ -109,12 +110,14 @@ fun SmsLoginContent(
     }
     val countdown by viewModel.sendCountdown.collectAsState()
 
+    val verifySuccess = stringResource(Res.string.verify_success)
+    val verifyError = stringResource(Res.string.verify_error)
     //订阅人机验证结果
     LaunchedEffect(geetestVerificationResult) {
+        if (geetestVerificationResult.eventType == "await") return@LaunchedEffect
         when (geetestVerificationResult.eventType) {
             "success" -> {
                 val geetestResult = geetestVerificationResult.data!!
-                Logger.d("人机验证成功")
                 showVerificationDialog = false
                 viewModel.sendSms(
                     areaCode.countryId,
@@ -124,25 +127,20 @@ fun SmsLoginContent(
                     geetestResult.geetestValidate,
                     geetestResult.geetestSeccode
                 )
+                showToast(verifySuccess)
             }
 
             "error" -> {
-                Logger.d("人机验证失败")
+                showToast(verifyError)
                 showVerificationDialog = false
             }
 
-            "wait" -> {
-                Logger.d("人机验证关闭")
-                showVerificationDialog = false
-            }
         }
     }
-    val toaster = rememberToasterState()
     BehavioralValidationDialog(
         geetest = geetest,
         visible = showVerificationDialog,
         verifyCallback = { verifyResults ->
-            Logger.d("人机验证结果：$verifyResults")
             geetestVerificationResult = verifyResults
         },
         onDismiss = {
@@ -153,7 +151,6 @@ fun SmsLoginContent(
         modifier = modifier.padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Toaster(state = toaster)
         Text(stringResource(Res.string.title_mobile_phone_number_login))
         Spacer(modifier = Modifier.height(20.dp))
         //手机号输入框
@@ -214,7 +211,7 @@ fun SmsLoginContent(
                     },
                     enabled = countdown == 0
                 ) {
-                    Text(text = if (countdown == 0) "获取验证码" else "${countdown}s")
+                    Text(text = if (countdown == 0) stringResource(Res.string.text_send_verification_code) else "${countdown}s")
                 }
             }
         )
