@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Sms
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -32,6 +33,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,9 +49,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.login.generated.resources.Res
 import bilicompose.biz.login.generated.resources.text_enter_phone_number
+import bilicompose.biz.login.generated.resources.text_login
 import bilicompose.biz.login.generated.resources.text_send_verification_code
 import bilicompose.biz.login.generated.resources.text_verification_code
 import bilicompose.biz.login.generated.resources.title_mobile_phone_number_login
+import bilicompose.biz.login.generated.resources.toast_phone_number_is_not_valid
 import bilicompose.biz.login.generated.resources.verify_error
 import bilicompose.biz.login.generated.resources.verify_success
 import org.jetbrains.compose.resources.stringResource
@@ -72,7 +76,7 @@ fun SmsLoginContent(
     modifier: Modifier,
     viewModel: SmsLoginViewModel = viewModel(),
     geeTestViewModel: GeeTestViewModel = viewModel(),
-    showToast : (String) -> Unit = {}
+    showToast: (String) -> Unit = {}
 ) {
     //手机号输入
     var inputPhoneNumber by rememberSaveable {
@@ -110,8 +114,20 @@ fun SmsLoginContent(
     }
     val countdown by viewModel.sendCountdown.collectAsState()
 
+    val verifyPhoneNumber by remember {
+        derivedStateOf {
+            val countryId = areaCode.countryId
+            val number = inputPhoneNumber
+            when (countryId) {
+                "86" -> number.length == 11 && number.all { it.isDigit() }
+                else -> number.isNotBlank()
+            }
+        }
+    }
+    //toast内容
     val verifySuccess = stringResource(Res.string.verify_success)
     val verifyError = stringResource(Res.string.verify_error)
+    val toastPhoneNumberIsNotValid = stringResource(Res.string.toast_phone_number_is_not_valid)
     //订阅人机验证结果
     LaunchedEffect(geetestVerificationResult) {
         if (geetestVerificationResult.eventType == "await") return@LaunchedEffect
@@ -206,8 +222,12 @@ fun SmsLoginContent(
                 //点击获取验证码后进行人机验证
                 TextButton(
                     onClick = {
-                        showVerificationDialog = true
-                        geeTestViewModel.getGeeTestCaptcha(areaCode.countryId, inputPhoneNumber)
+                        if (verifyPhoneNumber) {
+                            showVerificationDialog = true
+                            geeTestViewModel.getGeeTestCaptcha(areaCode.countryId, inputPhoneNumber)
+                        } else {
+                            showToast(toastPhoneNumberIsNotValid)
+                        }
                     },
                     enabled = countdown == 0
                 ) {
@@ -215,6 +235,10 @@ fun SmsLoginContent(
                 }
             }
         )
+        Spacer(modifier = Modifier.height(30.dp))
+        FilledTonalButton(onClick = {}){
+            Text(stringResource(Res.string.text_login))
+        }
     }
 }
 

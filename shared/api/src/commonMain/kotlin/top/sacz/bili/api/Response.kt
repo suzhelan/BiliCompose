@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 sealed class Response<out T> {
     data object Loading : Response<Nothing>()
+
     @Serializable
     data class Success<T>(
         val code: Int,
@@ -12,9 +13,20 @@ sealed class Response<out T> {
         val ttl: Int,
         val data: T
     ) : Response<T>()
-    data class Error(val code: Int, val msg: String, val cause : Throwable = ApiException(
-        code, msg,
-        cause = Throwable()
-    )) : Response<Nothing>()
+
+    @Serializable
+    data class SuccessOrNull<T>(
+        val code: Int,
+        val message: String,
+        val ttl: Int,
+        val data: T? = null
+    ) : Response<T>()
+
+    data class Error(
+        val code: Int, val msg: String, val cause: Throwable = ApiException(
+            code, msg,
+            cause = Throwable()
+        )
+    ) : Response<Nothing>()
 }
 

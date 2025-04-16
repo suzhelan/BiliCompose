@@ -4,6 +4,8 @@
     <string name="text_enter_phone_number">输入手机号</string>
     <string name="text_verification_code">验证码</string>
     <string name="text_send_verification_code">获取验证码</string>
+    <string name="toast_phone_number_is_not_valid">请输入有效的手机号</string>
+    <string name="text_login">登录</string>
     <string name="verify_success">验证成功 请注意接收验证码</string>
     <string name="verify_error">验证失败 请重试</string>
     <string name="title_mobile_phone_number_login">输入手机验证码登录</string>
