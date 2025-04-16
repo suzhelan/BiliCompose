@@ -120,7 +120,7 @@ fun SmsLoginContent(
                     areaCode.countryId,
                     inputPhoneNumber,
                     (geetest as Response.Success<Captcha>).data.token,
-                    (geetest as Response.Success<Captcha>).data.geetest.challenge,
+                    geetestResult.geetestChallenge,
                     geetestResult.geetestValidate,
                     geetestResult.geetestSeccode
                 )
@@ -210,7 +210,7 @@ fun SmsLoginContent(
                 TextButton(
                     onClick = {
                         showVerificationDialog = true
-                        geeTestViewModel.getGeeTestCaptcha()
+                        geeTestViewModel.getGeeTestCaptcha(areaCode.countryId, inputPhoneNumber)
                     },
                     enabled = countdown == 0
                 ) {

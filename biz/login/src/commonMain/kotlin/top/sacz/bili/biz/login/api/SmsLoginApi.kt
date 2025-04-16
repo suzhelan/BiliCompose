@@ -14,12 +14,17 @@ import top.sacz.bili.api.Response
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.api.headers.BiliHeaders
 import top.sacz.bili.biz.login.model.CountryList
-import top.sacz.bili.biz.login.model.SendSmsResult
+import top.sacz.bili.biz.login.model.SmsLoginToken
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 
 class SmsLoginApi {
+
+    companion object {
+        @OptIn(ExperimentalUuidApi::class)
+        val loginSessionId = Uuid.random().toString().replace("-", "")
+    }
 
     private val baseUrl = AppConfig.LOGIN_URL
 
@@ -41,13 +46,13 @@ class SmsLoginApi {
         geeChallenge: String, // 极验 challenge
         geeValidate: String, // 极验 result
         geeSeccode: String, // 极验 result +'|jordan'
-    ): Response.Success<SendSmsResult> {
+    ): Response.Success<SmsLoginToken> {
         return ktorClient.post("/x/passport-login/sms/send") {
             contentType(ContentType.Application.FormUrlEncoded)
             val body = FormDataContent(parameters {
                 append("cid", cid)
                 append("tel", tel)
-                append("login_session_id", Uuid.random().toString().replace("-", ""))
+                append("login_session_id", loginSessionId)
                 append("recaptcha_token", recaptchaToken)
                 append("gee_challenge", geeChallenge)
                 append("gee_validate", geeValidate)

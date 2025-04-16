@@ -43,6 +43,7 @@ fun BehavioralValidationDialog(
     onDismiss: () -> Unit
 ) {
     if (!visible) return
+    Logger.d("BehavioralValidation", "Visible $geetest")
     BasicAlertDialog(onDismissRequest = {
         onDismiss()
     }) {

@@ -13,7 +13,8 @@ import top.sacz.bili.api.ext.apiCall
 
 import top.sacz.bili.biz.login.api.SmsLoginApi
 import top.sacz.bili.biz.login.model.CountryList
-import top.sacz.bili.biz.login.model.SendSmsResult
+import top.sacz.bili.biz.login.model.SmsLoginToken
+
 
 class SmsLoginViewModel : ViewModel() {
     private val smsLoginApi = SmsLoginApi()
@@ -25,8 +26,7 @@ class SmsLoginViewModel : ViewModel() {
         }
     }
 
-
-    private val _sendSmsResult = MutableStateFlow<Response<SendSmsResult>>(Response.Loading)
+    private val _sendSmsResult = MutableStateFlow<Response<SmsLoginToken>>(Response.Loading)
     val sendSmsResult = _sendSmsResult.asStateFlow()
     fun sendSms(
         cid: String, // 国际冠字码

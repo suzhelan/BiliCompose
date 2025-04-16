@@ -18,17 +18,9 @@ data class Country(
 )
 
 @Serializable
-data class SendSmsResult(
-    val code: Int,
-    val data: SmsLoginToken,
-    val message: String,
-    val ttl: Int
-)
-
-@Serializable
 data class SmsLoginToken(
     @SerialName("captcha_key")
     val captchaKey: String,
-    @SerialName("recaptcha_token")
+    @SerialName("recaptcha_url")
     val recaptchaUrl: String
 )
