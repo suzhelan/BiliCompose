@@ -117,7 +117,7 @@ fun SmsLoginContent(
                 Logger.d("人机验证成功")
                 showVerificationDialog = false
                 viewModel.sendSms(
-                    areaCode.id.toString(),
+                    areaCode.countryId,
                     inputPhoneNumber,
                     (geetest as Response.Success<Captcha>).data.token,
                     (geetest as Response.Success<Captcha>).data.geetest.challenge,
@@ -131,7 +131,7 @@ fun SmsLoginContent(
                 showVerificationDialog = false
             }
 
-            "close" -> {
+            "wait" -> {
                 Logger.d("人机验证关闭")
                 showVerificationDialog = false
             }

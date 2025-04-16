@@ -13,26 +13,26 @@ actual object AppSigner {
     private fun appSign(
         appKey: String,
         appSec: String,
-        params: MutableMap<String, Any?>
+        params: MutableMap<String, String>
     ): String {
         // 为请求参数进行 APP 签名
         params["appkey"] = appKey
         // 按照 key 重排参数
-        val sortedParams = TreeMap<String, Any?>(params)
+        val sortedParams = TreeMap(params)
         // 序列化参数
-        val queryBuilder = StringBuilder()
+        val queryBuilder = StringBuffer()
         for ((key, value) in sortedParams) {
             if (queryBuilder.isNotEmpty()) {
-                queryBuilder.append('&')
+                queryBuilder.append("&")
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 queryBuilder.append(URLEncoder.encode(key, StandardCharsets.UTF_8))
-                    .append('=')
-                    .append(URLEncoder.encode(value?.toString(), StandardCharsets.UTF_8))
+                    .append("=")
+                    .append(URLEncoder.encode(value, StandardCharsets.UTF_8))
             } else {
                 queryBuilder.append(URLEncoder.encode(key, "UTF-8"))
-                    .append('=')
-                    .append(URLEncoder.encode(value?.toString(), "UTF-8"))
+                    .append("=")
+                    .append(URLEncoder.encode(value, "UTF-8"))
             }
         }
         return generateMD5(queryBuilder.append(appSec).toString())
@@ -47,13 +47,8 @@ actual object AppSigner {
             )
             val digest = md.digest(input.toByteArray())
             val sb = StringBuilder()
-            for (b in digest
-            ) {
-                sb.append(
-                    String.format(
-                        "%02x", b
-                    )
-                )
+            for (b in digest) {
+                sb.append(String.format("%02x", b))
             }
             return sb.toString()
         } catch (e: NoSuchAlgorithmException) {
@@ -65,7 +60,7 @@ actual object AppSigner {
     actual fun sign(
         appKey: String,
         appSec: String,
-        params: MutableMap<String, Any?>
+        params: MutableMap<String, String>
     ): String {
         return appSign(appKey, appSec, params)
     }

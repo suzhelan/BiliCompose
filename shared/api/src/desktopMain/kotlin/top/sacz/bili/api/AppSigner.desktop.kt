@@ -11,7 +11,7 @@ actual object AppSigner {
     private fun appSign(
         appKey: String,
         appSec: String,
-        params: MutableMap<String, Any?>
+        params: MutableMap<String, String>
     ): String {
         // 为请求参数进行 APP 签名
         params["appkey"] = appKey
@@ -57,7 +57,7 @@ actual object AppSigner {
     actual fun sign(
         appKey: String,
         appSec: String,
-        params: MutableMap<String, Any?>
+        params: MutableMap<String, String>
     ): String {
         return appSign(appKey, appSec, params)
     }

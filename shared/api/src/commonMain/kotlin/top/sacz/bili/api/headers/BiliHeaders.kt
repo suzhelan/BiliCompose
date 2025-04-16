@@ -49,6 +49,7 @@ val grpcHeaders: MutableMap<String, String>
             "x-bili-aurora-zone" to "",
             "x-bili-trace-id" to BiliHeaders.traceId,
         )
+        //如果登录了才需要配置这个
         if (false) {
             result["authorization"] = "identify_v1 {access_key}"
         }
@@ -66,10 +67,7 @@ object BiliHeaders {
     val traceId: String by lazy { genTraceId() }
     val auroraEid: String by lazy { genAuroraEid(0L) }
     val deviceId: String by lazy { genDeviceId() }
-    val statistics: String by lazy {
-    """
-    {"appId":1,"platform":3,"version":"7.27.0","abtest":""}
-    """ }
+    val statistics: String by lazy { """{"appId":1,"platform":3,"version":"8.41.0","abtest":""}""" }
     val sessionId: String by lazy { genSessionId() }
     private val random = Random.Default
 

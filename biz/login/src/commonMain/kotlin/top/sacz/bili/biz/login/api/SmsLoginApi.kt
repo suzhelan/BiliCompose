@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.parameters
 import top.sacz.bili.api.AppConfig
+import top.sacz.bili.api.AppKeyType
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.api.headers.BiliHeaders
@@ -22,6 +23,7 @@ class SmsLoginApi {
 
     private val baseUrl = AppConfig.LOGIN_URL
 
+    private val ktorClient = getKtorClient(baseUrl,AppKeyType.USER_INFO)
     /**
      * 发送短信
      * @param cid 国际冠字码
@@ -40,7 +42,7 @@ class SmsLoginApi {
         geeValidate: String, // 极验 result
         geeSeccode: String, // 极验 result +'|jordan'
     ): Response.Success<SendSmsResult> {
-        return getKtorClient(baseUrl).post("/x/passport-login/sms/send") {
+        return ktorClient.post("/x/passport-login/sms/send") {
             contentType(ContentType.Application.FormUrlEncoded)
             val body = FormDataContent(parameters {
                 append("cid", cid)
@@ -63,7 +65,7 @@ class SmsLoginApi {
      * 获取国家代码(国际冠字码)
      */
     suspend fun getCountryCode(): Response.Success<CountryList> {
-        return getKtorClient(baseUrl).get("/web/generic/country/list").body()
+        return ktorClient.get("/web/generic/country/list").body()
     }
 
 
