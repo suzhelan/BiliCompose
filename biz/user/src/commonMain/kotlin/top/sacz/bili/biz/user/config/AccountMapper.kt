@@ -1,25 +1,30 @@
 package top.sacz.bili.biz.user.config
 
 
-import top.sacz.bili.biz.user.entity.UserInfo
+
+import top.sacz.bili.biz.user.entity.AccountInfo
 import top.sacz.bili.storage.Storage
 
-object UserMapper {
+object AccountMapper {
     private val dataSource = Storage("user")
 
     fun clear() {
         dataSource.clear()
     }
 
+    fun isLogin(): Boolean {
+        return dataSource.hasKey("userInfo")
+    }
+
     fun hasUserInfo(): Boolean {
         return dataSource.hasKey("userInfo")
     }
 
-    fun getUserInfo(): UserInfo {
+    fun getUserInfo(): AccountInfo {
         return dataSource.getObjectOrNull("userInfo")!!
     }
 
-    fun setUserInfo(userInfo: UserInfo) {
-        dataSource.putObject("userInfo", userInfo)
+    fun setUserInfo(accountInfo: AccountInfo) {
+        dataSource.putObject("userInfo", accountInfo)
     }
 }

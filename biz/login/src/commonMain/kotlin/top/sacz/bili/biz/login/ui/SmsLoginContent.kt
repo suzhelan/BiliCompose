@@ -202,11 +202,17 @@ fun SmsLoginContent(
         86203 to stringResource(Res.string.error_code_1007),
     )
     LaunchedEffect(loginResult) {
-        if (loginResult is Response.Error) {
-            val response = loginResult as Response.Error
-            showToast(
-                "code:${response.code} " + (loginErrorMessages[response.code] ?: response.msg)
-            )
+        when (val response = loginResult) {
+            is Response.Success -> {
+                showToast(verifySuccess)
+            }
+
+            is Response.Error -> {
+                showToast(loginErrorMessages[response.code] ?: response.msg)
+            }
+
+            else -> {
+            }
         }
     }
     BehavioralValidationDialog(
@@ -247,7 +253,7 @@ fun SmsLoginContent(
                     TextButton(onClick = { openSelectAnAreaCode = true }) {
                         Text(text = "+${areaCode.countryId}")
                     }
-                    _SelectNumberArea(
+                    SelectNumberArea(
                         show = openSelectAnAreaCode,
                         response = countryList,
                         onSelect = { select ->
@@ -325,7 +331,7 @@ fun SmsLoginContent(
  * 选择国际区号弹窗
  */
 @Composable
-private fun _SelectNumberArea(
+private fun SelectNumberArea(
     show: Boolean,
     response: Response<CountryList>,
     onSelect: (Country) -> Unit,

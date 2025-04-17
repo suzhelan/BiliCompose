@@ -16,6 +16,9 @@ import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.shared.navigation.SharedScreen
 
 
+/**
+ * 显示没登录的按钮
+ */
 @Composable
 fun NotLoginContent() {
     //获取最近的导航

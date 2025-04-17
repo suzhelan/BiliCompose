@@ -3,21 +3,23 @@ package top.sacz.bili.biz.user.api
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import top.sacz.bili.api.AppConfig
+import top.sacz.bili.api.AppKeyType
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.getKtorClient
+import top.sacz.bili.biz.user.entity.AccountInfo
 import top.sacz.bili.biz.user.entity.Stat
-import top.sacz.bili.biz.user.entity.UserInfo
+
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-class UserApi {
+class AccountApi {
 
     /**
      * 获取用户信息
      */
     @OptIn(ExperimentalTime::class)
-    suspend fun getUserInfo(accessKey: String): Response.Success<UserInfo> {
-        return getKtorClient(AppConfig.APP_BASE_URL).get("/x/v2/account/myinfo") {
+    suspend fun getUserInfo(accessKey: String): Response.Success<AccountInfo> {
+        return getKtorClient(AppConfig.APP_BASE_URL,AppKeyType.USER_INFO).get("/x/v2/account/myinfo") {
             url {
                 parameters.append("access_key", accessKey)
                 parameters.append("ts", Clock.System.now().epochSeconds.toString())
@@ -30,7 +32,7 @@ class UserApi {
      * 获取用户状态数
      */
     suspend fun getStatus(accessKey: String): Response.Success<Stat> {
-        return getKtorClient(AppConfig.API_BASE_URL).get("x/web-interface/nav/stat") {
+        return getKtorClient(AppConfig.API_BASE_URL,AppKeyType.USER_INFO).get("/x/web-interface/nav/stat") {
             url {
                 parameters.append("access_key", accessKey)
             }
@@ -41,7 +43,7 @@ class UserApi {
      * 获取硬币数
      */
     suspend fun getCoins(accessKey: String): Response.Success<Double> {
-        return getKtorClient(AppConfig.ACCOUNT_URL).get("/site/getCoin") {
+        return getKtorClient(AppConfig.ACCOUNT_URL, AppKeyType.USER_INFO).get("/site/getCoin") {
             url {
                 parameters.append("access_key", accessKey)
             }
