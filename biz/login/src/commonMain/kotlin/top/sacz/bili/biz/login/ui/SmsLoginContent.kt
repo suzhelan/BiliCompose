@@ -48,6 +48,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.login.generated.resources.Res
+import bilicompose.biz.login.generated.resources.error_code_1002
+import bilicompose.biz.login.generated.resources.error_code_1003
+import bilicompose.biz.login.generated.resources.error_code_1025
+import bilicompose.biz.login.generated.resources.error_code_2400
+import bilicompose.biz.login.generated.resources.error_code_2406
+import bilicompose.biz.login.generated.resources.error_code_86203
 import bilicompose.biz.login.generated.resources.text_enter_phone_number
 import bilicompose.biz.login.generated.resources.text_login
 import bilicompose.biz.login.generated.resources.text_send_verification_code
@@ -112,6 +118,7 @@ fun SmsLoginContent(
     var geetestVerificationResult by remember {
         mutableStateOf(VerifyResult(null, "await", Clock.System.now().epochSeconds))
     }
+    //验证码发送倒计时 60 ... 0
     val countdown by viewModel.sendCountdown.collectAsState()
 
     val verifyPhoneNumber by remember {
@@ -128,6 +135,23 @@ fun SmsLoginContent(
     val verifySuccess = stringResource(Res.string.verify_success)
     val verifyError = stringResource(Res.string.verify_error)
     val toastPhoneNumberIsNotValid = stringResource(Res.string.toast_phone_number_is_not_valid)
+
+    val errorMessages = mapOf(
+        1002 to stringResource(Res.string.error_code_1002),
+        86203 to stringResource(Res.string.error_code_86203),
+        1003 to stringResource(Res.string.error_code_1003),
+        1025 to stringResource(Res.string.error_code_1025),
+        2400 to stringResource(Res.string.error_code_2400),
+        2406 to stringResource(Res.string.error_code_2406)
+    )
+    LaunchedEffect(geetest) {
+        if (geetest is Response.Error) {
+            val response = geetest as Response.Error
+            if (response.code == 0) return@LaunchedEffect
+            showVerificationDialog = false
+            showToast("code:${response.code} " + (errorMessages[response.code] ?: response.msg))
+        }
+    }
     //订阅人机验证结果
     LaunchedEffect(geetestVerificationResult) {
         if (geetestVerificationResult.eventType == "await") return@LaunchedEffect
@@ -224,7 +248,11 @@ fun SmsLoginContent(
                     onClick = {
                         if (verifyPhoneNumber) {
                             showVerificationDialog = true
-                            geeTestViewModel.getGeeTestCaptcha(areaCode.countryId, inputPhoneNumber)
+                            //申请人机验证
+                            geeTestViewModel.getGeeTestCaptcha(
+                                areaCode.countryId,
+                                inputPhoneNumber
+                            )
                         } else {
                             showToast(toastPhoneNumberIsNotValid)
                         }
@@ -236,10 +264,12 @@ fun SmsLoginContent(
             }
         )
         Spacer(modifier = Modifier.height(30.dp))
-        FilledTonalButton(onClick = {}){
+        FilledTonalButton(onClick = {}) {
             Text(stringResource(Res.string.text_login))
         }
     }
+
+
 }
 
 /**

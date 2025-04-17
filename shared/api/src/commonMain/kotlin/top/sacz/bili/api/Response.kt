@@ -15,7 +15,7 @@ sealed class Response<out T> {
     ) : Response<T>()
 
     @Serializable
-    data class SuccessOrNull<T>(
+    data class SuccessOrError<T>(
         val code: Int,
         val message: String,
         val ttl: Int,

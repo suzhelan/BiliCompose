@@ -29,7 +29,6 @@ import top.sacz.bili.api.Response
 import top.sacz.bili.biz.login.js.StatusJsMessageHandler
 import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.VerifyResult
-import top.sacz.bili.shared.common.logger.Logger
 
 /**
  * 进行行为验证的Dialog
@@ -43,7 +42,6 @@ fun BehavioralValidationDialog(
     onDismiss: () -> Unit
 ) {
     if (!visible) return
-    Logger.d("BehavioralValidation", "Visible $geetest")
     BasicAlertDialog(onDismissRequest = {
         onDismiss()
     }) {
@@ -53,7 +51,7 @@ fun BehavioralValidationDialog(
                 .fillMaxWidth()
                 .fillMaxHeight(0.5f)
         ) {
-            BehavioralValidation(geetest,verifyCallback)
+            BehavioralValidation(geetest, verifyCallback)
         }
     }
 }
@@ -94,14 +92,12 @@ fun BehavioralValidation(
     )
     LaunchedEffect(response) { // 当 response 变化时才执行
         if (htmlDataState != "await" && response is Response.Success) {
-            Logger.d("BehavioralValidation", "Res $response")
             val gt = response.data.geetest.gt
             val challenge = response.data.geetest.challenge
             val script = "startVerify('$gt','$challenge')"
             navigator.evaluateJavaScript(script) { returnMessage ->
-         /*       val rawJson = Json.parseToJsonElement(returnMessage).jsonPrimitive.content
-                verifyCallback(Json.decodeFromString(VerifyResult.serializer(), rawJson))
-*/            }
+
+            }
         }
     }
 }

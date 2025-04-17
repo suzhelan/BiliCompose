@@ -64,6 +64,7 @@ class SmsLoginApi {
             setBody(body)
         }.body()
     }
+
     /**
      * 进行短信的人机验证
      * @param cid 国际冠字码
@@ -78,7 +79,7 @@ class SmsLoginApi {
             val body = FormDataContent(parameters {
                 append("cid", cid)
                 append("tel", tel)
-                append("login_session_id", SmsLoginApi.loginSessionId)
+                append("login_session_id", loginSessionId)
                 append("channel", "bili")
                 append("buvid", BiliHeaders.buvid)
                 append("local_id", BiliHeaders.buvid)

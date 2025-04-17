@@ -9,4 +9,11 @@
     <string name="verify_success">验证成功 请注意接收验证码</string>
     <string name="verify_error">验证失败 请重试</string>
     <string name="title_mobile_phone_number_login">输入手机验证码登录</string>
+    <!--发送手机验证码-->
+    <string name="error_code_1002">手机号格式错误</string>
+    <string name="error_code_86203">短信发送次数已达上限</string>
+    <string name="error_code_1003">验证码已经发送</string>
+    <string name="error_code_1025">该手机号在哔哩哔哩有过永久封禁记录</string>
+    <string name="error_code_2400">登录秘钥错误</string>
+    <string name="error_code_2406">验证极验服务出错</string>
 </resources>

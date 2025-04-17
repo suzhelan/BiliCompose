@@ -9,4 +9,13 @@
     <string name="verify_success">Verification Successful Please note that you will receive a verification code</string>
     <string name="verify_error">Validation failed Please try again</string>
     <string name="title_mobile_phone_number_login">Enter your mobile phone number to log in</string>
+
+    <!--发送手机号验证码-->
+    <string name="error_code_1002">Invalid phone number format</string>
+    <string name="error_code_86203">SMS sending limit reached</string>
+    <string name="error_code_1003">Verification code already sent</string>
+    <string name="error_code_1025">This phone number has been permanently banned on Bilibili</string>
+    <string name="error_code_2400">Login key error</string>
+    <string name="error_code_2406">Geetest verification failed</string>
+
 </resources>
