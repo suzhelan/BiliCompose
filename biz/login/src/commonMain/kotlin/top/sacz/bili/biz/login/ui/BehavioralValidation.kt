@@ -12,12 +12,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import bilicompose.biz.login.generated.resources.Res
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
+import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
@@ -77,6 +81,26 @@ fun BehavioralValidation(
         val handler = StatusJsMessageHandler(verifyCallback)
         jsBridge.register(handler)
     }
+    // 新增状态锁
+    var hasExecuted by remember { mutableStateOf(false) }
+    LaunchedEffect(response, webViewState.loadingState) {
+        if (response is Response.Success
+            && webViewState.loadingState is LoadingState.Finished
+            && !hasExecuted) {
+            val gt = response.data.geetest.gt
+            val challenge = response.data.geetest.challenge
+            navigator.evaluateJavaScript("startVerify('$gt','$challenge')") {
+                // 执行完成后解锁（根据业务需求决定是否需要）
+                // hasExecuted = false
+            }
+            hasExecuted = true // 标记已执行
+        }
+        // 当依赖项失效时重置状态
+        if (response !is Response.Success) {
+            hasExecuted = false
+        }
+    }
+
     Text(
         text = "${webViewState.pageTitle ?: ""} ${webViewState.loadingState}",
         modifier = Modifier.fillMaxWidth().padding(
@@ -90,14 +114,4 @@ fun BehavioralValidation(
         state = webViewState,
         modifier = Modifier.fillMaxSize()
     )
-    LaunchedEffect(response) { // 当 response 变化时才执行
-        if (htmlDataState != "await" && response is Response.Success) {
-            val gt = response.data.geetest.gt
-            val challenge = response.data.geetest.challenge
-            val script = "startVerify('$gt','$challenge')"
-            navigator.evaluateJavaScript(script) { returnMessage ->
-
-            }
-        }
-    }
 }

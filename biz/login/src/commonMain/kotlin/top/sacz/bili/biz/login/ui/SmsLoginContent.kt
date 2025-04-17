@@ -20,13 +20,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Login
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Sms
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,6 +51,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.login.generated.resources.Res
 import bilicompose.biz.login.generated.resources.error_code_1002
 import bilicompose.biz.login.generated.resources.error_code_1003
+import bilicompose.biz.login.generated.resources.error_code_1006
+import bilicompose.biz.login.generated.resources.error_code_1007
 import bilicompose.biz.login.generated.resources.error_code_1025
 import bilicompose.biz.login.generated.resources.error_code_2400
 import bilicompose.biz.login.generated.resources.error_code_2406
@@ -67,6 +70,7 @@ import top.sacz.bili.api.Response
 import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.Country
 import top.sacz.bili.biz.login.model.CountryList
+import top.sacz.bili.biz.login.model.SendSmsLoginCodeResult
 import top.sacz.bili.biz.login.model.VerifyResult
 import top.sacz.bili.biz.login.viewmodel.GeeTestViewModel
 import top.sacz.bili.biz.login.viewmodel.SmsLoginViewModel
@@ -80,7 +84,7 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun SmsLoginContent(
     modifier: Modifier,
-    viewModel: SmsLoginViewModel = viewModel(),
+    smsLoginViewModel: SmsLoginViewModel = viewModel(),
     geeTestViewModel: GeeTestViewModel = viewModel(),
     showToast: (String) -> Unit = {}
 ) {
@@ -99,12 +103,12 @@ fun SmsLoginContent(
     }
 
     //国家列表包含区号
-    val countryList by viewModel.countryList.collectAsState()
+    val countryList by smsLoginViewModel.countryList.collectAsState()
     //请求申请极验的结果
     val geetest by geeTestViewModel.captcha.collectAsState()
     //获取国家区号
     LaunchedEffect(Unit) {
-        viewModel.getCountryCode()
+        smsLoginViewModel.getCountryCode()
     }
     //用户选择的国家区号
     var areaCode by remember {
@@ -119,7 +123,9 @@ fun SmsLoginContent(
         mutableStateOf(VerifyResult(null, "await", Clock.System.now().epochSeconds))
     }
     //验证码发送倒计时 60 ... 0
-    val countdown by viewModel.sendCountdown.collectAsState()
+    val countdown by smsLoginViewModel.sendCountdown.collectAsState()
+    //发送验证码结果
+    val sendSmsResult by smsLoginViewModel.sendSmsResult.collectAsState()
 
     val verifyPhoneNumber by remember {
         derivedStateOf {
@@ -136,7 +142,8 @@ fun SmsLoginContent(
     val verifyError = stringResource(Res.string.verify_error)
     val toastPhoneNumberIsNotValid = stringResource(Res.string.toast_phone_number_is_not_valid)
 
-    val errorMessages = mapOf(
+    //请求发送验证码错误提示码
+    val sendSmsErrorMessages = mapOf(
         1002 to stringResource(Res.string.error_code_1002),
         86203 to stringResource(Res.string.error_code_86203),
         1003 to stringResource(Res.string.error_code_1003),
@@ -144,12 +151,23 @@ fun SmsLoginContent(
         2400 to stringResource(Res.string.error_code_2400),
         2406 to stringResource(Res.string.error_code_2406)
     )
+    LaunchedEffect(sendSmsResult) {
+        if (sendSmsResult is Response.Error) {
+            val response = sendSmsResult as Response.Error
+            if (response.code == 0) return@LaunchedEffect
+            showToast(
+                "code:${response.code} " + (sendSmsErrorMessages[response.code] ?: response.msg)
+            )
+        }
+    }
     LaunchedEffect(geetest) {
         if (geetest is Response.Error) {
             val response = geetest as Response.Error
             if (response.code == 0) return@LaunchedEffect
             showVerificationDialog = false
-            showToast("code:${response.code} " + (errorMessages[response.code] ?: response.msg))
+            showToast(
+                "code:${response.code} " + (sendSmsErrorMessages[response.code] ?: response.msg)
+            )
         }
     }
     //订阅人机验证结果
@@ -159,7 +177,7 @@ fun SmsLoginContent(
             "success" -> {
                 val geetestResult = geetestVerificationResult.data!!
                 showVerificationDialog = false
-                viewModel.sendSms(
+                smsLoginViewModel.sendSms(
                     areaCode.countryId,
                     inputPhoneNumber,
                     (geetest as Response.Success<Captcha>).data.token,
@@ -175,6 +193,20 @@ fun SmsLoginContent(
                 showVerificationDialog = false
             }
 
+        }
+    }
+
+    val loginResult by smsLoginViewModel.loginResult.collectAsState()
+    val loginErrorMessages = mapOf(
+        1002 to stringResource(Res.string.error_code_1006),
+        86203 to stringResource(Res.string.error_code_1007),
+    )
+    LaunchedEffect(loginResult) {
+        if (loginResult is Response.Error) {
+            val response = loginResult as Response.Error
+            showToast(
+                "code:${response.code} " + (loginErrorMessages[response.code] ?: response.msg)
+            )
         }
     }
     BehavioralValidationDialog(
@@ -196,6 +228,7 @@ fun SmsLoginContent(
         //手机号输入框
         OutlinedTextField(
             value = inputPhoneNumber,
+            isError = sendSmsResult is Response.Error,
             onValueChange = { input ->
                 if (input.all { it.isDigit() }) {
                     inputPhoneNumber = input
@@ -228,6 +261,7 @@ fun SmsLoginContent(
         //验证码输入框
         OutlinedTextField(
             value = inputVerificationCode,
+            isError = loginResult is Response.Error,
             onValueChange = { input ->
                 if (input.all { it.isDigit() }) {
                     inputVerificationCode = input
@@ -264,8 +298,23 @@ fun SmsLoginContent(
             }
         )
         Spacer(modifier = Modifier.height(30.dp))
-        FilledTonalButton(onClick = {}) {
-            Text(stringResource(Res.string.text_login))
+        //登录按钮
+        OutlinedButton(onClick = {
+            smsLoginViewModel.login(
+                areaCode.countryId,
+                inputPhoneNumber,
+                inputVerificationCode,
+                (sendSmsResult as Response.Success<SendSmsLoginCodeResult>).data.captchaKey
+            )
+        }) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.Login,
+                    contentDescription = stringResource(Res.string.text_login),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(text = stringResource(Res.string.text_login))
+            }
         }
     }
 

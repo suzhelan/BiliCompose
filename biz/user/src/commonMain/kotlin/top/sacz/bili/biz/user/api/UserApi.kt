@@ -1,0 +1,50 @@
+package top.sacz.bili.biz.user.api
+
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import top.sacz.bili.api.AppConfig
+import top.sacz.bili.api.Response
+import top.sacz.bili.api.getKtorClient
+import top.sacz.bili.biz.user.entity.Stat
+import top.sacz.bili.biz.user.entity.UserInfo
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+
+class UserApi {
+
+    /**
+     * 获取用户信息
+     */
+    @OptIn(ExperimentalTime::class)
+    suspend fun getUserInfo(accessKey: String): Response.Success<UserInfo> {
+        return getKtorClient(AppConfig.APP_BASE_URL).get("/x/v2/account/myinfo") {
+            url {
+                parameters.append("access_key", accessKey)
+                parameters.append("ts", Clock.System.now().epochSeconds.toString())
+                //还有appKey和sign,在ktorClient中的拦截器自动计算并拼接
+            }
+        }.body()
+    }
+
+    /**
+     * 获取用户状态数
+     */
+    suspend fun getStatus(accessKey: String): Response.Success<Stat> {
+        return getKtorClient(AppConfig.API_BASE_URL).get("x/web-interface/nav/stat") {
+            url {
+                parameters.append("access_key", accessKey)
+            }
+        }.body()
+    }
+
+    /**
+     * 获取硬币数
+     */
+    suspend fun getCoins(accessKey: String): Response.Success<Double> {
+        return getKtorClient(AppConfig.ACCOUNT_URL).get("/site/getCoin") {
+            url {
+                parameters.append("access_key", accessKey)
+            }
+        }.body()
+    }
+}

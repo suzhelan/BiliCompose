@@ -14,7 +14,8 @@ import top.sacz.bili.api.Response
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.api.headers.BiliHeaders
 import top.sacz.bili.biz.login.model.CountryList
-import top.sacz.bili.biz.login.model.SmsLoginToken
+import top.sacz.bili.biz.login.model.SendSmsLoginCodeResult
+import top.sacz.bili.biz.login.model.SmsLoginResult
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -28,7 +29,8 @@ class SmsLoginApi {
 
     private val baseUrl = AppConfig.LOGIN_URL
 
-    private val ktorClient = getKtorClient(baseUrl,AppKeyType.USER_INFO)
+    private val ktorClient = getKtorClient(baseUrl, AppKeyType.USER_INFO)
+
     /**
      * 发送短信
      * @param cid 国际冠字码
@@ -45,7 +47,7 @@ class SmsLoginApi {
         geeChallenge: String, // 极验 challenge
         geeValidate: String, // 极验 result
         geeSeccode: String, // 极验 result +'|jordan'
-    ): Response.Success<SmsLoginToken> {
+    ): Response.Success<SendSmsLoginCodeResult> {
         return ktorClient.post("/x/passport-login/sms/send") {
             contentType(ContentType.Application.FormUrlEncoded)
             val body = FormDataContent(parameters {
@@ -73,7 +75,7 @@ class SmsLoginApi {
     suspend fun getCaptchaBySms(
         cid: String, // 国际冠字码
         tel: String, // 手机号码
-    ): Response.Success<SmsLoginToken> {
+    ): Response.Success<SendSmsLoginCodeResult> {
         return ktorClient.post("/x/passport-login/sms/send") {
             contentType(ContentType.Application.FormUrlEncoded)
             val body = FormDataContent(parameters {
@@ -97,4 +99,28 @@ class SmsLoginApi {
     }
 
 
+    /**
+     * 短信登录
+     * @param cid 国际冠字码
+     * @param tel 手机号码
+     * @param code 验证码
+     * @param captchaKey 验证码 key
+     */
+    suspend fun smsLogin(
+        cid: String, // 国际冠字码
+        tel: String, // 手机号码
+        code: String,
+        captchaKey: String,
+    ): Response.Success<SmsLoginResult> {
+        return ktorClient.post("/x/passport-login/login/sms") {
+            contentType(ContentType.Application.FormUrlEncoded)
+            setBody(FormDataContent(parameters {
+                append("cid", cid)
+                append("tel", tel)
+                append("login_session_id", loginSessionId)
+                append("code", code)
+                append("captcha_key", captchaKey)
+            }))
+        }.body()
+    }
 }

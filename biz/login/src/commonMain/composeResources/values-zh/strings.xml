@@ -16,4 +16,8 @@
     <string name="error_code_1025">该手机号在哔哩哔哩有过永久封禁记录</string>
     <string name="error_code_2400">登录秘钥错误</string>
     <string name="error_code_2406">验证极验服务出错</string>
+
+    <!--使用验证码登录-->
+    <string name="error_code_1006">请输入正确的短信验证码</string>
+    <string name="error_code_1007">短信验证码已过期</string>
 </resources>

@@ -19,3 +19,7 @@ suspend inline fun <T> apiCall(crossinline call: suspend CoroutineScope.() -> Re
         }
     }
 }
+
+inline fun <T> Response.SuccessOrError<T>.toError(): Response.Error {
+    return Response.Error(code, message)
+}

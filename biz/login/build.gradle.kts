@@ -22,6 +22,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(projects.shared.navigation)
             implementation(projects.shared.api)
+            implementation(projects.shared.storage)
             implementation(projects.shared.common)
         }
     }

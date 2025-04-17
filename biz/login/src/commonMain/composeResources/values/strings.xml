@@ -18,4 +18,8 @@
     <string name="error_code_2400">Login key error</string>
     <string name="error_code_2406">Geetest verification failed</string>
 
+    <!-- 使用验证码登录-->
+    <string name="error_code_1006">Please enter the correct SMS verification code</string>
+    <string name="error_code_1007">SMS verification code has expired</string>
+
 </resources>

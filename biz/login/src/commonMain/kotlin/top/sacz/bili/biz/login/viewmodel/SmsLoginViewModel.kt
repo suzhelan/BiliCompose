@@ -10,10 +10,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.ext.apiCall
-
 import top.sacz.bili.biz.login.api.SmsLoginApi
 import top.sacz.bili.biz.login.model.CountryList
-import top.sacz.bili.biz.login.model.SmsLoginToken
+import top.sacz.bili.biz.login.model.SendSmsLoginCodeResult
+import top.sacz.bili.biz.login.model.SmsLoginResult
+import top.sacz.bili.shared.common.logger.Logger
 
 
 class SmsLoginViewModel : ViewModel() {
@@ -26,7 +27,8 @@ class SmsLoginViewModel : ViewModel() {
         }
     }
 
-    private val _sendSmsResult = MutableStateFlow<Response<SmsLoginToken>>(Response.Loading)
+    private val _sendSmsResult =
+        MutableStateFlow<Response<SendSmsLoginCodeResult>>(Response.Loading)
     val sendSmsResult = _sendSmsResult.asStateFlow()
     fun sendSms(
         cid: String, // 国际冠字码
@@ -61,5 +63,40 @@ class SmsLoginViewModel : ViewModel() {
             _sendCountdown.value = i
             delay(1000)
         }
+    }
+
+    private val _loginResult = MutableStateFlow<Response<SmsLoginResult>>(Response.Loading)
+    val loginResult = _loginResult.asStateFlow()
+
+    /**
+     * 最后一步 进行登录并保存登录凭证
+     */
+    fun login(
+        cid: String, // 国际冠字码
+        tel: String, // 手机号码
+        code: String,
+        captchaKey: String,
+    ) = viewModelScope.launch {
+        try {
+            Logger.d("登录参数 cid $cid, tel $tel, code $code, captchaKey $captchaKey")
+            val loginResultRes = smsLoginApi.smsLogin(
+                cid,
+                tel,
+                code,
+                captchaKey
+            )
+            if (loginResultRes.code == 0) {
+                _loginResult.value = loginResultRes
+            } else {
+                _loginResult.value = Response.Error(
+                    loginResultRes.code,
+                    loginResultRes.message
+                )
+            }
+            Logger.d("登录结果 ${_loginResult.value}")
+        } catch (e: Exception) {
+            _loginResult.value = Response.Error(-1, e.message ?: "未知错误")
+        }
+
     }
 }
