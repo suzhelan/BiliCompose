@@ -38,7 +38,6 @@ class SmsLoginApi {
      * @param geeValidate 极验 result
      * @param geeSeccode 极验 result +'|jordan'
      */
-    @OptIn(ExperimentalUuidApi::class)
     suspend fun sendSms(
         cid: String, // 国际冠字码
         tel: String, // 手机号码
@@ -57,6 +56,29 @@ class SmsLoginApi {
                 append("gee_challenge", geeChallenge)
                 append("gee_validate", geeValidate)
                 append("gee_seccode", geeSeccode)
+                append("channel", "bili")
+                append("buvid", BiliHeaders.buvid)
+                append("local_id", BiliHeaders.buvid)
+                append("statistics", BiliHeaders.statistics)
+            })
+            setBody(body)
+        }.body()
+    }
+    /**
+     * 进行短信的人机验证
+     * @param cid 国际冠字码
+     * @param tel 手机号码
+     */
+    suspend fun getCaptchaBySms(
+        cid: String, // 国际冠字码
+        tel: String, // 手机号码
+    ): Response.Success<SmsLoginToken> {
+        return ktorClient.post("/x/passport-login/sms/send") {
+            contentType(ContentType.Application.FormUrlEncoded)
+            val body = FormDataContent(parameters {
+                append("cid", cid)
+                append("tel", tel)
+                append("login_session_id", SmsLoginApi.loginSessionId)
                 append("channel", "bili")
                 append("buvid", BiliHeaders.buvid)
                 append("local_id", BiliHeaders.buvid)

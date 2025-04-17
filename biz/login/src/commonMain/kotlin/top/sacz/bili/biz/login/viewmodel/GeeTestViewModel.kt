@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.ext.apiCall
 import top.sacz.bili.biz.login.api.GeeTestApi
+import top.sacz.bili.biz.login.api.SmsLoginApi
 import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.Geetest
 import top.sacz.bili.biz.login.model.Tencent
@@ -19,17 +20,17 @@ class GeeTestViewModel : ViewModel() {
     val captcha = _captcha.asStateFlow()
 
     fun getGeeTestCaptcha(cid: String, tel: String) = viewModelScope.launch {
-        val api = GeeTestApi()
+        val smsLoginApi = SmsLoginApi()
         _captcha.value = Response.Loading
         //先请求手机号专用的验证码
-        val response = api.getCaptchaBySms(cid, tel)
+        val response = smsLoginApi.getCaptchaBySms(cid, tel)
         val captcha = response.data
         val recaptchaUrl = captcha.recaptchaUrl
         if (recaptchaUrl.isEmpty()) {
             //如果recaptchaUrl没有返回数据 那么就走默认的验证码
             Logger.d("recaptchaUrl is empty(走默认验证码,而不是手机号专属geetest)")
             _captcha.value = apiCall {
-                api.captcha()
+                GeeTestApi().captcha()
             }
             return@launch
         }
