@@ -15,8 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FeaturedPlayList
 import androidx.compose.material.icons.outlined.SmartDisplay
-import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,11 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.compose.SubcomposeAsyncImage
 import top.sacz.bili.biz.recvids.model.Video
+import top.sacz.bili.shared.common.ui.autoSkeleton
 
 @Composable
 fun EmptyCard() {
@@ -40,6 +41,7 @@ fun EmptyCard() {
         modifier = Modifier
             .fillMaxWidth()
             .height(230.dp)
+            .autoSkeleton(true, CardDefaults.shape)
     ) {
 
     }
@@ -56,12 +58,11 @@ fun VideoCard(video: Video) {
         //上半部分 封面
         Box(modifier = Modifier.fillMaxWidth().height(150.dp)) {
             //封面图像
-            SubcomposeAsyncImage(
+            AsyncImage(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
                 model = video.cover,
-                error = { Icon(Icons.Rounded.Error, contentDescription = null) },
-                contentDescription = video.title
+                contentDescription = video.title,
             )
             //用来做底部渐黑的效果
             Box(
@@ -123,6 +124,8 @@ fun VideoCard(video: Video) {
             maxLines = 2,
             minLines = 2,
             fontSize = 12.sp,
+            lineHeight = 15.sp,
+            overflow = TextOverflow.Ellipsis,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth().padding(start = 5.dp, end = 5.dp)
         )
