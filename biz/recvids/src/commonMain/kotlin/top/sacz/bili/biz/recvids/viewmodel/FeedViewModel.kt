@@ -11,8 +11,8 @@ class FeedViewModel : ViewModel() {
 
     val recommendedListFlow = Pager(
         config = PagingConfig(
-            pageSize = 25,
-            prefetchDistance = 10,//提前多少页开始预加载
+            pageSize = 10,
+            prefetchDistance = 5,//提前多少页开始预加载
             enablePlaceholders = true
         ),
         pagingSourceFactory = {

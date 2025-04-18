@@ -14,8 +14,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
-import top.sacz.bili.biz.login.ui.NotLoginContent
 import top.sacz.bili.biz.recvids.ui.RecommendedVideoPage
+import top.sacz.bili.biz.user.ui.MineContent
 
 enum class AppDestinations(
     val label: String, val icon: ImageVector, val contentDescription: String
@@ -59,7 +59,7 @@ private fun _HomeScreen() {
             }
 
             AppDestinations.Mine -> {
-                NotLoginContent()
+                MineContent()
             }
         }
     }

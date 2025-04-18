@@ -43,6 +43,7 @@ kotlin {
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.transitions)
             implementation(projects.biz.home)
+            implementation(projects.biz.user)
             implementation(projects.biz.login)
             implementation(projects.shared.api)
             implementation(projects.shared.navigation)

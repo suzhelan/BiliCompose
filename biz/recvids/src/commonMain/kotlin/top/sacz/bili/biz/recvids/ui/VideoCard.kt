@@ -71,7 +71,7 @@ fun VideoCard(video: Video) {
                     .background(
                         Brush.verticalGradient(
                             0f to Color.Transparent,
-                            1f to Color.Black.copy(alpha = 0.5f)
+                            1f to Color.Black.copy(alpha = 0.7f)
                         )
                     )
             )

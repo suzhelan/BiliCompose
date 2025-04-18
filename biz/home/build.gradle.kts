@@ -9,6 +9,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.material3AdaptiveNavigationSuite)
             implementation(projects.biz.login)
+            implementation(projects.biz.user)
             implementation(projects.biz.recvids)
             implementation(libs.voyager.navigator)
         }

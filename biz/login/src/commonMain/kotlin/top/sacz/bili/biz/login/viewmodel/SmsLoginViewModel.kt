@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.ext.apiCall
 import top.sacz.bili.biz.login.api.SmsLoginApi
+import top.sacz.bili.biz.login.config.LoginMapper
 import top.sacz.bili.biz.login.model.CountryList
 import top.sacz.bili.biz.login.model.SendSmsLoginCodeResult
 import top.sacz.bili.biz.login.model.SmsLoginResult
@@ -94,6 +95,11 @@ class SmsLoginViewModel : ViewModel() {
                 )
             }
             Logger.d("登录结果 ${_loginResult.value}")
+            //保存登录凭证
+            if (_loginResult.value is Response.Success) {
+                LoginMapper.clear()
+                LoginMapper.setLoginInfo(loginResultRes.data)
+            }
         } catch (e: Exception) {
             _loginResult.value = Response.Error(-1, e.message ?: "未知错误")
         }

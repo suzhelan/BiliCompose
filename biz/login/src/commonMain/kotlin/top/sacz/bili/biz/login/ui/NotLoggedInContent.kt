@@ -20,7 +20,7 @@ import top.sacz.bili.shared.navigation.SharedScreen
  * 显示没登录的按钮
  */
 @Composable
-fun NotLoginContent() {
+fun NotLoggedInContent() {
     //获取最近的导航
     val navigator = LocalNavigator.currentOrThrow
     //创建登录屏幕

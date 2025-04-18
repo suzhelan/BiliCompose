@@ -12,10 +12,6 @@ object AccountMapper {
         dataSource.clear()
     }
 
-    fun isLogin(): Boolean {
-        return dataSource.hasKey("userInfo")
-    }
-
     fun hasUserInfo(): Boolean {
         return dataSource.hasKey("userInfo")
     }

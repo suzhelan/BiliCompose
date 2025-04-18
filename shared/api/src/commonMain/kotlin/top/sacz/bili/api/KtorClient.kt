@@ -39,7 +39,7 @@ val commonParams = mutableMapOf(
 )
 
 
-fun getKtorClient(baseUrl: String,appKeyType: AppKeyType = AppKeyType.APP_COMMON): HttpClient {
+fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMON): HttpClient {
     val ktorClient = HttpClient {
         //安装默认请求插件
         install(DefaultRequest) {
@@ -79,6 +79,17 @@ fun getKtorClient(baseUrl: String,appKeyType: AppKeyType = AppKeyType.APP_COMMON
                 request.url.parameters.entries().forEach {
                     rawParamMap[it.key] = it.value.first()
                 }
+                //添加公共参数
+                rawParamMap.putAll(commonParams)
+                //进行签名
+                val sign = BiliSignUtils(appKeyType).sign(rawParamMap)
+                rawParamMap["sign"] = sign
+                //构建新的请求体
+                request.url.parameters.clear()
+                rawParamMap.forEach {
+                    request.url.parameters.append(it.key, it.value)
+                }
+
             }
             //POST请求
             HttpMethod.Post -> {

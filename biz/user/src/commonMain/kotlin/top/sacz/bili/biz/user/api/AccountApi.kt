@@ -18,8 +18,8 @@ class AccountApi {
      * 获取用户信息
      */
     @OptIn(ExperimentalTime::class)
-    suspend fun getUserInfo(accessKey: String): Response.Success<AccountInfo> {
-        return getKtorClient(AppConfig.APP_BASE_URL,AppKeyType.USER_INFO).get("/x/v2/account/myinfo") {
+    suspend fun getMyUserInfo(accessKey: String): Response.Success<AccountInfo> {
+        return getKtorClient(AppConfig.APP_BASE_URL,AppKeyType.APP_COMMON).get("/x/v2/account/myinfo") {
             url {
                 parameters.append("access_key", accessKey)
                 parameters.append("ts", Clock.System.now().epochSeconds.toString())

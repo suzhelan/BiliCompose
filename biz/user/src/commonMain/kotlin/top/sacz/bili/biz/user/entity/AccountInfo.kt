@@ -3,6 +3,7 @@ package top.sacz.bili.biz.user.entity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
 @Serializable
 data class AccountInfo(
     @SerialName("mid") val mid: Int, // 用户mid

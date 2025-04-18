@@ -7,7 +7,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.coil.network.ktor3)
+            implementation(libs.coil.compose)
             implementation(libs.ktor.client.core)
+            implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(projects.biz.login)
             implementation(projects.shared.storage)
