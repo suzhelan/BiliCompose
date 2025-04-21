@@ -81,82 +81,95 @@ fun VideoCard(video: Video) {
                     .align(Alignment.BottomStart),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                //图标变白色
-                Icon(
-                    imageVector = Icons.Outlined.SmartDisplay,
-                    contentDescription = null,
-                    modifier = Modifier.size(15.dp),
-                    tint = Color.White,
-                )
-                Text(
-                    text = video.coverLeftText1,
-                    fontSize = 11.sp,
-                    style = TextStyle(color = Color.White)
-                )
-
-                //间距
-                Spacer(Modifier.width(10.dp))
-
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.FeaturedPlayList,
-                    contentDescription = null,
-                    modifier = Modifier.size(15.dp),
-                    tint = Color.White,
-                )
-                Text(
-                    text = video.coverLeftText2,
-                    fontSize = 11.sp,
-                    style = TextStyle(color = Color.White)
-                )
-                //视频时长位于最右侧
-                Text(
-                    text = video.coverRightText,
-                    fontSize = 11.sp,
-                    style = TextStyle(color = Color.White),
-                    modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End)
-                )
+                CoverInfoBar(video)
             }
         }
         //下半部分 各种文字信息
         //视频标题
-        Text(
-            text = video.title,
-            maxLines = 2,
-            minLines = 2,
-            fontSize = 12.sp,
-            lineHeight = 15.sp,
-            overflow = TextOverflow.Ellipsis,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.fillMaxWidth().padding(start = 5.dp, end = 5.dp)
-        )
-        //
-        Row(
-            modifier = Modifier.fillMaxSize().padding(start = 5.dp, end = 5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (video.rCmdReasonStyle != null) {
-                val cmdReasonStyle = video.rCmdReasonStyle
-                Text(
-                    text = cmdReasonStyle.text,
-                    fontSize = 10.sp,
-                    modifier = Modifier.background(
-                        shape = RoundedCornerShape(2.dp),
-                        color = MaterialTheme.colorScheme.secondaryContainer
-                    ).padding(start = 3.dp, end = 3.dp, top = 0.5.dp, bottom = 0.5.dp)
-                )
-            } else {
-                AsyncImage(
-                    model = video.gotoIcon.iconNightUrl,
-                    contentDescription = null,
-                    modifier = Modifier.size(
-                        height = 16.dp,
-                        width = 16.dp
-                    )
-                )
-            }
-            Spacer(Modifier.width(5.dp))
-            Text(text = video.args.upName, fontSize = 10.sp)
-        }
+        VideoInfoBar(video)
     }
+}
+
+@Composable
+private fun VideoInfoBar(video: Video) {
+    //标题
+    Text(
+        text = video.title,
+        maxLines = 2,
+        minLines = 2,
+        fontSize = 12.sp,
+        lineHeight = 15.sp,
+        overflow = TextOverflow.Ellipsis,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.fillMaxWidth().padding(start = 5.dp, end = 5.dp)
+    )
+    //最底下的up主等信息
+    Row(
+        modifier = Modifier.fillMaxSize().padding(start = 5.dp, end = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (video.rCmdReasonStyle != null) {
+            val cmdReasonStyle = video.rCmdReasonStyle
+            Text(
+                text = cmdReasonStyle.text,
+                fontSize = 10.sp,
+                modifier = Modifier.background(
+                    shape = RoundedCornerShape(2.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                ).padding(start = 3.dp, end = 3.dp, top = 0.5.dp, bottom = 0.5.dp)
+            )
+        } else {
+            AsyncImage(
+                model = video.gotoIcon.iconNightUrl,
+                contentDescription = null,
+                modifier = Modifier.size(
+                    height = 16.dp,
+                    width = 16.dp
+                )
+            )
+        }
+        Spacer(Modifier.width(5.dp))
+        Text(text = video.args.upName, fontSize = 10.sp)
+    }
+}
+
+@Composable
+private fun CoverInfoBar(video: Video) {
+
+    //图标变白色
+    Icon(
+        imageVector = Icons.Outlined.SmartDisplay,
+        contentDescription = null,
+        modifier = Modifier.size(15.dp),
+        tint = Color.White,
+    )
+    Text(
+        text = video.coverLeftText1,
+        fontSize = 11.sp,
+        style = TextStyle(color = Color.White)
+    )
+
+    //间距
+    Spacer(Modifier.width(10.dp))
+
+    Icon(
+        imageVector = Icons.AutoMirrored.Outlined.FeaturedPlayList,
+        contentDescription = null,
+        modifier = Modifier.size(15.dp),
+        tint = Color.White,
+    )
+    Text(
+        text = video.coverLeftText2,
+        fontSize = 11.sp,
+        style = TextStyle(color = Color.White)
+    )
+    //视频时长位于最右侧
+    Text(
+        text = video.coverRightText,
+        fontSize = 11.sp,
+        style = TextStyle(color = Color.White),
+        modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End)
+    )
+
 }
 
