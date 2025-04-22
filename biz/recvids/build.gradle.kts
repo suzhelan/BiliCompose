@@ -12,7 +12,6 @@ kotlin {
             implementation(libs.coil.network.ktor3)
             implementation(libs.coil.compose)
             implementation(libs.ktor.client.core)
-            implementation(compose.components.resources)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(projects.shared.api)

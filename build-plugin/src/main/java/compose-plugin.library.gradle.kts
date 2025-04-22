@@ -1,3 +1,4 @@
+import gradle.kotlin.dsl.accessors._47ce667d9889d48180efdf36ab2468e0.compose
 
 
 //应用常用插件
@@ -47,6 +48,8 @@ kotlin {
             api(compose.material3)
             //图标拓展 可在https://fonts.google.com/icons找到许多图标
             api(compose.materialIconsExtended)
+            //res
+            api(compose.components.resources)
         }
     }
 }

@@ -1,10 +1,12 @@
 package top.sacz.bili.biz.user.ui
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,26 +14,48 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
+import bilicompose.biz.user.generated.resources.Res
+import bilicompose.biz.user.generated.resources.ic_lv0
+import bilicompose.biz.user.generated.resources.ic_lv1
+import bilicompose.biz.user.generated.resources.ic_lv2
+import bilicompose.biz.user.generated.resources.ic_lv3
+import bilicompose.biz.user.generated.resources.ic_lv4
+import bilicompose.biz.user.generated.resources.ic_lv5
+import bilicompose.biz.user.generated.resources.ic_lv6
 import coil3.compose.AsyncImage
+import org.jetbrains.compose.resources.painterResource
 import top.sacz.bili.biz.login.config.LoginMapper
 import top.sacz.bili.biz.login.ui.NotLoggedInContent
+import top.sacz.bili.biz.user.entity.AccountInfo
 import top.sacz.bili.biz.user.viewmodel.MineViewModel
+
+private val levelIconMap = mapOf(
+    0 to Res.drawable.ic_lv0,
+    1 to Res.drawable.ic_lv1,
+    2 to Res.drawable.ic_lv2,
+    3 to Res.drawable.ic_lv3,
+    4 to Res.drawable.ic_lv4,
+    5 to Res.drawable.ic_lv5,
+    6 to Res.drawable.ic_lv6,
+)
 
 /**
  * 我的页
  */
 @Composable
 fun MineContent() {
-    //判断是否登录 如果没有登录 显示登录按钮
-    val isLogin by remember { LoginMapper.isLoginState }
-    if (isLogin) {
-        UserProfile()
-    } else {
-        NotLoggedInContent()
+    Scaffold { paddingValues ->
+        //判断是否登录 如果没有登录 显示登录按钮
+        val isLogin by remember { LoginMapper.isLoginState }
+        if (isLogin) {
+            UserProfile(modifier = Modifier.padding(paddingValues))
+        } else {
+            NotLoggedInContent()
+        }
     }
 }
 
@@ -39,46 +63,48 @@ fun MineContent() {
  * 用户信息
  */
 @Composable
-private fun UserProfile(mineViewModel: MineViewModel = viewModel()) {
+private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewModel = viewModel()) {
     LaunchedEffect(Unit) {
         mineViewModel.updateMine()
     }
-    val hasUserInfo by remember {
-        mineViewModel.hasUserInfo
-    }
-    if (!hasUserInfo) return
-    val accountInfo by mineViewModel.userInfo.collectAsState()
-    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+    val accountInfoOrNull by mineViewModel.userInfo.collectAsState()
+    val accountInfo: AccountInfo = accountInfoOrNull ?: return
+    ConstraintLayout(modifier = modifier.fillMaxWidth().padding(top = 50.dp)) {
         val (avatar, nickname, level) = createRefs()
         //头像
         AsyncImage(
-            model = accountInfo?.face,
+            model = accountInfo.face,
             contentDescription = null,
             modifier = Modifier
+                .size(65.dp)
+                .clip(RoundedCornerShape(50.dp))
                 .constrainAs(avatar) {
                     top.linkTo(parent.top)
-                    start.linkTo(parent.start)
+                    start.linkTo(parent.start, 20.dp)
                     bottom.linkTo(parent.bottom)
-                }
-                .fillMaxWidth(0.3f)
-        )
+                },
+            )
         //名字
-        Text(text = accountInfo?.name ?: "", modifier = Modifier.constrainAs(nickname) {
-            top.linkTo(avatar.top)
-            start.linkTo(avatar.end)
-        })
-        //等级
         Text(
-            text = "Lv${accountInfo?.level}",
-            fontSize = 8.sp,
-            modifier = Modifier.background(
-                shape = RoundedCornerShape(2.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer
-            ).padding(start = 1.dp, end = 1.dp, top = 1.dp, bottom = 1.dp).constrainAs(level) {
-                top.linkTo(nickname.top)
-                start.linkTo(nickname.end)
-                bottom.linkTo(nickname.bottom)
-            }
+            text = accountInfo.name, modifier = Modifier
+                .padding(start = 20.dp)
+                .constrainAs(nickname) {
+                    top.linkTo(avatar.top)
+                    start.linkTo(avatar.end)
+                }
+        )
+        //等级
+        Image(
+            painter = painterResource(levelIconMap[accountInfo.level] ?: Res.drawable.ic_lv0),
+            contentDescription = "lv${accountInfo.level}",
+            modifier = Modifier
+                .height(15.dp)
+                .padding(start = 10.dp)
+                .constrainAs(level) {
+                    top.linkTo(nickname.top)
+                    bottom.linkTo(nickname.bottom)
+                    start.linkTo(nickname.end)
+                },
         )
     }
 }
