@@ -1,6 +1,7 @@
 package top.sacz.bili
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -13,11 +14,13 @@ import top.sacz.bili.route.RouteNavigationConfig
 
 @Composable
 @Preview
-fun App() {
+fun App(
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
+    colorScheme: ColorScheme = if (isDarkTheme) darkColorScheme() else lightColorScheme()
+) {
     RouteNavigationConfig.routingScreenRegistration()
-    //判断是否深色模式
-    val isDarkTheme = isSystemInDarkTheme()
-    MaterialTheme(colorScheme = if (isDarkTheme) darkColorScheme() else lightColorScheme()) {
+
+    MaterialTheme(colorScheme = colorScheme) {
 
         Navigator(HomeScreen) { navigator ->
             SlideTransition(navigator)
