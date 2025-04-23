@@ -18,6 +18,7 @@ class MineViewModel : ViewModel() {
     fun updateMine() = viewModelScope.launch {
         //先从缓存查
         _mine.value = AccountMapper.getMine()
+        if (!LoginMapper.isLogin()) return@launch
         val api = AccountApi()
         val accessKey = LoginMapper.getAccessKey()
         val mine = api.fetchMineData(accessKey)
@@ -32,6 +33,7 @@ class MineViewModel : ViewModel() {
         _myInfo.value = AccountMapper.getMyInfo()
         //从网络更新
         val api = AccountApi()
+        if (!LoginMapper.isLogin()) return@launch
         val accessKey = LoginMapper.getAccessKey()
         val userInfo = api.getMyInfo(accessKey)
         _myInfo.value = userInfo.data
