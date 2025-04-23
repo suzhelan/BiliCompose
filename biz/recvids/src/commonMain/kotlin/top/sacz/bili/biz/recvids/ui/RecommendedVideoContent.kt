@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -37,7 +40,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +71,9 @@ fun RecommendedVideoScreen() {
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                ),
                 title = {
                     HomeTopBar {}
                 },
@@ -73,10 +81,32 @@ fun RecommendedVideoScreen() {
             )
         },
     ) { paddingValue ->
-        RecommendedVideoContent(modifier = Modifier.padding(paddingValue))
+
+        //垂直布局
+
+        Column(modifier = Modifier.padding(paddingValue)) {
+            Tab()
+            RecommendedVideoContent()
+        }
     }
 }
 
+@Composable
+private fun Tab() {
+    val titles = listOf("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5","Tab 6")
+    var selectedIndex by remember { mutableStateOf(0) }
+    TabRow(
+        selectedTabIndex = selectedIndex,
+    ) {
+        titles.forEachIndexed { index, title ->
+            Tab(
+                text = { Text(text = title) },
+                selected = selectedIndex == index,
+                onClick = { selectedIndex = index }
+            )
+        }
+    }
+}
 
 @Composable
 private fun HomeTopBar(mineViewModel: MineViewModel = viewModel(), onClick: () -> Unit) {
