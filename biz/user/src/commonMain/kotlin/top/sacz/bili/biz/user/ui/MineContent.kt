@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,7 +18,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.user.generated.resources.Res
@@ -30,7 +36,7 @@ import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import top.sacz.bili.biz.login.config.LoginMapper
 import top.sacz.bili.biz.login.ui.NotLoggedInContent
-import top.sacz.bili.biz.user.entity.AccountInfo
+import top.sacz.bili.biz.user.entity.mine.Mine
 import top.sacz.bili.biz.user.viewmodel.MineViewModel
 
 private val levelIconMap = mapOf(
@@ -67,13 +73,13 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
     LaunchedEffect(Unit) {
         mineViewModel.updateMine()
     }
-    val accountInfoOrNull by mineViewModel.userInfo.collectAsState()
-    val accountInfo: AccountInfo = accountInfoOrNull ?: return
+    val mineOrNull by mineViewModel.mine.collectAsState()
+    val mine: Mine = mineOrNull ?: return
     ConstraintLayout(modifier = modifier.fillMaxWidth().padding(top = 50.dp)) {
-        val (avatar, nickname, level) = createRefs()
+        val (avatar, nickname, level, entry, bCoin, coin) = createRefs()
         //头像
         AsyncImage(
-            model = accountInfo.face,
+            model = mine.face,
             contentDescription = null,
             modifier = Modifier
                 .size(65.dp)
@@ -83,20 +89,19 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
                     start.linkTo(parent.start, 20.dp)
                     bottom.linkTo(parent.bottom)
                 },
-            )
+        )
         //名字
         Text(
-            text = accountInfo.name, modifier = Modifier
-                .padding(start = 20.dp)
+            text = mine.name, modifier = Modifier
                 .constrainAs(nickname) {
                     top.linkTo(avatar.top)
-                    start.linkTo(avatar.end)
+                    start.linkTo(avatar.end, 20.dp)
                 }
         )
         //等级
         Image(
-            painter = painterResource(levelIconMap[accountInfo.level] ?: Res.drawable.ic_lv0),
-            contentDescription = "lv${accountInfo.level}",
+            painter = painterResource(levelIconMap[mine.level] ?: Res.drawable.ic_lv0),
+            contentDescription = "lv${mine.level}",
             modifier = Modifier
                 .height(15.dp)
                 .padding(start = 10.dp)
@@ -106,5 +111,36 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
                     start.linkTo(nickname.end)
                 },
         )
+
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
+            contentDescription = null,
+            tint = Color.Gray,
+            modifier = Modifier
+                .size(15.dp)
+                .constrainAs(entry) {
+                    top.linkTo(parent.top)
+                    end.linkTo(parent.end, 20.dp)
+                    bottom.linkTo(parent.bottom)
+                },
+        )
+
+        Text(
+            text = "B币: ${mine.bcoin}",
+            fontSize = 12.sp,
+            style = TextStyle(color = Color.Gray),
+            modifier = Modifier.constrainAs(bCoin) {
+                top.linkTo(nickname.bottom)
+                start.linkTo(nickname.start)
+            })
+
+        Text(
+            text = "硬币: ${mine.coin}",
+            fontSize = 12.sp,
+            style = TextStyle(color = Color.Gray),
+            modifier = Modifier.constrainAs(coin) {
+                top.linkTo(bCoin.top)
+                start.linkTo(bCoin.end, 15.dp)
+            })
     }
 }

@@ -22,6 +22,10 @@ object LoginMapper {
         return dataSource.getObjectOrNull<SmsLoginResult>("loginInfo")!!
     }
 
+    fun getAccessKey(): String {
+        return getLoginInfo().tokenInfo!!.accessToken
+    }
+
     fun clear() {
         dataSource.clear()
         _isLoginState.value = false

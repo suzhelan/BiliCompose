@@ -63,9 +63,16 @@ fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMO
         //泛型结果返回
         install(ContentNegotiation) {
             json(Json {
+                //忽略未知jsonKey
                 ignoreUnknownKeys = true
-                isLenient = true
-                explicitNulls = false
+                //是否将null的属性写入json 默认true
+                explicitNulls = true
+                //是否使用默认值 默认false
+                encodeDefaults = true
+                //是否格式化json
+                prettyPrint = true
+                //宽容解析模式 可以解析不规范的json格式
+                isLenient = false
             })
         }
     }

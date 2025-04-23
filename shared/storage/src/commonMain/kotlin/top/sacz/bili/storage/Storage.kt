@@ -12,6 +12,21 @@ import top.sacz.bili.storage.config.SettingsConfig.factor
 class Storage(private val database: String) {
     val settings = factor.create(database)
 
+    val json = Json {
+        //忽略未知jsonKey
+        ignoreUnknownKeys = true
+        //是否将null的属性写入json 默认true
+        explicitNulls = true
+        //是否使用默认值 默认false
+        encodeDefaults = true
+        //是否格式化json
+        prettyPrint = true
+        //宽容解析模式 可以解析不规范的json格式
+        isLenient = false
+        //解析失败按null值
+        coerceInputValues = true
+    }
+    
     fun hasKey(key: String): Boolean = settings.hasKey(key)
 
     fun remove(key: String) {
@@ -29,8 +44,8 @@ class Storage(private val database: String) {
      * @return 对象
      */
     inline fun <reified T> getObject(key: String, default: T): T {
-        val defaultValue = Json.encodeToString(default)
-        return Json.decodeFromString(settings.getString(key, defaultValue))
+        val defaultValue = json.encodeToString(default)
+        return json.decodeFromString(settings.getString(key, defaultValue))
     }
 
     /**
@@ -41,9 +56,9 @@ class Storage(private val database: String) {
      * @return 对象
      */
     inline fun <reified T> getObject(serializer: KSerializer<T>, key: String, default: T): T {
-        return Json.decodeFromString(
+        return json.decodeFromString(
             serializer,
-            settings.getString(key, Json.encodeToString(default))
+            settings.getString(key, json.encodeToString(default))
         )
     }
 
@@ -56,7 +71,7 @@ class Storage(private val database: String) {
         if (!settings.contains(key)) {
             return null
         }
-        return Json.decodeFromString(settings.getStringOrNull(key)!!)
+        return json.decodeFromString(settings.getStringOrNull(key)!!)
     }
 
     /**
@@ -69,7 +84,7 @@ class Storage(private val database: String) {
         if (!settings.contains(key)) {
             return null
         }
-        return Json.decodeFromString(serializer, settings.getStringOrNull(key)!!)
+        return json.decodeFromString(serializer, settings.getStringOrNull(key)!!)
     }
 
     /**
@@ -78,7 +93,7 @@ class Storage(private val database: String) {
      * @param value 值
      */
     inline fun <reified T> putObject(key: String, value: T) {
-        settings.putString(key, Json.encodeToString(value))
+        settings.putString(key, json.encodeToString(value))
     }
 
     /**
@@ -88,7 +103,7 @@ class Storage(private val database: String) {
      * @param value 值
      */
     inline fun <reified T> putObject(serializer: KSerializer<T>, key: String, value: T) {
-        settings.putString(key, Json.encodeToString(serializer, value))
+        settings.putString(key, json.encodeToString(serializer, value))
     }
 
 
