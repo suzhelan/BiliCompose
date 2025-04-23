@@ -93,7 +93,7 @@ fun RecommendedVideoScreen() {
 
 @Composable
 private fun Tab() {
-    val titles = listOf("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5","Tab 6")
+    val titles = listOf("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5", "Tab 6")
     var selectedIndex by remember { mutableStateOf(0) }
     TabRow(
         selectedTabIndex = selectedIndex,
