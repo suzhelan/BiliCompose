@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="b_coin">B币: %1$d</string>
+    <string name="coin">硬币: %1$d</string>
+</resources>

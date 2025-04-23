@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.user.generated.resources.Res
+import bilicompose.biz.user.generated.resources.b_coin
+import bilicompose.biz.user.generated.resources.coin
 import bilicompose.biz.user.generated.resources.ic_lv0
 import bilicompose.biz.user.generated.resources.ic_lv1
 import bilicompose.biz.user.generated.resources.ic_lv2
@@ -34,6 +36,7 @@ import bilicompose.biz.user.generated.resources.ic_lv5
 import bilicompose.biz.user.generated.resources.ic_lv6
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.biz.login.config.LoginMapper
 import top.sacz.bili.biz.login.ui.NotLoggedInContent
 import top.sacz.bili.biz.user.entity.mine.Mine
@@ -126,7 +129,7 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
         )
 
         Text(
-            text = "B币: ${mine.bcoin}",
+            text = stringResource(Res.string.b_coin, mine.bcoin),
             fontSize = 12.sp,
             style = TextStyle(color = Color.Gray),
             modifier = Modifier.constrainAs(bCoin) {
@@ -135,7 +138,7 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
             })
 
         Text(
-            text = "硬币: ${mine.coin}",
+            text = stringResource(Res.string.coin, mine.coin),
             fontSize = 12.sp,
             style = TextStyle(color = Color.Gray),
             modifier = Modifier.constrainAs(coin) {
