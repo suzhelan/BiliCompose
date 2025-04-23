@@ -44,7 +44,7 @@ fun RecommendedVideoPage(viewModel: FeedViewModel = viewModel()) {
         modifier = Modifier.fillMaxSize()
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Adaptive(minSize = 150.dp),
             contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
