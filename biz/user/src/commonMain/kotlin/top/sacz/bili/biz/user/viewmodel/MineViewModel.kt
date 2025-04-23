@@ -25,17 +25,17 @@ class MineViewModel : ViewModel() {
         AccountMapper.setMine(mine.data)
     }
 
-    private val _userInfo = MutableStateFlow<AccountInfo?>(null)
-    val userInfo = _userInfo.asStateFlow()
+    private val _myInfo = MutableStateFlow<AccountInfo?>(null)
+    val myInfo = _myInfo.asStateFlow()
     fun updateMyInfo() = viewModelScope.launch {
         //先从缓存查
-        _userInfo.value = AccountMapper.getUserInfo()
+        _myInfo.value = AccountMapper.getMyInfo()
         //从网络更新
         val api = AccountApi()
         val accessKey = LoginMapper.getAccessKey()
-        val userInfo = api.getMyUserInfo(accessKey)
-        _userInfo.value = userInfo.data
+        val userInfo = api.getMyInfo(accessKey)
+        _myInfo.value = userInfo.data
         //更新缓存
-        AccountMapper.setUserInfo(userInfo.data)
+        AccountMapper.setMyInfo(userInfo.data)
     }
 }

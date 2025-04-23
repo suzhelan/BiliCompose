@@ -14,6 +14,7 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
+            implementation(projects.biz.user)
             implementation(projects.shared.api)
             implementation(projects.shared.common)
         }

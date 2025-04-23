@@ -37,7 +37,7 @@ class AccountApi {
      * 获取用户信息
      */
     @OptIn(ExperimentalTime::class)
-    suspend fun getMyUserInfo(accessKey: String): Response.Success<AccountInfo> {
+    suspend fun getMyInfo(accessKey: String): Response.Success<AccountInfo> {
         return getKtorClient(
             AppConfig.APP_BASE_URL,
             AppKeyType.APP_COMMON

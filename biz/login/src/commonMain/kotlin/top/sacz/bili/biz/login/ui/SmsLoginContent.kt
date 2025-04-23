@@ -65,6 +65,8 @@ import bilicompose.biz.login.generated.resources.title_mobile_phone_number_login
 import bilicompose.biz.login.generated.resources.toast_phone_number_is_not_valid
 import bilicompose.biz.login.generated.resources.verify_error
 import bilicompose.biz.login.generated.resources.verify_success
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.api.Response
 import top.sacz.bili.biz.login.model.Captcha
@@ -88,6 +90,9 @@ fun SmsLoginContent(
     geeTestViewModel: GeeTestViewModel = viewModel(),
     showToast: (String) -> Unit = {}
 ) {
+    //获取最近的导航 登录成功后pop当前页面
+    val navigator = LocalNavigator.currentOrThrow
+
     //手机号输入
     var inputPhoneNumber by rememberSaveable {
         mutableStateOf("")
@@ -204,7 +209,7 @@ fun SmsLoginContent(
     LaunchedEffect(loginResult) {
         when (val response = loginResult) {
             is Response.Success -> {
-                showToast(verifySuccess)
+                navigator.pop()
             }
 
             is Response.Error -> {

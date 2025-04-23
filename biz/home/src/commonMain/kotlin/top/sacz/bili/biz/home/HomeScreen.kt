@@ -14,7 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
-import top.sacz.bili.biz.recvids.ui.RecommendedVideoPage
+import top.sacz.bili.biz.recvids.ui.RecommendedVideoScreen
 import top.sacz.bili.biz.user.ui.MineContent
 
 enum class AppDestinations(
@@ -55,7 +55,7 @@ private fun _HomeScreen() {
         }) {
         when (currentDestination) {
             AppDestinations.HOME -> {
-                RecommendedVideoPage()
+                RecommendedVideoScreen()
             }
 
             AppDestinations.Mine -> {
