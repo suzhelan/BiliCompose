@@ -24,7 +24,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kotlinx.serialization.protobuf)
-            implementation("com.soywiz.korlibs.krypto:krypto:4.0.10")
+            implementation(libs.krypto)
             //只用到个日志打印
             implementation(projects.shared.common)
             //获取登录access_key鉴权

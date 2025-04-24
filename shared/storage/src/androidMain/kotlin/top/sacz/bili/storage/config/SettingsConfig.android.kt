@@ -9,6 +9,14 @@ import io.fastkv.FastKV
 actual object SettingsConfig {
     lateinit var context: Context
 
+    /**
+     * SharedPreferencesSettings.Factory(context)
+     * 写2000条数据耗时1s
+     * 再高直接oom
+     *
+     * FastKvSettingsFactory写2000条数据 耗时300ms左右
+     * 100000条数据 耗时700ms
+     */
     actual val factor: Settings.Factory by lazy {
         FastKvSettingsFactory()
     }

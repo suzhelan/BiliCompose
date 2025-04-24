@@ -12,6 +12,7 @@ constraintlayoutComposeMultiplatform = "0.5.1"
 fastkv = "2.6.0"
 kotlin = "2.1.20"
 kotlinx-coroutines = "1.10.2"
+krypto = "4.0.10"
 multiplatformSettings = "1.3.0"
 napier = "2.7.1"
 navigationCompose = "2.8.0-alpha13"
@@ -22,7 +23,7 @@ sonner = "0.3.8"
 material3-adaptive = "1.1.0"
 
 kotlinx-serialization = "1.8.1"
-uiToolingPreviewAndroid = "1.7.8"
+uiToolingPreviewAndroid = "1.8.0"
 voyagerNavigator = "1.1.0-beta03"
 
 [libraries]
@@ -53,6 +54,8 @@ napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 #导航库
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyagerNavigator" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyagerNavigator" }
+#跨平台加密
+krypto = { module = "com.soywiz.korlibs.krypto:krypto", version.ref = "krypto" }
 
 #约束布局
 constraintlayout-compose-multiplatform = { module = "tech.annexflow.compose:constraintlayout-compose-multiplatform", version.ref = "constraintlayoutComposeMultiplatform" }
