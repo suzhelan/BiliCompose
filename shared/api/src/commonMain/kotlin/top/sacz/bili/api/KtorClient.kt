@@ -17,26 +17,8 @@ import io.ktor.http.URLProtocol
 import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import top.sacz.bili.api.headers.BiliHeaders
-import top.sacz.bili.api.headers.commonHeaders
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-
-/**
- * 常用参数 拼接在 url 和 body 中
- */
-@OptIn(ExperimentalTime::class)
-val commonParams = mutableMapOf(
-//    "access_key" to "",
-    "build" to "8410300",
-    "c_locale" to "zh_CN",
-    "channel" to "bili",
-    "mobi_app" to "android",
-    "platform" to "android",
-    "s_locale" to "zh_CN",
-    "statistics" to BiliHeaders.statistics,
-    "ts" to Clock.System.now().epochSeconds.toString(),
-)
+import top.sacz.bili.api.config.commonHeaders
+import top.sacz.bili.api.config.commonParams
 
 
 fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMON): HttpClient {
@@ -47,6 +29,7 @@ fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMO
                 protocol = URLProtocol.HTTPS
                 host = baseUrl
             }
+            //默认请求头
             for ((key, value) in commonHeaders) {
                 header(key, value)
             }
@@ -76,7 +59,7 @@ fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMO
             })
         }
     }
-    //进行签名
+    //进行签名和添加常用参数
     ktorClient.plugin(HttpSend).intercept { request ->
         val method = request.method
         when (method) {

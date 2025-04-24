@@ -1,13 +1,15 @@
-package top.sacz.bili.api.headers
+package top.sacz.bili.api.config
 
 
 import io.ktor.util.encodeBase64
 import io.ktor.utils.io.core.toByteArray
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
 import top.sacz.bili.api.proto.FawkesReq
 import top.sacz.bili.api.proto.Locale
 import top.sacz.bili.api.proto.LocaleIds
+import top.sacz.bili.shared.auth.config.LoginMapper
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
@@ -16,7 +18,7 @@ import kotlin.time.ExperimentalTime
 
 
 val commonHeaders: MutableMap<String, String>
-    get() {
+    get() = runBlocking {
         val result = mutableMapOf(
             "app-key" to "android64",
             "bili-http-engine" to "ignet",
@@ -31,14 +33,16 @@ val commonHeaders: MutableMap<String, String>
             "x-bili-locale-bin" to BiliHeaders.Bin.localBin,
             "x-bili-metadata-ip-region" to "CN",
             "x-bili-metadata-legal-region" to "CN",
-//            "x-bili-mid" to "479396940",
-//            "x-bili-ticket" to "eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM3MjcxNzAsImlhdCI6MTc0MzY5ODA3MCwiYnV2aWQiOiJYVTVDNzg2NUUzREE2NzAwNENCMkFCNkFFNTY3OTZCRTM0RTVEIn0.ytZygV5hTYkulQ6V9wUT3BC1k-zQxqnJMgDOZCYPMOw",
+            "x-bili-ticket" to BiliTicket.getBiliTickerData().ticket,
             "x-bili-trace-id" to BiliHeaders.traceId
         )
-        return result
+        if (LoginMapper.isLogin()) {
+            result["x-bili-mid"] = LoginMapper.getLoginInfo().tokenInfo!!.mid.toString()
+        }
+        return@runBlocking result
     }
 
-
+//TODO grpc接口的 等着完善
 val grpcHeaders: MutableMap<String, String>
     get() {
         val result = mutableMapOf(

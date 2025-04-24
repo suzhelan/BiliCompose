@@ -19,5 +19,6 @@ captures
 **/kcef-bundle
 **/cache
 
+**.prop
 /composeApp/release
 /composeApp/debug

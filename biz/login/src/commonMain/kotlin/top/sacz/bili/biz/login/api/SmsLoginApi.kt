@@ -12,7 +12,7 @@ import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.AppKeyType
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.getKtorClient
-import top.sacz.bili.api.headers.BiliHeaders
+import top.sacz.bili.api.config.BiliHeaders
 import top.sacz.bili.biz.login.model.CountryList
 import top.sacz.bili.biz.login.model.SendSmsLoginCodeResult
 import top.sacz.bili.shared.auth.entity.LoginResult
