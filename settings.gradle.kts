@@ -32,6 +32,7 @@ include(
     ":shared:storage",
     ":shared:common",
     ":shared:navigation",
+    ":shared:auth",
 )
 include(
     ":biz:home",

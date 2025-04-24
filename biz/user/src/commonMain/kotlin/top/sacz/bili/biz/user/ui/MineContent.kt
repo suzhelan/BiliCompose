@@ -37,10 +37,11 @@ import bilicompose.biz.user.generated.resources.ic_lv6
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import top.sacz.bili.biz.login.config.LoginMapper
+
 import top.sacz.bili.biz.login.ui.NotLoggedInContent
 import top.sacz.bili.biz.user.entity.mine.Mine
 import top.sacz.bili.biz.user.viewmodel.MineViewModel
+import top.sacz.bili.shared.auth.config.LoginMapper
 
 private val levelIconMap = mapOf(
     0 to Res.drawable.ic_lv0,

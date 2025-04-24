@@ -11,10 +11,11 @@ import kotlinx.coroutines.withContext
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.ext.apiCall
 import top.sacz.bili.biz.login.api.SmsLoginApi
-import top.sacz.bili.biz.login.config.LoginMapper
 import top.sacz.bili.biz.login.model.CountryList
 import top.sacz.bili.biz.login.model.SendSmsLoginCodeResult
-import top.sacz.bili.biz.login.model.SmsLoginResult
+import top.sacz.bili.shared.auth.config.LoginMapper
+import top.sacz.bili.shared.auth.entity.LoginResult
+
 import top.sacz.bili.shared.common.logger.Logger
 
 
@@ -66,7 +67,7 @@ class SmsLoginViewModel : ViewModel() {
         }
     }
 
-    private val _loginResult = MutableStateFlow<Response<SmsLoginResult>>(Response.Loading)
+    private val _loginResult = MutableStateFlow<Response<LoginResult>>(Response.Loading)
     val loginResult = _loginResult.asStateFlow()
 
     /**

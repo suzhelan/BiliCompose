@@ -19,6 +19,7 @@ kotlin {
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.voyager.navigator)
             implementation(libs.kotlinx.serialization.json)
+            implementation(projects.shared.auth)
             implementation(projects.shared.navigation)
             implementation(projects.shared.api)
             implementation(projects.shared.storage)

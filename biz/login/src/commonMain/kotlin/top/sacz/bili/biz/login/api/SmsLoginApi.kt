@@ -15,7 +15,8 @@ import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.api.headers.BiliHeaders
 import top.sacz.bili.biz.login.model.CountryList
 import top.sacz.bili.biz.login.model.SendSmsLoginCodeResult
-import top.sacz.bili.biz.login.model.SmsLoginResult
+import top.sacz.bili.shared.auth.entity.LoginResult
+
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -111,7 +112,7 @@ class SmsLoginApi {
         tel: String, // 手机号码
         code: String,
         captchaKey: String,
-    ): Response.Success<SmsLoginResult> {
+    ): Response.Success<LoginResult> {
         return ktorClient.post("/x/passport-login/login/sms") {
             contentType(ContentType.Application.FormUrlEncoded)
             setBody(FormDataContent(parameters {

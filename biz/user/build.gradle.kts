@@ -14,6 +14,8 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(projects.biz.login)
+            implementation(projects.shared.common)
+            implementation(projects.shared.auth)
             implementation(projects.shared.storage)
             implementation(projects.shared.api)
         }

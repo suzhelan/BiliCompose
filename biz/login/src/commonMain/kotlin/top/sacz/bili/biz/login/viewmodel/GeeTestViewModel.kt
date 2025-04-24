@@ -26,7 +26,7 @@ class GeeTestViewModel : ViewModel() {
             //先请求手机号专用的验证码
             val response = smsLoginApi.getCaptchaBySms(cid, tel)
             val captcha = response.data
-            if (response.code != 0 || captcha == null) {
+            if (response.code != 0) {
                 _captcha.value = Response.Error(response.code, response.message)
                 return@launch
             }

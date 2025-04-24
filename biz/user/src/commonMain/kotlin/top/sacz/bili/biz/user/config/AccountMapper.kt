@@ -2,10 +2,11 @@ package top.sacz.bili.biz.user.config
 
 
 import androidx.compose.runtime.State
-import top.sacz.bili.biz.login.config.LoginMapper
+
 
 import top.sacz.bili.biz.user.entity.AccountInfo
 import top.sacz.bili.biz.user.entity.mine.Mine
+import top.sacz.bili.shared.auth.config.LoginMapper
 import top.sacz.bili.storage.Storage
 
 object AccountMapper {

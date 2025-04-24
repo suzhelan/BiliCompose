@@ -5,11 +5,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import top.sacz.bili.biz.login.config.LoginMapper
+
 import top.sacz.bili.biz.user.api.AccountApi
 import top.sacz.bili.biz.user.config.AccountMapper
 import top.sacz.bili.biz.user.entity.AccountInfo
 import top.sacz.bili.biz.user.entity.mine.Mine
+import top.sacz.bili.shared.auth.config.LoginMapper
 
 class MineViewModel : ViewModel() {
 

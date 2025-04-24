@@ -1,8 +1,8 @@
-package top.sacz.bili.biz.login.config
+package top.sacz.bili.shared.auth.config
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import top.sacz.bili.biz.login.model.SmsLoginResult
+import top.sacz.bili.shared.auth.entity.LoginResult
 import top.sacz.bili.storage.Storage
 import top.sacz.bili.storage.ext.contains
 
@@ -13,13 +13,19 @@ object LoginMapper {
     private val _isLoginState = mutableStateOf(isLogin())
     val isLoginState: State<Boolean> = _isLoginState
 
-    fun setLoginInfo(smsLoginResult: SmsLoginResult) {
+    /**
+     * 设置登录信息
+     */
+    fun setLoginInfo(smsLoginResult: LoginResult) {
         dataSource.putObject("loginInfo", smsLoginResult)
         _isLoginState.value = true
     }
 
-    fun getLoginInfo(): SmsLoginResult {
-        return dataSource.getObjectOrNull<SmsLoginResult>("loginInfo")!!
+    /**
+     * 获取登录信息
+     */
+    fun getLoginInfo(): LoginResult {
+        return dataSource.getObjectOrNull<LoginResult>("loginInfo")!!
     }
 
     fun getAccessKey(): String {
@@ -35,4 +41,6 @@ object LoginMapper {
         return dataSource.contains("loginInfo")
     }
 
+
 }
+

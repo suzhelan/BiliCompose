@@ -1,14 +1,13 @@
 plugins {
     id("compose-plugin")
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.animation)
-            implementation(compose.animationGraphics)
-            implementation(libs.napier)
+            implementation(libs.kotlinx.serialization.json)
             implementation(projects.shared.storage)
         }
     }
