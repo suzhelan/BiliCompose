@@ -6,7 +6,9 @@ plugins {
 
 kotlin {
     sourceSets {
-
+        androidMain.dependencies {
+            implementation(libs.fastkv)
+        }
         commonMain.dependencies {
             implementation(libs.multiplatform.settings)
             implementation(libs.kotlinx.serialization.json)
