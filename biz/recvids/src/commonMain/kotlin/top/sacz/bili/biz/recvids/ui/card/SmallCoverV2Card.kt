@@ -1,4 +1,4 @@
-package top.sacz.bili.biz.recvids.ui
+package top.sacz.bili.biz.recvids.ui.card
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import top.sacz.bili.biz.recvids.model.Video
+import top.sacz.bili.biz.recvids.model.SmallCoverV2Item
 import top.sacz.bili.shared.common.ui.autoSkeleton
 
 @Composable
@@ -48,7 +48,7 @@ fun EmptyCard() {
 }
 
 @Composable
-fun VideoCard(video: Video) {
+fun VideoCard(video: SmallCoverV2Item) {
     //首先就是一个圆角卡片背景
     Card(
         modifier = Modifier
@@ -91,7 +91,7 @@ fun VideoCard(video: Video) {
 }
 
 @Composable
-private fun VideoInfoBar(video: Video) {
+private fun VideoInfoBar(video: SmallCoverV2Item) {
     //标题
     Text(
         text = video.title,
@@ -120,7 +120,7 @@ private fun VideoInfoBar(video: Video) {
             )
         } else {
             AsyncImage(
-                model = video.gotoIcon.iconNightUrl,
+                model = video.gotoIcon.iconUrl,
                 contentDescription = null,
                 modifier = Modifier.size(
                     height = 16.dp,
@@ -134,7 +134,7 @@ private fun VideoInfoBar(video: Video) {
 }
 
 @Composable
-private fun CoverInfoBar(video: Video) {
+private fun CoverInfoBar(video: SmallCoverV2Item) {
 
     //图标变白色
     Icon(
