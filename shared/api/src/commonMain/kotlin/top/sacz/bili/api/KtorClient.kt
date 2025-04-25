@@ -12,6 +12,7 @@ import io.ktor.client.plugins.plugin
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.header
 import io.ktor.client.request.setBody
+import io.ktor.http.HttpHeaders.Cookie
 import io.ktor.http.HttpMethod
 import io.ktor.http.URLProtocol
 import io.ktor.http.parameters
@@ -19,6 +20,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import top.sacz.bili.api.config.commonHeaders
 import top.sacz.bili.api.config.commonParams
+import top.sacz.bili.shared.auth.config.LoginMapper
 
 val HttpJsonDecoder = Json {
     //忽略未知jsonKey
@@ -33,7 +35,8 @@ val HttpJsonDecoder = Json {
     isLenient = false
 }
 
-fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMON): HttpClient {
+fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMON,
+                  withCookie : Boolean = false): HttpClient {
     val ktorClient = HttpClient {
         //安装默认请求插件
         install(DefaultRequest) {
@@ -45,6 +48,8 @@ fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMO
             for ((key, value) in commonHeaders) {
                 header(key, value)
             }
+            val cookie = LoginMapper.getCookie()
+            header(Cookie, cookie)
         }
         //安装日志插件
         install(Logging) {

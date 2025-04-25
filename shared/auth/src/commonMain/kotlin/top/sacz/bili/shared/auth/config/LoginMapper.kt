@@ -21,6 +21,12 @@ object LoginMapper {
         _isLoginState.value = true
     }
 
+    fun getCookie(): String {
+        return getLoginInfo().cookieInfo?.cookies?.joinToString(";") {
+            "${it.name}=${it.value}"
+        } ?: ""
+    }
+
     /**
      * 获取登录信息
      */
