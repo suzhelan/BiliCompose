@@ -7,7 +7,7 @@ import io.ktor.http.path
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.Response
 import top.sacz.bili.api.getKtorClient
-import top.sacz.bili.biz.recvids.model.FeedItem
+import top.sacz.bili.biz.recvids.model.ShortVideoData
 
 
 import kotlin.time.Clock
@@ -17,7 +17,7 @@ import kotlin.time.ExperimentalTime
 class FeedApi {
 
     @OptIn(ExperimentalTime::class)
-    suspend fun getFeed(): Response.Success<FeedItem> {
+    suspend fun getFeed(): Response.Success<ShortVideoData> {
         val params: MutableMap<String, Any> = mutableMapOf(
             "fnval" to 272,
             "fnver" to 1,

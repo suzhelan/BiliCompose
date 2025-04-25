@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 @Serializable
-data class FeedItem(
+data class ShortVideoData(
     val items: List<JsonObject>
 )
