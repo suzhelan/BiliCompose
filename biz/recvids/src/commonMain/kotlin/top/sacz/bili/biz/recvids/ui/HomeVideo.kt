@@ -45,6 +45,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.stringResource
+import top.sacz.bili.biz.recvids.ui.page.RecommendedVideoContent
 import top.sacz.bili.biz.user.config.AccountMapper
 import top.sacz.bili.biz.user.entity.AccountInfo
 import top.sacz.bili.biz.user.viewmodel.MineViewModel

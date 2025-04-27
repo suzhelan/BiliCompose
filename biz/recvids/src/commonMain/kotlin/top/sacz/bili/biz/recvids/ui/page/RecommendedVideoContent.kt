@@ -1,4 +1,4 @@
-package top.sacz.bili.biz.recvids.ui
+package top.sacz.bili.biz.recvids.ui.page
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,7 +66,12 @@ fun RecommendedVideoContent(
             }
             items(
                 count = lazyPagingItems.itemCount,
-                key = lazyPagingItems.itemKey { it.idx }
+                key = lazyPagingItems.itemKey {
+                    when (it) {
+                        is SmallCoverV2Item -> it.param
+                        else -> it.idx
+                    }
+                }
             ) { index ->
                 val video = lazyPagingItems[index]
                 if (video == null) {

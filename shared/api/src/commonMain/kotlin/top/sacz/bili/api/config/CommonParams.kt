@@ -4,7 +4,9 @@ import top.sacz.bili.shared.auth.config.LoginMapper
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-
+/**
+ * 并且必须
+ */
 @OptIn(ExperimentalTime::class)
 val commonParams: Map<String, String>
     get() {

@@ -48,8 +48,10 @@ fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMO
             for ((key, value) in commonHeaders) {
                 header(key, value)
             }
-            val cookie = LoginMapper.getCookie()
-            header(Cookie, cookie)
+            if (withCookie && LoginMapper.getCookie().isNotEmpty()) {
+                val cookie = LoginMapper.getCookie()
+                header(Cookie, cookie)
+            }
         }
         //安装日志插件
         install(Logging) {
