@@ -9,8 +9,10 @@ kotlin {
             implementation(compose.animation)
             implementation(compose.animationGraphics)
             implementation(libs.napier)
-            implementation("com.squareup.okio:okio:3.11.0")
+            implementation(libs.okio)
+            implementation(libs.kotlinx.datetime)
             implementation(projects.shared.storage)
         }
     }
 }
+

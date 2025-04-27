@@ -1,14 +1,10 @@
 package top.sacz.bili.biz.recvids.ui.page
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,23 +22,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
-import top.sacz.bili.biz.recvids.model.SmallCoverV2Item
 import top.sacz.bili.biz.recvids.ui.card.EmptyCard
-import top.sacz.bili.biz.recvids.ui.card.UnknownTypeCoverCard
-import top.sacz.bili.biz.recvids.ui.card.VideoCard
-import top.sacz.bili.biz.recvids.viewmodel.FeedViewModel
+import top.sacz.bili.biz.recvids.ui.card.PopularCoverCard
+import top.sacz.bili.biz.recvids.ui.card.PopularLoadingCard
+import top.sacz.bili.biz.recvids.viewmodel.PopularViewModel
 
-/**
- * 视频流布局实现
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedVideoContent(
+fun PopularVideoContent(
     modifier: Modifier = Modifier,
-    viewModel: FeedViewModel = viewModel()
+    viewModel: PopularViewModel = viewModel()
 ) {
-
-    val lazyPagingItems = viewModel.recommendedListFlow.collectAsLazyPagingItems()
+    val lazyPagingItems = viewModel.popularListFlow.collectAsLazyPagingItems()
     val isRefreshing by derivedStateOf { lazyPagingItems.loadState.refresh is LoadState.Loading }
 
     PullToRefreshBox(
@@ -52,43 +44,28 @@ fun FeedVideoContent(
         },
         modifier = modifier.fillMaxSize()
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 150.dp),
-            contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        LazyColumn {
             //骨架屏
             if (lazyPagingItems.itemCount == 0) {
                 items(10) {
-                    EmptyCard()
+                    PopularLoadingCard()
                 }
             }
             items(
                 count = lazyPagingItems.itemCount,
                 key = lazyPagingItems.itemKey {
-                    when (it) {
-                        is SmallCoverV2Item -> it.param
-                        else -> it.idx
-                    }
+                    it.bvid
                 }
             ) { index ->
-                val video = lazyPagingItems[index]
-                if (video == null) {
+                val popularItem = lazyPagingItems[index]
+                if (popularItem == null) {
                     EmptyCard()
                     return@items
                 }
-                when (video) {
-                    is SmallCoverV2Item -> {
-                        VideoCard(video)
-                    }
-                    else -> {
-                        UnknownTypeCoverCard(video)
-                    }
-                }
+                PopularCoverCard(popularItem)
             }
 
-            item(span = { GridItemSpan(maxLineSpan) }) {
+            item {
                 BottomLoadingIndicator(lazyPagingItems.loadState.append, retry = {
                     lazyPagingItems.retry()
                 })

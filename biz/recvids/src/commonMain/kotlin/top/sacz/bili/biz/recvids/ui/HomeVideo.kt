@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -28,9 +31,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,12 +46,16 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import top.sacz.bili.biz.recvids.ui.page.RecommendedVideoContent
+import top.sacz.bili.biz.recvids.ui.page.FeedVideoContent
+import top.sacz.bili.biz.recvids.ui.page.PopularVideoContent
 import top.sacz.bili.biz.user.config.AccountMapper
 import top.sacz.bili.biz.user.entity.AccountInfo
 import top.sacz.bili.biz.user.viewmodel.MineViewModel
 import top.sacz.bili.shared.navigation.SharedScreen
+
+val pages = listOf("推荐", "热门")
 
 /**
  * 本文件包含
@@ -61,7 +67,7 @@ import top.sacz.bili.shared.navigation.SharedScreen
 @Composable
 fun HomeVideoScreen() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-
+    val pagerState = rememberPagerState(pageCount = { pages.size }, initialPage = 0)
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -78,26 +84,43 @@ fun HomeVideoScreen() {
     ) { paddingValue ->
 
         //垂直布局
-
         Column(modifier = Modifier.padding(paddingValue)) {
-            Tab()
-            RecommendedVideoContent()
+            Tab(pagerState)
+            HorizontalPager(
+                state = pagerState,
+            ) { page ->
+                VideoPage(page)
+            }
         }
     }
 }
 
 @Composable
-private fun Tab() {
-    val titles = listOf("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5", "Tab 6")
-    var selectedIndex by remember { mutableStateOf(0) }
+private fun VideoPage(index: Int) {
+    when (index) {
+        0 -> {
+            FeedVideoContent()
+        }
+
+        1 -> {
+            PopularVideoContent()
+        }
+    }
+}
+
+@Composable
+private fun Tab(pagerState: PagerState) {
+    val scoop = rememberCoroutineScope()
     TabRow(
-        selectedTabIndex = selectedIndex,
+        selectedTabIndex = pagerState.currentPage,
     ) {
-        titles.forEachIndexed { index, title ->
+        pages.forEachIndexed { index, title ->
             Tab(
                 text = { Text(text = title) },
-                selected = selectedIndex == index,
-                onClick = { selectedIndex = index }
+                selected = pagerState.currentPage == index,
+                onClick = {
+                    scoop.launch { pagerState.animateScrollToPage(index) }
+                }
             )
         }
     }
@@ -142,6 +165,9 @@ private fun HomeTopBar(mineViewModel: MineViewModel = viewModel(), onClickSearch
 
 }
 
+/**
+ * 搜索栏
+ */
 @Composable
 private fun SearchBarWithClick(onClick: () -> Unit) {
     Row(

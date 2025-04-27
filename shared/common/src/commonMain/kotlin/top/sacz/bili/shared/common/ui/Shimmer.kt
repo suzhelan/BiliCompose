@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
  * 骨架屏
  */
 @Composable
-fun Modifier.shimmerEffect(showShimmer: Boolean): Modifier =
+fun Modifier.shimmerEffect(showShimmer: Boolean = true): Modifier =
     composed {
         val infiniteTransition = rememberInfiniteTransition()
         val translateAnim by infiniteTransition.animateFloat(
