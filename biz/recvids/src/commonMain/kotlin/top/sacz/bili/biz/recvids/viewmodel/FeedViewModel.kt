@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import top.sacz.bili.biz.recvids.data.VideoDataSource
+import top.sacz.bili.biz.recvids.data.FeedVideoDataSource
 
 class FeedViewModel : ViewModel() {
 
@@ -16,7 +16,7 @@ class FeedViewModel : ViewModel() {
             enablePlaceholders = true
         ),
         pagingSourceFactory = {
-            VideoDataSource()
+            FeedVideoDataSource()
         }
     ).flow.cachedIn(viewModelScope)
 

@@ -10,7 +10,7 @@ import top.sacz.bili.biz.recvids.model.BaseCoverItem
 import top.sacz.bili.biz.recvids.model.SmallCoverV2Item
 import top.sacz.bili.biz.recvids.model.targetCardType
 
-class VideoDataSource : PagingSource<Int, BaseCoverItem>() {
+class FeedVideoDataSource : PagingSource<Int, BaseCoverItem>() {
 
     private val firstPageIndex = 1
 
@@ -40,7 +40,7 @@ class VideoDataSource : PagingSource<Int, BaseCoverItem>() {
             LoadResult.Page(
                 data = items,
                 prevKey = null/*if (currentKey == firstPageIndex) null else currentKey - 1*/,
-                //我们的数据是无限的 所以填入Int.MAX_VALUE,返回null 表示仍然会继续加载更多,如果数据有限 那把Int.MAX_VALUE换成page总数
+                //Bil的数据是无限的 ,所以nextKey总是为currentKey + 1 ,返回null表示没有更多页了
                 nextKey = if (currentKey == Int.MAX_VALUE) null else currentKey + 1
             )
         } catch (e: Exception) {
