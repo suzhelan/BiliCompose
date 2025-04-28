@@ -74,21 +74,21 @@ data class SmallCoverV2Item(
     @Serializable
     data class RCmdReasonStyle(
         @SerialName("bg_color")
-        val bgColor: String,
+        val bgColor: String = "",
         @SerialName("bg_color_night")
-        val bgColorNight: String,
+        val bgColorNight: String = "",
         @SerialName("bg_style")
-        val bgStyle: Int,
+        val bgStyle: Int = 0,
         @SerialName("border_color")
-        val borderColor: String,
+        val borderColor: String = "",
         @SerialName("border_color_night")
-        val borderColorNight: String,
+        val borderColorNight: String = "",
         @SerialName("text")
-        val text: String,
+        val text: String = "",
         @SerialName("text_color")
-        val textColor: String,
+        val textColor: String = "",
         @SerialName("text_color_night")
-        val textColorNight: String
+        val textColorNight: String = "",
     )
 
     @Immutable
