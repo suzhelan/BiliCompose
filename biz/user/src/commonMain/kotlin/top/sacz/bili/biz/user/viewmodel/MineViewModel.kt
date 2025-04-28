@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import top.sacz.bili.api.Response
+import top.sacz.bili.api.ext.apiCall
 
 import top.sacz.bili.biz.user.api.AccountApi
 import top.sacz.bili.biz.user.config.AccountMapper
@@ -36,9 +38,19 @@ class MineViewModel : ViewModel() {
         val api = AccountApi()
         if (!LoginMapper.isLogin()) return@launch
         val accessKey = LoginMapper.getAccessKey()
-        val userInfo = api.getMyInfo(accessKey)
-        _myInfo.value = userInfo.data
-        //更新缓存
-        AccountMapper.setMyInfo(userInfo.data)
+        val userInfoRsp = apiCall { api.getMyInfo(accessKey) }
+        when (userInfoRsp) {
+            is Response.Success -> {
+                val userInfo = userInfoRsp.data
+                _myInfo.value = userInfo
+                AccountMapper.setMyInfo(userInfo)
+            }
+            is Response.Error -> {
+                //TODO: 错误处理
+            }
+            else -> {
+
+            }
+        }
     }
 }
