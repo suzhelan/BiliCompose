@@ -73,6 +73,7 @@ fun HomeVideoScreen() {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
+                    //让状态栏背景和顶栏一致
                     scrolledContainerColor = MaterialTheme.colorScheme.background
                 ),
                 title = {

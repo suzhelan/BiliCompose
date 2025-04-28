@@ -1,6 +1,7 @@
 package top.sacz.bili.biz.recvids.ui.card
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FeaturedPlayList
 import androidx.compose.material.icons.outlined.SmartDisplay
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -40,7 +42,7 @@ fun EmptyCard() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(230.dp)
+            .height(215.dp)
             .autoSkeleton(true, CardDefaults.shape)
     ) {
 
@@ -53,31 +55,33 @@ fun VideoCard(video: SmallCoverV2Item) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(230.dp)
+            .height(225.dp)
     ) {
         //上半部分 封面
-        Box(modifier = Modifier.fillMaxWidth().height(150.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().height(145.dp)) {
             //封面图像
             AsyncImage(
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
-                model = video.cover,
+                model = "${video.cover}@10q.avif",
                 contentDescription = video.title,
             )
             //用来做底部渐黑的效果
             Box(
-                modifier = Modifier.fillMaxWidth().height(40.dp)
+                modifier = Modifier.fillMaxWidth().height(30.dp)
                     .align(Alignment.BottomStart)
                     .background(
                         Brush.verticalGradient(
                             0f to Color.Transparent,
-                            1f to Color.Black.copy(alpha = 0.7f)
+                            1f to Color.Black.copy(alpha = 0.4f)
                         )
                     )
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth().height(20.dp)
+                modifier = Modifier.fillMaxWidth()
+                    .height(20.dp)
+                    .padding(horizontal = 5.dp)
                     .align(Alignment.BottomStart),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -91,51 +95,7 @@ fun VideoCard(video: SmallCoverV2Item) {
 }
 
 @Composable
-private fun VideoInfoBar(video: SmallCoverV2Item) {
-    //标题
-    Text(
-        text = video.title,
-        maxLines = 2,
-        minLines = 2,
-        fontSize = 12.sp,
-        lineHeight = 15.sp,
-        overflow = TextOverflow.Ellipsis,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.fillMaxWidth().padding(start = 5.dp, end = 5.dp)
-    )
-    //最底下的up主等信息
-    Row(
-        modifier = Modifier.fillMaxSize().padding(start = 5.dp, end = 5.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (video.rCmdReasonStyle != null) {
-            val cmdReasonStyle = video.rCmdReasonStyle
-            Text(
-                text = cmdReasonStyle.text,
-                fontSize = 10.sp,
-                modifier = Modifier.background(
-                    shape = RoundedCornerShape(2.dp),
-                    color = MaterialTheme.colorScheme.secondaryContainer
-                ).padding(start = 3.dp, end = 3.dp, top = 0.5.dp, bottom = 0.5.dp)
-            )
-        } else {
-            AsyncImage(
-                model = video.gotoIcon.iconUrl,
-                contentDescription = null,
-                modifier = Modifier.size(
-                    height = 16.dp,
-                    width = 16.dp
-                )
-            )
-        }
-        Spacer(Modifier.width(5.dp))
-        Text(text = video.args.upName, fontSize = 10.sp)
-    }
-}
-
-@Composable
 private fun CoverInfoBar(video: SmallCoverV2Item) {
-
     //图标变白色
     Icon(
         imageVector = Icons.Outlined.SmartDisplay,
@@ -150,7 +110,7 @@ private fun CoverInfoBar(video: SmallCoverV2Item) {
     )
 
     //间距
-    Spacer(Modifier.width(10.dp))
+    Spacer(Modifier.width(5.dp))
 
     Icon(
         imageVector = Icons.AutoMirrored.Outlined.FeaturedPlayList,
@@ -171,5 +131,55 @@ private fun CoverInfoBar(video: SmallCoverV2Item) {
         modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End)
     )
 
+}
+
+@Composable
+private fun VideoInfoBar(video: SmallCoverV2Item) {
+    Spacer(Modifier.height(10.dp))
+    //标题
+    Text(
+        text = video.title,
+        maxLines = 2,
+        minLines = 2,
+        fontSize = 14.sp,
+        lineHeight = 15.sp,
+        overflow = TextOverflow.Ellipsis,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)
+    )
+    //最底下的up主等信息
+    Row(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val upColor = if (isSystemInDarkTheme()) Color.LightGray else Color.DarkGray
+        if (video.rCmdReasonStyle != null) {
+            val cmdReasonStyle = video.rCmdReasonStyle
+            Text(
+                text = cmdReasonStyle.text,
+                fontSize = 12.sp,
+                modifier = Modifier.background(
+                    shape = RoundedCornerShape(2.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                ).padding(vertical = 1.dp, horizontal = 3.dp)
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Rounded.Person,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = upColor
+            )
+        }
+        Spacer(Modifier.width(5.dp))
+        Text(
+            text = video.args.upName,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = upColor ,
+            style = MaterialTheme.typography.headlineSmall,
+            fontSize = 12.sp
+        )
+    }
 }
 
