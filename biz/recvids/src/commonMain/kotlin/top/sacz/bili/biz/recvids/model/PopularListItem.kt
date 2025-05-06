@@ -1,5 +1,6 @@
 package top.sacz.bili.biz.recvids.model
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -22,6 +23,7 @@ data class PopularListItem(
 )
 
 @Serializable
+@Immutable
 data class PopularItem(
     @SerialName("aid")
     val aid: Long = 0L, // 视频的AV号，示例值：114396604926350
@@ -81,94 +83,95 @@ data class PopularItem(
     val upFromV2: Int = 0, // UP主来源，示例值：35
     @SerialName("videos")
     val videos: Int = 0 // 视频数量，示例值：1
-)
+) {
+    @Serializable
+    data class Dimension(
+        @SerialName("height")
+        val height: Int = 0, // 视频高度，示例值：720
+        @SerialName("rotate")
+        val rotate: Int = 0, // 视频旋转角度，示例值：0
+        @SerialName("width")
+        val width: Int = 0 // 视频宽度，示例值：960
+    )
 
-@Serializable
-data class Dimension(
-    @SerialName("height")
-    val height: Int = 0, // 视频高度，示例值：720
-    @SerialName("rotate")
-    val rotate: Int = 0, // 视频旋转角度，示例值：0
-    @SerialName("width")
-    val width: Int = 0 // 视频宽度，示例值：960
-)
+    @Serializable
+    data class Owner(
+        @SerialName("face")
+        val face: String = "", // UP主头像，示例值："https://i0.hdslb.com/bfs/face/ca8ebe1d87000add24a084d3f73e044689e53cf2.jpg"
+        @SerialName("mid")
+        val mid: Long = 0L, // UP主ID，示例值：3546661762631823
+        @SerialName("name")
+        val name: String = "" // UP主名称，示例值："沉星纪录片"
+    )
 
-@Serializable
-data class Owner(
-    @SerialName("face")
-    val face: String = "", // UP主头像，示例值："https://i0.hdslb.com/bfs/face/ca8ebe1d87000add24a084d3f73e044689e53cf2.jpg"
-    @SerialName("mid")
-    val mid: Long = 0L, // UP主ID，示例值：3546661762631823
-    @SerialName("name")
-    val name: String = "" // UP主名称，示例值："沉星纪录片"
-)
+    @Serializable
+    data class RcmdReason(
+        @SerialName("content")
+        val content: String = "", // 推荐理由内容，示例值："百万播放"
+        @SerialName("corner_mark")
+        val cornerMark: Int = 0 // 推荐理由角标，示例值：1
+    )
 
-@Serializable
-data class RcmdReason(
-    @SerialName("content")
-    val content: String = "", // 推荐理由内容，示例值："百万播放"
-    @SerialName("corner_mark")
-    val cornerMark: Int = 0 // 推荐理由角标，示例值：1
-)
+    @Serializable
+    data class Rights(
+        @SerialName("arc_pay")
+        val arcPay: Int = 0, // 是否支持付费观看，示例值：0
+        @SerialName("autoplay")
+        val autoplay: Int = 0, // 是否自动播放，示例值：1
+        @SerialName("bp")
+        val bp: Int = 0, // 是否支持投币，示例值：0
+        @SerialName("download")
+        val download: Int = 0, // 是否支持下载，示例值：0
+        @SerialName("elec")
+        val elec: Int = 0, // 是否支持充电，示例值：0
+        @SerialName("hd5")
+        val hd5: Int = 0, // 是否支持高清5，示例值：0
+        @SerialName("is_cooperation")
+        val isCooperation: Int = 0, // 是否为合作视频，示例值：0
+        @SerialName("movie")
+        val movie: Int = 0, // 是否为电影，示例值：0
+        @SerialName("no_background")
+        val noBackground: Int = 0, // 是否无背景，示例值：0
+        @SerialName("no_reprint")
+        val noReprint: Int = 0, // 是否禁止转载，示例值：0
+        @SerialName("pay")
+        val pay: Int = 0, // 是否付费，示例值：0
+        @SerialName("pay_free_watch")
+        val payFreeWatch: Int = 0, // 是否支持免费观看，示例值：0
+        @SerialName("ugc_pay")
+        val ugcPay: Int = 0, // 是否支持UGC付费，示例值：0
+        @SerialName("ugc_pay_preview")
+        val ugcPayPreview: Int = 0 // 是否支持UGC付费预览，示例值：0
+    )
 
-@Serializable
-data class Rights(
-    @SerialName("arc_pay")
-    val arcPay: Int = 0, // 是否支持付费观看，示例值：0
-    @SerialName("autoplay")
-    val autoplay: Int = 0, // 是否自动播放，示例值：1
-    @SerialName("bp")
-    val bp: Int = 0, // 是否支持投币，示例值：0
-    @SerialName("download")
-    val download: Int = 0, // 是否支持下载，示例值：0
-    @SerialName("elec")
-    val elec: Int = 0, // 是否支持充电，示例值：0
-    @SerialName("hd5")
-    val hd5: Int = 0, // 是否支持高清5，示例值：0
-    @SerialName("is_cooperation")
-    val isCooperation: Int = 0, // 是否为合作视频，示例值：0
-    @SerialName("movie")
-    val movie: Int = 0, // 是否为电影，示例值：0
-    @SerialName("no_background")
-    val noBackground: Int = 0, // 是否无背景，示例值：0
-    @SerialName("no_reprint")
-    val noReprint: Int = 0, // 是否禁止转载，示例值：0
-    @SerialName("pay")
-    val pay: Int = 0, // 是否付费，示例值：0
-    @SerialName("pay_free_watch")
-    val payFreeWatch: Int = 0, // 是否支持免费观看，示例值：0
-    @SerialName("ugc_pay")
-    val ugcPay: Int = 0, // 是否支持UGC付费，示例值：0
-    @SerialName("ugc_pay_preview")
-    val ugcPayPreview: Int = 0 // 是否支持UGC付费预览，示例值：0
-)
+    @Serializable
+    data class Stat(
+        @SerialName("aid")
+        val aid: Long = 0L, // 视频AV号，示例值：114396604926350
+        @SerialName("coin")
+        val coin: Int = 0, // 投币数，示例值：1772
+        @SerialName("danmaku")
+        val danmaku: Int = 0, // 弹幕数，示例值：21778
+        @SerialName("dislike")
+        val dislike: Int = 0, // 不喜欢数，示例值：0
+        @SerialName("favorite")
+        val favorite: Int = 0, // 收藏数，示例值：13437
+        @SerialName("his_rank")
+        val hisRank: Int = 0, // 历史最高排名，示例值：95
+        @SerialName("like")
+        val like: Int = 0, // 点赞数，示例值：144078
+        @SerialName("now_rank")
+        val nowRank: Int = 0, // 当前排名，示例值：0
+        @SerialName("reply")
+        val reply: Int = 0, // 评论数，示例值：6530
+        @SerialName("share")
+        val share: Int = 0, // 分享数，示例值：40014
+        @SerialName("view")
+        val view: Int = 0, // 播放数，示例值：1259292
+        @SerialName("vt")
+        val vt: Int = 0, // VT值，示例值：0
+        @SerialName("vv")
+        val vv: Int = 0 // VV值，示例值：1259292
+    )
+}
 
-@Serializable
-data class Stat(
-    @SerialName("aid")
-    val aid: Long = 0L, // 视频AV号，示例值：114396604926350
-    @SerialName("coin")
-    val coin: Int = 0, // 投币数，示例值：1772
-    @SerialName("danmaku")
-    val danmaku: Int = 0, // 弹幕数，示例值：21778
-    @SerialName("dislike")
-    val dislike: Int = 0, // 不喜欢数，示例值：0
-    @SerialName("favorite")
-    val favorite: Int = 0, // 收藏数，示例值：13437
-    @SerialName("his_rank")
-    val hisRank: Int = 0, // 历史最高排名，示例值：95
-    @SerialName("like")
-    val like: Int = 0, // 点赞数，示例值：144078
-    @SerialName("now_rank")
-    val nowRank: Int = 0, // 当前排名，示例值：0
-    @SerialName("reply")
-    val reply: Int = 0, // 评论数，示例值：6530
-    @SerialName("share")
-    val share: Int = 0, // 分享数，示例值：40014
-    @SerialName("view")
-    val view: Int = 0, // 播放数，示例值：1259292
-    @SerialName("vt")
-    val vt: Int = 0, // VT值，示例值：0
-    @SerialName("vv")
-    val vv: Int = 0 // VV值，示例值：1259292
-)

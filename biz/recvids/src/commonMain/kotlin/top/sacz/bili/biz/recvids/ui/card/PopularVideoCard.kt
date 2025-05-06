@@ -23,6 +23,7 @@ import coil3.compose.AsyncImage
 import top.sacz.bili.biz.recvids.model.PopularItem
 import top.sacz.bili.shared.common.ui.shimmerEffect
 import top.sacz.bili.shared.common.util.TimeUtils
+import top.sacz.bili.shared.common.util.TimeUtils.formatPlayCount
 
 @Composable
 fun PopularLoadingCard() {
@@ -34,15 +35,15 @@ fun PopularCoverCard(popularItem: PopularItem) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp)
-            .padding(8.dp)
+            .height(120.dp)
+            .padding(vertical = 6.dp, horizontal = 12.dp)
     ) {
-        val (coverImage, durationText, titleText, reasonText, upNameText) = createRefs()
+        val (coverImage, durationText, titleText, reasonText, upNameText, extraText) = createRefs()
 
         AsyncImage(
             model = popularItem.pic,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentDescription = popularItem.title,
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier.width(170.dp)
                 .height(100.dp)
                 .clip(RoundedCornerShape(8.dp))
@@ -75,35 +76,36 @@ fun PopularCoverCard(popularItem: PopularItem) {
             minLines = 2,
             maxLines = 2,
             lineHeight = 16.sp,
+            style = MaterialTheme.typography.titleSmall,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .constrainAs(titleText) {
-                    start.linkTo(coverImage.end, margin = 5.dp)
-                    top.linkTo(parent.top)
+                    start.linkTo(coverImage.end, margin = 12.dp)
+                    top.linkTo(parent.top, 5.dp)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
                 }
         )
 
-
         // 推荐理由
-        Text(
-            text = popularItem.rcmdReason.content,
-            color = Color.White,
-            fontSize = 12.sp,
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier
-                .background(
-                    color = Color(0xFFFF6699),
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .padding(horizontal = 1.dp, vertical = 1.dp)
-                .constrainAs(reasonText) {
-                    start.linkTo(coverImage.end, margin = 5.dp)
-                    top.linkTo(titleText.bottom, margin = 4.dp)
-                }
-        )
-
+        if (popularItem.rcmdReason.content.isNotEmpty()) {
+            Text(
+                text = popularItem.rcmdReason.content,
+                color = Color.White,
+                fontSize = 12.sp,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier
+                    .background(
+                        color = Color(0xFFFF6699),
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .padding(horizontal = 2.dp, vertical = 1.dp)
+                    .constrainAs(reasonText) {
+                        start.linkTo(titleText.start)
+                        top.linkTo(titleText.bottom, margin = 4.dp)
+                    }
+            )
+        }
         // UP主名称
         Text(
             text = popularItem.owner.name,
@@ -112,8 +114,24 @@ fun PopularCoverCard(popularItem: PopularItem) {
             color = Color.Gray,
             modifier = Modifier
                 .constrainAs(upNameText) {
-                    start.linkTo(coverImage.end, margin = 5.dp)
-                    top.linkTo(reasonText.bottom, margin = 4.dp)
+                    start.linkTo(titleText.start)
+                    bottom.linkTo(extraText.top, (-5).dp)
+                }
+        )
+
+        Text(
+            text = "${popularItem.stat.view.formatPlayCount()}观看 • ${
+                TimeUtils.formatTimeAgo(
+                    popularItem.ctime.toLong()
+                )
+            }",
+            style = MaterialTheme.typography.bodyMedium,
+            fontSize = 12.sp,
+            color = Color.Gray,
+            modifier = Modifier
+                .constrainAs(extraText) {
+                    start.linkTo(titleText.start)
+                    bottom.linkTo(parent.bottom)
                 }
         )
     }
