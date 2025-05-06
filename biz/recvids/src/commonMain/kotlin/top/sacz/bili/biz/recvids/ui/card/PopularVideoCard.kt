@@ -5,8 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import bilicompose.biz.recvids.generated.resources.Res
+import bilicompose.biz.recvids.generated.resources.more
 import coil3.compose.AsyncImage
+import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.biz.recvids.model.PopularItem
 import top.sacz.bili.shared.common.ui.shimmerEffect
 import top.sacz.bili.shared.common.util.TimeUtils
@@ -38,13 +45,13 @@ fun PopularCoverCard(popularItem: PopularItem) {
             .height(120.dp)
             .padding(vertical = 6.dp, horizontal = 12.dp)
     ) {
-        val (coverImage, durationText, titleText, reasonText, upNameText, extraText) = createRefs()
+        val (coverImage, durationText, titleText, reasonText, upNameText, extraText, moreIc) = createRefs()
 
         AsyncImage(
             model = popularItem.pic,
             contentDescription = popularItem.title,
             contentScale = ContentScale.FillBounds,
-            modifier = Modifier.width(170.dp)
+            modifier = Modifier.width(165.dp)
                 .height(100.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .constrainAs(coverImage) {
@@ -80,7 +87,7 @@ fun PopularCoverCard(popularItem: PopularItem) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .constrainAs(titleText) {
-                    start.linkTo(coverImage.end, margin = 12.dp)
+                    start.linkTo(coverImage.end, margin = 10.dp)
                     top.linkTo(parent.top, 5.dp)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
@@ -102,7 +109,7 @@ fun PopularCoverCard(popularItem: PopularItem) {
                     .padding(horizontal = 2.dp, vertical = 1.dp)
                     .constrainAs(reasonText) {
                         start.linkTo(titleText.start)
-                        top.linkTo(titleText.bottom, margin = 4.dp)
+                        bottom.linkTo(upNameText.top, 3.dp)
                     }
             )
         }
@@ -115,7 +122,7 @@ fun PopularCoverCard(popularItem: PopularItem) {
             modifier = Modifier
                 .constrainAs(upNameText) {
                     start.linkTo(titleText.start)
-                    bottom.linkTo(extraText.top, (-5).dp)
+                    bottom.linkTo(extraText.top)
                 }
         )
 
@@ -131,6 +138,18 @@ fun PopularCoverCard(popularItem: PopularItem) {
             modifier = Modifier
                 .constrainAs(extraText) {
                     start.linkTo(titleText.start)
+                    bottom.linkTo(parent.bottom)
+                }
+        )
+
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = stringResource(Res.string.more),
+            tint = Color.Gray,
+            modifier = Modifier
+                .size(20.dp)
+                .constrainAs(moreIc) {
+                    end.linkTo(parent.end, (-10).dp)
                     bottom.linkTo(parent.bottom)
                 }
         )

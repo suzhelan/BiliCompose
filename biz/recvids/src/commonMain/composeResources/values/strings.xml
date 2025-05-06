@@ -2,4 +2,5 @@
 <resources>
     <string name="text_search">Search</string>
     <string name="text_search_hint">Search content</string>
+    <string name="more">More</string>
 </resources>
