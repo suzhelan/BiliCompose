@@ -11,7 +11,10 @@ kotlin {
             implementation(libs.napier)
             implementation(libs.okio)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.krypto)
+            implementation(libs.ktor.client.core)
             implementation(projects.shared.storage)
+
         }
     }
 }

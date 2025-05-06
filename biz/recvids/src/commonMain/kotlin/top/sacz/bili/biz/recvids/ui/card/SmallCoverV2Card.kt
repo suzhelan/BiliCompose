@@ -63,7 +63,7 @@ fun VideoCard(video: SmallCoverV2Item) {
             AsyncImage(
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
-                model = "${video.cover}@10q.avif",
+                model = "${video.cover}@10q.webp",
                 contentDescription = video.title,
             )
             //用来做底部渐黑的效果
