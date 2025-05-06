@@ -1,13 +1,13 @@
 plugins {
-    id("compose-plugin.library")
+    id("compose-plugin")
     alias(libs.plugins.kotlinx.serialization)
 }
 
 kotlin {
 
     sourceSets {
-
         commonMain.dependencies {
+            implementation("network.chaintech:compose-multiplatform-media-player:1.0.40")
             implementation(libs.paging.compose.common)
             implementation(libs.coil.network.ktor3)
             implementation(libs.coil.compose)
@@ -15,12 +15,9 @@ kotlin {
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
-            implementation(projects.biz.user)
-            implementation(projects.biz.player)
             implementation(projects.shared.api)
-            implementation(libs.voyager.navigator)
             implementation(projects.shared.common)
-            implementation(projects.shared.navigation)
+            implementation(libs.voyager.navigator)
         }
     }
 

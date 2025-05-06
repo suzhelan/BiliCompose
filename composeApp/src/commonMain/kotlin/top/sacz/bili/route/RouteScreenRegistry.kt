@@ -3,6 +3,7 @@ package top.sacz.bili.route
 import cafe.adriel.voyager.core.registry.ScreenRegistry
 import top.sacz.bili.biz.home.HomeScreen
 import top.sacz.bili.biz.login.ui.LoginScreen
+import top.sacz.bili.biz.player.ui.VideoPlayerScreen
 import top.sacz.bili.shared.navigation.SharedScreen
 
 object RouteNavigationConfig {
@@ -14,6 +15,9 @@ object RouteNavigationConfig {
             }
             register<SharedScreen.Login> {
                 LoginScreen
+            }
+            register<SharedScreen.VideoPlayer> {
+                VideoPlayerScreen(it.url)
             }
         }
     }

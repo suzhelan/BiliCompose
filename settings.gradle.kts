@@ -36,6 +36,7 @@ include(
 )
 include(
     ":biz:home",
+    ":biz:player",
     ":biz:user",
     ":biz:login",
     ":biz:recvids")

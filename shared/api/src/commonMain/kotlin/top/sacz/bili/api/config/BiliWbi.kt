@@ -1,9 +1,11 @@
 package top.sacz.bili.api.config
 
 import io.ktor.http.encodeURLParameter
-import kotlinx.datetime.Clock
+
 import kotlinx.serialization.Serializable
 import top.sacz.bili.shared.common.ext.md5
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 
 @Serializable
@@ -36,6 +38,7 @@ data class WbiParams(
         return (sorted.toQueryString() + mixinKey).md5()
     }
 
+    @OptIn(ExperimentalTime::class)
     fun getWTs(): Long {
         return Clock.System.now().epochSeconds
     }

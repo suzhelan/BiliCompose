@@ -45,6 +45,7 @@ kotlin {
             implementation(projects.biz.home)
             implementation(projects.biz.user)
             implementation(projects.biz.login)
+            implementation(projects.biz.player)
             implementation(projects.shared.api)
             implementation(projects.shared.navigation)
         }
