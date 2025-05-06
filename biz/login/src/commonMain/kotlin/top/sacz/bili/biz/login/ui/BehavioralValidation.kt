@@ -29,7 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import top.sacz.bili.api.Response
+import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.login.js.StatusJsMessageHandler
 import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.VerifyResult
@@ -40,7 +40,7 @@ import top.sacz.bili.biz.login.model.VerifyResult
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BehavioralValidationDialog(
-    geetest: Response<Captcha>,
+    geetest: BiliResponse<Captcha>,
     verifyCallback: (VerifyResult) -> Unit,
     visible: Boolean,
     onDismiss: () -> Unit
@@ -63,7 +63,7 @@ fun BehavioralValidationDialog(
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun BehavioralValidation(
-    response: Response<Captcha>,
+    response: BiliResponse<Captcha>,
     verifyCallback: (VerifyResult) -> Unit,
 ) {
     val htmlDataState by produceState(initialValue = "await") {
@@ -84,7 +84,7 @@ fun BehavioralValidation(
     // 新增状态锁
     var hasExecuted by remember { mutableStateOf(false) }
     LaunchedEffect(response, webViewState.loadingState) {
-        if (response is Response.Success
+        if (response is BiliResponse.Success
             && webViewState.loadingState is LoadingState.Finished
             && !hasExecuted) {
             val gt = response.data.geetest.gt
@@ -96,7 +96,7 @@ fun BehavioralValidation(
             hasExecuted = true // 标记已执行
         }
         // 当依赖项失效时重置状态
-        if (response !is Response.Success) {
+        if (response !is BiliResponse.Success) {
             hasExecuted = false
         }
     }

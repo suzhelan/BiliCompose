@@ -5,7 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.http.path
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.AppKeyType
-import top.sacz.bili.api.Response
+import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.biz.user.entity.AccountInfo
 import top.sacz.bili.biz.user.entity.Stat
@@ -19,7 +19,7 @@ class AccountApi {
     /**
      * 获取我的页信息
      */
-    suspend fun fetchMineData(accessKey: String): Response.Success<Mine> {
+    suspend fun fetchMineData(accessKey: String): BiliResponse.Success<Mine> {
         return getKtorClient(AppConfig.APP_BASE_URL).get {
             url {
                 path("/x/v2/account/mine")
@@ -37,7 +37,7 @@ class AccountApi {
      * 获取用户信息
      */
     @OptIn(ExperimentalTime::class)
-    suspend fun getMyInfo(accessKey: String): Response.Success<AccountInfo> {
+    suspend fun getMyInfo(accessKey: String): BiliResponse.Success<AccountInfo> {
         return getKtorClient(
             AppConfig.APP_BASE_URL,
             AppKeyType.APP_COMMON
@@ -53,7 +53,7 @@ class AccountApi {
     /**
      * 获取用户状态数
      */
-    suspend fun getStatus(accessKey: String): Response.Success<Stat> {
+    suspend fun getStatus(accessKey: String): BiliResponse.Success<Stat> {
         return getKtorClient(
             AppConfig.API_BASE_URL,
             AppKeyType.USER_INFO
@@ -67,7 +67,7 @@ class AccountApi {
     /**
      * 获取硬币数
      */
-    suspend fun getCoins(accessKey: String): Response.Success<Double> {
+    suspend fun getCoins(accessKey: String): BiliResponse.Success<Double> {
         return getKtorClient(AppConfig.ACCOUNT_URL, AppKeyType.USER_INFO).get("/site/getCoin") {
             url {
                 parameters.append("access_key", accessKey)

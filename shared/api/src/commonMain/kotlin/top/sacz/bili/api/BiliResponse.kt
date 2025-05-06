@@ -3,8 +3,8 @@ package top.sacz.bili.api
 import kotlinx.serialization.Serializable
 
 
-sealed class Response<out T> {
-    data object Loading : Response<Nothing>()
+sealed class BiliResponse<out T> {
+    data object Loading : BiliResponse<Nothing>()
 
     @Serializable
     data class Success<T>(
@@ -12,7 +12,7 @@ sealed class Response<out T> {
         val message: String,
         val ttl: Int,
         val data: T
-    ) : Response<T>()
+    ) : BiliResponse<T>()
 
     @Serializable
     data class SuccessOrError<T>(
@@ -20,13 +20,13 @@ sealed class Response<out T> {
         val message: String,
         val ttl: Int,
         val data: T? = null
-    ) : Response<T>()
+    ) : BiliResponse<T>()
 
     data class Error(
         val code: Int, val msg: String, val cause: Throwable = ApiException(
             code, msg,
             cause = Throwable()
         )
-    ) : Response<Nothing>()
+    ) : BiliResponse<Nothing>()
 }
 

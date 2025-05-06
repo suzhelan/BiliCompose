@@ -10,7 +10,7 @@ import korlibs.crypto.HMAC
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import top.sacz.bili.api.Response
+import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.storage.Storage
 import top.sacz.bili.storage.ext.contains
 import kotlin.time.Clock
@@ -67,7 +67,7 @@ private class BiliTicketGenerator {
     }
 
     @OptIn(ExperimentalTime::class)
-    suspend fun generateTicket(csrf: String = ""): Response.Success<BiliTicketData> {
+    suspend fun generateTicket(csrf: String = ""): BiliResponse.Success<BiliTicketData> {
         val timestamp = Clock.System.now().epochSeconds
         val hexsign = hmacSha256("ts$timestamp")
         val client = HttpClient {
@@ -82,6 +82,6 @@ private class BiliTicketGenerator {
             parameter("hexsign", hexsign)
             parameter("context[ts]", timestamp)
             parameter("csrf", csrf)
-        }.body<Response.Success<BiliTicketData>>()
+        }.body<BiliResponse.Success<BiliTicketData>>()
     }
 }

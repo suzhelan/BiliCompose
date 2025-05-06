@@ -6,7 +6,7 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import top.sacz.bili.api.Response
+import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.ext.apiCall
 import top.sacz.bili.biz.login.api.GeeTestApi
 import top.sacz.bili.biz.login.api.SmsLoginApi
@@ -16,18 +16,18 @@ import top.sacz.bili.biz.login.model.Tencent
 import top.sacz.bili.shared.common.logger.Logger
 
 class GeeTestViewModel : ViewModel() {
-    private val _captcha = MutableStateFlow<Response<Captcha>>(Response.Loading)
+    private val _captcha = MutableStateFlow<BiliResponse<Captcha>>(BiliResponse.Loading)
     val captcha = _captcha.asStateFlow()
 
     fun getGeeTestCaptcha(cid: String, tel: String) =
         viewModelScope.launch {
-            _captcha.value = Response.Loading
+            _captcha.value = BiliResponse.Loading
             val smsLoginApi = SmsLoginApi()
             //先请求手机号专用的验证码
             val response = smsLoginApi.getCaptchaBySms(cid, tel)
             val captcha = response.data
             if (response.code != 0) {
-                _captcha.value = Response.Error(response.code, response.message)
+                _captcha.value = BiliResponse.Error(response.code, response.message)
                 return@launch
             }
             val recaptchaUrl = captcha.recaptchaUrl
@@ -49,7 +49,7 @@ class GeeTestViewModel : ViewModel() {
             val recaptchaToken = paramMap["recaptcha_token"]
             val geeGt = paramMap["gee_gt"]
             val geeChallenge = paramMap["gee_challenge"]
-            val result = Response.Success(
+            val result = BiliResponse.Success(
                 ttl = 1,
                 code = 0,
                 message = "0",

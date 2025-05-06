@@ -71,7 +71,7 @@ class ApiException(val code: Int, override val message: String, override val cau
             }
         }
     }
-    fun <T> toResponse(): Response<T> {
-        return Response.Error(code = code, msg = message, cause = this)
+    fun <T> toResponse(): BiliResponse<T> {
+        return BiliResponse.Error(code = code, msg = message, cause = this)
     }
 }

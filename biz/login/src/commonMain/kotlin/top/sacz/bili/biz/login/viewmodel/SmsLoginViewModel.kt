@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import top.sacz.bili.api.Response
+import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.ext.apiCall
 import top.sacz.bili.biz.login.api.SmsLoginApi
 import top.sacz.bili.biz.login.model.CountryList
@@ -21,7 +21,7 @@ import top.sacz.bili.shared.common.logger.Logger
 
 class SmsLoginViewModel : ViewModel() {
     private val smsLoginApi = SmsLoginApi()
-    private val _countryList = MutableStateFlow<Response<CountryList>>(Response.Loading)
+    private val _countryList = MutableStateFlow<BiliResponse<CountryList>>(BiliResponse.Loading)
     val countryList = _countryList.asStateFlow()
     fun getCountryCode() = viewModelScope.launch {
         _countryList.value = apiCall {
@@ -30,7 +30,7 @@ class SmsLoginViewModel : ViewModel() {
     }
 
     private val _sendSmsResult =
-        MutableStateFlow<Response<SendSmsLoginCodeResult>>(Response.Loading)
+        MutableStateFlow<BiliResponse<SendSmsLoginCodeResult>>(BiliResponse.Loading)
     val sendSmsResult = _sendSmsResult.asStateFlow()
     fun sendSms(
         cid: String, // 国际冠字码
@@ -51,7 +51,7 @@ class SmsLoginViewModel : ViewModel() {
                 geeSeccode
             )
         }
-        if (_sendSmsResult.value is Response.Success) {
+        if (_sendSmsResult.value is BiliResponse.Success) {
             //发送成功后，进行倒计时
             startCountdown()
         }
@@ -67,7 +67,7 @@ class SmsLoginViewModel : ViewModel() {
         }
     }
 
-    private val _loginResult = MutableStateFlow<Response<LoginResult>>(Response.Loading)
+    private val _loginResult = MutableStateFlow<BiliResponse<LoginResult>>(BiliResponse.Loading)
     val loginResult = _loginResult.asStateFlow()
 
     /**
@@ -90,19 +90,19 @@ class SmsLoginViewModel : ViewModel() {
             if (loginResultRes.code == 0) {
                 _loginResult.value = loginResultRes
             } else {
-                _loginResult.value = Response.Error(
+                _loginResult.value = BiliResponse.Error(
                     loginResultRes.code,
                     loginResultRes.message
                 )
             }
             Logger.d("登录结果 ${_loginResult.value}")
             //保存登录凭证
-            if (_loginResult.value is Response.Success) {
+            if (_loginResult.value is BiliResponse.Success) {
                 LoginMapper.clear()
                 LoginMapper.setLoginInfo(loginResultRes.data)
             }
         } catch (e: Exception) {
-            _loginResult.value = Response.Error(-1, e.message ?: "未知错误")
+            _loginResult.value = BiliResponse.Error(-1, e.message ?: "未知错误")
         }
 
     }

@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import top.sacz.bili.biz.recvids.api.PopularApi
 import top.sacz.bili.biz.recvids.model.PopularItem
-import top.sacz.bili.shared.common.logger.Logger
 
 class PopularDataSource : PagingSource<Int, PopularItem>() {
 
@@ -21,8 +20,7 @@ class PopularDataSource : PagingSource<Int, PopularItem>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, PopularItem> {
         return try {
             val currentKey = params.key ?: firstPageIndex
-            Logger.d("currentKey: $currentKey")
-            val response = api.fetchPopular(params.key ?: 1, params.loadSize)
+            val response = api.fetchPopular(params.key ?: 1)
             val popularListItem = response.data
             val items: List<PopularItem> = popularListItem.list
             LoadResult.Page(

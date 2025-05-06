@@ -10,7 +10,7 @@ import io.ktor.http.contentType
 import io.ktor.http.parameters
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.AppKeyType
-import top.sacz.bili.api.Response
+import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.api.config.BiliHeaders
 import top.sacz.bili.biz.login.model.CountryList
@@ -48,7 +48,7 @@ class SmsLoginApi {
         geeChallenge: String, // 极验 challenge
         geeValidate: String, // 极验 result
         geeSeccode: String, // 极验 result +'|jordan'
-    ): Response.Success<SendSmsLoginCodeResult> {
+    ): BiliResponse.Success<SendSmsLoginCodeResult> {
         return ktorClient.post("/x/passport-login/sms/send") {
             contentType(ContentType.Application.FormUrlEncoded)
             val body = FormDataContent(parameters {
@@ -76,7 +76,7 @@ class SmsLoginApi {
     suspend fun getCaptchaBySms(
         cid: String, // 国际冠字码
         tel: String, // 手机号码
-    ): Response.Success<SendSmsLoginCodeResult> {
+    ): BiliResponse.Success<SendSmsLoginCodeResult> {
         return ktorClient.post("/x/passport-login/sms/send") {
             contentType(ContentType.Application.FormUrlEncoded)
             val body = FormDataContent(parameters {
@@ -95,7 +95,7 @@ class SmsLoginApi {
     /**
      * 获取国家代码(国际冠字码)
      */
-    suspend fun getCountryCode(): Response.Success<CountryList> {
+    suspend fun getCountryCode(): BiliResponse.Success<CountryList> {
         return ktorClient.get("/web/generic/country/list").body()
     }
 
@@ -112,7 +112,7 @@ class SmsLoginApi {
         tel: String, // 手机号码
         code: String,
         captchaKey: String,
-    ): Response.Success<LoginResult> {
+    ): BiliResponse.Success<LoginResult> {
         return ktorClient.post("/x/passport-login/login/sms") {
             contentType(ContentType.Application.FormUrlEncoded)
             setBody(FormDataContent(parameters {

@@ -68,7 +68,7 @@ import bilicompose.biz.login.generated.resources.verify_success
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.jetbrains.compose.resources.stringResource
-import top.sacz.bili.api.Response
+import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.Country
 import top.sacz.bili.biz.login.model.CountryList
@@ -157,8 +157,8 @@ fun SmsLoginContent(
         2406 to stringResource(Res.string.error_code_2406)
     )
     LaunchedEffect(sendSmsResult) {
-        if (sendSmsResult is Response.Error) {
-            val response = sendSmsResult as Response.Error
+        if (sendSmsResult is BiliResponse.Error) {
+            val response = sendSmsResult as BiliResponse.Error
             if (response.code == 0) return@LaunchedEffect
             showToast(
                 "code:${response.code} " + (sendSmsErrorMessages[response.code] ?: response.msg)
@@ -166,8 +166,8 @@ fun SmsLoginContent(
         }
     }
     LaunchedEffect(geetest) {
-        if (geetest is Response.Error) {
-            val response = geetest as Response.Error
+        if (geetest is BiliResponse.Error) {
+            val response = geetest as BiliResponse.Error
             if (response.code == 0) return@LaunchedEffect
             showVerificationDialog = false
             showToast(
@@ -185,7 +185,7 @@ fun SmsLoginContent(
                 smsLoginViewModel.sendSms(
                     areaCode.countryId,
                     inputPhoneNumber,
-                    (geetest as Response.Success<Captcha>).data.token,
+                    (geetest as BiliResponse.Success<Captcha>).data.token,
                     geetestResult.geetestChallenge,
                     geetestResult.geetestValidate,
                     geetestResult.geetestSeccode
@@ -208,11 +208,11 @@ fun SmsLoginContent(
     )
     LaunchedEffect(loginResult) {
         when (val response = loginResult) {
-            is Response.Success -> {
+            is BiliResponse.Success -> {
                 navigator.pop()
             }
 
-            is Response.Error -> {
+            is BiliResponse.Error -> {
                 showToast(loginErrorMessages[response.code] ?: response.msg)
             }
 
@@ -239,7 +239,7 @@ fun SmsLoginContent(
         //手机号输入框
         OutlinedTextField(
             value = inputPhoneNumber,
-            isError = sendSmsResult is Response.Error,
+            isError = sendSmsResult is BiliResponse.Error,
             onValueChange = { input ->
                 if (input.all { it.isDigit() }) {
                     inputPhoneNumber = input
@@ -272,7 +272,7 @@ fun SmsLoginContent(
         //验证码输入框
         OutlinedTextField(
             value = inputVerificationCode,
-            isError = loginResult is Response.Error,
+            isError = loginResult is BiliResponse.Error,
             onValueChange = { input ->
                 if (input.all { it.isDigit() }) {
                     inputVerificationCode = input
@@ -315,7 +315,7 @@ fun SmsLoginContent(
                 areaCode.countryId,
                 inputPhoneNumber,
                 inputVerificationCode,
-                (sendSmsResult as Response.Success<SendSmsLoginCodeResult>).data.captchaKey
+                (sendSmsResult as BiliResponse.Success<SendSmsLoginCodeResult>).data.captchaKey
             )
         }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -338,7 +338,7 @@ fun SmsLoginContent(
 @Composable
 private fun SelectNumberArea(
     show: Boolean,
-    response: Response<CountryList>,
+    response: BiliResponse<CountryList>,
     onSelect: (Country) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -347,7 +347,7 @@ private fun SelectNumberArea(
         onDismissRequest = onDismiss,
     ) {
         when (response) {
-            is Response.Success -> {
+            is BiliResponse.Success -> {
                 //常用国家区号列表
                 response.data.common.forEach { country ->
                     DropdownMenuItem(
@@ -374,7 +374,7 @@ private fun SelectNumberArea(
                 }
             }
             //加载中...
-            is Response.Loading -> {
+            is BiliResponse.Loading -> {
                 DropdownMenuItem(
                     text = {
                         LoadingDots(modifier = Modifier.fillMaxWidth())

@@ -4,7 +4,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import top.sacz.bili.api.AppConfig
-import top.sacz.bili.api.Response
+import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.biz.recvids.model.PopularListItem
 
@@ -14,14 +14,14 @@ class PopularApi {
      * @param  page 页码
      * @param  size 每页数量
      */
-    suspend fun fetchPopular(page: Int = 1, size: Int = 20): Response.Success<PopularListItem> {
+    suspend fun fetchPopular(page: Int = 1): BiliResponse.Success<PopularListItem> {
         return getKtorClient(
             AppConfig.API_BASE_URL,
             withCookie = true
         ).get("/x/web-interface/popular") {
             url {
-                parameter("page", page)
-                parameter("size", size)
+                parameter("pn", page)
+                parameter("ps", 20)
             }
         }.body()
     }
