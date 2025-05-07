@@ -66,7 +66,7 @@ val grpcHeaders: MutableMap<String, String>
 
 object BiliHeaders {
     val userAgent =
-        "Mozilla/5.0 BiliDroid/1.46.2 (bbcallen@gmail.com) os/android model/vivo mobi_app/android_hd build/2001100 channel/yingyongbao innerVer/2001100 osVer/14 network/2"
+        "Mozilla/5.0 BiliDroid/8.43.0 (bbcallen@gmail.com) os/android model/oppo mobi_app/android_hd build/2001100 channel/yingyongbao innerVer/2001100 osVer/14 network/2"
     val buvid: String by lazy { generateBuvid() }
     val traceId: String by lazy { genTraceId() }
     val auroraEid: String by lazy { genAuroraEid(0L) }

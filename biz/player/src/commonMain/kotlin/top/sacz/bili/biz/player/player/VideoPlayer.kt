@@ -10,7 +10,6 @@ import chaintech.videoplayer.host.MediaPlayerHost
 import chaintech.videoplayer.model.PlayerSpeed
 import chaintech.videoplayer.model.ScreenResize
 import chaintech.videoplayer.ui.video.VideoPlayerComposable
-import top.sacz.bili.api.config.commonHeaders
 
 @Composable
 fun VideoPlayerUI(url: String) {
@@ -33,7 +32,11 @@ fun getPlayerHost(url: String): MediaPlayerHost {
         initialVideoFitMode = ScreenResize.FIT,
         isLooping = false,
         startTimeInSeconds = 10f,
-        headers = commonHeaders
+        headers = mapOf(
+            "user-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+            "referer" to "https://www.bilibili.com",
+            //试过app端user-agent,但是仍然403,决定用web端了
+        )
     )
     /*
     // Play the video

@@ -20,24 +20,27 @@ class VideoPlayerScreen(val body: String) : Screen {
 
     @Composable
     override fun Content() {
-        val viewModel : VideoPlayerViewModel = viewModel()
+        val viewModel: VideoPlayerViewModel = viewModel()
         val body: SmallCoverV2Item = HttpJsonDecoder.decodeFromString(body)
         val data by viewModel.video.collectAsState()
-        LaunchedEffect(Unit){
+        LaunchedEffect(Unit) {
             viewModel.getVideoInfo(
                 avid = body.playerArgs.aid.toString(),
                 cid = body.playerArgs.cid.toString(),
-                qn = 80
             )
         }
-        when(val video = data) {
+        when (val video = data) {
             is BiliResponse.Loading -> {
                 //加载指示器
                 CircularProgressIndicator()
             }
+
             is BiliResponse.Error -> {}
             is BiliResponse.Success -> {
-                VideoPlayerUI(video.data.dash.video[0].baseUrl)
+                val allVideo = video.data.dash.video
+                val maxVideoUrl = allVideo.maxByOrNull { it.id }
+
+                VideoPlayerUI(maxVideoUrl!!.baseUrl)
             }
         }
     }
