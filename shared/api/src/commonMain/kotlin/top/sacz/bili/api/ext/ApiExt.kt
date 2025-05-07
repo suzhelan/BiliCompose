@@ -20,6 +20,3 @@ suspend inline fun <T> apiCall(crossinline call: suspend CoroutineScope.() -> Bi
     }
 }
 
-inline fun <T> BiliResponse.SuccessOrError<T>.toError(): BiliResponse.Error {
-    return BiliResponse.Error(code, message)
-}

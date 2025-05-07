@@ -14,14 +14,6 @@ sealed class BiliResponse<out T> {
         val data: T
     ) : BiliResponse<T>()
 
-    @Serializable
-    data class SuccessOrError<T>(
-        val code: Int,
-        val message: String,
-        val ttl: Int,
-        val data: T? = null
-    ) : BiliResponse<T>()
-
     data class Error(
         val code: Int, val msg: String, val cause: Throwable = ApiException(
             code, msg,

@@ -22,6 +22,7 @@ object LoginMapper {
     }
 
     fun getCookie(): String {
+        if (!isLogin()) return ""
         return getLoginInfo().cookieInfo?.cookies?.joinToString(";") {
             "${it.name}=${it.value}"
         } ?: ""

@@ -3,11 +3,14 @@ package top.sacz.bili.biz.player.api
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import kotlinx.serialization.json.JsonObject
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
+import top.sacz.bili.biz.player.model.PlayerArgsItem
 
+/**
+ * 获取视频信息
+ */
 class VideoPlayerApi {
     suspend fun getVideoInfo(
         avid: String? = null,
@@ -16,7 +19,7 @@ class VideoPlayerApi {
         seasonId: String? = null,
         cid: String,
         qn: Int = 80
-    ): BiliResponse.Success<JsonObject> {
+    ): BiliResponse.Success<PlayerArgsItem> {
         val data = mutableMapOf<String, String>().apply {
             if (avid != null) this["avid"] = avid
             if (bvid != null) this["bvid"] = bvid
