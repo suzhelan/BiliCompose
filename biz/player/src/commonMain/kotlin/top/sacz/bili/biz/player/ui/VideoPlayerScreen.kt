@@ -9,17 +9,16 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
+import chaintech.videoplayer.ui.audio.AudioPlayer
+import chaintech.videoplayer.ui.video.VideoPlayerComposable
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.HttpJsonDecoder
 import top.sacz.bili.biz.player.controller.PlayerSyncController
 import top.sacz.bili.biz.player.model.SmallCoverV2Item
-import top.sacz.bili.biz.player.player.AudioPlayerUI
-import top.sacz.bili.biz.player.player.VideoPlayerUI
-import top.sacz.bili.biz.player.player.getAudioPlayerHost
-import top.sacz.bili.biz.player.player.getVideoPlayerHost
 import top.sacz.bili.biz.player.viewmodel.VideoPlayerViewModel
+import top.sacz.bili.shared.common.logger.Logger
 
-class VideoPlayerScreen(val body: String) : Screen {
+class VideoPlayerScreen(private val body: String) : Screen {
     override val key: ScreenKey
         get() = "/video"
 
@@ -46,16 +45,17 @@ class VideoPlayerScreen(val body: String) : Screen {
                 val maxVideoUrl = allVideo.maxByOrNull { it.id }
                 val audio = video.data.dash.audio
                 val maxAudioUrl = audio.maxByOrNull { it.id }
-                val controller = remember { PlayerSyncController() }
-
-                val audioPlayerHost =
-                    remember { getAudioPlayerHost(maxAudioUrl!!.baseUrl, controller) }
-
-                val videoPlayerHost =
-                    remember { getVideoPlayerHost(maxVideoUrl!!.baseUrl, controller) }
-
-                VideoPlayerUI(videoPlayerHost)
-                AudioPlayerUI(audioPlayerHost)
+                val controller = remember {
+                    PlayerSyncController(
+                        videoUrl = maxVideoUrl!!.baseUrl,
+                        audioUrl = maxAudioUrl!!.baseUrl
+                    )
+                }
+                Logger.d("audio", "${maxVideoUrl!!.baseUrl} ${maxAudioUrl!!.baseUrl}")
+                VideoPlayerComposable(
+                    playerHost = controller.videoPlayerHost,
+                )
+                AudioPlayer(controller.audioPlayerHost)
             }
         }
     }
