@@ -21,6 +21,15 @@ val qualityMap = mapOf(
     127 to "8K 超高清",
 )
 
+
+val audioMap = mapOf(
+    30216 to "64K",
+    30232 to "132K",
+    30280 to "192K",
+    30250 to "杜比全景声",
+    30251 to "Hi-Res无损",
+)
+
 object VideoQuality {
     // 备注信息作为常量存储
     const val REMARK_240P = "仅 MP4 格式支持\n仅platform=html5时有效"

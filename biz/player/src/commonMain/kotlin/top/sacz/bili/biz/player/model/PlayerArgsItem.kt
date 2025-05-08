@@ -58,10 +58,20 @@ data class PlayerArgsItem(
         @SerialName("frameRate") val frameRate: String = "",
         @SerialName("sar") val sar: String = "",
         @SerialName("startWithSap") val startWithSap: Int = 0,
-        @SerialName("segmentBase") val segmentBase: JsonObject = JsonObject(mapOf()),
+        @SerialName("segment_base") val segmentBase: SegmentBase?= null,
         @SerialName("codecid") val codecid: Int = 0
     )
 
+    /**
+     * 关键帧 用来索引脱进度条
+     * "initialization": "0-817",
+     * "index_range": "818-1089"
+     */
+    @Serializable
+    data class SegmentBase(
+        @SerialName("initialization") val initialization: String = "",
+        @SerialName("index_range") val indexRange: String = ""
+    )
     @Serializable
     data class AudioItem(
         @SerialName("id") val id: Int = 0,
