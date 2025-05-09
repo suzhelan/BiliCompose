@@ -1,57 +1,82 @@
 package top.sacz.bili.biz.player.controller
 
-import chaintech.videoplayer.host.MediaPlayerHost
-import chaintech.videoplayer.model.ScreenResize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import org.openani.mediamp.MediampPlayer
+import org.openani.mediamp.compose.rememberMediampPlayer
+import org.openani.mediamp.source.UriMediaData
 
 /**
  * 音频流和视频流同步控制
  */
-class PlayerSyncController(private val videoUrl: String, private val audioUrl: String) {
+class PlayerSyncController(
+    val videoPlayer: MediampPlayer,
+    val audioPlayer: MediampPlayer,
+    private val scope: CoroutineScope
+) {
 
-    private val headers = mapOf(
+    private var syncJob: Job? = null
+
+    val headers = mutableMapOf(
         "user-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
         "referer" to "https://www.bilibili.com",
         //试过app端user-agent,但是仍然403,决定用web端了
     )
 
-    private var isSyncing = false
-
-    val videoPlayerHost: MediaPlayerHost by lazy {
-        buildPlayerHost(videoUrl).apply {
-            onEvent = { event ->
-            }
+    fun play(videoUrl: String, audioUrl: String) {
+        scope.launch {
+            videoPlayer.setMediaData(UriMediaData(videoUrl, headers))
+            audioPlayer.setMediaData(UriMediaData(audioUrl, headers))
+            sync()
         }
     }
 
-    val audioPlayerHost: MediaPlayerHost by lazy {
-        buildPlayerHost(audioUrl).apply {
-            onEvent = { event ->
-            }
-        }
+    fun close() {
+        videoPlayer.close()
+        audioPlayer.close()
+        syncJob?.cancel()
     }
 
-    fun startSync() {
-        videoPlayerHost.play()
-        audioPlayerHost.play()
+    fun resume() {
+        videoPlayer.resume()
+        audioPlayer.resume()
+        sync()
     }
 
-    fun stopSync() {
-        videoPlayerHost.pause()
-        audioPlayerHost.pause()
+    fun pause() {
+        videoPlayer.pause()
+        audioPlayer.pause()
+        syncJob?.cancel()
     }
 
-    // 进度跳转同步
-    fun seekBothTo(seconds: Float) {
-        videoPlayerHost.seekTo(seconds)
-        audioPlayerHost.seekTo(seconds)
+    fun seekTo(position: Long) {
+        videoPlayer.seekTo(position)
+        audioPlayer.seekTo(position)
     }
 
-    private fun buildPlayerHost(url: String): MediaPlayerHost {
-        return MediaPlayerHost(
-            mediaUrl = url,
-            initialVideoFitMode = ScreenResize.FILL,
-            headers = headers
-        )
+
+    private fun sync() {
+        val videoPlayerTime: StateFlow<Long> = videoPlayer.currentPositionMillis
+        val audioPlayerTime: StateFlow<Long> = audioPlayer.currentPositionMillis
+
     }
 
+
+}
+
+/**
+ * 同步音频控制器
+ * @return PlayerSyncController
+ */
+@Composable
+fun rememberPlayerSyncController(): PlayerSyncController {
+    val videoPlayer = rememberMediampPlayer()
+    val audioPlayer = rememberMediampPlayer()
+    val coroutineScope = rememberCoroutineScope()
+    val controller = PlayerSyncController(videoPlayer, audioPlayer, coroutineScope)
+    return controller
 }
