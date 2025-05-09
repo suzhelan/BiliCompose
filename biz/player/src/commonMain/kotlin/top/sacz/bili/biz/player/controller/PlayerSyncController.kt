@@ -1,6 +1,5 @@
 package top.sacz.bili.biz.player.controller
 
-import chaintech.videoplayer.host.MediaPlayerEvent
 import chaintech.videoplayer.host.MediaPlayerHost
 import chaintech.videoplayer.model.ScreenResize
 
@@ -14,31 +13,19 @@ class PlayerSyncController(private val videoUrl: String, private val audioUrl: S
         "referer" to "https://www.bilibili.com",
         //试过app端user-agent,但是仍然403,决定用web端了
     )
+
+    private var isSyncing = false
+
     val videoPlayerHost: MediaPlayerHost by lazy {
         buildPlayerHost(videoUrl).apply {
             onEvent = { event ->
-                when(event) {
-                    is MediaPlayerEvent.CurrentTimeChange -> {
-                        audioPlayerHost.seekTo(event.currentTime.toFloat())
-                    }
-                    is MediaPlayerEvent.PauseChange -> {
-                        if (event.isPaused) {
-                            audioPlayerHost.pause()
-                        } else {
-                            audioPlayerHost.play()
-                        }
-                    }
-                    else ->{
-                        
-                    }
-                }
             }
         }
     }
+
     val audioPlayerHost: MediaPlayerHost by lazy {
         buildPlayerHost(audioUrl).apply {
             onEvent = { event ->
-
             }
         }
     }
@@ -62,8 +49,7 @@ class PlayerSyncController(private val videoUrl: String, private val audioUrl: S
     private fun buildPlayerHost(url: String): MediaPlayerHost {
         return MediaPlayerHost(
             mediaUrl = url,
-            initialVideoFitMode = ScreenResize.FIT,
-//            isPaused = true,
+            initialVideoFitMode = ScreenResize.FILL,
             headers = headers
         )
     }
