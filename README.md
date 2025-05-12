@@ -1,7 +1,13 @@
-## 基于Compose+KMP的BiliBili 哔哩哔哩 跨平台客户端
+## 基于 ComposeMultiplatform(CMP)+KotlinMultiplatform(KMP) 的BiliBili 哔哩哔哩 跨平台客户端
 
 个人练习使用 持续维护中
 
+### 已适配的平台
+- [x] Android
+- [ ] Win (尚未完全适配)
+- [ ] Mac
+- [ ] Ios
+- [ ] Linux
 ### 已实现的功能
 - [x] 登录功能
 - [x] 主页功能
@@ -22,3 +28,5 @@
 
 ### 正在解决的问题
 - [ ] 播放器音频流和视频流无法声画同步
+- [ ] 解决Desktop Player的问题
+- [ ] 解决Desktop Webview无法使用的问题(现有方案KCEF在Desktop上无法正常运行) 受到影响的功能: 登录业务-极验人机验证
