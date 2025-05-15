@@ -91,18 +91,27 @@ dependencies {
     debugImplementation(compose.uiTooling)
 }
 
+
 compose.desktop {
     application {
         mainClass = "top.sacz.bili.MainKt"
 
         nativeDistributions {
+
             targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "BiliCompose"
             packageVersion = "1.0.0"
+            description = "description"
+            copyright = "© 2025 suzhelan. All rights reserved."
+            vendor = "Suzhelan"
+//            licenseFile.set(project.file("LICENSE.txt"))
             windows {
                 shortcut = true
+                perUserInstall = true
+                iconFile.set(project.file("icons/icon.ico"))
+                //设置编译结果路径
+                outputBaseDir.set(project.file("windows"))
             }
         }
     }
-
 }
