@@ -7,8 +7,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("org.openani.mediamp:mediamp-all:0.0.23")
-//            implementation("network.chaintech:compose-multiplatform-media-player:1.0.40")
             implementation(libs.paging.compose.common)
             implementation(libs.coil.network.ktor3)
             implementation(libs.coil.compose)
@@ -19,8 +17,16 @@ kotlin {
             implementation(projects.shared.api)
             implementation(projects.shared.common)
             implementation(libs.voyager.navigator)
+            implementation("org.openani.mediamp:mediamp-all:0.0.29")
         }
+
+        sourceSets.androidMain.dependencies {
+            implementation(libs.androidx.media3.exoplayer)
+        }
+
+
     }
 
 }
+
 

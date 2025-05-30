@@ -27,6 +27,7 @@ material3-adaptive = "1.1.0"
 kotlinx-serialization = "1.8.1"
 uiToolingPreviewAndroid = "1.8.0"
 voyagerNavigator = "1.1.0-beta03"
+media3Exoplayer = "1.7.1"
 
 [libraries]
 # Gradle plugins
@@ -100,6 +101,7 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 #打印
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3Exoplayer" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
