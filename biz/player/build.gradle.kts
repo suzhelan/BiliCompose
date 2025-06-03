@@ -17,7 +17,7 @@ kotlin {
             implementation(projects.shared.api)
             implementation(projects.shared.common)
             implementation(libs.voyager.navigator)
-            implementation("org.openani.mediamp:mediamp-all:0.0.29")
+            implementation(libs.mediamp.all)
         }
 
         sourceSets.androidMain.dependencies {

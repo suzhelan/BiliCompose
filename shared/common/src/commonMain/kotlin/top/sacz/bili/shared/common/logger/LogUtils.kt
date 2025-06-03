@@ -7,7 +7,7 @@ import okio.SYSTEM
 import okio.buffer
 import okio.use
 
-object Logger {
+object LogUtils {
     private val fs = FileSystem.SYSTEM
     private val dir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY
     private val debugSuffix = "debug.log"
@@ -18,7 +18,6 @@ object Logger {
     init {
         Napier.base(DebugAntilog())
     }
-
     fun d(message: Any) {
         d("Default", message)
     }

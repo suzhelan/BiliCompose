@@ -20,5 +20,7 @@ captures
 **/cache
 
 **.prop
+**.exe
+**.json
 /composeApp/release
 /composeApp/debug

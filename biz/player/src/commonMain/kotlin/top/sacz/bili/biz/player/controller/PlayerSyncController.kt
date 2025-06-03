@@ -12,7 +12,7 @@ import org.openani.mediamp.compose.rememberMediampPlayer
  */
 class PlayerSyncController(
     val videoPlayer: MediampPlayer,
-    private val scope: CoroutineScope
+    val scope: CoroutineScope
 ) {
     companion object {
         val headers = mutableMapOf(
@@ -26,26 +26,43 @@ class PlayerSyncController(
         scope.launch {
             doLoadMediaData(videoPlayer, videoUrl, audioUrl)
         }
+        videoPlayer.playbackState
     }
 
+    /**
+     * 停止播放
+     */
     fun close() {
         videoPlayer.close()
     }
 
+    /**
+     * 播放
+     */
     fun resume() {
         videoPlayer.resume()
     }
 
+    /**
+     * 暂停播放
+     */
     fun pause() {
         videoPlayer.pause()
     }
 
+    /**
+     * 跳转到指定位置
+     */
     fun seekTo(position: Long) {
         videoPlayer.seekTo(position)
     }
 
-    private fun sync() {
-
+    /**
+     * 在原视频的基础上跳过多少毫秒
+     * 可为正数或者负数
+     */
+    fun skipTo(deltaMillis: Long) {
+        videoPlayer.skip(deltaMillis)
     }
 
 }
