@@ -1,5 +1,3 @@
-import gradle.kotlin.dsl.accessors._47ce667d9889d48180efdf36ab2468e0.compose
-
 
 //应用常用插件
 
