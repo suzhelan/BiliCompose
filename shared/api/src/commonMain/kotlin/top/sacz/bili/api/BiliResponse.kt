@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 sealed class BiliResponse<out T> {
     data object Loading : BiliResponse<Nothing>()
+    data object Wait : BiliResponse<Nothing>()
 
     @Serializable
     data class Success<T>(
@@ -12,6 +13,14 @@ sealed class BiliResponse<out T> {
         val message: String,
         val ttl: Int,
         val data: T
+    ) : BiliResponse<T>()
+
+    @Serializable
+    data class SuccessOrNull<T>(
+        val code: Int,
+        val message: String,
+        val ttl: Int,
+        val data: T?
     ) : BiliResponse<T>()
 
     data class Error(

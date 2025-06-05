@@ -9,7 +9,7 @@ enum class AppKeyType(val appKey: String, val appSec: String) {
     //android-粉版-获取资源通用
     APP_COMMON("1d8b6e7d45233436", "560c52ccd288fed045859ed18bffd973"),
 
-    //android-粉版-获取用户信息用
+    //android-粉版-获取用户信息用/登录用
     USER_INFO("783bbb7264451d82", "2653583c8873dea268ab9386918b1d65")
 }
 

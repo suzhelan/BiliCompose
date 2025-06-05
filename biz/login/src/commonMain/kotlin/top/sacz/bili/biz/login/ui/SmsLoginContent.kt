@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -85,7 +86,6 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 @Composable
 fun SmsLoginContent(
-    modifier: Modifier,
     smsLoginViewModel: SmsLoginViewModel = viewModel(),
     geeTestViewModel: GeeTestViewModel = viewModel(),
     showToast: (String) -> Unit = {}
@@ -231,7 +231,7 @@ fun SmsLoginContent(
         }
     )
     Column(
-        modifier = modifier.padding(20.dp),
+        modifier = Modifier.fillMaxSize().padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(stringResource(Res.string.title_mobile_phone_number_login))

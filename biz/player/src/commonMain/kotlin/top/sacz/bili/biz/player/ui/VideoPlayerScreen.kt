@@ -70,6 +70,8 @@ class VideoPlayerScreen(private val body: String) : Screen {
                         controller = controller
                     )
                 }
+
+                else -> {}
             }
         }
 
