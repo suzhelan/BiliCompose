@@ -152,6 +152,7 @@ private fun HomeTopBar(mineViewModel: MineViewModel = viewModel(), onClickSearch
             val login = rememberScreen(SharedScreen.Login)
             Icon(
                 imageVector = Icons.Outlined.AccountCircle,
+                tint = MaterialTheme.colorScheme.primary,
                 contentDescription = null,
                 modifier = Modifier.size(36.dp)
                     .clip(RoundedCornerShape(50.dp))

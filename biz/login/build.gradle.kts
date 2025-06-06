@@ -21,6 +21,8 @@ kotlin {
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.voyager.navigator)
             implementation(libs.kotlinx.serialization.json)
+            //二维码
+            implementation("io.github.alexzhirkevich:qrose:1.0.1")
             implementation(projects.shared.auth)
             implementation(projects.shared.navigation)
             implementation(projects.shared.api)
