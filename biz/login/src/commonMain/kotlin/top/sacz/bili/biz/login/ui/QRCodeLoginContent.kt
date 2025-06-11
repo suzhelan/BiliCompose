@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,14 +46,41 @@ fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
     //获取最近的导航 登录成功后pop当前页面
     val navigator = LocalNavigator.currentOrThrow
     val getQRCode by viewModel.qrCode.collectAsState()
-
+    val queryQRCodeResult by viewModel.qrCodeResult.collectAsState()
+    val sendCountdown by viewModel.sendCountdown.collectAsState()
+    val queryMessage by viewModel.queryMessage.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.getQRCode()
+    }
+    LaunchedEffect(queryQRCodeResult) {
+        when (val result = queryQRCodeResult) {
+            is BiliResponse.SuccessOrNull -> {
+                if (result.code == 0) {
+                    navigator.pop()
+                }
+            }
+            else -> {}
+        }
     }
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Text(
+            text = "请使用哔哩哔哩app扫码登录"
+        )
+        Spacer(modifier = Modifier.size(20.dp))
+        Text(
+            text = "扫码状态:$queryMessage",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+        Text(
+            text = "二维码过期倒计时:${sendCountdown}秒",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+        Spacer(modifier = Modifier.size(20.dp))
         when (val qrCode = getQRCode) {
             is BiliResponse.Error -> {
             }
@@ -64,10 +92,6 @@ fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
             }
 
             is BiliResponse.Success<TvQRCode> -> {
-                Text(
-                    text = "请使用哔哩哔哩app扫码登录"
-                )
-                Spacer(modifier = Modifier.size(20.dp))
                 QRCodeImage(qrCode.data.url)
                 Spacer(modifier = Modifier.size(40.dp))
                 Text(
@@ -78,7 +102,14 @@ fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
             }
 
             else -> {}
+        }
 
+        OutlinedButton(
+            onClick = {
+                viewModel.getQRCode()
+            }
+        ) {
+            Text(text = "重新获取二维码")
         }
     }
 }
@@ -86,7 +117,7 @@ fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
 @Composable
 private fun QRCodeImage(url: String) {
     val qrcodeColor = MaterialTheme.colorScheme.primary
-    val qrcodePainter : Painter = rememberQrCodePainter(url) {
+    val qrcodePainter: Painter = rememberQrCodePainter(url) {
         //可以在二维码加logo 但是没有比他
         shapes {
             ball = QrBallShape.circle()
@@ -104,17 +135,17 @@ private fun QRCodeImage(url: String) {
                     end = Offset(it, it)
                 )
             }*/
-/*            //边框色块
-            frame = QrBrush.solid(cornerColor)
-            //边框内圆点色块
-            ball  = QrBrush.solid(cornerColor)*/
+            /*            //边框色块
+                        frame = QrBrush.solid(cornerColor)
+                        //边框内圆点色块
+                        ball  = QrBrush.solid(cornerColor)*/
         }
     }
     Image(
         painter = qrcodePainter,
         contentDescription = null,
         modifier = Modifier.size(150.dp).clickable {
-            val qrcodeBytes : ByteArray = qrcodePainter.toByteArray(1024, 1024, ImageFormat.PNG)
+            val qrcodeBytes: ByteArray = qrcodePainter.toByteArray(1024, 1024, ImageFormat.PNG)
         }
     )
 }

@@ -13,13 +13,8 @@ import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.biz.login.model.TvQRCode
 import top.sacz.bili.biz.login.model.WebApplyQRCode
 import top.sacz.bili.biz.login.model.WebScanQRCodeResult
-import top.sacz.bili.shared.auth.entity.LoginResult
+import top.sacz.bili.shared.auth.entity.TvLoginResult
 
-suspend fun main() {
-    val api = QRCodeLoginApi()
-    val tvQRCode = api.getTvQRCode().data
-    api.queryTvQRCodeResult(tvQRCode.authCode)
-}
 
 class QRCodeLoginApi {
     private val baseUrl = AppConfig.LOGIN_URL
@@ -44,7 +39,7 @@ class QRCodeLoginApi {
     /**
      * appkey	str	APP 密钥	APP 方式必要	可用
      * local_id	num	TV 端 id	TV 端必要	可为0
-     * ts	num	当前时间戳	APP 方式必要
+     * ts	    num	当前时间戳	APP 方式必要
      * sign	str	APP 签名	APP 方式必要
      * mobi_app	str	平台标识	非必要	会被拼接到返回的 url query
      */
@@ -70,7 +65,7 @@ class QRCodeLoginApi {
      *  ts         num  当前时间戳  APP方式必要
      *  sign       str  APP签名  APP方式必要
      */
-    suspend fun queryTvQRCodeResult(authCode: String): BiliResponse.SuccessOrNull<LoginResult> {
+    suspend fun queryTvQRCodeResult(authCode: String): BiliResponse.SuccessOrNull<TvLoginResult> {
         return getKtorClient(baseUrl, AppKeyType.USER_INFO)
             .post("/x/passport-tv-login/qrcode/poll") {
                 //appKey,和sign在签名时会自动添加

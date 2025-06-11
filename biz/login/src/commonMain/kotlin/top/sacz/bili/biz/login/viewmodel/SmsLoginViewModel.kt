@@ -32,6 +32,7 @@ class SmsLoginViewModel : ViewModel() {
     private val _sendSmsResult =
         MutableStateFlow<BiliResponse<SendSmsLoginCodeResult>>(BiliResponse.Loading)
     val sendSmsResult = _sendSmsResult.asStateFlow()
+
     fun sendSms(
         cid: String, // 国际冠字码
         tel: String, // 手机号码
@@ -99,7 +100,7 @@ class SmsLoginViewModel : ViewModel() {
             //保存登录凭证
             if (_loginResult.value is BiliResponse.Success) {
                 LoginMapper.clear()
-                LoginMapper.setLoginInfo(loginResultRes.data)
+                LoginMapper.setAppLoginInfo(loginResultRes.data)
             }
         } catch (e: Exception) {
             _loginResult.value = BiliResponse.Error(-1, e.message ?: "未知错误")

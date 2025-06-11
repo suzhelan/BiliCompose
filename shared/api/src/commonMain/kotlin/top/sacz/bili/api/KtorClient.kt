@@ -35,8 +35,10 @@ val HttpJsonDecoder = Json {
     isLenient = false
 }
 
-fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMON,
-                  withCookie : Boolean = false): HttpClient {
+fun getKtorClient(
+    baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMON,
+    withCookie: Boolean = false
+): HttpClient {
     val ktorClient = HttpClient {
         //安装默认请求插件
         install(DefaultRequest) {
@@ -48,7 +50,11 @@ fun getKtorClient(baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMO
             for ((key, value) in commonHeaders) {
                 header(key, value)
             }
-            if (withCookie && LoginMapper.getCookie().isNotEmpty()) {
+            //带cookie请求头
+            if (withCookie
+                && LoginMapper.isLogin()
+                && LoginMapper.getCookie().isNotEmpty()
+            ) {
                 val cookie = LoginMapper.getCookie()
                 header(Cookie, cookie)
             }

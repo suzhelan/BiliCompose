@@ -37,7 +37,7 @@ val commonHeaders: MutableMap<String, String>
             "x-bili-trace-id" to BiliHeaders.traceId
         )
         if (LoginMapper.isLogin()) {
-            result["x-bili-mid"] = LoginMapper.getLoginInfo().tokenInfo!!.mid.toString()
+            result["x-bili-mid"] = LoginMapper.getMid().toString()
         }
         return@runBlocking result
     }
