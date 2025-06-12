@@ -12,6 +12,9 @@ import top.sacz.bili.biz.player.model.PlayerArgsItem
  * 获取视频信息
  */
 class VideoPlayerApi {
+    /**
+     * 必须包含 cid+avid/bvid
+     */
     suspend fun getVideoInfo(
         avid: String? = null,
         bvid: String? = null,
