@@ -17,7 +17,7 @@ object RouteNavigationConfig {
                 LoginScreen
             }
             register<SharedScreen.VideoPlayer> {
-                VideoPlayerScreen(it.url)
+                VideoPlayerScreen(it.body)
             }
         }
     }

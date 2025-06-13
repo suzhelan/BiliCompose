@@ -16,7 +16,7 @@ import cafe.adriel.voyager.core.screen.ScreenKey
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.HttpJsonDecoder
 import top.sacz.bili.biz.player.controller.rememberPlayerSyncController
-import top.sacz.bili.biz.player.model.SmallCoverV2Item
+import top.sacz.bili.biz.player.model.PlayerParams
 import top.sacz.bili.biz.player.viewmodel.VideoPlayerViewModel
 
 class VideoPlayerScreen(private val body: String) : Screen {
@@ -27,12 +27,12 @@ class VideoPlayerScreen(private val body: String) : Screen {
     @Composable
     override fun Content() {
         val viewModel: VideoPlayerViewModel = viewModel()
-        val body: SmallCoverV2Item = HttpJsonDecoder.decodeFromString(body)
+        val body: PlayerParams = HttpJsonDecoder.decodeFromString(body)
         val data by viewModel.video.collectAsState()
         LaunchedEffect(Unit) {
             viewModel.getVideoInfo(
-                avid = body.playerArgs.aid.toString(),
-                cid = body.playerArgs.cid.toString(),
+                avid = body.avid,
+                cid = body.cid,
             )
         }
         Scaffold(
