@@ -9,10 +9,11 @@ import korlibs.crypto.MD5
  * @param args 格式化参数
  * @return 格式化后的字符串
  */
-fun String.format(vararg args: Any?): String {
-    TODO("等做")
-}
+expect fun String.format(vararg args: Any?): String
 
+inline fun String.format(format: String, vararg args: Any?): String {
+    return format.format(*args)
+}
 
 // 通用 URL 编码
 fun String.urlEncode(): String {

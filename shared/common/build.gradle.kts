@@ -1,5 +1,5 @@
 plugins {
-    id("compose-plugin")
+    id("compose-plugin.library")
 }
 
 
