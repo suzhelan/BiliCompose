@@ -287,7 +287,7 @@ data class UserCard(
         // 新版头像框ID
         // 示例：2511
         @SerialName("n_pid")
-        val nPid: Int = 0,
+        val nPid: Long = 0,
 
         // 头像框名称
         // 示例："初音未来13周年"
@@ -297,7 +297,7 @@ data class UserCard(
         // 头像框ID
         // 示例：2511
         @SerialName("pid")
-        val pid: Int = 0
+        val pid: Long = 0
     )
 
     @Serializable
@@ -350,7 +350,7 @@ data class UserCard(
         // 电视大会员过期时间（秒级时间戳）
         // 示例：2003500800
         @SerialName("tv_due_date")
-        val tvDueDate: Int = 0,
+        val tvDueDate: Long = 0,
 
         // 电视大会员支付类型
         // 示例：1

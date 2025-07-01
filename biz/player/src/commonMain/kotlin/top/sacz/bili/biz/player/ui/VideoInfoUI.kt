@@ -1,11 +1,13 @@
 package top.sacz.bili.biz.player.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +65,7 @@ private fun VideoDetailsUI(videoInfo: VideoInfo, userViewModel: UserViewModel = 
 
 private fun playbackDataUI(videoInfo: VideoInfo) {
 }
+
 @Composable
 private fun AuthorItemUI(userCardResponse: BiliResponse<UserCard>) = ConstraintLayout(
     modifier = Modifier.fillMaxWidth()
@@ -76,7 +79,7 @@ private fun AuthorItemUI(userCardResponse: BiliResponse<UserCard>) = ConstraintL
         return@ConstraintLayout
     }
     val userCard = (userCardResponse as BiliResponse.Success).data
-    val (avatar, name, sign) = createRefs()
+    val (avatar, name, sign, concern) = createRefs()
     AsyncImage(
         model = userCard.card.face,
         contentDescription = null,
@@ -106,4 +109,20 @@ private fun AuthorItemUI(userCardResponse: BiliResponse<UserCard>) = ConstraintL
             start.linkTo(name.start)
         }
     )
+    //最右边添加一个点击关注的按钮
+    FilledTonalButton(onClick = {
+
+    },
+        contentPadding = PaddingValues(vertical = 5.dp, horizontal = 5.dp),
+        modifier = Modifier
+            .size(
+                height = 30.dp,
+                width = 75.dp
+            ).constrainAs(concern) {
+        top.linkTo(avatar.top)
+        end.linkTo(parent.end)
+        bottom.linkTo(avatar.bottom)
+    }) {
+        Text(text = "+ 关注", fontSize = 12.sp)
+    }
 }
