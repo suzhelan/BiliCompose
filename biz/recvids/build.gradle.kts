@@ -17,6 +17,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(projects.biz.user)
             implementation(projects.biz.player)
+            implementation(projects.shared.auth)
             implementation(projects.shared.api)
             implementation(libs.voyager.navigator)
             implementation(projects.shared.common)

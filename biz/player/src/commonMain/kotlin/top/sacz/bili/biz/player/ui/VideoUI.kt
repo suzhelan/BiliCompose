@@ -31,6 +31,7 @@ import top.sacz.bili.biz.player.controller.PlayerSyncController
 import top.sacz.bili.biz.player.controller.rememberPlayerSyncController
 import top.sacz.bili.biz.player.model.PlayerParams
 import top.sacz.bili.biz.player.viewmodel.VideoPlayerViewModel
+import top.sacz.bili.shared.common.ui.theme.ColorPrimary
 
 @Composable
 fun VideoPlayer(playerParams: PlayerParams, viewModel: VideoPlayerViewModel = viewModel())  {
@@ -129,7 +130,7 @@ private fun VideoPlayer(controller: PlayerSyncController)= Box(
                 Icon(
                     imageVector = Icons.Outlined.Replay,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = ColorPrimary,
                     modifier = Modifier.size(100.dp).align(Alignment.Center)
                         .clickable {
                             controller.seekTo(0)
@@ -138,7 +139,7 @@ private fun VideoPlayer(controller: PlayerSyncController)= Box(
             } else {
                 Icon(
                     imageVector = Icons.Outlined.PlayArrow,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = ColorPrimary,
                     contentDescription = null,
                     modifier = Modifier.size(100.dp).align(Alignment.Center)
                 )
@@ -149,7 +150,7 @@ private fun VideoPlayer(controller: PlayerSyncController)= Box(
             //播放中
             Text(
                 text = "播放中...",
-                color = MaterialTheme.colorScheme.primary,
+                color = ColorPrimary,
                 style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -168,7 +169,7 @@ private fun VideoPlayer(controller: PlayerSyncController)= Box(
             Icon(
                 imageVector = Icons.Outlined.Replay,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = ColorPrimary,
                 modifier = Modifier.size(100.dp).align(Alignment.Center)
                     .clickable {
                         controller.seekTo(0)

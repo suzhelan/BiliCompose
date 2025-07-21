@@ -35,6 +35,22 @@ val HttpJsonDecoder = Json {
     isLenient = false
 }
 
+/**
+ * 主要是做了添加常见参数和签名的拦截器
+ *             参数
+ *             "build" to "8410300",
+ *             "c_locale" to "zh_CN",
+ *             "channel" to "bili",
+ *             "mobi_app" to "android",
+ *             "platform" to "android",
+ *             "s_locale" to "zh_CN",
+ *             "statistics" to BiliHeaders.statistics,
+ *             "ts" to Clock.System.now().epochSeconds.toString(),
+ *             "access_key" to LoginMapper.getAccessKey()
+ * @param baseUrl 请求的域名
+ * @param appKeyType 签名所使用的appKey
+ * @param withCookie 是否携带cookie,如果是web接口最好带上
+ */
 fun getKtorClient(
     baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMON,
     withCookie: Boolean = false

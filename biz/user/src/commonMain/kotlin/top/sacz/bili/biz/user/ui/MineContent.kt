@@ -1,6 +1,12 @@
 package top.sacz.bili.biz.user.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -11,15 +17,18 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -27,6 +36,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.user.generated.resources.Res
 import bilicompose.biz.user.generated.resources.b_coin
 import bilicompose.biz.user.generated.resources.coin
+import bilicompose.biz.user.generated.resources.dynamic
+import bilicompose.biz.user.generated.resources.fans
+import bilicompose.biz.user.generated.resources.follow
 import bilicompose.biz.user.generated.resources.ic_lv0
 import bilicompose.biz.user.generated.resources.ic_lv1
 import bilicompose.biz.user.generated.resources.ic_lv2
@@ -37,11 +49,15 @@ import bilicompose.biz.user.generated.resources.ic_lv6
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-
+import top.sacz.bili.api.getOrThrow
+import top.sacz.bili.api.isSuccess
 import top.sacz.bili.biz.login.ui.NotLoggedInContent
 import top.sacz.bili.biz.user.entity.mine.Mine
 import top.sacz.bili.biz.user.viewmodel.MineViewModel
 import top.sacz.bili.shared.auth.config.LoginMapper
+import top.sacz.bili.shared.common.ui.theme.ColorPrimaryContainer
+import top.sacz.bili.shared.common.ui.theme.DividingLineColor
+import top.sacz.bili.shared.common.ui.theme.TipTextColor
 
 private val levelIconMap = mapOf(
     0 to Res.drawable.ic_lv0,
@@ -77,10 +93,27 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
     LaunchedEffect(Unit) {
         mineViewModel.updateMine()
     }
-    val mineOrNull by mineViewModel.mine.collectAsState()
-    val mine: Mine = mineOrNull ?: return
-    ConstraintLayout(modifier = modifier.fillMaxWidth().padding(top = 50.dp)) {
-        val (avatar, nickname, level, entry, bCoin, coin) = createRefs()
+    val mineResponse by mineViewModel.mine.collectAsState()
+    if (!mineResponse.isSuccess()) {
+        return
+    }
+    val mine = mineResponse.getOrThrow()
+    Column(modifier = modifier.fillMaxWidth().padding(top = 50.dp)) {
+        HeaderUserCard(mine)
+        Spacer(modifier = Modifier.height(20.dp))
+        UserAmount(mine)
+    }
+}
+
+/**
+ * 头部卡片
+ */
+@Composable
+private fun ColumnScope.HeaderUserCard(
+    mine: Mine
+) {
+    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+        val (avatar, nickname, level, entry, identity, bCoin, coin) = createRefs()
         //头像
         AsyncImage(
             model = mine.face,
@@ -116,6 +149,7 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
                 },
         )
 
+        //进入空间
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
             contentDescription = null,
@@ -130,14 +164,33 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
         )
 
         Text(
+            text = "正式会员",
+            fontSize = 12.sp,
+            color = ColorPrimaryContainer,
+            //带边框
+            modifier = Modifier
+                .constrainAs(identity) {
+                    top.linkTo(nickname.bottom)
+                    start.linkTo(nickname.start)
+                }
+                .border(
+                    width = 1.dp,
+                    color = ColorPrimaryContainer,
+                    shape = RoundedCornerShape(2.dp)
+                )
+                .padding(horizontal = 2.dp, vertical = 0.dp)
+        )
+        //b币
+        Text(
             text = stringResource(Res.string.b_coin, mine.bcoin),
             fontSize = 12.sp,
             style = TextStyle(color = Color.Gray),
             modifier = Modifier.constrainAs(bCoin) {
-                top.linkTo(nickname.bottom)
-                start.linkTo(nickname.start)
+                top.linkTo(identity.bottom, 5.dp)
+                start.linkTo(identity.start)
             })
 
+        //硬币
         Text(
             text = stringResource(Res.string.coin, mine.coin),
             fontSize = 12.sp,
@@ -146,5 +199,54 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
                 top.linkTo(bCoin.top)
                 start.linkTo(bCoin.end, 15.dp)
             })
+    }
+}
+
+/**
+ * 数量
+ * 动态 粉丝 关注
+ */
+@Composable
+private fun ColumnScope.UserAmount(
+    mine: Mine
+) {
+    // 聚合数据列表
+    val data = mapOf(
+        Res.string.dynamic to mine.dynamic,
+        Res.string.follow to mine.following,
+        Res.string.fans to mine.follower
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        data.onEachIndexed { index, (amountTextRes, count) ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = count.toString(),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = stringResource(amountTextRes),
+                    fontSize = 12.sp,
+                    color = TipTextColor
+                )
+            }
+            //如果是最后一个的话 不添加分割线
+            if (index != data.size - 1) {
+                VerticalDivider(
+                    modifier = Modifier.height(25.dp),
+                    color = DividingLineColor,
+                    thickness = 1.dp
+                )
+            }
+        }
     }
 }

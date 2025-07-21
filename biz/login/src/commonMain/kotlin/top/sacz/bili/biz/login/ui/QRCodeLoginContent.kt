@@ -35,6 +35,7 @@ import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.login.model.TvQRCode
 import top.sacz.bili.biz.login.viewmodel.QRCodeLoginViewModel
 import top.sacz.bili.shared.common.ui.LoadingIndicator
+import top.sacz.bili.shared.common.ui.theme.ColorPrimary
 
 /**
  * 扫码登录组件 比较简单
@@ -116,7 +117,7 @@ fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
 
 @Composable
 private fun QRCodeImage(url: String) {
-    val qrcodeColor = MaterialTheme.colorScheme.primary
+    val qrcodeColor = ColorPrimary
     val qrcodePainter: Painter = rememberQrCodePainter(url) {
         //可以在二维码加logo 但是没有比他
         shapes {

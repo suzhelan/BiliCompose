@@ -42,10 +42,20 @@ fun <T> BiliResponse<T>.isLoading(): Boolean = this is BiliResponse.Loading
 fun <T> BiliResponse<T>.isWait(): Boolean = this is BiliResponse.Wait
 fun <T> BiliResponse<T>.isError(): Boolean = this is BiliResponse.Error
 
+fun <T> BiliResponse<T>.getOrThrow(): T {
+    return when (this) {
+        is BiliResponse.Success -> data
+        is BiliResponse.SuccessOrNull -> data!!
+        is BiliResponse.Error -> throw cause
+        is BiliResponse.Loading -> throw IllegalStateException("Loading")
+        BiliResponse.Wait -> throw IllegalStateException("Wait")
+    }
+}
 
 /**
  * DSL构建器风格的状态监听器
  */
+@Suppress("ComposableNaming")
 @Composable
 fun <T> BiliResponse<T>.registerStatusListener(block: StatusListenerBuilder<T>.() -> Unit) {
     val builder = StatusListenerBuilder<T>().apply(block)

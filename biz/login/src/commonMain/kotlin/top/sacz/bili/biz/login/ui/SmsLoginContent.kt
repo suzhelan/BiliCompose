@@ -77,6 +77,7 @@ import top.sacz.bili.biz.login.model.SendSmsLoginCodeResult
 import top.sacz.bili.biz.login.model.VerifyResult
 import top.sacz.bili.biz.login.viewmodel.GeeTestViewModel
 import top.sacz.bili.biz.login.viewmodel.SmsLoginViewModel
+import top.sacz.bili.shared.common.ui.theme.ColorPrimary
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -322,7 +323,7 @@ fun SmsLoginContent(
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.Login,
                     contentDescription = stringResource(Res.string.text_login),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = ColorPrimary
                 )
                 Text(text = stringResource(Res.string.text_login))
             }
@@ -396,7 +397,7 @@ private fun SelectNumberArea(
 @Composable
 private fun LoadingDots(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary,
+    color: Color = ColorPrimary,
     dotSize: Dp = 8.dp
 ) {
     val delays = listOf(0, 200, 400) // 每个点的动画延迟

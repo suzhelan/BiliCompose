@@ -2,5 +2,7 @@
 <resources>
     <string name="b_coin">BCoin: %1$d</string>
     <string name="coin">Coin: %1$d</string>
-
+    <string name="dynamic">dynamic</string>
+    <string name="follow">follow</string>
+    <string name="fans">fans</string>
 </resources>
