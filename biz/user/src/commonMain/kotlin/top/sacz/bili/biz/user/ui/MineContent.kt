@@ -1,3 +1,4 @@
+
 package top.sacz.bili.biz.user.ui
 
 import androidx.compose.foundation.Image
@@ -184,7 +185,7 @@ private fun ColumnScope.HeaderUserCard(
         Text(
             text = stringResource(Res.string.b_coin, mine.bcoin),
             fontSize = 12.sp,
-            style = TextStyle(color = Color.Gray),
+            style = TextStyle(color =TipTextColor),
             modifier = Modifier.constrainAs(bCoin) {
                 top.linkTo(identity.bottom, 5.dp)
                 start.linkTo(identity.start)
@@ -194,7 +195,7 @@ private fun ColumnScope.HeaderUserCard(
         Text(
             text = stringResource(Res.string.coin, mine.coin),
             fontSize = 12.sp,
-            style = TextStyle(color = Color.Gray),
+            style = TextStyle(color = TipTextColor),
             modifier = Modifier.constrainAs(coin) {
                 top.linkTo(bCoin.top)
                 start.linkTo(bCoin.end, 15.dp)
