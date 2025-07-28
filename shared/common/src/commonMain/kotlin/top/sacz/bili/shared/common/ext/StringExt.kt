@@ -11,9 +11,6 @@ import korlibs.crypto.MD5
  */
 expect fun String.format(vararg args: Any?): String
 
-inline fun String.format(format: String, vararg args: Any?): String {
-    return format.format(*args)
-}
 
 // 通用 URL 编码
 fun String.urlEncode(): String {

@@ -1,12 +1,12 @@
 package top.sacz.bili.shared.common.util
 
 
-
-
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 object TimeUtils {
     fun formatMinutesToTime(seconds: Int): String {
@@ -16,6 +16,7 @@ object TimeUtils {
         return "$minutes:${remainingSeconds.toString().padStart(2, '0')}"
     }
 
+    @OptIn(ExperimentalTime::class)
     fun formatTimeAgo(videoCreateTime: Long): String {
         val currentTime = Clock.System.now().epochSeconds
         val delta = currentTime - videoCreateTime
@@ -31,14 +32,13 @@ object TimeUtils {
                     .toLocalDateTime(TimeZone.currentSystemDefault()).date
 
                 when (currentDate.toEpochDays() - videoDate.toEpochDays()) {
-                    1 -> "昨天"
-                    2 -> "前天"
-                    else -> "${videoDate.year}-${videoDate.monthNumber}-${videoDate.dayOfMonth}"
+                    1L -> "昨天"
+                    2L -> "前天"
+                    else -> "${videoDate.year}-${videoDate.month.number}-${videoDate.day}"
                 }
             }
         }
     }
-
 
 
     fun Int.formatPlayCount(): String {
