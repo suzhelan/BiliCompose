@@ -1,4 +1,4 @@
-package top.sacz.bili.shared.common.ui
+package top.sacz.bili.shared.common.ui.dialog
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,7 +39,7 @@ fun LoadingDialog(
 }
 
 @Composable
-fun LoadingWithDialog(
+fun LoadingDialog(
     icon: ImageVector? = null,
     title: String = "",
     text: String = "加载中",

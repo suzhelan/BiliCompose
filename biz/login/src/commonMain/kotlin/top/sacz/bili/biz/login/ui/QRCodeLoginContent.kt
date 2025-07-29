@@ -119,7 +119,7 @@ fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
 private fun QRCodeImage(url: String) {
     val qrcodeColor = ColorPrimary
     val qrcodePainter: Painter = rememberQrCodePainter(url) {
-        //可以在二维码加logo 但是没有比他
+        //可以在二维码加logo 但是没什么必要
         shapes {
             ball = QrBallShape.circle()
             darkPixel = QrPixelShape.roundCorners()
@@ -144,7 +144,7 @@ private fun QRCodeImage(url: String) {
     }
     Image(
         painter = qrcodePainter,
-        contentDescription = null,
+        contentDescription = "二维码",
         modifier = Modifier.size(150.dp).clickable {
             val qrcodeBytes: ByteArray = qrcodePainter.toByteArray(1024, 1024, ImageFormat.PNG)
         }
