@@ -73,7 +73,6 @@ fun Modifier.autoSkeleton(
 ): Modifier = composed {
     if (!isLoading) return@composed this
     this.clip(shape) // 先裁剪形状
-//        .background(Color.LightGray.copy(alpha = 0.15f), shape)
         .shimmerEffect(showShimmer = true) // 传递形状参数
 }
 

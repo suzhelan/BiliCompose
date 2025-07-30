@@ -2,12 +2,16 @@ package top.sacz.bili.biz.user.api
 
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.FormDataContent
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.parameters
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
+import top.sacz.bili.biz.user.entity.RelationTags
+import top.sacz.bili.biz.user.entity.RelationUser
 import top.sacz.bili.shared.auth.config.LoginMapper
 
 /**
@@ -34,6 +38,18 @@ class RelationApi {
     }
 
     /**
+     * 获取分组列表 不包含-20(全部分组)
+     * 包含 -10(特别关注) 0(默认分组) 331816752(自定义的分组)
+     */
+    suspend fun queryTags(): BiliResponse.Success<List<RelationTags>> {
+        return ktor.get("/x/relation/tags") {
+            url {
+                parameter("access_key", LoginMapper.getAccessKey())
+            }
+        }.body()
+    }
+
+    /**
      * 获取关注列表
      * @param tagId 关注标签id
      *  0：默认分组
@@ -42,16 +58,19 @@ class RelationApi {
      * @param page 页码
      * @return
      */
-    suspend fun queryFollowList(tagId: Int = -20, page: Int): BiliResponse.Success<Unit> {
+    suspend fun queryFollowList(
+        tagId: Int = -20,
+        page: Int = 1
+    ): BiliResponse.Success<List<RelationUser>> {
         val pageSize = 50
-        return ktor.post("/x/relation/tag") {
-            setBody(FormDataContent(parameters {
-                append("access_key", LoginMapper.getAccessKey())
-                append("tagid", tagId.toString())
-                append("order_type", "")
-                append("ps", pageSize.toString())
-                append("pn", page.toString())
-            }))
+        return ktor.get("/x/relation/tag") {
+            url {
+                parameter("access_key", LoginMapper.getAccessKey())
+                parameter("tagid", tagId.toString())
+                parameter("order_type", "")
+                parameter("ps", pageSize.toString())
+                parameter("pn", page.toString())
+            }
         }.body()
     }
 }

@@ -1,8 +1,8 @@
-
 package top.sacz.bili.biz.user.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -47,6 +47,8 @@ import bilicompose.biz.user.generated.resources.ic_lv3
 import bilicompose.biz.user.generated.resources.ic_lv4
 import bilicompose.biz.user.generated.resources.ic_lv5
 import bilicompose.biz.user.generated.resources.ic_lv6
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -185,7 +187,7 @@ private fun ColumnScope.HeaderUserCard(
         Text(
             text = stringResource(Res.string.b_coin, mine.bcoin),
             fontSize = 12.sp,
-            style = TextStyle(color =TipTextColor),
+            style = TextStyle(color = TipTextColor),
             modifier = Modifier.constrainAs(bCoin) {
                 top.linkTo(identity.bottom, 5.dp)
                 start.linkTo(identity.start)
@@ -211,6 +213,7 @@ private fun ColumnScope.HeaderUserCard(
 private fun ColumnScope.UserAmount(
     mine: Mine
 ) {
+    val navigate = LocalNavigator.currentOrThrow
     // 聚合数据列表
     val data = mapOf(
         Res.string.dynamic to mine.dynamic,
@@ -228,6 +231,21 @@ private fun ColumnScope.UserAmount(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.weight(1f)
+                    .clickable {
+                        when (amountTextRes) {
+                            Res.string.dynamic -> {
+
+                            }
+
+                            Res.string.follow -> {
+                                navigate.push(FollowListScreen)
+                            }
+
+                            Res.string.fans -> {
+
+                            }
+                        }
+                    }
             ) {
                 Text(
                     text = count.toString(),

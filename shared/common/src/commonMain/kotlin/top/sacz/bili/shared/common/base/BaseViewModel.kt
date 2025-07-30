@@ -8,10 +8,6 @@ import top.sacz.bili.shared.common.ui.dialog.DialogState
  * 常用设计架构
  */
 abstract class BaseViewModel : ViewModel() {
-    val isShowLoading = MutableStateFlow(false)
-    fun setShowLoading(show: Boolean) {
-        isShowLoading.value = show
-    }
 
     val showDialog = MutableStateFlow<DialogState>(DialogState.Dismiss)
 
@@ -19,5 +15,12 @@ abstract class BaseViewModel : ViewModel() {
         showDialog.value = DialogState.Dismiss
     }
 
+    fun updateDialog(dialogState: DialogState) {
+        showDialog.value = dialogState
+    }
+
+    fun setShowLoading() {
+        showDialog.value = DialogState.Loading()
+    }
 
 }
