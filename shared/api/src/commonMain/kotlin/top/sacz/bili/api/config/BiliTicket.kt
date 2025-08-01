@@ -16,16 +16,30 @@ import top.sacz.bili.storage.ext.contains
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+
 /**
  * x-bili-ticket 添加在请求头中
  */
 @Serializable
 data class BiliTicketData(
+    @SerialName("ticket")
     val ticket: String,
     @SerialName("created_at")
     val createdAt: Long,//创建时间 秒级
-    val ttl: Int//过期时间 三天 259200
-)
+    @SerialName("ttl")
+    val ttl: Int,//过期时间 三天 259200
+    @SerialName("nav")
+    val nav: Nav
+) {
+    @Serializable
+    data class Nav(
+        @SerialName("img")
+        val img: String, // https://i0.hdslb.com/bfs/wbi/7cd084941338484aae1ad9425b84077c.png
+        @SerialName("sub")
+        val sub: String // https://i0.hdslb.com/bfs/wbi/4932caff0ff746eab6f01bf08b70ac45.png
+    )
+}
+
 object BiliTicket {
     suspend fun getBiliTickerData(): BiliTicketData {
         return Storage("biliticket").run {

@@ -7,6 +7,35 @@ import top.sacz.bili.shared.common.ext.md5
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+/**
+ * 使用了wbi接口的 可以使用这个试试
+ */
+object BiliWbi {
+    suspend fun getWRid(params: Map<String, String>): String {
+        val biliTicketData = BiliTicket.getBiliTickerData()
+        val wbiParams = WbiParams(
+            imgKey = extractImgKeyFromUrl(biliTicketData.nav.img),
+            subKey = extractImgKeyFromUrl(biliTicketData.nav.sub)
+        )
+        return wbiParams.getWRid(params)
+    }
+
+    suspend fun getWTs(): Long {
+        val biliTicketData = BiliTicket.getBiliTickerData()
+        val wbiParams = WbiParams(
+            imgKey = extractImgKeyFromUrl(biliTicketData.nav.img),
+            subKey = extractImgKeyFromUrl(biliTicketData.nav.sub)
+        )
+        return wbiParams.getWTs()
+    }
+
+    private fun extractImgKeyFromUrl(url: String): String {
+        // 提取文件名部分，例如从https://i0.hdslb.com/bfs/wbi/4932caff0ff746eab6f01bf08b70ac45.png中获取 4932caff0ff746eab6f01bf08b70ac45
+        val fileNameWithExtension = url.substringAfterLast("/")
+        val fileName = fileNameWithExtension.substringBeforeLast(".")
+        return fileName
+    }
+}
 
 @Serializable
 data class WbiParams(

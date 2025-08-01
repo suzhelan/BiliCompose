@@ -18,6 +18,7 @@ import io.ktor.http.URLProtocol
 import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import top.sacz.bili.api.config.BiliWbi
 import top.sacz.bili.api.config.commonHeaders
 import top.sacz.bili.api.config.commonParams
 import top.sacz.bili.shared.auth.config.LoginMapper
@@ -49,11 +50,13 @@ val HttpJsonDecoder = Json {
  *             "access_key" to LoginMapper.getAccessKey()
  * @param baseUrl 请求的域名
  * @param appKeyType 签名所使用的appKey
- * @param withCookie 是否携带cookie,如果是web接口最好带上
+ * @param withCookie 是否携带cookie,如果是web专属接口最好带上
+ * @param withWbi 是否携带wbi鉴权,默认不带
  */
 fun getKtorClient(
     baseUrl: String, appKeyType: AppKeyType = AppKeyType.APP_COMMON,
-    withCookie: Boolean = false
+    withCookie: Boolean = false,
+    withWbi: Boolean = false
 ): HttpClient {
     val ktorClient = HttpClient {
         //安装默认请求插件
@@ -67,10 +70,7 @@ fun getKtorClient(
                 header(key, value)
             }
             //带cookie请求头
-            if (withCookie
-                && LoginMapper.isLogin()
-                && LoginMapper.getCookie().isNotEmpty()
-            ) {
+            if (withCookie && LoginMapper.isLogin() && LoginMapper.getCookie().isNotEmpty()) {
                 val cookie = LoginMapper.getCookie()
                 header(Cookie, cookie)
             }
@@ -95,6 +95,7 @@ fun getKtorClient(
         when (method) {
             //GET请求
             HttpMethod.Get -> {
+                //将原本的参数转换成标准map
                 val rawParamMap = mutableMapOf<String, String>()
                 request.url.parameters.entries().forEach {
                     rawParamMap[it.key] = it.value.first()
@@ -104,6 +105,13 @@ fun getKtorClient(
                 //进行签名
                 val sign = BiliSignUtils(appKeyType).sign(rawParamMap)
                 rawParamMap["sign"] = sign
+                //添加wbi参数
+                if (withWbi) {
+                    val wbiParams = BiliWbi.getWRid(rawParamMap)
+                    val wts = BiliWbi.getWTs()
+                    rawParamMap["w_rid"] = wbiParams
+                    rawParamMap["wts"] = wts.toString()
+                }
                 //构建新的请求体
                 request.url.parameters.clear()
                 rawParamMap.forEach {
@@ -122,7 +130,7 @@ fun getKtorClient(
                 //添加公共参数
                 paramMap.putAll(commonParams)
                 //进行签名
-                val sign = BiliSignUtils(AppKeyType.USER_INFO).sign(paramMap)
+                val sign = BiliSignUtils(appKeyType).sign(paramMap)
                 paramMap["sign"] = sign
                 //构建新的请求体
                 val newBody = FormDataContent(parameters {
