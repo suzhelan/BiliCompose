@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import top.sacz.bili.biz.user.api.RelationApi
 import top.sacz.bili.biz.user.entity.RelationUser
+import top.sacz.bili.shared.common.logger.error
 
 
 /**
@@ -26,14 +27,30 @@ class FollowListDataSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, RelationUser> {
         return try {
             val currentKey = params.key ?: firstPageIndex
+            //关注关注列表
             val response = api.queryFollowList(tagId, params.key ?: 1)
             val items: List<RelationUser> = response.data
+            if (items.isEmpty()) {
+                return LoadResult.Page(
+                    data = emptyList(),
+                    prevKey = if (currentKey > firstPageIndex) currentKey - 1 else null,
+                    nextKey = null
+                )
+            }
+            //批量查询关系信息
+            val relations = api.queryRelations(items.map { it.mid })
+            //循环获取关系信息
+            for (item in items) {
+                item.attribute = relations.data[item.mid.toString()]!!.attribute
+            }
+            //返回结果
             LoadResult.Page(
                 data = items,
                 prevKey = if (currentKey > firstPageIndex) currentKey - 1 else null,
                 nextKey = if (items.isNotEmpty()) currentKey + 1 else null
             )
         } catch (e: Exception) {
+            e.error()
             LoadResult.Error(e)
         }
     }

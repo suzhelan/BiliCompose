@@ -7,6 +7,10 @@ import okio.SYSTEM
 import okio.buffer
 import okio.use
 
+fun Throwable.error(tag: String = "Default", message: String = "Error") {
+    LogUtils.e(tag, message, this)
+}
+
 object LogUtils {
     private val fs = FileSystem.SYSTEM
     private val dir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY
@@ -18,6 +22,7 @@ object LogUtils {
     init {
         Napier.base(DebugAntilog())
     }
+
     fun d(message: Any) {
         d("Default", message)
     }

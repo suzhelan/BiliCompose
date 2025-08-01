@@ -8,6 +8,10 @@ sealed class BiliResponse<out T> {
     data object Loading : BiliResponse<Nothing>()
     data object Wait : BiliResponse<Nothing>()
 
+    /**
+     * 成功返回数据
+     * 包含data
+     */
     @Serializable
     data class Success<T>(
         val code: Int,
@@ -16,12 +20,15 @@ sealed class BiliResponse<out T> {
         val data: T
     ) : BiliResponse<T>()
 
+    /**
+     * 获取数据成功，但数据为null,或者没返回data字段
+     */
     @Serializable
     data class SuccessOrNull<T>(
         val code: Int,
         val message: String,
         val ttl: Int,
-        val data: T?
+        val data: T? = null
     ) : BiliResponse<T>()
 
     data class Error(
@@ -32,7 +39,7 @@ sealed class BiliResponse<out T> {
     ) : BiliResponse<Nothing>()
 }
 
-fun <T> BiliResponse<T>.isSuccess(): Boolean = when(this) {
+fun <T> BiliResponse<T>.isSuccess(): Boolean = when (this) {
     is BiliResponse.Success -> true
     is BiliResponse.SuccessOrNull -> true
     else -> false
@@ -48,7 +55,7 @@ fun <T> BiliResponse<T>.getOrThrow(): T {
         is BiliResponse.SuccessOrNull -> data!!
         is BiliResponse.Error -> throw cause
         is BiliResponse.Loading -> throw IllegalStateException("Loading")
-        BiliResponse.Wait -> throw IllegalStateException("Wait")
+        is BiliResponse.Wait -> throw IllegalStateException("Wait")
     }
 }
 

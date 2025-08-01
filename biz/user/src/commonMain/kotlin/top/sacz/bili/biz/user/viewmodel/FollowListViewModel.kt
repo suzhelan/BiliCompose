@@ -15,18 +15,45 @@ class FollowListViewModel : BaseViewModel() {
 
     private val api = RelationApi()
 
-    private val _tags = mutableStateListOf(
-        RelationTags(
-            count = 0,
-            name = "全部",
-            tagid = -20,
-            tip = ""
-        )
-    )
+    private val _tags = mutableStateListOf<RelationTags>()
     val tags: List<RelationTags> = _tags
 
     fun queryTags() = viewModelScope.launch {
-        _tags.addAll(api.queryTags().data)
+        val resultTags = api.queryTags().data
+        _tags.add(
+            0,
+            RelationTags(
+                count = 0,
+                name = "全部",
+                tagid = -20,
+                tip = "All"
+            )
+        )
+        _tags.addAll(resultTags)
+    }
+
+    /**
+     * 取消关注
+     */
+    fun cancelFollow(mid: Long, onUserUpdate: (Int) -> Unit) = viewModelScope.launch {
+        val result = api.modify(mid, 2)
+        if (result.code == 0) {
+            //只更新关系
+            val relation = api.queryRelation(mid).data
+            onUserUpdate(relation.attribute)
+        }
+    }
+
+    /**
+     * 关注用户
+     */
+    fun addFollow(mid: Long, onUserUpdate: (Int) -> Unit) = viewModelScope.launch {
+        val result = api.modify(mid, 1)
+        if (result.code == 0) {
+            //只更新关系
+            val relation = api.queryRelation(mid).data
+            onUserUpdate(relation.attribute)
+        }
     }
 
     fun getFollowListFlow(tagId: Int) = Pager(

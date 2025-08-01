@@ -3,6 +3,25 @@ package top.sacz.bili.biz.user.entity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
+@Serializable
+data class Relation(
+    @SerialName("attribute")
+    val attribute: Int, // 关系 0：未关注 1：悄悄关注（已弃用） 2：已关注 6：已互粉 128：已拉黑
+    @SerialName("mid")
+    val mid: Long, // mid
+    @SerialName("mtime")
+    val mtime: Int, // 1601654227
+    @SerialName("special")
+    val special: Int, // 0
+    @SerialName("tag")
+    val tag: List<Int>? // null
+)
+
+
+/**
+ * 查询分组列表
+ */
 @Serializable
 data class RelationTags(
     @SerialName("count")
@@ -15,10 +34,13 @@ data class RelationTags(
     val tip: String
 )
 
+/**
+ * 通过分组列表查询的对象
+ */
 @Serializable
 data class RelationUser(
     @SerialName("attribute")
-    val attribute: Int, // 0
+    var attribute: Int, // 0
     @SerialName("face")
     val face: String, // https://i2.hdslb.com/bfs/face/18e3b77e40cc76ac35b904a994b499a23e449b08.webp
     @SerialName("face_nft")
@@ -109,5 +131,8 @@ data class RelationUser(
         val liveStatus: Int // 0
     )
 }
+
+
+
 
 

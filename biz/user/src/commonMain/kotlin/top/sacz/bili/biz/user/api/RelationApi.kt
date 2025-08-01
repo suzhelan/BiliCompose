@@ -10,6 +10,7 @@ import io.ktor.http.parameters
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
+import top.sacz.bili.biz.user.entity.Relation
 import top.sacz.bili.biz.user.entity.RelationTags
 import top.sacz.bili.biz.user.entity.RelationUser
 import top.sacz.bili.shared.auth.config.LoginMapper
@@ -27,11 +28,11 @@ class RelationApi {
      * @param action 1为关注，2为取消关注,3为悄悄关注，4为取消悄悄关注,5为拉黑，6为取消拉黑,7为踢出粉丝
      * @return
      */
-    suspend fun concern(mid: String, action: Int): BiliResponse.Success<String> {
+    suspend fun modify(mid: Long, action: Int): BiliResponse.SuccessOrNull<Nothing> {
         return ktor.post("x/relation/modify") {
             setBody(FormDataContent(parameters {
                 append("access_key", LoginMapper.getAccessKey())
-                append("fid", mid)
+                append("fid", mid.toString())
                 append("act", action.toString())
             }))
         }.body()
@@ -70,6 +71,36 @@ class RelationApi {
                 parameter("order_type", "")
                 parameter("ps", pageSize.toString())
                 parameter("pn", page.toString())
+            }
+        }.body()
+    }
+
+    /**
+     * 获取用户和自己的关系
+     * @param mid 用户mid
+     * @return
+     */
+    suspend fun queryRelation(mid: Long): BiliResponse.Success<Relation> {
+        return ktor.get("/x/relation") {
+            url {
+                parameter("access_key", LoginMapper.getAccessKey())
+                parameter("fid", mid)
+            }
+        }.body()
+    }
+
+    /**
+     * 批量查询用户和自己的关系
+     * @param midList 用户mid列表
+     * @return
+     */
+    suspend fun queryRelations(midList: List<Long>): BiliResponse.Success<Map<String, Relation>> {
+        //拼接为 mid1,mid2,mid3这样的字符串
+        val mids = midList.joinToString(",")
+        return ktor.get("/x/relation/relations") {
+            url {
+                parameter("access_key", LoginMapper.getAccessKey())
+                parameter("fids", mids)
             }
         }.body()
     }
