@@ -8,7 +8,9 @@ import top.sacz.bili.api.ApiException
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.shared.common.logger.Logger
 
-
+/**
+ * 调用API接口 并在失败时自动返回Error
+ */
 suspend inline fun <T> apiCall(crossinline call: suspend CoroutineScope.() -> BiliResponse<T>): BiliResponse<T> {
     return withContext(Dispatchers.IO) {
         try {

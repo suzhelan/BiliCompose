@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import kotlinx.coroutines.launch
 import top.sacz.bili.biz.user.api.RelationApi
 import top.sacz.bili.biz.user.data.FollowListDataSource
 import top.sacz.bili.biz.user.entity.RelationTags
@@ -35,7 +34,7 @@ class FollowListViewModel : BaseViewModel() {
     /**
      * 取消关注
      */
-    fun cancelFollow(mid: Long, onUserUpdate: (Int) -> Unit) = viewModelScope.launch {
+    fun cancelFollow(mid: Long, onUserUpdate: (Int) -> Unit) = launchTask {
         val result = api.modify(mid, 2)
         if (result.code == 0) {
             //只更新关系
@@ -47,7 +46,7 @@ class FollowListViewModel : BaseViewModel() {
     /**
      * 关注用户
      */
-    fun addFollow(mid: Long, onUserUpdate: (Int) -> Unit) = viewModelScope.launch {
+    fun addFollow(mid: Long, onUserUpdate: (Int) -> Unit) = launchTask {
         val result = api.modify(mid, 1)
         if (result.code == 0) {
             //只更新关系

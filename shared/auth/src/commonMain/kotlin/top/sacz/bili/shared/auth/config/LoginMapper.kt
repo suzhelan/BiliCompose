@@ -8,11 +8,12 @@ import top.sacz.bili.shared.auth.entity.UniversalLoginResult
 import top.sacz.bili.storage.Storage
 import top.sacz.bili.storage.ext.contains
 
-private const val LOGIN_INFO = "loginInfo"
-
-private const val TV_LOGIN_INFO = "tvLoginInfo"
 
 object LoginMapper {
+    private const val LOGIN_INFO = "loginInfo"
+
+    private const val TV_LOGIN_INFO = "tvLoginInfo"
+
     private val dataSource = Storage("login")
 
     //是否登录状态

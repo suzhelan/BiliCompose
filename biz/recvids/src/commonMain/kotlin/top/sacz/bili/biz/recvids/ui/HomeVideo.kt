@@ -50,7 +50,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.api.getOrThrow
 import top.sacz.bili.api.isSuccess
-import top.sacz.bili.api.isWait
 import top.sacz.bili.biz.recvids.ui.page.FeedVideoContent
 import top.sacz.bili.biz.recvids.ui.page.PopularVideoContent
 import top.sacz.bili.biz.user.entity.AccountInfo
@@ -143,7 +142,7 @@ private fun HomeTopBar(mineViewModel: MineViewModel = viewModel(), onClickSearch
     }
     val data by mineViewModel.myInfo.collectAsState()
     Row {
-        if (isLogin && !data.isWait()) {
+        if (isLogin) {
             if (data.isSuccess()) {
                 val myInfo: AccountInfo = data.getOrThrow()
                 AsyncImage(
