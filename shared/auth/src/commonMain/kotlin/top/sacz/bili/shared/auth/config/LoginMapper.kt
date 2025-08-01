@@ -8,6 +8,10 @@ import top.sacz.bili.shared.auth.entity.UniversalLoginResult
 import top.sacz.bili.storage.Storage
 import top.sacz.bili.storage.ext.contains
 
+private const val LOGIN_INFO = "loginInfo"
+
+private const val TV_LOGIN_INFO = "tvLoginInfo"
+
 object LoginMapper {
     private val dataSource = Storage("login")
 
@@ -17,30 +21,30 @@ object LoginMapper {
 
     //------------手机端短信登录逻辑------------
     fun setAppLoginInfo(smsLoginResult: LoginResult) {
-        dataSource.putObject("loginInfo", smsLoginResult)
+        dataSource.putObject(LOGIN_INFO, smsLoginResult)
         _isLoginState.value = true
     }
 
     fun getAppLoginInfo(): LoginResult? {
-        return dataSource.getObjectOrNull<LoginResult>("loginInfo")
+        return dataSource.getObjectOrNull<LoginResult>(LOGIN_INFO)
     }
 
     fun isAppLogin(): Boolean {
-        return dataSource.contains("loginInfo")
+        return dataSource.contains(LOGIN_INFO)
     }
 
     //------------TV端扫码登录逻辑------------
     fun getTvLoginInfo(): TvLoginResult? {
-        return dataSource.getObjectOrNull<TvLoginResult>("tvLoginInfo")
+        return dataSource.getObjectOrNull<TvLoginResult>(TV_LOGIN_INFO)
     }
 
     fun setTvLoginInfo(tvLoginInfo: TvLoginResult) {
-        dataSource.putObject("tvLoginInfo", tvLoginInfo)
+        dataSource.putObject(TV_LOGIN_INFO, tvLoginInfo)
         _isLoginState.value = true
     }
 
     fun isTvLogin(): Boolean {
-        return dataSource.contains("tvLoginInfo")
+        return dataSource.contains(TV_LOGIN_INFO)
     }
 
     /**
@@ -89,5 +93,6 @@ object LoginMapper {
     fun getMid(): Int {
         return getUniversalLoginInfo().tokenInfo.mid
     }
+
 }
 

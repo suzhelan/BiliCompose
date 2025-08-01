@@ -18,7 +18,7 @@ class FollowListViewModel : BaseViewModel() {
     private val _tags = mutableStateListOf<RelationTags>()
     val tags: List<RelationTags> = _tags
 
-    fun queryTags() = viewModelScope.launch {
+    fun queryTags() = launchTask {
         val resultTags = api.queryTags().data
         _tags.add(
             0,

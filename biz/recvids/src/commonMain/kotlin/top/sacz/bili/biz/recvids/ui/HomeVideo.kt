@@ -48,7 +48,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import top.sacz.bili.api.registerStatusListener
+import top.sacz.bili.api.getOrThrow
+import top.sacz.bili.api.isSuccess
+import top.sacz.bili.api.isWait
 import top.sacz.bili.biz.recvids.ui.page.FeedVideoContent
 import top.sacz.bili.biz.recvids.ui.page.PopularVideoContent
 import top.sacz.bili.biz.user.entity.AccountInfo
@@ -135,46 +137,41 @@ private fun HomeTopBar(mineViewModel: MineViewModel = viewModel(), onClickSearch
         LoginMapper.isLoginState
     }
     LaunchedEffect(isLogin) {
-        mineViewModel.fetchMyInfo()
-    }
-    val myInfo by mineViewModel.myInfo.collectAsState()
-    myInfo.registerStatusListener {
-        onLoading {
-            //加载中
+        if (isLogin) {
+            mineViewModel.fetchMyInfo()
         }
-        onSuccess { data ->
-            Row {
-                if (isLogin) {
-                    val myInfo: AccountInfo = data
-                    AsyncImage(
-                        model = myInfo.face,
-                        contentDescription = null,
-                        modifier = Modifier.size(36.dp)
-                            .clip(RoundedCornerShape(50.dp))
-                    )
-                } else {
-                    //获取最近的导航
-                    val navigator = LocalNavigator.currentOrThrow
-                    //创建登录屏幕
-                    val login = rememberScreen(SharedScreen.Login)
-                    Icon(
-                        imageVector = Icons.Outlined.AccountCircle,
-                        tint = ColorPrimary,
-                        contentDescription = null,
-                        modifier = Modifier.size(36.dp)
-                            .clip(RoundedCornerShape(50.dp))
-                            .clickable {
-                                navigator.push(login)
-                            }
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                SearchBarWithClick(onClickSearchBar)
+    }
+    val data by mineViewModel.myInfo.collectAsState()
+    Row {
+        if (isLogin && !data.isWait()) {
+            if (data.isSuccess()) {
+                val myInfo: AccountInfo = data.getOrThrow()
+                AsyncImage(
+                    model = myInfo.face,
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp)
+                        .clip(RoundedCornerShape(50.dp))
+                )
             }
+        } else {
+            //获取最近的导航
+            val navigator = LocalNavigator.currentOrThrow
+            //创建登录屏幕
+            val login = rememberScreen(SharedScreen.Login)
+            Icon(
+                imageVector = Icons.Outlined.AccountCircle,
+                tint = ColorPrimary,
+                contentDescription = null,
+                modifier = Modifier.size(36.dp)
+                    .clip(RoundedCornerShape(50.dp))
+                    .clickable {
+                        navigator.push(login)
+                    }
+            )
         }
+        Spacer(modifier = Modifier.width(10.dp))
+        SearchBarWithClick(onClickSearchBar)
     }
-
-
 }
 
 /**

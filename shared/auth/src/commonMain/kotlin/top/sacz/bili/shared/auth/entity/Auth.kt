@@ -93,58 +93,60 @@ data class LoginResult(
 @Serializable
 data class TvLoginResult(
     @SerialName("access_token")
-    val accessToken: String = "",
+    val accessToken: String, // c2e0e18fde02883a55c0b123ab3d7982
     @SerialName("cookie_info")
-    val cookieInfo: CookieInfo = CookieInfo(),
+    val cookieInfo: CookieInfo,
     @SerialName("expires_in")
-    val expiresIn: Int = 0,
+    val expiresIn: Int, // 15552000
     @SerialName("hint")
-    val hint: String = "",
+    val hint: String,
     @SerialName("is_new")
-    val isNew: Boolean = false,
+    val isNew: Boolean, // false
     @SerialName("mid")
-    val mid: Int = 0,
+    val mid: Int, // 479396940
     @SerialName("refresh_token")
-    val refreshToken: String = "",
+    val refreshToken: String, // fe3c92b83a3a5d4ab99430dd8b702282
     @SerialName("sso")
-    val sso: List<String> = listOf(),
+    val sso: List<String>,
     @SerialName("token_info")
-    val tokenInfo: TokenInfo = TokenInfo()
+    val tokenInfo: TokenInfo
 ) {
     @Serializable
     data class CookieInfo(
         @SerialName("cookies")
-        val cookies: List<Cooky> = listOf(),
+        val cookies: List<Cooky>,
         @SerialName("domains")
-        val domains: List<String> = listOf()
+        val domains: List<String>
     )
 
     @Serializable
     data class TokenInfo(
         @SerialName("access_token")
-        val accessToken: String = "",
+        val accessToken: String, // c2e0e18fde02883a55c0b123ab3d7982
         @SerialName("expires_in")
-        val expiresIn: Int = 0,
+        val expiresIn: Int, // 15552000
         @SerialName("mid")
-        val mid: Int = 0,
+        val mid: Int, // 479396940
         @SerialName("refresh_token")
-        val refreshToken: String = "",
+        val refreshToken: String, // fe3c92b83a3a5d4ab99430dd8b702282
         @SerialName("region")
-        val region: String = ""
+        val region: String // CN
     )
 
     @Serializable
     data class Cooky(
         @SerialName("expires")
-        val expires: Int = 0,
+        val expires: Int, // 1769581443
         @SerialName("http_only")
-        val httpOnly: Int = 0,
+        val httpOnly: Int, // 1
         @SerialName("name")
-        val name: String = "",
+        val name: String, // SESSDATA
         @SerialName("secure")
-        val secure: Int = 0,
+        val secure: Int, // 1
         @SerialName("value")
-        val value: String = ""
+        val value: String // b7fd3c4e%2C1769581443%2C2a1d9882
     )
 }
+
+
 

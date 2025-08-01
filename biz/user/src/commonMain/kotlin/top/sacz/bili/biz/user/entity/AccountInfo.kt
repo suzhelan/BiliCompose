@@ -24,37 +24,38 @@ data class AccountInfo(
     @SerialName("invite") val invite: Invite,
     @SerialName("is_tourist") val isTourist: Int, // **作用尚不明确**
     @SerialName("pin_prompting") val pinPrompting: Int // **作用尚不明确**
-)
+) {
+    @Serializable
+    data class Vip(
+        @SerialName("type") val type: Int, // 大会员类型（0：无；1：月度；2：年度）
+        @SerialName("status") val status: Int, // 会员开通状态（0：无；1：有）
+        @SerialName("due_date") val dueDate: Long, // 大会员到期时间（毫秒时间戳）
+        @SerialName("vip_pay_type") val vipPayType: Int, // 会员开通状态（0：无；1：有）
+        @SerialName("theme_type") val themeType: Int, // 会员开通状态（0：无；1：有）
+        @SerialName("label") val label: Label, //
+        @SerialName("avatar_subscript") val avatarSubscript: Int, // 是否显示会员图标（0：不显示；1：显示）
+        @SerialName("nickname_color") val nicknameColor: String // 会员昵称颜色（颜色码）
+    )
 
-@Serializable
-data class Vip(
-    @SerialName("type") val type: Int, // 大会员类型（0：无；1：月度；2：年度） 
-    @SerialName("status") val status: Int, // 会员开通状态（0：无；1：有） 
-    @SerialName("due_date") val dueDate: Long, // 大会员到期时间（毫秒时间戳）
-    @SerialName("vip_pay_type") val vipPayType: Int, // 会员开通状态（0：无；1：有）
-    @SerialName("theme_type") val themeType: Int, // 会员开通状态（0：无；1：有）
-    @SerialName("label") val label: Label, //
-    @SerialName("avatar_subscript") val avatarSubscript: Int, // 是否显示会员图标（0：不显示；1：显示）
-    @SerialName("nickname_color") val nicknameColor: String // 会员昵称颜色（颜色码）
-)
+    @Serializable
+    data class Label(
+        @SerialName("path") val path: String, // **作用尚不明确**
+        @SerialName("text") val text: String, // 会员类型文字
+        @SerialName("label_theme") val labelTheme: String // 会员类型
+    )
 
-@Serializable
-data class Label(
-    @SerialName("path") val path: String, // **作用尚不明确** 
-    @SerialName("text") val text: String, // 会员类型文字
-    @SerialName("label_theme") val labelTheme: String // 会员类型
-)
+    @Serializable
+    data class Official(
+        @SerialName("role") val role: Int, // 认证类型（0：无；1、2、7：个人认证；3、4、5、6：机构认证）
+        @SerialName("title") val title: String, // 无为空
+        @SerialName("desc") val desc: String, // 无为空
+        @SerialName("type") val type: Int // 无为空
+    )
 
-@Serializable
-data class Official(
-    @SerialName("role") val role: Int, // 认证类型（0：无；1、2、7：个人认证；3、4、5、6：机构认证） 
-    @SerialName("title") val title: String, // 无为空 
-    @SerialName("desc") val desc: String, // 无为空 
-    @SerialName("type") val type: Int // 无为空 
-)
+    @Serializable
+    data class Invite(
+        @SerialName("invite_remind") val inviteRemind: Int, // **作用尚不明确**
+        @SerialName("display") val display: Boolean // **作用尚不明确**
+    )
+}
 
-@Serializable
-data class Invite(
-    @SerialName("invite_remind") val inviteRemind: Int, // **作用尚不明确**
-    @SerialName("display") val display: Boolean // **作用尚不明确** 
-)

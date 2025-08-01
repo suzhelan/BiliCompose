@@ -115,12 +115,12 @@ fun MessageDialog(
         text = { Text(text = text) },
         confirmButton = {
             TextButton(onClick = onConfirmRequest) {
-                Text(text = cancelButtonText)
+                Text(text = confirmButtonText)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismissRequest) {
-                Text(text = confirmButtonText)
+                Text(text = cancelButtonText)
             }
         }
     )

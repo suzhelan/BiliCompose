@@ -37,6 +37,13 @@ sealed class BiliResponse<out T> {
             cause = Throwable()
         )
     ) : BiliResponse<Nothing>()
+
+
+    companion object {
+        fun <T> buildSuccess(data: T): BiliResponse<T> {
+            return Success(0, "Cache", 1, data)
+        }
+    }
 }
 
 fun <T> BiliResponse<T>.isSuccess(): Boolean = when (this) {

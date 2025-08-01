@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -34,7 +36,9 @@ import io.github.alexzhirkevich.qrose.toByteArray
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.login.model.TvQRCode
 import top.sacz.bili.biz.login.viewmodel.QRCodeLoginViewModel
+import top.sacz.bili.shared.auth.config.LoginMapper
 import top.sacz.bili.shared.common.ui.LoadingIndicator
+import top.sacz.bili.shared.common.ui.dialog.MessageDialog
 import top.sacz.bili.shared.common.ui.theme.ColorPrimary
 
 /**
@@ -45,24 +49,18 @@ import top.sacz.bili.shared.common.ui.theme.ColorPrimary
 @Composable
 fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
     //获取最近的导航 登录成功后pop当前页面
-    val navigator = LocalNavigator.currentOrThrow
+    LocalNavigator.currentOrThrow
     val getQRCode by viewModel.qrCode.collectAsState()
-    val queryQRCodeResult by viewModel.qrCodeResult.collectAsState()
     val sendCountdown by viewModel.sendCountdown.collectAsState()
     val queryMessage by viewModel.queryMessage.collectAsState()
+    val isShowLoginSuccessDialog by viewModel.isShowLoginSuccessDialog.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.getQRCode()
     }
-    LaunchedEffect(queryQRCodeResult) {
-        when (val result = queryQRCodeResult) {
-            is BiliResponse.SuccessOrNull -> {
-                if (result.code == 0) {
-                    navigator.pop()
-                }
-            }
-            else -> {}
-        }
+    if (isShowLoginSuccessDialog) {
+        LoginSuccessDialog()
     }
+
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -116,6 +114,20 @@ fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
 }
 
 @Composable
+private fun LoginSuccessDialog() {
+    val navigator = LocalNavigator.currentOrThrow
+    MessageDialog(
+        icon = Icons.Outlined.VerifiedUser,
+        title = "登录成功",
+        text = "登录成功当前用户mid:${LoginMapper.getMid()}",
+        confirmButtonText = "确定",
+        onConfirmRequest = {
+            navigator.pop()
+        }
+    )
+}
+
+@Composable
 private fun QRCodeImage(url: String) {
     val qrcodeColor = ColorPrimary
     val qrcodePainter: Painter = rememberQrCodePainter(url) {
@@ -146,7 +158,7 @@ private fun QRCodeImage(url: String) {
         painter = qrcodePainter,
         contentDescription = "二维码",
         modifier = Modifier.size(150.dp).clickable {
-            val qrcodeBytes: ByteArray = qrcodePainter.toByteArray(1024, 1024, ImageFormat.PNG)
+            qrcodePainter.toByteArray(1024, 1024, ImageFormat.PNG)
         }
     )
 }
