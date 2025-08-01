@@ -21,7 +21,7 @@ inline fun <reified T> ViewModel.getCacheMutableStateFlow(cacheKey: String): Mut
 
 /**
  * 先查缓存 再查服务器
- * 服务器只接受正确的结果
+ * 只接受正确的结果
  */
 inline fun <reified T> ViewModel.launchCacheUpdateTask(
     cacheKey: String,

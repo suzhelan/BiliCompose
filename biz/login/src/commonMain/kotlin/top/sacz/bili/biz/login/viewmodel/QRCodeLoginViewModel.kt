@@ -54,6 +54,10 @@ class QRCodeLoginViewModel : ViewModel() {
     private fun startSubscribingToResults(authCode: String) = viewModelScope.launch {
         val startTime = Clock.System.now().epochSeconds
         while (true) {
+            val elapsedSeconds = ((Clock.System.now().epochSeconds - startTime)).toInt()
+            val remainingSeconds = 180 - elapsedSeconds
+            if (remainingSeconds < 0) break
+            _sendCountdown.value = remainingSeconds
             //检查状态
             val loginResult = _qrCodeResult.value
             if (loginResult is BiliResponse.SuccessOrNull) {
@@ -76,10 +80,6 @@ class QRCodeLoginViewModel : ViewModel() {
                     }
                 }
             }
-            val elapsedSeconds = ((Clock.System.now().epochSeconds - startTime)).toInt()
-            val remainingSeconds = 180 - elapsedSeconds
-            if (remainingSeconds < 0) break
-            _sendCountdown.value = remainingSeconds
             queryQRCodeResult(authCode)
             delay(1000)
         }
