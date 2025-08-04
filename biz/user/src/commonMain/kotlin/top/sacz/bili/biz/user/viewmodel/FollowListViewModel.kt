@@ -10,7 +10,7 @@ import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.user.api.RelationApi
 import top.sacz.bili.biz.user.data.FollowListDataSource
 import top.sacz.bili.biz.user.entity.RelationTags
-import top.sacz.bili.biz.user.util.ModifyUtils
+import top.sacz.bili.biz.user.util.RelationUtils
 import top.sacz.bili.shared.common.base.BaseViewModel
 
 class FollowListViewModel : BaseViewModel() {
@@ -48,7 +48,7 @@ class FollowListViewModel : BaseViewModel() {
             val relation = api.queryRelation(mid).data
             onUserUpdate(relation.attribute)
         } else {
-            showMessage(message = ModifyUtils.getToastByModifyResult(result))
+            showMessage(message = RelationUtils.getToastByModifyResult(result))
         }
         followList[mid] = result
     }
@@ -64,7 +64,7 @@ class FollowListViewModel : BaseViewModel() {
             val relation = api.queryRelation(mid).data
             onUserUpdate(relation.attribute)
         } else {
-            showMessage(message = ModifyUtils.getToastByModifyResult(result))
+            showMessage(message = RelationUtils.getToastByModifyResult(result))
         }
         followList[mid] = result
     }

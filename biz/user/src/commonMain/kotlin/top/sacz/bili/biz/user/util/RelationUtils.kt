@@ -2,8 +2,7 @@ package top.sacz.bili.biz.user.util
 
 import top.sacz.bili.api.BiliResponse
 
-object ModifyUtils {
-
+object RelationUtils {
 
     /**
      * 根据响应结果获取对应的提示语
