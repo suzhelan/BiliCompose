@@ -1,5 +1,6 @@
 package top.sacz.bili.biz.user.ui
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -19,15 +20,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,8 +56,11 @@ import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.user.entity.RelationUser
+import top.sacz.bili.biz.user.ui.dialog.TagsDialog
 import top.sacz.bili.biz.user.viewmodel.FollowListViewModel
 import top.sacz.bili.shared.common.ext.isInvisible
+import top.sacz.bili.shared.common.ext.toFalse
+import top.sacz.bili.shared.common.ext.toTrue
 import top.sacz.bili.shared.common.ui.CommonComposeUI
 import top.sacz.bili.shared.common.ui.LoadingIndicator
 import top.sacz.bili.shared.common.ui.TitleUI
@@ -76,14 +83,44 @@ object FollowListScreen : Screen {
                 TitleUI(title = "关注列表", onClickBack = {
                     navigate.pop()
                 })
+            },
+            floatActionButton = { vm ->
+                FloatingActionButton(onClick = {
+                    vm.isShowSettingTagsDialog.toTrue()
+                }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = "Settings",
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
             }
         ) { vm ->
             DialogHandler(vm)
+            Dialogs(vm)
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
                 TabPageUI(vm)
             }
+        }
+    }
+
+    @Composable
+    private fun Dialogs(vm: FollowListViewModel) {
+        val isShowSettingTagsDialog by vm.isShowSettingTagsDialog.collectAsState()
+        val tagSettingsMid by vm.tagSettingsMid.collectAsState()
+        if (isShowSettingTagsDialog) {
+            TagsDialog(
+                tagSettingsMid,
+                vm,
+                onUpdate = {
+                    vm.queryTags()
+                },
+                onDismissRequest = {
+                    vm.isShowSettingTagsDialog.toFalse()
+                }
+            )
         }
     }
 
@@ -170,7 +207,17 @@ object FollowListScreen : Screen {
     ) {
         var userState by remember { mutableStateOf(item) }
         val actionState = vm.followList[item.mid]
-        ConstraintLayout(modifier = Modifier.fillMaxWidth().height(70.dp).padding(10.dp)) {
+        ConstraintLayout(
+            modifier = Modifier.fillMaxWidth()
+                .height(70.dp)
+                .padding(10.dp)
+                .combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        vm.openSettingTagsDialog(item.mid)
+                    }
+                )
+        ) {
             //元素内容 头像 昵称 签名 关注按钮 头像左下角会员标识
             val (avatar, text, followBtn, actionLoading) = createRefs()
             AsyncImage(
