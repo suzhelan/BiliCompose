@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -48,6 +49,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
+import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.user.entity.RelationUser
 import top.sacz.bili.biz.user.viewmodel.FollowListViewModel
 import top.sacz.bili.shared.common.ui.CommonComposeUI
@@ -160,11 +162,15 @@ object FollowListScreen : Screen {
     }
 
     @Composable
-    private fun LazyItemScope.UserItemUI(vm: FollowListViewModel, item: RelationUser) {
+    private fun LazyItemScope.UserItemUI(
+        vm: FollowListViewModel,
+        item: RelationUser,
+    ) {
         var userState by remember { mutableStateOf(item) }
+        val state = vm.followList[item.mid]
         ConstraintLayout(modifier = Modifier.fillMaxWidth().height(70.dp).padding(10.dp)) {
             //元素内容 头像 昵称 签名 关注按钮 头像左下角会员标识
-            val (avatar, text, _, followBtn) = createRefs()
+            val (avatar, text, followBtn) = createRefs()
             AsyncImage(
                 model = userState.face,
                 contentDescription = "avatar",
@@ -199,59 +205,67 @@ object FollowListScreen : Screen {
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
-            when (userState.attribute) {
-                0 -> {
-                    OutlinedButton(
-                        onClick = {
-                            vm.addFollow(userState.mid) {
-                                userState = userState.copy(attribute = it)
-                            }
-                        },
-                        contentPadding = PaddingValues(
-                            vertical = 0.dp,
-                            horizontal = 0.dp
-                        ),
-                        modifier = Modifier
-                            .size(85.dp, 30.dp)
-                            .constrainAs(followBtn) {
-                                top.linkTo(parent.top)
-                                bottom.linkTo(parent.bottom)
-                                end.linkTo(parent.end)
-                            }
-                    ) {
-                        Icon(imageVector = Icons.Outlined.Add, contentDescription = "Add")
-                        Text(text = "关注")
+            if (state is BiliResponse.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(30.dp)
+                        .constrainAs(followBtn) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
+                            end.linkTo(parent.end, 20.dp)
+                        })
+            } else {
+                when (userState.attribute) {
+                    0 -> {
+                        OutlinedButton(
+                            onClick = {
+                                vm.addFollow(userState.mid) {
+                                    userState = userState.copy(attribute = it)
+                                }
+                            },
+                            contentPadding = PaddingValues(
+                                vertical = 0.dp,
+                                horizontal = 0.dp
+                            ),
+                            modifier = Modifier
+                                .size(85.dp, 30.dp)
+                                .constrainAs(followBtn) {
+                                    top.linkTo(parent.top)
+                                    bottom.linkTo(parent.bottom)
+                                    end.linkTo(parent.end)
+                                }
+                        ) {
+                            Icon(imageVector = Icons.Outlined.Add, contentDescription = "Add")
+                            Text(text = "关注")
+                        }
                     }
-                }
 
-                2, 6 -> {
-                    //已关注
-                    //右侧 关注按钮
-                    FilledTonalButton(
-                        onClick = {
-                            vm.cancelFollow(userState.mid) {
-                                userState = item.copy(attribute = it)
-                            }
-                        },
-                        contentPadding = PaddingValues(
-                            vertical = 0.dp,
-                            horizontal = 0.dp
-                        ),
-                        modifier = Modifier
-                            .size(85.dp, 30.dp)
-                            .constrainAs(followBtn) {
-                                top.linkTo(parent.top)
-                                bottom.linkTo(parent.bottom)
-                                end.linkTo(parent.end)
-                            }
-                    ) {
-                        Icon(imageVector = Icons.Outlined.Menu, contentDescription = "Menu")
-                        Text(text = if (userState.attribute == 2) "已关注" else "已互粉")
+                    2, 6 -> {
+                        //已关注
+                        //右侧 关注按钮
+                        FilledTonalButton(
+                            onClick = {
+                                vm.cancelFollow(userState.mid) {
+                                    userState = item.copy(attribute = it)
+                                }
+                            },
+                            contentPadding = PaddingValues(
+                                vertical = 0.dp,
+                                horizontal = 0.dp
+                            ),
+                            modifier = Modifier
+                                .size(85.dp, 30.dp)
+                                .constrainAs(followBtn) {
+                                    top.linkTo(parent.top)
+                                    bottom.linkTo(parent.bottom)
+                                    end.linkTo(parent.end)
+                                }
+                        ) {
+                            Icon(imageVector = Icons.Outlined.Menu, contentDescription = "Menu")
+                            Text(text = if (userState.attribute == 2) "已关注" else "已互粉")
+                        }
                     }
                 }
             }
-
         }
     }
 }

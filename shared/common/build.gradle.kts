@@ -16,6 +16,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.krypto)
             implementation(libs.ktor.client.core)
+            implementation(libs.coil.compose)
         }
     }
 }

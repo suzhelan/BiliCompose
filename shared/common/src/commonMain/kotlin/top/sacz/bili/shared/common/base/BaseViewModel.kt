@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import top.sacz.bili.shared.common.logger.error
 import top.sacz.bili.shared.common.ui.dialog.DialogState
@@ -18,18 +19,29 @@ abstract class BaseViewModel : ViewModel() {
         throwable.error()
     }
 
-    val showDialog = MutableStateFlow<DialogState>(DialogState.Dismiss)
-
+    private val _showDialog = MutableStateFlow<DialogState>(DialogState.Dismiss)
+    val showDialog = _showDialog.asStateFlow()
     fun dismissDialog() {
-        showDialog.value = DialogState.Dismiss
+        _showDialog.value = DialogState.Dismiss
     }
 
     fun updateDialog(dialogState: DialogState) {
-        showDialog.value = dialogState
+        _showDialog.value = dialogState
     }
 
     fun setShowLoading() {
-        showDialog.value = DialogState.Loading()
+        _showDialog.value = DialogState.Loading()
+    }
+
+    fun showMessage(title: String = "提示", message: String) {
+        _showDialog.value = DialogState.Message(
+            title = title,
+            text = message,
+            confirmButtonText = "确定",
+            onConfirmRequest = {
+                dismissDialog()
+            }
+        )
     }
 
     fun launchTask(
