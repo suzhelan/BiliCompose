@@ -7,7 +7,7 @@ object RelationUtils {
     /**
      * 根据响应结果获取对应的提示语
      */
-    fun getToastByModifyResult(result: BiliResponse.SuccessOrNull<Nothing>): String {
+    fun getToastByModifyResult(result: BiliResponse.SuccessOrNull<*>): String {
         return when (result.code) {
             0 -> "成功"
             -101 -> "请先登录"
@@ -23,6 +23,20 @@ object RelationUtils {
             22014 -> "已经关注用户，无法重复关注"
             22120 -> "重复加入黑名单"
             40061 -> "用户不存在"
+            else -> "未知错误"
+        }
+    }
+
+    fun getToastByCreateTagResult(result: BiliResponse.SuccessOrNull<*>): String {
+        return when (result.code) {
+            0 -> "成功"
+            -101 -> "请先登录"
+            -111 -> "csrf校验失败"
+            -400 -> "请求错误"
+            22101 -> "分组名称存在不允许的字符"
+            22102 -> "分组数量超过限制"
+            22103 -> "分组名过长"
+            22106 -> "该分组已经存在"
             else -> "未知错误"
         }
     }

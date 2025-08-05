@@ -12,17 +12,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,7 +47,6 @@ import top.sacz.bili.shared.common.ui.theme.TipTextColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagsDialog(
-    mid: Long,
     vm: FollowListViewModel,
     onUpdate: () -> Unit,
     onDismissRequest: () -> Unit
@@ -58,6 +62,19 @@ fun TagsDialog(
     val userInTags by vm.userInTags.collectAsState()
     //选中的状态
     val tagsCheckedMap: Map<Int, Boolean> = vm.tagsCheckedMap
+
+    val isShowCreateTagDialog by vm.isShowCreateTagDialog.collectAsState()
+    if (isShowCreateTagDialog) {
+        CreateTagDialog(
+            vm = vm,
+            onUpdate = {
+                onUpdate()
+            },
+            onDismissRequest = {
+                vm.closeCreateTagDialog()
+            }
+        )
+    }
     ModalBottomSheet(
         modifier = Modifier.fillMaxHeight(),
         sheetState = sheetState,
@@ -86,7 +103,7 @@ fun TagsDialog(
                         Spacer(modifier = Modifier.weight(1f))
                         TextButton(
                             onClick = {
-
+                                vm.openCreateTagDialog()
                             }
                         ) {
                             Icon(imageVector = Icons.Outlined.Add, contentDescription = "Add")
@@ -113,7 +130,6 @@ fun TagsDialog(
                 }
             }
         }
-
     }
 
 
@@ -170,4 +186,46 @@ private fun TagItem(tag: RelationTags, isChecked: Boolean, onChecked: (Boolean) 
             )
         }
     }
+}
+
+@Composable
+private fun CreateTagDialog(
+    vm: FollowListViewModel,
+    onUpdate: () -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    var tagName by remember {
+        mutableStateOf("")
+    }
+    AlertDialog(
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        title = {
+            Text(text = "新建分组")
+        },
+        text = {
+            OutlinedTextField(
+                value = tagName,
+                onValueChange = {
+                    tagName = it
+                },
+                label = {
+                    Text(text = "分组名称")
+                }
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    vm.createTag(tagName = tagName) {
+                        onUpdate()
+                        onDismissRequest()
+                    }
+                }
+            ) {
+                Text(text = "创建")
+            }
+        }
+    )
 }

@@ -56,7 +56,7 @@ class FollowListViewModel : BaseViewModel() {
             val relation = api.queryRelation(mid).data
             onUserUpdate(relation.attribute)
         } else {
-            showMessage(message = RelationUtils.getToastByModifyResult(result))
+            showMessageDialog(message = RelationUtils.getToastByModifyResult(result))
         }
         followList[mid] = result
     }
@@ -72,7 +72,7 @@ class FollowListViewModel : BaseViewModel() {
             val relation = api.queryRelation(mid).data
             onUserUpdate(relation.attribute)
         } else {
-            showMessage(message = RelationUtils.getToastByModifyResult(result))
+            showMessageDialog(message = RelationUtils.getToastByModifyResult(result))
         }
         followList[mid] = result
     }
@@ -128,6 +128,31 @@ class FollowListViewModel : BaseViewModel() {
             for (tagId in inTags.data.keys) {
                 _tagsCheckedMap[tagId] = true
             }
+        }
+    }
+
+    val isShowCreateTagDialog = MutableStateFlow(false)
+
+    fun openCreateTagDialog() {
+        isShowCreateTagDialog.value = true
+    }
+
+    fun closeCreateTagDialog() {
+        isShowCreateTagDialog.value = false
+    }
+
+    fun createTag(tagName: String, onSuccess: () -> Unit) = launchTask {
+        setShowLoading()
+        val result = api.createTag(tagName)
+        if (result.code == 0) {
+            onSuccess()
+            dismissDialog()
+        } else {
+            showMessageDialog(message = result.message)
+        }
+    }.invokeOnCompletion { e ->
+        e?.let {
+            showMessageDialog(message = it.message ?: "")
         }
     }
 }

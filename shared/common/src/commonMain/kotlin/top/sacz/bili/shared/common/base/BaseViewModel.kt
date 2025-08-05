@@ -33,7 +33,7 @@ abstract class BaseViewModel : ViewModel() {
         _showDialog.value = DialogState.Loading()
     }
 
-    fun showMessage(title: String = "提示", message: String) {
+    fun showMessageDialog(title: String = "提示", message: String) {
         _showDialog.value = DialogState.Message(
             title = title,
             text = message,

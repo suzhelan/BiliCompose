@@ -20,15 +20,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -60,7 +58,6 @@ import top.sacz.bili.biz.user.ui.dialog.TagsDialog
 import top.sacz.bili.biz.user.viewmodel.FollowListViewModel
 import top.sacz.bili.shared.common.ext.isInvisible
 import top.sacz.bili.shared.common.ext.toFalse
-import top.sacz.bili.shared.common.ext.toTrue
 import top.sacz.bili.shared.common.ui.CommonComposeUI
 import top.sacz.bili.shared.common.ui.LoadingIndicator
 import top.sacz.bili.shared.common.ui.TitleUI
@@ -83,17 +80,6 @@ object FollowListScreen : Screen {
                 TitleUI(title = "关注列表", onClickBack = {
                     navigate.pop()
                 })
-            },
-            floatActionButton = { vm ->
-                FloatingActionButton(onClick = {
-                    vm.isShowSettingTagsDialog.toTrue()
-                }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Settings",
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
             }
         ) { vm ->
             DialogHandler(vm)
@@ -109,10 +95,8 @@ object FollowListScreen : Screen {
     @Composable
     private fun Dialogs(vm: FollowListViewModel) {
         val isShowSettingTagsDialog by vm.isShowSettingTagsDialog.collectAsState()
-        val tagSettingsMid by vm.tagSettingsMid.collectAsState()
         if (isShowSettingTagsDialog) {
             TagsDialog(
-                tagSettingsMid,
                 vm,
                 onUpdate = {
                     vm.queryTags()
@@ -134,8 +118,9 @@ object FollowListScreen : Screen {
             LoadingIndicator()
             return
         }
-        TabRow(
+        ScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
+            edgePadding = 0.dp
         ) {
             tags.forEachIndexed { index, item ->
                 Tab(

@@ -68,6 +68,20 @@ class RelationApi {
     }
 
     /**
+     * 创建分组
+     * @param tagName 分组名称
+     * @return
+     */
+    suspend fun createTag(tagName: String): BiliResponse.SuccessOrNull<Map<String, Int>> {
+        return ktor.post("/x/relation/tag/create") {
+            setBody(FormDataContent(parameters {
+                append("access_key", LoginMapper.getAccessKey())
+                append("tag", tagName)
+            }))
+        }.body()
+    }
+
+    /**
      * 获取关注列表
      * @param tagId 关注标签id
      *  0：默认分组
