@@ -15,8 +15,7 @@ import top.sacz.bili.biz.login.model.CountryList
 import top.sacz.bili.biz.login.model.SendSmsLoginCodeResult
 import top.sacz.bili.shared.auth.config.LoginMapper
 import top.sacz.bili.shared.auth.entity.LoginResult
-
-import top.sacz.bili.shared.common.logger.Logger
+import top.sacz.bili.shared.common.logger.LogUtils
 
 
 class SmsLoginViewModel : ViewModel() {
@@ -81,7 +80,7 @@ class SmsLoginViewModel : ViewModel() {
         captchaKey: String,
     ) = viewModelScope.launch {
         try {
-            Logger.d("登录参数 cid $cid, tel $tel, code $code, captchaKey $captchaKey")
+            LogUtils.d("登录参数 cid $cid, tel $tel, code $code, captchaKey $captchaKey")
             val loginResultRes = smsLoginApi.smsLogin(
                 cid,
                 tel,
@@ -96,7 +95,7 @@ class SmsLoginViewModel : ViewModel() {
                     loginResultRes.message
                 )
             }
-            Logger.d("登录结果 ${_loginResult.value}")
+            LogUtils.d("登录结果 ${_loginResult.value}")
             //保存登录凭证
             if (_loginResult.value is BiliResponse.Success) {
                 LoginMapper.clear()

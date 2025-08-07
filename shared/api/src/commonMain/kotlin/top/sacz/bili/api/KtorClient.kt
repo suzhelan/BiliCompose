@@ -22,6 +22,7 @@ import top.sacz.bili.api.config.BiliWbi
 import top.sacz.bili.api.config.commonHeaders
 import top.sacz.bili.api.config.commonParams
 import top.sacz.bili.shared.auth.config.LoginMapper
+import top.sacz.bili.shared.common.logger.LogUtils
 
 val HttpJsonDecoder = Json {
     //忽略未知jsonKey
@@ -80,7 +81,7 @@ fun getKtorClient(
             level = LogLevel.ALL
             logger = object : Logger {
                 override fun log(message: String) {
-                    top.sacz.bili.shared.common.logger.Logger.d("KtorClient", message)
+                    LogUtils.d("KtorClient", message)
                 }
             }
         }

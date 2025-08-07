@@ -13,7 +13,7 @@ import top.sacz.bili.biz.login.api.SmsLoginApi
 import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.Geetest
 import top.sacz.bili.biz.login.model.Tencent
-import top.sacz.bili.shared.common.logger.Logger
+import top.sacz.bili.shared.common.logger.LogUtils
 
 class GeeTestViewModel : ViewModel() {
     private val _captcha = MutableStateFlow<BiliResponse<Captcha>>(BiliResponse.Loading)
@@ -33,7 +33,7 @@ class GeeTestViewModel : ViewModel() {
             val recaptchaUrl = captcha.recaptchaUrl
             if (recaptchaUrl.isEmpty()) {
                 //如果recaptchaUrl没有返回数据 那么就走默认的验证码
-                Logger.d("recaptchaUrl is empty(走默认验证码,而不是手机号专属geetest)")
+                LogUtils.d("recaptchaUrl is empty(走默认验证码,而不是手机号专属geetest)")
                 _captcha.value = apiCall {
                     GeeTestApi().captcha()
                 }

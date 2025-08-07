@@ -6,7 +6,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import top.sacz.bili.api.ApiException
 import top.sacz.bili.api.BiliResponse
-import top.sacz.bili.shared.common.logger.Logger
+import top.sacz.bili.shared.common.logger.LogUtils
 
 /**
  * 调用API接口 并在失败时自动返回Error
@@ -16,7 +16,7 @@ suspend inline fun <T> apiCall(crossinline call: suspend CoroutineScope.() -> Bi
         try {
             return@withContext call()
         } catch (e: Throwable) {
-            Logger.e("ApiCall", e)
+            LogUtils.e("ApiCall", e)
             return@withContext ApiException.build(e).toResponse()
         }
     }
