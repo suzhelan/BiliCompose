@@ -155,4 +155,40 @@ class FollowListViewModel : BaseViewModel() {
             showMessageDialog(message = it.message ?: "")
         }
     }
+
+
+    val isShowDeleteTagDialog = MutableStateFlow(false)
+    val deleteTagId = MutableStateFlow(0)
+
+    /**
+     * 判断该分组是否有用户
+     */
+    fun hasUserInTag(tagId: Int, onSuccess: (haUser: Boolean) -> Unit) = launchTask {
+        val tag = api.queryFollowList(tagId = tagId)
+        deleteTagId.value = tagId
+        if (tag.code == 0) {
+            val tag = tag.data
+            onSuccess(tag.isNotEmpty())
+        } else {
+            showMessageDialog(message = tag.message)
+        }
+    }
+
+    fun removeTagUI(tagId: Int) {
+        //先在tags中删除 保持最佳ui效果
+        _tags.removeAll { it.tagid == tagId }
+    }
+
+    fun deleteTag(tagId: Int) = launchTask {
+        val result = api.deleteTag(tagId)
+        if (result.code == 0) {
+            queryTags()
+        } else {
+            showMessageDialog(message = result.message)
+        }
+    }.invokeOnCompletion { e ->
+        e?.let {
+            showMessageDialog(message = it.message ?: "")
+        }
+    }
 }

@@ -39,49 +39,6 @@ class RelationApi {
     }
 
     /**
-     * 获取分组列表 不包含-20(全部分组)
-     * 包含
-     * -10(特别关注)
-     * 0(默认分组)
-     * 331816752(自定义的分组)
-     */
-    suspend fun queryTags(): BiliResponse.Success<List<RelationTags>> {
-        return ktor.get("/x/relation/tags") {
-            url {
-                parameter("access_key", LoginMapper.getAccessKey())
-            }
-        }.body()
-    }
-
-    /**
-     * 查询用户所在分组
-     * @param mid 用户mid
-     * @return 用户所在的分组列表
-     */
-    suspend fun queryUserInTags(mid: Long): BiliResponse.Success<Map<Int, String>> {
-        return ktor.get("/x/relation/tag/user") {
-            url {
-                parameter("access_key", LoginMapper.getAccessKey())
-                parameter("fid", mid)
-            }
-        }.body()
-    }
-
-    /**
-     * 创建分组
-     * @param tagName 分组名称
-     * @return
-     */
-    suspend fun createTag(tagName: String): BiliResponse.SuccessOrNull<Map<String, Int>> {
-        return ktor.post("/x/relation/tag/create") {
-            setBody(FormDataContent(parameters {
-                append("access_key", LoginMapper.getAccessKey())
-                append("tag", tagName)
-            }))
-        }.body()
-    }
-
-    /**
      * 获取关注列表
      * @param tagId 关注标签id
      *  0：默认分组
@@ -133,6 +90,63 @@ class RelationApi {
                 parameter("access_key", LoginMapper.getAccessKey())
                 parameter("fids", mids)
             }
+        }.body()
+    }
+
+    /**
+     * 获取分组列表 不包含-20(全部分组)
+     * 包含
+     * -10(特别关注)
+     * 0(默认分组)
+     * 331816752(自定义的分组)
+     */
+    suspend fun queryTags(): BiliResponse.Success<List<RelationTags>> {
+        return ktor.get("/x/relation/tags") {
+            url {
+                parameter("access_key", LoginMapper.getAccessKey())
+            }
+        }.body()
+    }
+
+    /**
+     * 查询用户所在分组
+     * @param mid 用户mid
+     * @return 用户所在的分组列表
+     */
+    suspend fun queryUserInTags(mid: Long): BiliResponse.Success<Map<Int, String>> {
+        return ktor.get("/x/relation/tag/user") {
+            url {
+                parameter("access_key", LoginMapper.getAccessKey())
+                parameter("fid", mid)
+            }
+        }.body()
+    }
+
+    /**
+     * 创建分组
+     * @param tagName 分组名称
+     * @return
+     */
+    suspend fun createTag(tagName: String): BiliResponse.SuccessOrNull<Map<String, Int>> {
+        return ktor.post("/x/relation/tag/create") {
+            setBody(FormDataContent(parameters {
+                append("access_key", LoginMapper.getAccessKey())
+                append("tag", tagName)
+            }))
+        }.body()
+    }
+
+    /**
+     * 删除分组
+     * @param tagId 分组id
+     * @return
+     */
+    suspend fun deleteTag(tagId: Int): BiliResponse.SuccessOrNull<Nothing> {
+        return ktor.post("/x/relation/tag/del") {
+            setBody(FormDataContent(parameters {
+                append("access_key", LoginMapper.getAccessKey())
+                append("tagid", tagId.toString())
+            }))
         }.body()
     }
 }

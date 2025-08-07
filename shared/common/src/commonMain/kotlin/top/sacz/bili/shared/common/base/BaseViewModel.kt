@@ -38,6 +38,9 @@ abstract class BaseViewModel : ViewModel() {
             title = title,
             text = message,
             confirmButtonText = "确定",
+            onDismissRequest = {
+                dismissDialog()
+            },
             onConfirmRequest = {
                 dismissDialog()
             }

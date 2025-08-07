@@ -24,9 +24,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -120,10 +120,12 @@ object FollowListScreen : Screen {
         }
         ScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
-            edgePadding = 0.dp
+            edgePadding = 0.dp,
+            modifier = Modifier.fillMaxWidth(),
         ) {
             tags.forEachIndexed { index, item ->
-                Tab(
+                LeadingIconTab(
+                    icon = {},
                     text = {
                         Text(text = item.name)
                     },

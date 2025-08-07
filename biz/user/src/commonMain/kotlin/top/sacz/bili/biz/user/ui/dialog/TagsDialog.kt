@@ -1,5 +1,6 @@
 package top.sacz.bili.biz.user.ui.dialog
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,20 +9,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +40,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +51,9 @@ import androidx.constraintlayout.compose.Dimension
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.user.entity.RelationTags
 import top.sacz.bili.biz.user.viewmodel.FollowListViewModel
+import top.sacz.bili.shared.common.ext.toFalse
+import top.sacz.bili.shared.common.ext.toTrue
+import top.sacz.bili.shared.common.ui.dialog.WarnDialog
 import top.sacz.bili.shared.common.ui.theme.TipTextColor
 
 
@@ -64,6 +80,8 @@ fun TagsDialog(
     val tagsCheckedMap: Map<Int, Boolean> = vm.tagsCheckedMap
 
     val isShowCreateTagDialog by vm.isShowCreateTagDialog.collectAsState()
+    val isShowDeleteTagDialog by vm.isShowDeleteTagDialog.collectAsState()
+    val deleteTag by vm.deleteTagId.collectAsState()
     if (isShowCreateTagDialog) {
         CreateTagDialog(
             vm = vm,
@@ -72,6 +90,20 @@ fun TagsDialog(
             },
             onDismissRequest = {
                 vm.closeCreateTagDialog()
+            }
+        )
+    }
+    if (isShowDeleteTagDialog) {
+        WarnDialog(
+            title = "删除分组",
+            text = "该分组下还有用户,确定要删除该分组吗？",
+            confirmButtonText = "删除",
+            onConfirmRequest = {
+                vm.deleteTag(deleteTag)
+                vm.isShowDeleteTagDialog.toFalse()
+            },
+            onDismissRequest = {
+                vm.isShowDeleteTagDialog.toFalse()
             }
         )
     }
@@ -116,23 +148,41 @@ fun TagsDialog(
                             Text(text = "保存")
                         }
                     }
-                    for (tag in allTags) {
-                        Spacer(modifier = Modifier.size(8.dp))
-                        TagItem(
-                            tag = tag,
-                            isChecked = tagsCheckedMap[tag.tagid] ?: false,
-                            onChecked = { checked ->
-                                vm.updateTagsCheckedMap(tag.tagid, checked)
-                            }
-                        )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(
+                            items = allTags,
+                            key = { tag -> tag.tagid }
+                        ) { tag ->
+                            TodoListItemWithAnimation(
+                                tag = tag,
+                                isChecked = tagsCheckedMap[tag.tagid] ?: false,
+                                onUpdate = { checked ->
+                                    vm.updateTagsCheckedMap(tag.tagid, checked)
+                                },
+                                onRemove = {
+                                    //删除
+                                    vm.hasUserInTag(tag.tagid) { haUser ->
+                                        vm.removeTagUI(tag.tagid)
+                                        //有用户的话展示一下dialog
+                                        if (haUser) {
+                                            vm.isShowDeleteTagDialog.toTrue()
+                                        } else {
+                                            //没有用户则直接删除
+                                            vm.deleteTag(tag.tagid)
+                                        }
+                                    }
+                                }
+                            )
+                            Spacer(modifier = Modifier.size(8.dp))
+                        }
                     }
-
                 }
             }
         }
     }
-
-
 }
 
 @Composable
@@ -228,4 +278,71 @@ private fun CreateTagDialog(
             }
         }
     )
+}
+
+/**
+ * 可左右滑的列表项
+ */
+@Composable
+fun TodoListItemWithAnimation(
+    tag: RelationTags,
+    isChecked: Boolean,
+    onUpdate: (Boolean) -> Unit,
+    onRemove: (RelationTags) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+
+    //监听拖动状态
+    val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart) onRemove(tag)
+            false//松手还原状态
+        },
+        positionalThreshold = { fullSize ->
+            fullSize.times(0.5f)
+        },
+    )
+
+    SwipeToDismissBox(
+        state = swipeToDismissBoxState,
+        modifier = modifier.fillMaxWidth()
+            .wrapContentHeight()
+            .clip(CardDefaults.shape),
+        backgroundContent = {
+            when (swipeToDismissBoxState.dismissDirection) {
+                //从左到右
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    //什么都没有
+                }
+                //从右到左
+                SwipeToDismissBoxValue.EndToStart -> {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Remove item",
+                        modifier = Modifier.fillMaxSize()
+                            .background(
+                                lerp(
+                                    Color.LightGray,
+                                    Color.Red,
+                                    swipeToDismissBoxState.progress
+                                )
+                            )
+                            .wrapContentSize(Alignment.CenterEnd)
+                            .padding(12.dp),
+                        tint = Color.White
+                    )
+                }
+
+                SwipeToDismissBoxValue.Settled -> {}
+            }
+        }
+    ) {
+        TagItem(
+            tag = tag,
+            isChecked = isChecked,
+            onChecked = {
+                onUpdate(it)
+            }
+        )
+    }
 }
