@@ -34,6 +34,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -78,8 +79,6 @@ fun TagsDialog(
     }
     //获取用户所在的分组
     val userInTags by vm.userInTags.collectAsState()
-    //选中的状态
-    val tagsCheckedMap: Map<Int, Boolean> = vm.tagsCheckedMap
 
     val isShowCreateTagDialog by vm.isShowCreateTagDialog.collectAsState()
     val isShowDeleteTagDialog by vm.isShowDeleteTagDialog.collectAsState()
@@ -181,25 +180,7 @@ fun TagsDialog(
                         ) { tag ->
                             TodoListItemWithAnimation(
                                 tag = tag,
-                                isChecked = tagsCheckedMap[tag.tagid] ?: false,
-                                onUpdate = { checked ->
-                                    vm.updateTagsCheckedMap(tag.tagid, checked)
-                                },
-                                onRemove = {
-                                    //删除
-                                    vm.hasUserInTag(tag.tagid) { haUser ->
-                                        //有用户的话展示一下dialog
-                                        if (haUser) {
-                                            vm.isShowDeleteTagDialog.toTrue()
-                                        } else {
-                                            //没有用户则直接删除
-                                            vm.deleteTag(tag.tagid)
-                                        }
-                                    }
-                                },
-                                onRename = {
-                                    vm.showRenameTagDialog(tag)
-                                },
+                                vm = vm,
                             )
                             Spacer(modifier = Modifier.size(8.dp))
                         }
@@ -212,28 +193,53 @@ fun TagsDialog(
 
 /**
  * 可左右滑的列表项
+ *
  */
 @Composable
-fun TodoListItemWithAnimation(
+private fun TodoListItemWithAnimation(
     tag: RelationTags,
-    isChecked: Boolean,
-    onUpdate: (Boolean) -> Unit,
-    onRemove: () -> Unit,
-    onRename: () -> Unit,
+    vm: FollowListViewModel,
     modifier: Modifier = Modifier,
 ) {
-
+    //选中的状态
+    val tagsCheckedMap: Map<Int, Boolean> = vm.tagsCheckedMap
+    // 监听删除确认对话框状态，在对话框关闭时（取消删除）重置滑动状态
+    val isShowDeleteTagDialog by vm.isShowDeleteTagDialog.collectAsState()
     //监听拖动状态
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10) onRemove()
-            if (it == SwipeToDismissBoxValue.StartToEnd && tag.tagid != -10) onRename()
-            it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10//松手还原状态
+            if (it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10) {
+                //删除
+                vm.hasUserInTag(tag.tagid) { haUser ->
+                    //有用户的话展示一下dialog
+                    if (haUser) {
+                        vm.isShowDeleteTagDialog.toTrue()
+                    } else {
+                        //没有用户则直接删除
+                        vm.deleteTag(tag.tagid)
+                    }
+                }
+            }
+            if (it == SwipeToDismissBoxValue.StartToEnd && tag.tagid != -10) {
+                vm.showRenameTagDialog(tag)
+            }
+            when {
+                tag.tagid == -10 -> false
+                it == SwipeToDismissBoxValue.EndToStart && !isShowDeleteTagDialog -> true
+                else -> false
+            }
         },
         positionalThreshold = { fullSize ->
             fullSize.times(0.5f)
         },
     )
+
+    LaunchedEffect(isShowDeleteTagDialog) {
+        if (!isShowDeleteTagDialog) {
+            // 对话框关闭时重置滑动状态
+            swipeToDismissBoxState.reset()
+        }
+    }
 
     SwipeToDismissBox(
         state = swipeToDismissBoxState,
@@ -288,9 +294,9 @@ fun TodoListItemWithAnimation(
     ) {
         TagItem(
             tag = tag,
-            isChecked = isChecked,
-            onChecked = {
-                onUpdate(it)
+            isChecked = tagsCheckedMap[tag.tagid] ?: false,
+            onChecked = { checked ->
+                vm.updateTagsCheckedMap(tag.tagid, checked)
             }
         )
     }
