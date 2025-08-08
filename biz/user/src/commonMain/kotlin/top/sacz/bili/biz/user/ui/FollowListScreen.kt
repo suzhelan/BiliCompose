@@ -4,6 +4,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,10 +24,9 @@ import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -118,24 +118,27 @@ object FollowListScreen : Screen {
             LoadingIndicator()
             return
         }
-        ScrollableTabRow(
-            selectedTabIndex = pagerState.currentPage,
-            edgePadding = 0.dp,
-            modifier = Modifier.fillMaxWidth(),
+
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            tags.forEachIndexed { index, item ->
-                LeadingIconTab(
-                    icon = {},
-                    text = {
-                        Text(text = item.name)
-                    },
+            tags.forEachIndexed { index, tag ->
+                FilterChip(
                     selected = pagerState.currentPage == index,
                     onClick = {
                         scoop.launch { pagerState.animateScrollToPage(index) }
+                    },
+                    label = {
+                        Text(text = tag.name)
                     }
                 )
             }
         }
+
         HorizontalPager(
             state = pagerState,
         ) { page ->
