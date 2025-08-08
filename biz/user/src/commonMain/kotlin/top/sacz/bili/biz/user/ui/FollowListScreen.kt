@@ -200,13 +200,12 @@ object FollowListScreen : Screen {
         ConstraintLayout(
             modifier = Modifier.fillMaxWidth()
                 .height(70.dp)
-                .padding(10.dp)
                 .combinedClickable(
                     onClick = {},
                     onLongClick = {
                         vm.showSettingTagsDialog(item.mid)
                     }
-                )
+                ).padding(10.dp)
         ) {
             //元素内容 头像 昵称 签名 关注按钮 头像左下角会员标识
             val (avatar, text, followBtn, actionLoading) = createRefs()
