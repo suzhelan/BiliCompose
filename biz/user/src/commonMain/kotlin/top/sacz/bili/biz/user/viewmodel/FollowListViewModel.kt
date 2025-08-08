@@ -114,6 +114,9 @@ class FollowListViewModel : BaseViewModel() {
     val userInTags = MutableStateFlow<BiliResponse<Map<Int, String>>>(BiliResponse.Loading)
     private fun getUserInTags(mid: Long) = launchTask {
         _tagsCheckedMap.clear()
+        _tags.forEach { tags ->
+            _tagsCheckedMap[tags.tagid] = false
+        }
         userInTags.value = BiliResponse.Loading
         userInTags.value = apiCall {
             api.queryUserInTags(mid)
@@ -183,6 +186,38 @@ class FollowListViewModel : BaseViewModel() {
         }
     }.invokeOnCompletion { e ->
         e?.let {
+            showMessageDialog(message = it.message ?: "")
+        }
+    }
+
+    /**
+     * 保存弹窗中的用户分组信息
+     * 其实可以用 [RelationApi.moveUserToTag] 即可一次完成请求 但是实在太难用
+     */
+    fun saveUserInTagInfo(onSuccess: () -> Unit) = launchTask {
+        //从已选择的tagId筛选出移动目标的tagId
+        val targetTagIds = tagsCheckedMap.filter {
+            it.value
+        }.map { it.key }
+
+        api.deleteUserFromTag(tagSettingsMid.value).apply {
+            if (code == 0) {
+                onSuccess()
+            } else {
+                showMessageDialog(message = message)
+            }
+        }
+        if (targetTagIds.isNotEmpty()) {
+            api.addUserToTag(listOf(tagSettingsMid.value), targetTagIds).apply {
+                if (code == 0) {
+                    onSuccess()
+                } else {
+                    showMessageDialog(message = message)
+                }
+            }
+        }
+    }.invokeOnCompletion {
+        it?.let {
             showMessageDialog(message = it.message ?: "")
         }
     }

@@ -142,7 +142,11 @@ fun TagsDialog(
                             Text(text = "新建分组")
                         }
                         TextButton(
-                            onClick = {}
+                            onClick = {
+                                vm.saveUserInTagInfo {
+                                    vm.closeSettingTagsDialog()
+                                }
+                            }
                         ) {
                             Icon(imageVector = Icons.Outlined.Save, contentDescription = "Save")
                             Text(text = "保存")

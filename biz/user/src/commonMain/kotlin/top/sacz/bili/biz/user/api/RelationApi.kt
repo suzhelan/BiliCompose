@@ -149,4 +149,69 @@ class RelationApi {
             }))
         }.body()
     }
+
+    /**
+     * 将用户移动到默认分组
+     **/
+    suspend fun deleteUserFromTag(
+        fid: Long,
+    ): BiliResponse.SuccessOrNull<Nothing> {
+        return ktor.post("/x/relation/tags/addUsers") {
+            setBody(FormDataContent(parameters {
+                append("access_key", LoginMapper.getAccessKey())
+                append("tagids", "0")
+                append("fids", fid.toString())
+            }))
+        }.body()
+    }
+
+    /**
+     * 添加用户到分组
+     */
+    suspend fun addUserToTag(
+        fids: List<Long>,
+        tagIds: List<Int>,
+    ): BiliResponse.SuccessOrNull<Nothing> {
+        return ktor.post("/x/relation/tags/addUsers") {
+            setBody(FormDataContent(parameters {
+                append("access_key", LoginMapper.getAccessKey())
+                append("tagids", tagIds.joinToString(","))
+                append("fids", fids.joinToString(","))
+            }))
+        }.body()
+    }
+
+    /**
+     * 批量移动用户到分组
+     * 操作难度极高
+     * 已知问题 所有字段均不能为空
+     * 新旧任何不能重复
+     * 出现操作关注分组 也容易出错
+     * 优点 一次请求就能完成移动
+     * 缺点 难用
+     * 推荐使用 [deleteUserFromTag] + [addUserToTag]
+     */
+    suspend fun moveUserToTag(
+        fids: List<Long>,
+        beforeTagIds: List<Int>,
+        afterTagIds: List<Int>
+    ): BiliResponse.SuccessOrNull<Nothing> {
+        if (fids.isEmpty()) {
+            throw IllegalArgumentException("fids is empty")
+        }
+        if (beforeTagIds.isEmpty()) {
+            throw IllegalArgumentException("beforeTagIds is empty")
+        }
+        if (afterTagIds.isEmpty()) {
+            throw IllegalArgumentException("afterTagIds is empty")
+        }
+        return ktor.post("x/relation/tags/moveUsers") {
+            setBody(FormDataContent(parameters {
+                append("access_key", LoginMapper.getAccessKey())
+                append("beforeTagids", beforeTagIds.joinToString(","))
+                append("afterTagids", afterTagIds.joinToString(","))
+                append("fids", fids.joinToString(","))
+            }))
+        }.body()
+    }
 }
