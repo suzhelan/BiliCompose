@@ -174,11 +174,6 @@ class FollowListViewModel : BaseViewModel() {
         }
     }
 
-    fun removeTagUI(tagId: Int) {
-        //先在tags中删除 保持最佳ui效果
-        _tags.removeAll { it.tagid == tagId }
-    }
-
     fun deleteTag(tagId: Int) = launchTask {
         val result = api.deleteTag(tagId)
         if (result.code == 0) {

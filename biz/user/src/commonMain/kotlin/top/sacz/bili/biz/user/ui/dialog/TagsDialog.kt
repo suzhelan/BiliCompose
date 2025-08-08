@@ -165,7 +165,6 @@ fun TagsDialog(
                                 onRemove = {
                                     //删除
                                     vm.hasUserInTag(tag.tagid) { haUser ->
-                                        vm.removeTagUI(tag.tagid)
                                         //有用户的话展示一下dialog
                                         if (haUser) {
                                             vm.isShowDeleteTagDialog.toTrue()
@@ -296,7 +295,7 @@ fun TodoListItemWithAnimation(
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
             if (it == SwipeToDismissBoxValue.EndToStart) onRemove(tag)
-            false//松手还原状态
+            it == SwipeToDismissBoxValue.EndToStart//松手还原状态
         },
         positionalThreshold = { fullSize ->
             fullSize.times(0.5f)
