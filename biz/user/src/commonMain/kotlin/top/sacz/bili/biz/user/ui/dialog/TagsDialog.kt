@@ -298,8 +298,8 @@ fun TodoListItemWithAnimation(
     //监听拖动状态
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart) onRemove(tag)
-            it == SwipeToDismissBoxValue.EndToStart//松手还原状态
+            if (it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10) onRemove(tag)
+            it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10//松手还原状态
         },
         positionalThreshold = { fullSize ->
             fullSize.times(0.5f)
@@ -312,31 +312,35 @@ fun TodoListItemWithAnimation(
             .wrapContentHeight()
             .clip(CardDefaults.shape),
         backgroundContent = {
-            when (swipeToDismissBoxState.dismissDirection) {
-                //从左到右
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    //什么都没有
-                }
-                //从右到左
-                SwipeToDismissBoxValue.EndToStart -> {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Remove item",
-                        modifier = Modifier.fillMaxSize()
-                            .background(
-                                lerp(
-                                    Color.LightGray,
-                                    Color.Red,
-                                    swipeToDismissBoxState.progress
-                                )
+            if (tag.tagid != -10) {
+                when (swipeToDismissBoxState.dismissDirection) {
+                    //从左到右
+                    SwipeToDismissBoxValue.StartToEnd -> {
+                        //什么都没有
+                    }
+                    //从右到左
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        if (tag.tagid != -10) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Remove item",
+                                modifier = Modifier.fillMaxSize()
+                                    .background(
+                                        lerp(
+                                            Color.LightGray,
+                                            Color.Red,
+                                            swipeToDismissBoxState.progress
+                                        )
+                                    )
+                                    .wrapContentSize(Alignment.CenterEnd)
+                                    .padding(12.dp),
+                                tint = Color.White
                             )
-                            .wrapContentSize(Alignment.CenterEnd)
-                            .padding(12.dp),
-                        tint = Color.White
-                    )
-                }
+                        }
+                    }
 
-                SwipeToDismissBoxValue.Settled -> {}
+                    SwipeToDismissBoxValue.Settled -> {}
+                }
             }
         }
     ) {

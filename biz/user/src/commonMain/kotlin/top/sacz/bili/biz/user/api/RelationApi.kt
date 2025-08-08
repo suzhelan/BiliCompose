@@ -17,6 +17,11 @@ import top.sacz.bili.shared.auth.config.LoginMapper
 
 /**
  * 用户关系api
+ * 分组
+ * 0：默认分组
+ * -10：特别关注
+ * -20：所有
+ * 其他: 自定义分组
  */
 class RelationApi {
 
