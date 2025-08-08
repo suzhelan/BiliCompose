@@ -92,14 +92,10 @@ class FollowListViewModel : BaseViewModel() {
     //是否展示设置分组的对话框
     val isShowSettingTagsDialog = MutableStateFlow(false)
     val tagSettingsMid = MutableStateFlow(0L)
-    fun openSettingTagsDialog(targetMid: Long) {
+    fun showSettingTagsDialog(targetMid: Long) {
         tagSettingsMid.value = targetMid
         isShowSettingTagsDialog.value = true
         getUserInTags(targetMid)
-    }
-
-    fun closeSettingTagsDialog() {
-        isShowSettingTagsDialog.value = false
     }
 
 
@@ -136,17 +132,35 @@ class FollowListViewModel : BaseViewModel() {
 
     val isShowCreateTagDialog = MutableStateFlow(false)
 
-    fun openCreateTagDialog() {
-        isShowCreateTagDialog.value = true
-    }
-
-    fun closeCreateTagDialog() {
-        isShowCreateTagDialog.value = false
-    }
 
     fun createTag(tagName: String, onSuccess: () -> Unit) = launchTask {
         setShowLoading()
         val result = api.createTag(tagName)
+        if (result.code == 0) {
+            onSuccess()
+            dismissDialog()
+        } else {
+            showMessageDialog(message = result.message)
+        }
+    }.invokeOnCompletion { e ->
+        e?.let {
+            showMessageDialog(message = it.message ?: "")
+        }
+    }
+
+    val isShowRenameTagDialog = MutableStateFlow(false)
+    val renameTag = MutableStateFlow(RelationTags(0, "", 0, ""))
+    fun showRenameTagDialog(tag: RelationTags) {
+        renameTag.value = tag
+        isShowRenameTagDialog.value = true
+    }
+
+    /**
+     * 重命名分组
+     */
+    fun renameTag(tagId: Int, tagName: String, onSuccess: () -> Unit) = launchTask {
+        setShowLoading()
+        val result = api.renameTag(tagId, tagName)
         if (result.code == 0) {
             onSuccess()
             dismissDialog()
@@ -199,7 +213,7 @@ class FollowListViewModel : BaseViewModel() {
         val targetTagIds = tagsCheckedMap.filter {
             it.value
         }.map { it.key }
-
+        //先把用户从别的分组移动到默认分组
         api.deleteUserFromTag(tagSettingsMid.value).apply {
             if (code == 0) {
                 onSuccess()
@@ -207,6 +221,7 @@ class FollowListViewModel : BaseViewModel() {
                 showMessageDialog(message = message)
             }
         }
+        //再把用户添加到目标分组
         if (targetTagIds.isNotEmpty()) {
             api.addUserToTag(listOf(tagSettingsMid.value), targetTagIds).apply {
                 if (code == 0) {

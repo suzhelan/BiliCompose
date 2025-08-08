@@ -219,4 +219,18 @@ class RelationApi {
             }))
         }.body()
     }
+
+    /**
+     * 重命名分组
+     */
+    suspend fun renameTag(tagId: Int, name: String): BiliResponse.SuccessOrNull<Nothing> {
+        return ktor.post("/x/relation/tag/update") {
+            setBody(FormDataContent(parameters {
+                append("access_key", LoginMapper.getAccessKey())
+                append("tagid", tagId.toString())
+                append("name", name)
+            }))
+        }.body()
+    }
+
 }

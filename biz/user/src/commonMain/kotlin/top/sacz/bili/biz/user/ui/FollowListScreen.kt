@@ -204,7 +204,7 @@ object FollowListScreen : Screen {
                 .combinedClickable(
                     onClick = {},
                     onLongClick = {
-                        vm.openSettingTagsDialog(item.mid)
+                        vm.showSettingTagsDialog(item.mid)
                     }
                 )
         ) {

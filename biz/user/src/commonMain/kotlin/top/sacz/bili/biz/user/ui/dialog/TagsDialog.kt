@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -54,6 +55,7 @@ import top.sacz.bili.biz.user.viewmodel.FollowListViewModel
 import top.sacz.bili.shared.common.ext.toFalse
 import top.sacz.bili.shared.common.ext.toTrue
 import top.sacz.bili.shared.common.ui.dialog.WarnDialog
+import top.sacz.bili.shared.common.ui.theme.ColorPrimary
 import top.sacz.bili.shared.common.ui.theme.TipTextColor
 
 
@@ -81,6 +83,8 @@ fun TagsDialog(
 
     val isShowCreateTagDialog by vm.isShowCreateTagDialog.collectAsState()
     val isShowDeleteTagDialog by vm.isShowDeleteTagDialog.collectAsState()
+    val isShowRenameTagDialog by vm.isShowRenameTagDialog.collectAsState()
+    val renameTag by vm.renameTag.collectAsState()
     val deleteTag by vm.deleteTagId.collectAsState()
     if (isShowCreateTagDialog) {
         CreateTagDialog(
@@ -89,7 +93,7 @@ fun TagsDialog(
                 onUpdate()
             },
             onDismissRequest = {
-                vm.closeCreateTagDialog()
+                vm.isShowCreateTagDialog.toFalse()
             }
         )
     }
@@ -107,6 +111,21 @@ fun TagsDialog(
             }
         )
     }
+    if (isShowRenameTagDialog) {
+        RenameTagDialog(
+            tag = renameTag,
+            onUpdate = { newTagName ->
+                vm.renameTag(tagId = renameTag.tagid, tagName = newTagName) {
+                    vm.queryTags()
+                    vm.isShowRenameTagDialog.toFalse()
+                }
+            },
+            onDismissRequest = {
+                vm.isShowRenameTagDialog.toFalse()
+            }
+        )
+    }
+
     ModalBottomSheet(
         modifier = Modifier.fillMaxHeight(),
         sheetState = sheetState,
@@ -135,7 +154,7 @@ fun TagsDialog(
                         Spacer(modifier = Modifier.weight(1f))
                         TextButton(
                             onClick = {
-                                vm.openCreateTagDialog()
+                                vm.isShowCreateTagDialog.toTrue()
                             }
                         ) {
                             Icon(imageVector = Icons.Outlined.Add, contentDescription = "Add")
@@ -144,7 +163,7 @@ fun TagsDialog(
                         TextButton(
                             onClick = {
                                 vm.saveUserInTagInfo {
-                                    vm.closeSettingTagsDialog()
+                                    vm.isShowSettingTagsDialog.toFalse()
                                 }
                             }
                         ) {
@@ -177,7 +196,10 @@ fun TagsDialog(
                                             vm.deleteTag(tag.tagid)
                                         }
                                     }
-                                }
+                                },
+                                onRename = {
+                                    vm.showRenameTagDialog(tag)
+                                },
                             )
                             Spacer(modifier = Modifier.size(8.dp))
                         }
@@ -188,6 +210,95 @@ fun TagsDialog(
     }
 }
 
+/**
+ * 可左右滑的列表项
+ */
+@Composable
+fun TodoListItemWithAnimation(
+    tag: RelationTags,
+    isChecked: Boolean,
+    onUpdate: (Boolean) -> Unit,
+    onRemove: () -> Unit,
+    onRename: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+
+    //监听拖动状态
+    val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10) onRemove()
+            if (it == SwipeToDismissBoxValue.StartToEnd && tag.tagid != -10) onRename()
+            it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10//松手还原状态
+        },
+        positionalThreshold = { fullSize ->
+            fullSize.times(0.5f)
+        },
+    )
+
+    SwipeToDismissBox(
+        state = swipeToDismissBoxState,
+        modifier = modifier.fillMaxWidth()
+            .wrapContentHeight()
+            .clip(CardDefaults.shape),
+        backgroundContent = {
+            if (tag.tagid != -10) {
+                when (swipeToDismissBoxState.dismissDirection) {
+                    //从左到右
+                    SwipeToDismissBoxValue.StartToEnd -> {
+                        //重命名
+                        Icon(
+                            imageVector = Icons.Outlined.Edit,
+                            contentDescription = "Remove item",
+                            modifier = Modifier.fillMaxSize()
+                                .background(
+                                    lerp(
+                                        Color.LightGray,
+                                        ColorPrimary,
+                                        swipeToDismissBoxState.progress
+                                    )
+                                )
+                                .wrapContentSize(Alignment.CenterStart)
+                                .padding(12.dp),
+                            tint = Color.White
+                        )
+                    }
+                    //从右到左
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Remove item",
+                            modifier = Modifier.fillMaxSize()
+                                .background(
+                                    lerp(
+                                        Color.LightGray,
+                                        Color.Red,
+                                        swipeToDismissBoxState.progress
+                                    )
+                                )
+                                .wrapContentSize(Alignment.CenterEnd)
+                                .padding(12.dp),
+                            tint = Color.White
+                        )
+                    }
+
+                    SwipeToDismissBoxValue.Settled -> {}
+                }
+            }
+        }
+    ) {
+        TagItem(
+            tag = tag,
+            isChecked = isChecked,
+            onChecked = {
+                onUpdate(it)
+            }
+        )
+    }
+}
+
+/**
+ * 实际显示分组的ItemUI
+ */
 @Composable
 private fun TagItem(tag: RelationTags, isChecked: Boolean, onChecked: (Boolean) -> Unit) {
     Card(
@@ -241,6 +352,10 @@ private fun TagItem(tag: RelationTags, isChecked: Boolean, onChecked: (Boolean) 
     }
 }
 
+
+/**
+ * 创建分组对话框
+ */
 @Composable
 private fun CreateTagDialog(
     vm: FollowListViewModel,
@@ -283,73 +398,45 @@ private fun CreateTagDialog(
     )
 }
 
+
 /**
- * 可左右滑的列表项
+ * 重命名分组对话框
  */
 @Composable
-fun TodoListItemWithAnimation(
+private fun RenameTagDialog(
     tag: RelationTags,
-    isChecked: Boolean,
-    onUpdate: (Boolean) -> Unit,
-    onRemove: (RelationTags) -> Unit,
-    modifier: Modifier = Modifier,
+    onUpdate: (newTagName: String) -> Unit,
+    onDismissRequest: () -> Unit
 ) {
-
-    //监听拖动状态
-    val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10) onRemove(tag)
-            it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10//松手还原状态
+    var tagName by remember {
+        mutableStateOf(tag.name)
+    }
+    AlertDialog(
+        onDismissRequest = {
+            onDismissRequest()
         },
-        positionalThreshold = { fullSize ->
-            fullSize.times(0.5f)
+        title = {
+            Text(text = "修改分组名称")
         },
-    )
-
-    SwipeToDismissBox(
-        state = swipeToDismissBoxState,
-        modifier = modifier.fillMaxWidth()
-            .wrapContentHeight()
-            .clip(CardDefaults.shape),
-        backgroundContent = {
-            if (tag.tagid != -10) {
-                when (swipeToDismissBoxState.dismissDirection) {
-                    //从左到右
-                    SwipeToDismissBoxValue.StartToEnd -> {
-                        //什么都没有
-                    }
-                    //从右到左
-                    SwipeToDismissBoxValue.EndToStart -> {
-                        if (tag.tagid != -10) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Remove item",
-                                modifier = Modifier.fillMaxSize()
-                                    .background(
-                                        lerp(
-                                            Color.LightGray,
-                                            Color.Red,
-                                            swipeToDismissBoxState.progress
-                                        )
-                                    )
-                                    .wrapContentSize(Alignment.CenterEnd)
-                                    .padding(12.dp),
-                                tint = Color.White
-                            )
-                        }
-                    }
-
-                    SwipeToDismissBoxValue.Settled -> {}
+        text = {
+            OutlinedTextField(
+                value = tagName,
+                onValueChange = {
+                    tagName = it
+                },
+                label = {
+                    Text(text = "分组名称")
                 }
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onUpdate(tagName)
+                }
+            ) {
+                Text(text = "重命名")
             }
         }
-    ) {
-        TagItem(
-            tag = tag,
-            isChecked = isChecked,
-            onChecked = {
-                onUpdate(it)
-            }
-        )
-    }
+    )
 }
