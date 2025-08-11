@@ -11,13 +11,16 @@ import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -81,6 +84,9 @@ private fun VideoPlayer(controller: PlayerSyncController)= Box(
     )
     val playbackState by controller.videoPlayer.playbackState.collectAsState()
 
+    // 添加一个用于跟踪Slider位置的状态
+    var sliderProgress by remember { mutableStateOf(0f) }
+
     val progress by combine(
         controller.videoPlayer.mediaProperties.filterNotNull(),
         controller.videoPlayer.currentPositionMillis
@@ -91,30 +97,46 @@ private fun VideoPlayer(controller: PlayerSyncController)= Box(
         (duration.toFloat() / properties.durationMillis.toFloat()).coerceIn(0f, 1f)
     }.collectAsState(0f)
 
+    // 当播放器进度更新时，同步更新slider的位置
+    LaunchedEffect(progress) {
+        sliderProgress = progress
+    }
+
     //播放进度条
-    LinearProgressIndicator(
-        progress = {
-            progress
+    Slider(
+        value = sliderProgress,
+        onValueChange = { newValue ->
+            // 更新Slider显示位置
+            sliderProgress = newValue
+            // 可以在这里添加实时预览功能
         },
-        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
-    )
-    // 添加一个透明的点击层
-    Box(
+        onValueChangeFinished = {
+            // 计算并跳转到指定位置
+            val duration = controller.videoPlayer.mediaProperties.value?.durationMillis ?: 0L
+            controller.seekTo((sliderProgress * duration).toLong())
+        },
         modifier = Modifier
             .fillMaxWidth()
-            .height(230.dp)
-            .clickable {
-                when (playbackState) {
-                    PlaybackState.PAUSED -> {
-                        controller.resume()
-                    }
-
-                    else -> {
-                        controller.pause()
-                    }
-                }
-            }
+            .align(Alignment.BottomCenter)
     )
+
+    /* // 添加一个透明的点击层
+     Box(
+         modifier = Modifier
+             .fillMaxWidth()
+             .height(230.dp)
+             .clickable {
+                 when (playbackState) {
+                     PlaybackState.PAUSED -> {
+                         controller.resume()
+                     }
+
+                     else -> {
+                         controller.pause()
+                     }
+                 }
+             }
+     )*/
 
     when (playbackState) {
         PlaybackState.READY -> {

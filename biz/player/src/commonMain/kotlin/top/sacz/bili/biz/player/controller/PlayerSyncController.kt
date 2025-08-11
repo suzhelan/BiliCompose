@@ -51,7 +51,7 @@ class PlayerSyncController(
     }
 
     /**
-     * 跳转到指定位置
+     * 跳转到指定位置 毫秒
      */
     fun seekTo(position: Long) {
         videoPlayer.seekTo(position)

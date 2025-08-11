@@ -31,7 +31,7 @@ data class SmallCoverV2Item(
     @SerialName("idx") override val idx: Int = 0,
     @SerialName("official_icon") val officialIcon: Int = 0,
     @SerialName("param") val `param`: String = "", // 视频aid
-    @SerialName("player_args") val playerArgs: PlayerArgs = PlayerArgs(), // 视频信息
+    @SerialName("player_args") val playerArgs: PlayerArgs, // 视频信息
     @SerialName("report_flow_data") val reportFlowData: String = "",
     @SerialName("talk_back") val talkBack: String = "",
     @SerialName("three_point") val threePoint: ThreePoint = ThreePoint(),
