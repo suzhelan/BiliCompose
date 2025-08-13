@@ -12,6 +12,7 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.ktor.client.core)
             implementation(libs.lifecycle.viewmodel.compose)
+            implementation(libs.lifecycle.runtime.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
             implementation(projects.shared.api)
