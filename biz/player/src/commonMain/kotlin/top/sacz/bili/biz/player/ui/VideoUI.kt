@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +26,7 @@ import top.sacz.bili.biz.player.controller.PlayerSyncController
 import top.sacz.bili.biz.player.controller.rememberPlayerSyncController
 import top.sacz.bili.biz.player.model.PlayerParams
 import top.sacz.bili.biz.player.ui.loading.BiliVideoLoadingIndicator
+import top.sacz.bili.biz.player.ui.progress.ProgressSlider
 import top.sacz.bili.biz.player.viewmodel.VideoPlayerViewModel
 
 @Composable
@@ -81,7 +81,9 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
 
     // 添加一个用于跟踪Slider位置的状态
     var sliderProgress by remember { mutableStateOf(0f) }
-
+    // 判断是否正在拖动进度条
+    var isDragging by remember { mutableStateOf(false) }
+    // 播放进度条
     val progress by combine(
         controller.videoPlayer.mediaProperties.filterNotNull(),
         controller.videoPlayer.currentPositionMillis
@@ -94,6 +96,9 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
 
     // 当播放器进度更新时，同步更新slider的位置
     LaunchedEffect(progress) {
+        if (isDragging) {
+            return@LaunchedEffect
+        }
         sliderProgress = progress
     }
 
@@ -102,22 +107,32 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
         modifier = Modifier.align(Alignment.Center),
         mediampPlayer = controller.videoPlayer
     )
-    //播放进度条
-    Slider(
-        value = sliderProgress,
-        onValueChange = { newValue ->
-            // 更新Slider显示位置
-            sliderProgress = newValue
-            // 可以在这里添加实时预览功能
-        },
-        onValueChangeFinished = {
-            // 计算并跳转到指定位置
-            val duration = controller.videoPlayer.mediaProperties.value?.durationMillis ?: 0L
-            controller.seekTo((sliderProgress * duration).toLong())
-        },
+
+    ProgressSlider(
         modifier = Modifier
             .fillMaxWidth()
             .align(Alignment.BottomCenter)
     )
+    /*    //播放进度条
+        Slider(
+            value = sliderProgress,
+            onValueChange = { newValue ->
+                isDragging = true
+                // 更新Slider显示位置
+                sliderProgress = newValue
+                // 可以在这里添加实时预览功
+            },
+            onValueChangeFinished = {
+                isDragging = false
+                // 计算并跳转到指定位置
+                val duration = controller.videoPlayer.mediaProperties.value?.durationMillis ?: 0L
+                controller.seekTo((sliderProgress * duration).toLong())
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .align(Alignment.BottomCenter)
+        )*/
+
 
 }
