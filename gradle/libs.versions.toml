@@ -2,11 +2,11 @@
 agp = "8.12.0"
 androidx-activityCompose = "1.10.1"
 androidx-appcompat = "1.7.1"
-androidx-lifecycle = "2.9.1"
+androidx-lifecycle = "2.9.2"
 androidx-material = "1.12.0"
 
 coil = "3.3.0"
-compose-multiplatform = "1.9.0-beta01"
+compose-multiplatform = "1.9.0-beta03"
 composeWebviewMultiplatform = "2.0.2"
 constraintlayoutComposeMultiplatform = "0.6.0"
 fastkv = "3.0.1"
@@ -25,7 +25,6 @@ pagingComposeCommon = "3.3.0-alpha02-0.5.1"
 sonner = "0.3.8"
 
 kotlinx-serialization = "1.9.0"
-uiToolingPreviewAndroid = "1.8.3"
 voyagerNavigator = "1.1.0-beta03"
 media3Exoplayer = "1.8.0"
 
@@ -86,7 +85,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
-androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
+androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "compose-multiplatform" }
 fastkv = { module = "io.github.billywei01:fastkv", version.ref = "fastkv" }
 
 #ios
