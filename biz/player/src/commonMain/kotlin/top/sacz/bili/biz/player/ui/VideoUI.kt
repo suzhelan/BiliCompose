@@ -11,22 +11,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import org.openani.mediamp.compose.MediampPlayerSurface
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.player.controller.PlayerSyncController
 import top.sacz.bili.biz.player.controller.rememberPlayerSyncController
 import top.sacz.bili.biz.player.model.PlayerParams
 import top.sacz.bili.biz.player.ui.loading.BiliVideoLoadingIndicator
-import top.sacz.bili.biz.player.ui.progress.ProgressSlider
+import top.sacz.bili.biz.player.ui.progress.PlayerProgressSlider
+import top.sacz.bili.biz.player.ui.progress.rememberPlayerProgressSliderState
 import top.sacz.bili.biz.player.viewmodel.VideoPlayerViewModel
 
 @Composable
@@ -78,29 +74,25 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
         controller.videoPlayer,
         Modifier.fillMaxSize()
     )
-
+    // 总时长
+    val totalDurationMillis by controller.videoPlayer.mediaProperties.collectAsState()
+    // 当前播放进度
+    val currentPositionMillis by controller.videoPlayer.currentPositionMillis.collectAsState()
     // 添加一个用于跟踪Slider位置的状态
-    var sliderProgress by remember { mutableStateOf(0f) }
-    // 判断是否正在拖动进度条
-    var isDragging by remember { mutableStateOf(false) }
-    // 播放进度条
-    val progress by combine(
-        controller.videoPlayer.mediaProperties.filterNotNull(),
-        controller.videoPlayer.currentPositionMillis
-    ) { properties, duration ->
-        if (properties.durationMillis == 0L) {
-            return@combine 0f
+    val progressSliderState = rememberPlayerProgressSliderState(
+        currentPositionMillis = {
+            currentPositionMillis
+        },
+        totalDurationMillis = {
+            totalDurationMillis?.durationMillis ?: 0L
+        },
+        onProView = {
+        },
+        onFinished = {
+            controller.seekTo(it)
         }
-        (duration.toFloat() / properties.durationMillis.toFloat()).coerceIn(0f, 1f)
-    }.collectAsState(0f)
+    )
 
-    // 当播放器进度更新时，同步更新slider的位置
-    LaunchedEffect(progress) {
-        if (isDragging) {
-            return@LaunchedEffect
-        }
-        sliderProgress = progress
-    }
 
     //加载指示器
     BiliVideoLoadingIndicator(
@@ -108,31 +100,11 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
         mediampPlayer = controller.videoPlayer
     )
 
-    ProgressSlider(
+    PlayerProgressSlider(
         modifier = Modifier
             .fillMaxWidth()
-            .align(Alignment.BottomCenter)
+            .align(Alignment.BottomCenter),
+        state = progressSliderState,
     )
-    /*    //播放进度条
-        Slider(
-            value = sliderProgress,
-            onValueChange = { newValue ->
-                isDragging = true
-                // 更新Slider显示位置
-                sliderProgress = newValue
-                // 可以在这里添加实时预览功
-            },
-            onValueChangeFinished = {
-                isDragging = false
-                // 计算并跳转到指定位置
-                val duration = controller.videoPlayer.mediaProperties.value?.durationMillis ?: 0L
-                controller.seekTo((sliderProgress * duration).toLong())
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .align(Alignment.BottomCenter)
-        )*/
-
 
 }
