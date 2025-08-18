@@ -6,6 +6,7 @@ import io.ktor.client.request.parameter
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
+import top.sacz.bili.biz.player.model.OnlineCount
 import top.sacz.bili.biz.player.model.PlayerArgsItem
 import top.sacz.bili.biz.player.model.VideoInfo
 
@@ -117,6 +118,24 @@ class VideoPlayerApi {
                     parameter(key, value)
                 }
             }
+        }.body()
+    }
+
+    /**
+     * 获取视频在线观看数量文本
+     */
+    suspend fun getVideoOnlineCountText(
+        aid: Long,
+        cid: Long
+    ): BiliResponse.Success<OnlineCount> {
+        val appClient = getKtorClient(AppConfig.APP_BASE_URL)
+        return appClient.get(
+            "/x/v2/view/video/online"
+        ) {
+            //添加视频信息参数
+            parameter("aid", aid)
+            parameter("cid", cid)
+            //key sign ts等参数由client自行填充
         }.body()
     }
 }

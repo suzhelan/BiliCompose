@@ -104,6 +104,7 @@ fun getKtorClient(
                 //添加公共参数
                 rawParamMap.putAll(commonParams)
                 //进行签名
+                rawParamMap["appkey"] = appKeyType.appKey
                 val sign = BiliSignUtils(appKeyType).sign(rawParamMap)
                 rawParamMap["sign"] = sign
                 //添加wbi参数
@@ -131,6 +132,7 @@ fun getKtorClient(
                 //添加公共参数
                 paramMap.putAll(commonParams)
                 //进行签名
+                paramMap["appkey"] = appKeyType.appKey
                 val sign = BiliSignUtils(appKeyType).sign(paramMap)
                 paramMap["sign"] = sign
                 //构建新的请求体

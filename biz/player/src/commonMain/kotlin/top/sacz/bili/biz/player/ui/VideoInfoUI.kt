@@ -72,7 +72,11 @@ fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel = vi
 }
 
 @Composable
-private fun VideoDetailsUI(videoInfo: VideoInfo, userViewModel: UserViewModel = viewModel()) {
+private fun VideoDetailsUI(
+    videoInfo: VideoInfo,
+    userViewModel: UserViewModel = viewModel(),
+    viewModel: VideoPlayerViewModel = viewModel()
+) {
     val userCard by userViewModel.userCard.collectAsState()
     LaunchedEffect(videoInfo) {
         userViewModel.getUserInfo(mid = videoInfo.owner.mid)
@@ -86,7 +90,12 @@ private fun VideoDetailsUI(videoInfo: VideoInfo, userViewModel: UserViewModel = 
 }
 
 @Composable
-private fun VideoBasicInfoUI(videoInfo: VideoInfo) {
+private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel = viewModel()) {
+    //正在观看的人数
+    val onlineCountText by viewModel.onlineCountText.collectAsState()
+    LaunchedEffect(videoInfo) {
+        viewModel.getVideoOnlineCountText(videoInfo.aid, videoInfo.cid)
+    }
     val iconSize = 15.dp
     val textSize = 13.sp
     //可点击展开与收起的布局
@@ -151,6 +160,12 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo) {
                         text = TimeUtils.formatTime(videoInfo.pubdate.toLong()),
                         fontSize = textSize
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    //在线观看人数
+                    Text(
+                        text = onlineCountText,
+                        fontSize = textSize
+                    )
                 }
             }
         },
@@ -168,6 +183,7 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo) {
                 color = TipTextColor,
                 fontSize = textSize
             )
+
         }
     )
 

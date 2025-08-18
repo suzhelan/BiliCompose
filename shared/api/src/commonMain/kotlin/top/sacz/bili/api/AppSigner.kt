@@ -15,7 +15,7 @@ enum class AppKeyType(val appKey: String, val appSec: String) {
 
 class BiliSignUtils(private val appKeyType: AppKeyType) {
     fun sign(params: MutableMap<String, String>): String {
-        return AppSigner.appSign(appKeyType.appKey, appKeyType.appSec, params)
+        return AppSigner.appSign(appKeyType.appSec, params)
     }
 }
 
@@ -25,11 +25,9 @@ class BiliSignUtils(private val appKeyType: AppKeyType) {
  */
 object AppSigner {
     fun appSign(
-        appKey: String,
         appSec: String,
         params: MutableMap<String, String>
     ): String {
-        params["appkey"] = appKey
         // 使用 Kotlin 标准库的排序方法
         val sortedEntries = params.entries.sortedBy { it.key }
         // 拼接参数
