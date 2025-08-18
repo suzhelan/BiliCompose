@@ -2,7 +2,9 @@ package top.sacz.bili.shared.common.ui.card
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,27 +14,32 @@ import androidx.compose.ui.Modifier
 
 
 @Composable
-fun ExpandableItemView(
+fun Expandable(
     modifier: Modifier = Modifier,
-    title: @Composable () -> Unit,
+    title: @Composable ColumnScope.(isExpanded: Boolean) -> Unit,
     isExpanded: Boolean = false,
-    content: @Composable () -> Unit
+    content: @Composable ColumnScope.(isExpanded: Boolean) -> Unit
 ) {
     var isExpandedState by remember {
         mutableStateOf(isExpanded)
     }
     Column(
         modifier = modifier
-            .clickable {
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
                 isExpandedState = !isExpandedState
             }
-            .animateContentSize() // 关键修饰符
+            .animateContentSize()
     ) {
         // 标题
-        title()
+        title(
+            isExpandedState
+        )
         // 动态内容部分
         if (isExpandedState) {
-            content()
+            content(isExpandedState)
         }
     }
 }

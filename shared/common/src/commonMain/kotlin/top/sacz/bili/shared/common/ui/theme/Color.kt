@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 
 
 /**
@@ -19,3 +20,9 @@ val TipTextColor: Color @Composable @ReadOnlyComposable get() = if (isSystemInDa
 val ErrorTextColor: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.error
 
 val DividingLineColor: Color @Composable @ReadOnlyComposable get() = TipTextColor.copy(alpha = 0.5f)
+
+
+//字体风格
+object TextStyle {
+    val Title: TextStyle @Composable @ReadOnlyComposable get() = MaterialTheme.typography.titleLarge
+}

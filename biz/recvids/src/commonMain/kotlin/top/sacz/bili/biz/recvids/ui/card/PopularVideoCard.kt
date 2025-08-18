@@ -31,7 +31,7 @@ import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.biz.recvids.model.PopularItem
 import top.sacz.bili.shared.common.ui.shimmerEffect
 import top.sacz.bili.shared.common.util.TimeUtils
-import top.sacz.bili.shared.common.util.TimeUtils.formatPlayCount
+import top.sacz.bili.shared.common.util.formatPlayCount
 
 @Composable
 fun PopularLoadingCard() {
