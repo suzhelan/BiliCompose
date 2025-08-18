@@ -48,9 +48,10 @@ object TimeUtils {
     fun formatTime(seconds: Long): String {
         val date = Instant.fromEpochMilliseconds(seconds * 1000)
             .toLocalDateTime(TimeZone.currentSystemDefault())
-        return "${date.year}年${date.month.number}月${date.day}日 ${date.hour}:${date.minute}"
+        return "${date.year}年${date.month.number}月${date.day}日 ${date.hour}:${
+            date.minute.toString().padStart(2, '0')
+        }"
     }
-
 
 }
 
