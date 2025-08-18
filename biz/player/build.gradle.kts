@@ -15,10 +15,13 @@ kotlin {
             implementation(libs.lifecycle.runtime.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
-            implementation(projects.shared.api)
-            implementation(projects.shared.common)
             implementation(libs.voyager.navigator)
             implementation(libs.mediamp.all)
+
+            //尽可能只使用公共模块
+            implementation(projects.biz.user)
+            implementation(projects.shared.api)
+            implementation(projects.shared.common)
         }
 
         sourceSets.androidMain.dependencies {

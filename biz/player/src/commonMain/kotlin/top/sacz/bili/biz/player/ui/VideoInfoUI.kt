@@ -7,7 +7,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,10 +31,11 @@ import top.sacz.bili.api.isLoading
 import top.sacz.bili.api.isSuccess
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.player.model.PlayerParams
-import top.sacz.bili.biz.player.model.UserCard
 import top.sacz.bili.biz.player.model.VideoInfo
-import top.sacz.bili.biz.player.viewmodel.UserViewModel
 import top.sacz.bili.biz.player.viewmodel.VideoPlayerViewModel
+import top.sacz.bili.biz.user.entity.UserCard
+import top.sacz.bili.biz.user.viewmodel.UserViewModel
+import top.sacz.bili.shared.common.ui.card.ExpandableItemView
 import top.sacz.bili.shared.common.ui.shimmerEffect
 import top.sacz.bili.shared.common.util.toStringCount
 
@@ -55,11 +62,29 @@ fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel = vi
 private fun VideoDetailsUI(videoInfo: VideoInfo, userViewModel: UserViewModel = viewModel()) {
     val userCard by userViewModel.userCard.collectAsState()
     LaunchedEffect(videoInfo) {
-        userViewModel.getUserInfo(mid = videoInfo.owner.mid.toString())
+        userViewModel.getUserInfo(mid = videoInfo.owner.mid)
     }
     //作者卡片在最上方
-    AuthorItemUI(userCard)
+    AuthorItemUI(userCard, userViewModel)
+    //然后是一个可以展开的视频基本信息,包含标题,播放量,弹幕数量,发布时间,n人正在看
+    VideoBasicInfoUI(videoInfo)
     //然后是点赞 播放量 评论量等信息
+
+}
+
+@Composable
+private fun VideoBasicInfoUI(videoInfo: VideoInfo) {
+    ExpandableItemView(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+        title = {
+            Text(text = videoInfo.title)
+        },
+        content = {
+            Text(
+                text = videoInfo.desc
+            )
+        }
+    )
 
 }
 
@@ -67,17 +92,22 @@ private fun playbackDataUI(videoInfo: VideoInfo) {
 }
 
 @Composable
-private fun AuthorItemUI(userCardResponse: BiliResponse<UserCard>) = ConstraintLayout(
+private fun AuthorItemUI(
+    userCardResponse: BiliResponse<UserCard>,
+    viewModel: UserViewModel
+) = ConstraintLayout(
     modifier = Modifier.fillMaxWidth()
         .height(80.dp)
         .padding(10.dp)
-        .shimmerEffect(userCardResponse.isLoading()).clickable {
+        .clickable {
             //跳转到用户主页
         }
 ) {
+
     if (!userCardResponse.isSuccess()) {
         return@ConstraintLayout
     }
+    val actionState by viewModel.actionState.collectAsState()
     val userCard = (userCardResponse as BiliResponse.Success).data
     val (avatar, name, sign, concern) = createRefs()
     AsyncImage(
@@ -109,20 +139,51 @@ private fun AuthorItemUI(userCardResponse: BiliResponse<UserCard>) = ConstraintL
             start.linkTo(name.start)
         }
     )
-    //最右边添加一个点击关注的按钮
-    FilledTonalButton(onClick = {
-
-    },
-        contentPadding = PaddingValues(vertical = 5.dp, horizontal = 5.dp),
-        modifier = Modifier
-            .size(
-                height = 30.dp,
-                width = 75.dp
-            ).constrainAs(concern) {
-        top.linkTo(avatar.top)
-        end.linkTo(parent.end)
-        bottom.linkTo(avatar.bottom)
-    }) {
-        Text(text = "+ 关注", fontSize = 12.sp)
+    if (actionState.isLoading()) {
+        CircularProgressIndicator(modifier = Modifier.size(20.dp).constrainAs(concern) {
+            top.linkTo(avatar.top)
+            end.linkTo(parent.end)
+            bottom.linkTo(avatar.bottom)
+        })
+    } else if (userCard.following) {
+        //最右边添加一个点击关注的按钮
+        FilledTonalButton(
+            onClick = {
+                viewModel.unfollow(userCard.card.mid.toLong())
+            },
+            contentPadding = PaddingValues(vertical = 5.dp, horizontal = 5.dp),
+            modifier = Modifier
+                .size(
+                    height = 30.dp,
+                    width = 75.dp
+                ).constrainAs(concern) {
+                    top.linkTo(avatar.top)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(avatar.bottom)
+                }) {
+            Icon(imageVector = Icons.Outlined.Menu, contentDescription = "unfollow")
+            Text(text = "已关注", fontSize = 12.sp)
+        }
+    } else {
+        OutlinedButton(
+            onClick = {
+                viewModel.follow(userCard.card.mid.toLong())
+            },
+            contentPadding = PaddingValues(vertical = 5.dp, horizontal = 5.dp),
+            modifier = Modifier
+                .size(
+                    height = 30.dp,
+                    width = 75.dp
+                ).constrainAs(concern) {
+                    top.linkTo(avatar.top)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(avatar.bottom)
+                }
+        ) {
+            Icon(imageVector = Icons.Outlined.Add, contentDescription = "addFollow")
+            Text(text = "关注", fontSize = 12.sp)
+        }
     }
+
+
 }

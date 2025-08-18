@@ -1,9 +1,7 @@
-package top.sacz.bili.biz.player.model
-
+package top.sacz.bili.biz.user.entity
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
 
 @Serializable
 data class UserCard(
@@ -302,11 +300,6 @@ data class UserCard(
 
     @Serializable
     data class Vip(
-        // 大会员角标信息
-        // 示例见AvatarIcon类注释
-        @SerialName("avatar_icon")
-        val avatarIcon: AvatarIcon = AvatarIcon(),
-
         // 是否显示会员图标
         // 示例：1
         @SerialName("avatar_subscript")
@@ -383,13 +376,6 @@ data class UserCard(
         val vipType: Int = 0
     )
 
-    @Serializable
-    data class AvatarIcon(
-        // 图标资源（暂未使用）
-        // 示例见IconResource类注释
-        @SerialName("icon_resource")
-        val iconResource: IconResource = IconResource()
-    )
 
     @Serializable
     data class Label(

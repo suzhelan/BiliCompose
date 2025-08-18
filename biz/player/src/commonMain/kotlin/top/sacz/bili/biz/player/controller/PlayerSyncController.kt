@@ -26,7 +26,6 @@ class PlayerSyncController(
         scope.launch {
             doLoadMediaData(videoPlayer, videoUrl, audioUrl)
         }
-        videoPlayer.playbackState
     }
 
     /**

@@ -47,8 +47,8 @@ sealed class BiliResponse<out T> {
 }
 
 fun <T> BiliResponse<T>.isSuccess(): Boolean = when (this) {
-    is BiliResponse.Success -> true
-    is BiliResponse.SuccessOrNull -> true
+    is BiliResponse.Success -> code == 0
+    is BiliResponse.SuccessOrNull -> code == 0
     else -> false
 }
 

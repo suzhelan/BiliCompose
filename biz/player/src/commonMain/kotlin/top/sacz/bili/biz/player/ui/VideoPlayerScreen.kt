@@ -36,7 +36,9 @@ class VideoPlayerScreen(private val body: String) : Screen {
             Column(
                 modifier = Modifier.padding(paddingValues)
             ) {
+                //播放器
                 VideoPlayer(body)
+                //视频信息
                 VideoInfoUI(body)
             }
         }
