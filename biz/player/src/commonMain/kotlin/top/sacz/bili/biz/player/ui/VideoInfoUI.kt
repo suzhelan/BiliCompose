@@ -200,10 +200,11 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalArrangement = Arrangement.spacedBy((-10).dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 videoTags.forEach {
                     SuggestionChip(
+                        modifier = Modifier.height(25.dp),
                         onClick = {
                             //跳转到标签页
                         },

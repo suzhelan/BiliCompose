@@ -36,7 +36,11 @@ fun Expandable(
             visible = isExpandedState,
             //可自定义动画 但是不需要 默认的就很好了
         ) {
-            Column {
+            Column(
+                modifier = Modifier.clickable {
+
+                }
+            ) {
                 content(isExpandedState)
             }
         }
