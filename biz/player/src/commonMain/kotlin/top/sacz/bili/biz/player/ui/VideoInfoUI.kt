@@ -1,6 +1,8 @@
 package top.sacz.bili.biz.player.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -89,12 +92,21 @@ private fun VideoDetailsUI(
 
 }
 
+/**
+ * 标题+描述+基本数据指标+标签
+ */
 @Composable
 private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel = viewModel()) {
     //正在观看的人数
     val onlineCountText by viewModel.onlineCountText.collectAsState()
+    val videoTags by viewModel.videoTags.collectAsState()
     LaunchedEffect(videoInfo) {
         viewModel.getVideoOnlineCountText(videoInfo.aid, videoInfo.cid)
+        viewModel.getVideoTags(
+            aid = videoInfo.aid,
+            bvid = videoInfo.bvid,
+            cid = videoInfo.cid,
+        )
     }
     val iconSize = 15.dp
     val textSize = 13.sp
@@ -183,7 +195,26 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
                 color = TipTextColor,
                 fontSize = textSize
             )
-
+            //视频标签
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy((-10).dp)
+            ) {
+                videoTags.forEach {
+                    SuggestionChip(
+                        onClick = {
+                            //跳转到标签页
+                        },
+                        label = {
+                            Text(
+                                text = it.tagName,
+                            )
+                        }
+                    )
+                }
+            }
         }
     )
 

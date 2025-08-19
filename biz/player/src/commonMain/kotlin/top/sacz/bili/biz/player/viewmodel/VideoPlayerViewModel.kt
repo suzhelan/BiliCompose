@@ -9,6 +9,7 @@ import top.sacz.bili.api.ext.apiCall
 import top.sacz.bili.biz.player.api.VideoPlayerApi
 import top.sacz.bili.biz.player.model.PlayerArgsItem
 import top.sacz.bili.biz.player.model.VideoInfo
+import top.sacz.bili.biz.player.model.VideoTag
 import top.sacz.bili.shared.common.base.BaseViewModel
 
 class VideoPlayerViewModel : BaseViewModel() {
@@ -65,4 +66,22 @@ class VideoPlayerViewModel : BaseViewModel() {
             cid = cid
         ).data.online.totalText
     }
+
+    val videoTags = MutableStateFlow<List<VideoTag>>(listOf())
+
+    /**
+     * 获取视频标签
+     */
+    fun getVideoTags(
+        aid: Long? = null,
+        bvid: String? = null,
+        cid: Long? = null,
+    ) = launchTask {
+        videoTags.value = api.getVideoTags(
+            aid = aid,
+            bvid = bvid,
+            cid = cid
+        ).data
+    }
+
 }

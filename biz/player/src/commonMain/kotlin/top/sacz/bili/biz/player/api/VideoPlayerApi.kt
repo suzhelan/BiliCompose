@@ -9,6 +9,7 @@ import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.biz.player.model.OnlineCount
 import top.sacz.bili.biz.player.model.PlayerArgsItem
 import top.sacz.bili.biz.player.model.VideoInfo
+import top.sacz.bili.biz.player.model.VideoTag
 
 /**
  * 获取视频信息
@@ -136,6 +137,31 @@ class VideoPlayerApi {
             parameter("aid", aid)
             parameter("cid", cid)
             //key sign ts等参数由client自行填充
+        }.body()
+    }
+
+    /**
+     * 获取视频标签信息
+     */
+    suspend fun getVideoTags(
+        aid: Long? = null,
+        bvid: String? = null,
+        cid: Long? = null
+    ): BiliResponse.Success<List<VideoTag>> {
+        return client.get(
+            "/x/web-interface/view/detail/tag"
+        ) {
+            url {
+                if (aid != null) {
+                    parameter("aid", aid)
+                }
+                if (bvid != null) {
+                    parameter("bvid", bvid)
+                }
+                if (cid != null) {
+                    parameter("cid", cid)
+                }
+            }
         }.body()
     }
 }
