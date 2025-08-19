@@ -1,6 +1,6 @@
 package top.sacz.bili.shared.common.ui.card
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -20,26 +20,28 @@ fun Expandable(
     isExpanded: Boolean = false,
     content: @Composable ColumnScope.(isExpanded: Boolean) -> Unit
 ) {
-    var isExpandedState by remember {
-        mutableStateOf(isExpanded)
-    }
+    var isExpandedState by remember { mutableStateOf(isExpanded) }
+
     Column(
         modifier = modifier
             .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
             ) {
                 isExpandedState = !isExpandedState
             }
-            .animateContentSize()
     ) {
-        // 标题
-        title(
-            isExpandedState
-        )
-        // 动态内容部分
-        if (isExpandedState) {
-            content(isExpandedState)
+        title(isExpandedState)
+        AnimatedVisibility(
+            visible = isExpandedState,
+            //可自定义动画 但是不需要 默认的就很好了
+        ) {
+            Column {
+                content(isExpandedState)
+            }
         }
     }
 }
+
+
+
