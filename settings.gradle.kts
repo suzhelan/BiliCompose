@@ -25,6 +25,7 @@ include(
     ":shared:common",
     ":shared:navigation",
     ":shared:auth",
+    ":shared:biliplayer",
 )
 include(
     ":biz:home",

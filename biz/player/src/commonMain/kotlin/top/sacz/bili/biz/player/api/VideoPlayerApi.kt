@@ -6,10 +6,11 @@ import io.ktor.client.request.parameter
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
-import top.sacz.bili.biz.player.model.OnlineCount
-import top.sacz.bili.biz.player.model.PlayerArgsItem
-import top.sacz.bili.biz.player.model.VideoInfo
-import top.sacz.bili.biz.player.model.VideoTag
+
+import top.sacz.bili.biz.player.entity.OnlineCount
+import top.sacz.bili.biz.player.entity.PlayerArgsItem
+import top.sacz.bili.biz.player.entity.VideoInfo
+import top.sacz.bili.biz.player.entity.VideoTag
 
 /**
  * 获取视频信息

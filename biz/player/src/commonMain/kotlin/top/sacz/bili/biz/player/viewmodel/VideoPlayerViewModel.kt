@@ -7,16 +7,16 @@ import kotlinx.coroutines.launch
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.ext.apiCall
 import top.sacz.bili.biz.player.api.VideoPlayerApi
-import top.sacz.bili.biz.player.model.PlayerArgsItem
-import top.sacz.bili.biz.player.model.VideoInfo
-import top.sacz.bili.biz.player.model.VideoTag
+import top.sacz.bili.biz.player.entity.PlayerArgsItem
+import top.sacz.bili.biz.player.entity.VideoInfo
+import top.sacz.bili.biz.player.entity.VideoTag
 import top.sacz.bili.shared.common.base.BaseViewModel
 
 class VideoPlayerViewModel : BaseViewModel() {
     private val api = VideoPlayerApi()
-    private val _data = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
-    val video = _data.asStateFlow()
-    fun getPlayerInfo(
+    private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
+    val videoUrlData = _videoUrlData.asStateFlow()
+    fun getPlayerUrl(
         avid: String? = null,
         bvid: String? = null,
         epid: String? = null,
@@ -24,7 +24,7 @@ class VideoPlayerViewModel : BaseViewModel() {
         cid: String,
         qn: Int = 80
     ) = viewModelScope.launch {
-        _data.value = apiCall {
+        _videoUrlData.value = apiCall {
             api.getPlayerInfo(
                 avid = avid,
                 bvid = bvid,
@@ -37,14 +37,14 @@ class VideoPlayerViewModel : BaseViewModel() {
     }
 
 
-    private val _videoInfo = MutableStateFlow<BiliResponse<VideoInfo>>(BiliResponse.Loading)
-    val videoInfo = _videoInfo.asStateFlow()
-    fun getVideoInfo(
+    private val _videoDetailsInfo = MutableStateFlow<BiliResponse<VideoInfo>>(BiliResponse.Loading)
+    val videoDetailsInfo = _videoDetailsInfo.asStateFlow()
+    fun getVideoDetailsInfo(
         avid: String? = null,
         bvid: String? = null,
     ) = viewModelScope.launch {
-        _videoInfo.value = BiliResponse.Loading
-        _videoInfo.value = apiCall {
+        _videoDetailsInfo.value = BiliResponse.Loading
+        _videoDetailsInfo.value = apiCall {
             api.getVideoDetails(
                 avid = avid,
                 bvid = bvid,

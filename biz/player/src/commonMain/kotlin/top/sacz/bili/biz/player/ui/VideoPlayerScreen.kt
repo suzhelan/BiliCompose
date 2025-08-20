@@ -11,7 +11,8 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import top.sacz.bili.api.HttpJsonDecoder
-import top.sacz.bili.biz.player.model.PlayerParams
+import top.sacz.bili.biz.player.entity.PlayerParams
+
 
 class VideoPlayerScreen(private val body: String) : Screen {
     override val key: ScreenKey
@@ -21,6 +22,7 @@ class VideoPlayerScreen(private val body: String) : Screen {
     @Composable
     override fun Content() {
         val body: PlayerParams = HttpJsonDecoder.decodeFromString(body)
+
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -37,7 +39,7 @@ class VideoPlayerScreen(private val body: String) : Screen {
                 modifier = Modifier.padding(paddingValues)
             ) {
                 //播放器
-                VideoPlayer(body)
+                MediaUI(body)
                 //视频信息
                 VideoInfoUI(body)
             }

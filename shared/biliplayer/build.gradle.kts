@@ -7,9 +7,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.paging.compose.common)
-            implementation(libs.coil.network.ktor3)
-            implementation(libs.coil.compose)
             implementation(libs.ktor.client.core)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.runtime.compose)
@@ -17,12 +14,6 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.voyager.navigator)
             implementation(libs.mediamp.all)
-
-            //尽可能只使用公共模块
-            implementation(projects.biz.user)
-            implementation(projects.shared.api)
-            implementation(projects.shared.biliplayer)
-            implementation(projects.shared.common)
         }
 
         sourceSets.androidMain.dependencies {

@@ -43,8 +43,9 @@ import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.isLoading
 import top.sacz.bili.api.isSuccess
 import top.sacz.bili.api.registerStatusListener
-import top.sacz.bili.biz.player.model.PlayerParams
-import top.sacz.bili.biz.player.model.VideoInfo
+import top.sacz.bili.biz.player.entity.PlayerParams
+
+import top.sacz.bili.biz.player.entity.VideoInfo
 import top.sacz.bili.biz.player.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.biz.user.entity.UserCard
 import top.sacz.bili.biz.user.viewmodel.UserViewModel
@@ -57,9 +58,9 @@ import top.sacz.bili.shared.common.util.toStringCount
 
 @Composable
 fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel = viewModel()) {
-    val vmVideoInfo by viewModel.videoInfo.collectAsState()
+    val vmVideoInfo by viewModel.videoDetailsInfo.collectAsState()
     LaunchedEffect(Unit) {
-        viewModel.getVideoInfo(
+        viewModel.getVideoDetailsInfo(
             avid = playerParams.avid,
             bvid = playerParams.bvid,
         )

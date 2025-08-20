@@ -47,6 +47,7 @@ kotlin {
             implementation(projects.biz.login)
             implementation(projects.biz.player)
             implementation(projects.shared.api)
+            implementation(projects.shared.biliplayer)
             implementation(projects.shared.navigation)
         }
         desktopMain.dependencies {
