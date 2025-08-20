@@ -12,8 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.openani.mediamp.compose.MediampPlayerSurface
 import top.sacz.bili.biliplayer.controller.PlayerSyncController
+import top.sacz.bili.biliplayer.controller.PlayerToolBarVisibility
 import top.sacz.bili.biliplayer.controller.rememberPlayerSyncController
-import top.sacz.bili.biliplayer.ui.gesture.GestureHost
+import top.sacz.bili.biliplayer.ui.gesture.ProgressGestureHost
 import top.sacz.bili.biliplayer.ui.loading.BiliVideoLoadingIndicator
 import top.sacz.bili.biliplayer.ui.progress.PlayerProgressIndicator
 import top.sacz.bili.biliplayer.ui.progress.PlayerProgressSlider
@@ -84,15 +85,16 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
             )
         },
         gesture = {
-            GestureHost(
+            ProgressGestureHost(
                 currentProgress = { progressSliderState.displayPositionRatio },
-                onClick = {
-
-                },
                 onShowSlider = {
+                    if (controller.visibility != PlayerToolBarVisibility.Visible) {
+                        controller.updateVisibility(PlayerToolBarVisibility.Visible)
+                    }
                     progressSliderState.previewPositionRatio(it)
                 },
                 onFinished = {
+                    controller.updateVisibility(PlayerToolBarVisibility.Invisible)
                     progressSliderState.changeFinished()
                 },
             )
