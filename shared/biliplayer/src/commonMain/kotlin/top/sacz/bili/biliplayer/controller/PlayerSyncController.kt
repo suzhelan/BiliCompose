@@ -20,6 +20,8 @@ class PlayerSyncController(
     var visibility by mutableStateOf(PlayerToolBarVisibility.Visible)
         private set
 
+    val playbackState get() = videoPlayer.playbackState
+
     fun updateVisibility(newVisibility: PlayerToolBarVisibility) {
         visibility = newVisibility
     }

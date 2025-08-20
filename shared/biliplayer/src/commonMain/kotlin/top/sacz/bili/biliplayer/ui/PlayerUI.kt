@@ -14,10 +14,10 @@ import org.openani.mediamp.compose.MediampPlayerSurface
 import top.sacz.bili.biliplayer.controller.PlayerSyncController
 import top.sacz.bili.biliplayer.controller.PlayerToolBarVisibility
 import top.sacz.bili.biliplayer.controller.rememberPlayerSyncController
+import top.sacz.bili.biliplayer.ui.bottombar.PlayerBottomBar
 import top.sacz.bili.biliplayer.ui.gesture.ProgressGestureHost
 import top.sacz.bili.biliplayer.ui.loading.BiliVideoLoadingIndicator
 import top.sacz.bili.biliplayer.ui.progress.PlayerProgressIndicator
-import top.sacz.bili.biliplayer.ui.progress.PlayerProgressSlider
 import top.sacz.bili.biliplayer.ui.progress.rememberPlayerProgressSliderState
 import top.sacz.bili.biliplayer.ui.video.VideoScaffold
 
@@ -69,11 +69,9 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
             )
         },
         bottomBar = {
-            PlayerProgressSlider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
-                state = progressSliderState,
+            PlayerBottomBar(
+                progressSliderState = progressSliderState,
+                controller = controller
             )
         },
         progressIndicator = {
@@ -85,6 +83,7 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
             )
         },
         gesture = {
+            //左右控制进度手势
             ProgressGestureHost(
                 currentProgress = { progressSliderState.displayPositionRatio },
                 onShowSlider = {
@@ -96,7 +95,7 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
                 onFinished = {
                     controller.updateVisibility(PlayerToolBarVisibility.Invisible)
                     progressSliderState.changeFinished()
-                },
+                }
             )
         }
     )

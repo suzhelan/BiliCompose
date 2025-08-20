@@ -14,7 +14,7 @@ import androidx.compose.ui.text.TextStyle
 val ColorPrimary: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.primary
 val ColorPrimaryContainer: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.primaryContainer
 val ColorError: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.error
-
+val ColorSurface @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.surface
 val TextColor: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.onSurface
 val TipTextColor: Color @Composable @ReadOnlyComposable get() = if (isSystemInDarkTheme()) Color.LightGray else Color.Gray
 val ErrorTextColor: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.error
