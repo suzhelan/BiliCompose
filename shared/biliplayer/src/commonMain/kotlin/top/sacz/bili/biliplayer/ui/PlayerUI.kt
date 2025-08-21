@@ -15,7 +15,7 @@ import top.sacz.bili.biliplayer.controller.PlayerSyncController
 import top.sacz.bili.biliplayer.controller.PlayerToolBarVisibility
 import top.sacz.bili.biliplayer.controller.rememberPlayerSyncController
 import top.sacz.bili.biliplayer.ui.bottombar.PlayerBottomBar
-import top.sacz.bili.biliplayer.ui.gesture.ProgressGestureHost
+import top.sacz.bili.biliplayer.ui.gesture.GestureHost
 import top.sacz.bili.biliplayer.ui.loading.BiliVideoLoadingIndicator
 import top.sacz.bili.biliplayer.ui.progress.PlayerProgressIndicator
 import top.sacz.bili.biliplayer.ui.progress.rememberPlayerProgressSliderState
@@ -83,14 +83,20 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
             )
         },
         gesture = {
-            //左右控制进度手势
-            ProgressGestureHost(
+            // 统一手势控制器，处理点击、双击和拖拽手势
+            GestureHost(
                 currentProgress = { progressSliderState.displayPositionRatio },
-                onShowSlider = {
+                onClick = {
+                    controller.showOrHideToolBar()
+                },
+                onDoubleTap = {
+                    controller.playOrPause()
+                },
+                onShowSlider = { progress ->
                     if (controller.visibility != PlayerToolBarVisibility.Visible) {
                         controller.updateVisibility(PlayerToolBarVisibility.Visible)
                     }
-                    progressSliderState.previewPositionRatio(it)
+                    progressSliderState.previewPositionRatio(progress)
                 },
                 onFinished = {
                     controller.updateVisibility(PlayerToolBarVisibility.Invisible)

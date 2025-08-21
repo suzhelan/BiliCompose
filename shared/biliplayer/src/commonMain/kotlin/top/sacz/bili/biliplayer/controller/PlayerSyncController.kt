@@ -7,7 +7,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.StateFlow
 import org.openani.mediamp.MediampPlayer
+import org.openani.mediamp.PlaybackState
 import org.openani.mediamp.compose.rememberMediampPlayer
 
 /**
@@ -20,7 +22,7 @@ class PlayerSyncController(
     var visibility by mutableStateOf(PlayerToolBarVisibility.Visible)
         private set
 
-    val playbackState get() = videoPlayer.playbackState
+    val playbackState: StateFlow<PlaybackState> get() = videoPlayer.playbackState
 
     fun updateVisibility(newVisibility: PlayerToolBarVisibility) {
         visibility = newVisibility
@@ -72,6 +74,22 @@ class PlayerSyncController(
      */
     fun skipTo(deltaMillis: Long) {
         videoPlayer.skip(deltaMillis)
+    }
+
+    fun showOrHideToolBar() {
+        visibility = if (visibility == PlayerToolBarVisibility.Visible) {
+            PlayerToolBarVisibility.Invisible
+        } else {
+            PlayerToolBarVisibility.Visible
+        }
+    }
+
+    fun playOrPause() {
+        if (videoPlayer.playbackState.value.isPlaying) {
+            videoPlayer.pause()
+        } else {
+            videoPlayer.resume()
+        }
     }
 
 }
