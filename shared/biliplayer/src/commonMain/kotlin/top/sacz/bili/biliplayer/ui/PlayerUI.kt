@@ -22,6 +22,7 @@ import top.sacz.bili.biliplayer.ui.bottombar.PlayerBottomBar
 import top.sacz.bili.biliplayer.ui.gesture.GestureHost
 import top.sacz.bili.biliplayer.ui.indicator.AudioVisualIndicator
 import top.sacz.bili.biliplayer.ui.indicator.BiliVideoLoadingIndicator
+import top.sacz.bili.biliplayer.ui.indicator.BrightnessIndicator
 import top.sacz.bili.biliplayer.ui.indicator.VolumeIndicator
 import top.sacz.bili.biliplayer.ui.progress.PlayerProgressIndicator
 import top.sacz.bili.biliplayer.ui.progress.rememberPlayerProgressSliderState
@@ -66,19 +67,29 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
     VideoScaffold(
         playerSyncController = controller,
         floatMessageCenter = {
-            //加载指示器
+            //缓冲/错误指示器
             BiliVideoLoadingIndicator(
                 modifier = Modifier.align(Alignment.Center),
                 mediampPlayer = controller.videoPlayer
             )
-            //亮度和音量指示器
+            //亮度和音量调整指示器
             when (indicatorType) {
-                AudioVisualIndicator.Brightness -> {}
                 AudioVisualIndicator.None -> {}
+                AudioVisualIndicator.Brightness -> {
+                    BrightnessIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        progress = {
+                            audioVisualState.brightnessPercentage
+                        }
+                    )
+                }
+
                 AudioVisualIndicator.Volume -> {
                     VolumeIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        progress = audioVisualState.volume,
+                        progress = {
+                            audioVisualState.volumePercentage
+                        }
                     )
                 }
             }
@@ -127,7 +138,7 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
                     progressSliderState.changeFinished()
                 },
                 currentVolume = {
-                    audioVisualState.volume
+                    audioVisualState.volumePercentage
                 },
                 onVolume = {
                     if (indicatorType != AudioVisualIndicator.Volume) {
@@ -139,9 +150,12 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
                     indicatorType = AudioVisualIndicator.None
                 },
                 currentBrightness = {
-                    audioVisualState.brightness
+                    audioVisualState.brightnessPercentage
                 },
                 onBrightness = {
+                    if (indicatorType != AudioVisualIndicator.Brightness) {
+                        indicatorType = AudioVisualIndicator.Brightness
+                    }
                     audioVisualState.setBrightness(it)
                 },
                 onBrightnessFinished = {

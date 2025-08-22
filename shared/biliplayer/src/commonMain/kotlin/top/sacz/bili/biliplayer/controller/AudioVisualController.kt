@@ -2,8 +2,9 @@ package top.sacz.bili.biliplayer.controller
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
 
 @Composable
 expect fun rememberAudioLevelController(): AudioVisualState
@@ -12,19 +13,17 @@ expect fun rememberAudioLevelController(): AudioVisualState
 class AudioVisualState(
     val audioVisualManager: AudioVisualManager
 ) {
-    val volume: Float by derivedStateOf {
-        audioVisualManager.getCurrentVolume()
-    }
-    val brightness: Float by derivedStateOf {
-        audioVisualManager.getCurrentBrightness()
-    }
+    var volumePercentage: Float by mutableFloatStateOf(audioVisualManager.getCurrentVolume())
+    var brightnessPercentage: Float by mutableFloatStateOf(audioVisualManager.getCurrentBrightness())
 
     fun setVolume(volume: Float) {
         audioVisualManager.setVolume(volume)
+        this.volumePercentage = volume
     }
 
     fun setBrightness(brightness: Float) {
         audioVisualManager.setBrightness(brightness)
+        this.brightnessPercentage = brightness
     }
 }
 
