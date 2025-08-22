@@ -184,7 +184,8 @@ fun PlayerProgressSlider(
     modifier = modifier.fillMaxWidth().height(24.dp),
     contentAlignment = Alignment.CenterStart
 ) {
-    /*//轨道与背景
+
+/*//轨道与背景
     Box(modifier = Modifier.fillMaxSize().padding(8.dp).clip(CircleShape)) {
         //轨道
         Canvas(modifier = Modifier.matchParentSize()) {

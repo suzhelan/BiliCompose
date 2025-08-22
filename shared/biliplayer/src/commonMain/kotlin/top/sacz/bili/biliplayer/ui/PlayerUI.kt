@@ -7,16 +7,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.openani.mediamp.compose.MediampPlayerSurface
 import top.sacz.bili.biliplayer.controller.PlayerSyncController
 import top.sacz.bili.biliplayer.controller.PlayerToolBarVisibility
+import top.sacz.bili.biliplayer.controller.rememberAudioLevelController
 import top.sacz.bili.biliplayer.controller.rememberPlayerSyncController
 import top.sacz.bili.biliplayer.ui.bottombar.PlayerBottomBar
 import top.sacz.bili.biliplayer.ui.gesture.GestureHost
-import top.sacz.bili.biliplayer.ui.loading.BiliVideoLoadingIndicator
+import top.sacz.bili.biliplayer.ui.indicator.AudioVisualIndicator
+import top.sacz.bili.biliplayer.ui.indicator.BiliVideoLoadingIndicator
+import top.sacz.bili.biliplayer.ui.indicator.VolumeIndicator
 import top.sacz.bili.biliplayer.ui.progress.PlayerProgressIndicator
 import top.sacz.bili.biliplayer.ui.progress.rememberPlayerProgressSliderState
 import top.sacz.bili.biliplayer.ui.video.VideoScaffold
@@ -53,6 +59,10 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
             controller.seekTo(it)
         }
     )
+    val audioVisualState = rememberAudioLevelController()
+    var indicatorType: AudioVisualIndicator by remember {
+        mutableStateOf(AudioVisualIndicator.None)
+    }
     VideoScaffold(
         playerSyncController = controller,
         floatMessageCenter = {
@@ -61,6 +71,17 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
                 modifier = Modifier.align(Alignment.Center),
                 mediampPlayer = controller.videoPlayer
             )
+            //亮度和音量指示器
+            when (indicatorType) {
+                AudioVisualIndicator.Brightness -> {}
+                AudioVisualIndicator.None -> {}
+                AudioVisualIndicator.Volume -> {
+                    VolumeIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        progress = audioVisualState.volume,
+                    )
+                }
+            }
         },
         video = {
             //视频实际组件
@@ -106,18 +127,25 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
                     progressSliderState.changeFinished()
                 },
                 currentVolume = {
-                    0.5f
+                    audioVisualState.volume
                 },
                 onVolume = {
-                    // 音量控制
-                    println("音量控制: $it")
+                    if (indicatorType != AudioVisualIndicator.Volume) {
+                        indicatorType = AudioVisualIndicator.Volume
+                    }
+                    audioVisualState.setVolume(it)
+                },
+                onVolumeFinished = {
+                    indicatorType = AudioVisualIndicator.None
                 },
                 currentBrightness = {
-                    0.5f
+                    audioVisualState.brightness
                 },
                 onBrightness = {
-                    // 亮度控制
-                    println("亮度控制: $it")
+                    audioVisualState.setBrightness(it)
+                },
+                onBrightnessFinished = {
+                    indicatorType = AudioVisualIndicator.None
                 }
             )
         }

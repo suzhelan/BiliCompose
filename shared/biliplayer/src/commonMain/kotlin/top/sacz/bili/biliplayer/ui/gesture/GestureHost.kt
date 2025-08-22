@@ -12,7 +12,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 
 
 /**
- * 统一手势控制器，处理点击、双击和水平/垂直拖拽手势,不存放任何可以显示的UI
+ * 统一手势控制器，处理点击、双击和水平/垂直拖拽手势,不存放任何可以显示的UI,本文件和本项目没有任何耦合度
  * 使用draggable也可以,我这里选择了pointerInput
  * @param onClick 点击
  * @param onDoubleTap 双击
@@ -40,9 +40,11 @@ fun BoxWithConstraintsScope.GestureHost(
     //当前系统音量
     currentVolume: () -> Float,
     onVolume: (Float) -> Unit,
+    onVolumeFinished: () -> Unit,
     //当前亮度
     currentBrightness: () -> Float,
-    onBrightness: (Float) -> Unit
+    onBrightness: (Float) -> Unit,
+    onBrightnessFinished: () -> Unit
 ) {
     val maxWidth = constraints.maxWidth
     val maxHeight = constraints.maxHeight
@@ -64,6 +66,9 @@ fun BoxWithConstraintsScope.GestureHost(
         initialProgress = currentVolume,
         onChange = {
             onVolume(it)
+        },
+        onFinished = {
+            onVolumeFinished()
         }
     )
     //亮度
@@ -72,6 +77,9 @@ fun BoxWithConstraintsScope.GestureHost(
         initialProgress = currentBrightness,
         onChange = {
             onBrightness(it)
+        },
+        onFinished = {
+            onBrightnessFinished()
         }
     )
     //手势控制器 操作空间比较大 也可以使用Row{Box(亮度)+Box(间距)+Box(音量)}

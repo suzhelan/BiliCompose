@@ -1,4 +1,4 @@
-package top.sacz.bili.biliplayer.ui.loading
+package top.sacz.bili.biliplayer.ui.indicator
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

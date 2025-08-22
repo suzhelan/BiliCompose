@@ -94,34 +94,32 @@ class PlayerSyncController(
 
 }
 
+/**
+ * 播放器工具栏显示状态
+ * @param topBar 顶部工具栏,包含 返回,标题,时间等
+ * @param bottomBar 底部工具栏,包含 播放/暂停,进度条,全屏按钮等
+ * @param gestureLock 手势锁定 如果锁定则不允许手势操作
+ */
 @Immutable
 data class PlayerToolBarVisibility(
     val topBar: Boolean,
     val bottomBar: Boolean,
-    val floatingBottomEnd: Boolean,
-    val rhsBar: Boolean,
     val gestureLock: Boolean,
-    val detachedSlider: Boolean
 ) {
+
     companion object {
         @Stable
         val Visible = PlayerToolBarVisibility(
             topBar = true,
             bottomBar = true,
-            floatingBottomEnd = false,
-            rhsBar = true,
             gestureLock = true,
-            detachedSlider = false,
         )
 
         @Stable
         val Invisible = PlayerToolBarVisibility(
             topBar = false,
             bottomBar = false,
-            floatingBottomEnd = true,
-            rhsBar = false,
             gestureLock = false,
-            detachedSlider = false,
         )
     }
 }
