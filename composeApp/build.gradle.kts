@@ -68,6 +68,9 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    buildFeatures {
+        compose = true // 必须启用
+    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -81,17 +84,18 @@ android {
             enableV4Signing = true
         }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
+        debug {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
-    buildFeatures {
-        compose = true // 必须启用
-    }
+
     compileOptions {
         sourceCompatibility = BuildVersionConfig.JAVA_VERSION
         targetCompatibility = BuildVersionConfig.JAVA_VERSION
