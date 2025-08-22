@@ -58,7 +58,7 @@ kotlin {
 }
 
 android {
-    namespace = "top.sacz.bili"
+    namespace = BuildVersionConfig.APPLICATION_ID
     compileSdk = BuildVersionConfig.COMPILE_SDK
 
     defaultConfig {
@@ -71,12 +71,22 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            excludes += "/META-INF/INDEX.LIST"
         }
     }
+    signingConfigs {
+        create("release") {
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }
     buildFeatures {

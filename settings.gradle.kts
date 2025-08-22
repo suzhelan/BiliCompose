@@ -14,6 +14,8 @@ dependencyResolutionManagement {
         mavenCentral()
         google()
         maven { url = uri("https://jitpack.io") }
+        //webview
+        maven("https://jogamp.org/deployment/maven")
     }
 }
 includeBuild("build-plugin")
