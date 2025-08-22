@@ -4,78 +4,126 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
 
 
 /**
- * 统一手势控制器，处理点击、双击和水平/垂直拖拽手势
+ * 统一手势控制器，处理点击、双击和水平/垂直拖拽手势,不存放任何可以显示的UI
  * 使用draggable也可以,我这里选择了pointerInput
+ * @param onClick 点击
+ * @param onDoubleTap 双击
+ *
+ * @param currentProgress 当前进度
+ * @param onProgress 左右滑进度
+ * @param onProgressFinished 拖动进度条结束
+ *
+ * @param currentVolume 当前音量
+ * @param onVolume 更新音量
+ *
+ * @param currentBrightness 当前亮度
+ * @param onBrightness 更新亮度
+ *
  */
 @Composable
-fun GestureHost(
-    currentProgress: () -> Float,
+fun BoxWithConstraintsScope.GestureHost(
+    //单击和长按
     onClick: () -> Unit,
     onDoubleTap: () -> Unit,
-    onShowSlider: (Float) -> Unit,
-    onFinished: () -> Unit,
+    //进度相关
+    currentProgress: () -> Float,
+    onProgress: (Float) -> Unit,
+    onProgressFinished: () -> Unit,
+    //当前系统音量
+    currentVolume: () -> Float,
+    onVolume: (Float) -> Unit,
+    //当前亮度
+    currentBrightness: () -> Float,
+    onBrightness: (Float) -> Unit
 ) {
-    val width = remember { mutableStateOf(0) }
-    var targetProgress by remember { mutableStateOf(Float.NaN) }
+    //拖拽进度
+    val targetProgress = rememberGestureController(
+        widthOrHeight = constraints.maxWidth,
+        initialProgress = currentProgress,
+        onChange = {
+            onProgress(it)
+        },
+        onFinished = {
+            onProgressFinished()
+        }
+    )
+    //拖拽音量
+    val targetVolume = rememberGestureController(
+        widthOrHeight = constraints.maxHeight,
+        initialProgress = currentVolume,
+        onChange = {
+            onVolume(it)
+        }
+    )
+    //亮度
+    val targetBrightness = rememberGestureController(
+        widthOrHeight = constraints.maxHeight,
+        initialProgress = currentBrightness,
+        onChange = {
+            onBrightness(it)
+        }
+    )
     //手势控制器
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .onSizeChanged { width.value = it.width }
             .combinedClickable(
                 onClick = {
                     onClick()
                 },
                 onDoubleClick = {
                     onDoubleTap()
-                }
+                },
+                indication = null,
+                interactionSource = null
             )//使用combinedClickable不会和pointerInput冲突
             .pointerInput(Unit) {
                 //监听水平拖动
                 detectHorizontalDragGestures(
                     onDragStart = {
-                        targetProgress = currentProgress()
+                        targetProgress.onStart()
                     },
                     onHorizontalDrag = { change, dragAmount ->
-                        val progressChange = dragAmount / width.value
-                        targetProgress = (targetProgress + progressChange).coerceIn(0f, 1f)
-                        onShowSlider(targetProgress)
+                        targetProgress.onMove(dragAmount)
                     },
                     onDragEnd = {
-                        onFinished()
+                        targetProgress.onFinish()
                     }
                 )
             }
     ) {
         //左半屏
-        Box(modifier = Modifier.weight(1f).fillMaxHeight().pointerInput(Unit) {
-            //监听垂直拖动
-            detectVerticalDragGestures(
-                onVerticalDrag = { change, dragAmount ->
-                    println("亮度:$dragAmount")
-                },
-            )
-        })
+        Box(
+            modifier = Modifier.weight(1f).fillMaxHeight()
+                .pointerInput(Unit) {
+                    //监听垂直拖动
+                    detectVerticalDragGestures(
+                        onVerticalDrag = { change, dragAmount ->
+                            targetBrightness.onMove(dragAmount)
+                        },
+                    )
+                })
+        //中间纯分隔即可
+        Box(modifier = Modifier.weight(1f).fillMaxHeight())
         //右半屏
-        Box(modifier = Modifier.weight(1f).fillMaxHeight().pointerInput(Unit) {
+        Box(
+            modifier = Modifier.weight(1f)
+                .fillMaxHeight()
+                .pointerInput(Unit) {
             //监听垂直拖动
             detectVerticalDragGestures(
                 onVerticalDrag = { change, dragAmount ->
-                    println("音量:$dragAmount")
+                    targetVolume.onMove(dragAmount)
                 },
             )
         })

@@ -63,18 +63,21 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
             )
         },
         video = {
+            //视频实际组件
             MediampPlayerSurface(
                 controller.videoPlayer,
                 Modifier.fillMaxSize()
             )
         },
         bottomBar = {
+            //底栏,暂停/播放,进度条,全屏
             PlayerBottomBar(
                 progressSliderState = progressSliderState,
                 controller = controller
             )
         },
         progressIndicator = {
+            //进度条
             PlayerProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,15 +95,29 @@ private fun VideoPlayer(controller: PlayerSyncController) = Box(
                 onDoubleTap = {
                     controller.playOrPause()
                 },
-                onShowSlider = { progress ->
+                onProgress = { progress ->
                     if (controller.visibility != PlayerToolBarVisibility.Visible) {
                         controller.updateVisibility(PlayerToolBarVisibility.Visible)
                     }
                     progressSliderState.previewPositionRatio(progress)
                 },
-                onFinished = {
+                onProgressFinished = {
                     controller.updateVisibility(PlayerToolBarVisibility.Invisible)
                     progressSliderState.changeFinished()
+                },
+                currentVolume = {
+                    0.5f
+                },
+                onVolume = {
+                    // 音量控制
+                    println("音量控制: $it")
+                },
+                currentBrightness = {
+                    0.5f
+                },
+                onBrightness = {
+                    // 亮度控制
+                    println("亮度控制: $it")
                 }
             )
         }
