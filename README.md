@@ -22,7 +22,6 @@
 - [ ] 直播功能
 - [ ] 番剧功能
 - [ ] 专栏功能
-- [ ] 扫码登录
 - [ ] 播放器
 - [ ] 评论功能
 - [ ] 个人主页和动态
@@ -30,5 +29,5 @@
 
 ### 正在解决的问题
 - [x] 播放器音频流和视频流无法声画同步(Android平台解决)
-- [ ] 解决Desktop Player的问题
+- [ ] 解决Desktop Player的问题(Install VLC, Video Audio Sync)
 - [ ] 解决Desktop Webview无法使用的问题(现有方案KCEF在Desktop上无法正常运行) 受到影响的功能: 登录业务-极验人机验证
