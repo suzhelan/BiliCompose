@@ -5,23 +5,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import top.sacz.bili.api.BiliResponse
+import top.sacz.bili.api.HttpJsonDecoder
 import top.sacz.bili.api.ext.apiCall
+import top.sacz.bili.biz.player.api.VideoInfoApi
 import top.sacz.bili.biz.player.api.VideoPlayerApi
 import top.sacz.bili.biz.player.entity.PlayerArgsItem
 import top.sacz.bili.biz.player.entity.VideoInfo
 import top.sacz.bili.biz.player.entity.VideoTag
 import top.sacz.bili.shared.common.base.BaseViewModel
+import top.sacz.bili.shared.common.logger.LogUtils
 
 class VideoPlayerViewModel : BaseViewModel() {
     private val api = VideoPlayerApi()
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
     val videoUrlData = _videoUrlData.asStateFlow()
     fun getPlayerUrl(
-        avid: String? = null,
+        avid: Long? = null,
         bvid: String? = null,
         epid: String? = null,
         seasonId: String? = null,
-        cid: String,
+        cid: Long,
         qn: Int = 80
     ) = viewModelScope.launch {
         _videoUrlData.value = apiCall {
@@ -40,13 +43,13 @@ class VideoPlayerViewModel : BaseViewModel() {
     private val _videoDetailsInfo = MutableStateFlow<BiliResponse<VideoInfo>>(BiliResponse.Loading)
     val videoDetailsInfo = _videoDetailsInfo.asStateFlow()
     fun getVideoDetailsInfo(
-        avid: String? = null,
+        avid: Long? = null,
         bvid: String? = null,
     ) = viewModelScope.launch {
         _videoDetailsInfo.value = BiliResponse.Loading
         _videoDetailsInfo.value = apiCall {
             api.getVideoDetails(
-                avid = avid,
+                aid = avid,
                 bvid = bvid,
             )
         }
@@ -84,4 +87,12 @@ class VideoPlayerViewModel : BaseViewModel() {
         ).data
     }
 
+
+    fun getRecommendedVideoByVideo(
+        aid: Long
+    ) = launchTask {
+        val api = VideoInfoApi()
+        val result = api.getRecommendedVideosByVideo(aid)
+        LogUtils.d(HttpJsonDecoder.encodeToString(result.data.items[0]))
+    }
 }

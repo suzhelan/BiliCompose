@@ -39,7 +39,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import top.sacz.bili.biz.player.entity.PlayerParams
-import top.sacz.bili.biz.recvids.model.SmallCoverV2Item
+import top.sacz.bili.biz.recvids.entity.SmallCoverV2Item
 import top.sacz.bili.shared.common.ui.autoSkeleton
 import top.sacz.bili.shared.navigation.SharedScreen
 
@@ -60,8 +60,8 @@ fun VideoCard(video: SmallCoverV2Item) {
     val navigator  = LocalNavigator.currentOrThrow
     val videoScreen = rememberScreen(SharedScreen.VideoPlayer(
         PlayerParams(
-            avid = video.playerArgs.aid.toString(),
-            cid = video.playerArgs.cid.toString(),
+            avid = video.playerArgs.aid,
+            cid = video.playerArgs.cid,
         ).toJson()
     ))    //首先就是一个圆角卡片背景
     Card(

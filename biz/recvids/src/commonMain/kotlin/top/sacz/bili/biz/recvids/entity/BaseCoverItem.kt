@@ -1,4 +1,4 @@
-package top.sacz.bili.biz.recvids.model
+package top.sacz.bili.biz.recvids.entity
 
 sealed class BaseCoverItem {
     abstract val cardType: String
@@ -32,4 +32,11 @@ fun BaseCoverItem.isAd(): Boolean {
  */
 fun BaseCoverItem.isSmallV2(): Boolean {
     return cardType == "small_cover_v2" || cardGoto == "av"
+}
+
+/**
+ * 直播
+ */
+fun BaseCoverItem.isLive(): Boolean {
+    return cardType == "small_cover_v9" || cardGoto == "live"
 }

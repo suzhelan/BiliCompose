@@ -6,9 +6,10 @@ import kotlinx.serialization.json.jsonPrimitive
 import top.sacz.bili.api.HttpJsonDecoder
 import top.sacz.bili.biz.recvids.api.FeedApi
 import top.sacz.bili.biz.recvids.config.BaseCoverSerializer
-import top.sacz.bili.biz.recvids.model.BaseCoverItem
-import top.sacz.bili.biz.recvids.model.SmallCoverV2Item
-import top.sacz.bili.biz.recvids.model.targetCardType
+import top.sacz.bili.biz.recvids.entity.BaseCoverItem
+import top.sacz.bili.biz.recvids.entity.SmallCoverV2Item
+import top.sacz.bili.biz.recvids.entity.targetCardType
+import top.sacz.bili.shared.common.logger.LogUtils
 
 class FeedVideoDataSource : PagingSource<Int, BaseCoverItem>() {
 
@@ -44,6 +45,7 @@ class FeedVideoDataSource : PagingSource<Int, BaseCoverItem>() {
                 nextKey = if (currentKey == Int.MAX_VALUE) null else currentKey + 1
             )
         } catch (e: Exception) {
+            LogUtils.e("主页视频获取失败", e)
             LoadResult.Error(e)
         }
     }

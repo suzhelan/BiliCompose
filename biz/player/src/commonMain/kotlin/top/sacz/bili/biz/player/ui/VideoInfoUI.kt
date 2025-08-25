@@ -58,6 +58,7 @@ import top.sacz.bili.shared.common.util.toStringCount
 
 @Composable
 fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel = viewModel()) {
+    viewModel.getRecommendedVideoByVideo(aid = playerParams.avid!!)
     val vmVideoInfo by viewModel.videoDetailsInfo.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.getVideoDetailsInfo(

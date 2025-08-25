@@ -1,4 +1,4 @@
-package top.sacz.bili.biz.recvids.model
+package top.sacz.bili.biz.recvids.entity
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject

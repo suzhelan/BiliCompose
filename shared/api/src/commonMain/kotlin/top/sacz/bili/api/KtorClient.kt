@@ -135,6 +135,13 @@ fun getKtorClient(
                 paramMap["appkey"] = appKeyType.appKey
                 val sign = BiliSignUtils(appKeyType).sign(paramMap)
                 paramMap["sign"] = sign
+                //添加wbi参数
+                if (withWbi) {
+                    val wbiParams = BiliWbi.getWRid(paramMap)
+                    val wts = BiliWbi.getWTs()
+                    paramMap["w_rid"] = wbiParams
+                    paramMap["wts"] = wts.toString()
+                }
                 //构建新的请求体
                 val newBody = FormDataContent(parameters {
                     paramMap.forEach {

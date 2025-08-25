@@ -6,7 +6,7 @@ import io.ktor.client.request.parameter
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
-import top.sacz.bili.biz.recvids.model.PopularListItem
+import top.sacz.bili.biz.recvids.entity.PopularListItem
 
 class PopularApi {
     /**

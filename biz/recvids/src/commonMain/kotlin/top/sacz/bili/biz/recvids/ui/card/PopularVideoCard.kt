@@ -28,7 +28,7 @@ import bilicompose.biz.recvids.generated.resources.Res
 import bilicompose.biz.recvids.generated.resources.more
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.stringResource
-import top.sacz.bili.biz.recvids.model.PopularItem
+import top.sacz.bili.biz.recvids.entity.PopularItem
 import top.sacz.bili.shared.common.ui.shimmerEffect
 import top.sacz.bili.shared.common.util.TimeUtils
 import top.sacz.bili.shared.common.util.formatPlayCount

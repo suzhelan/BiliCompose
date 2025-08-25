@@ -1,5 +1,6 @@
 package top.sacz.bili.biz.recvids.api
 
+
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -7,9 +8,7 @@ import io.ktor.http.path
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
-import top.sacz.bili.biz.recvids.model.ShortVideoData
-
-
+import top.sacz.bili.biz.recvids.entity.ShortVideoData
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 

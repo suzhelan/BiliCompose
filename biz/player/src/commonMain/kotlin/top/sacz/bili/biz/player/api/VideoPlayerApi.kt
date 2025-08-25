@@ -22,6 +22,7 @@ class VideoPlayerApi {
         withCookie = true
     )
 
+
     /**
      * 获取视频分P列表
      */
@@ -47,15 +48,15 @@ class VideoPlayerApi {
      * 获取视频简介
      */
     suspend fun getVideoDescr(
-        avid: String? = null,
+        aid: String? = null,
         bvid: String? = null,
     ): BiliResponse.Success<String> {
         return client.get(
             "/x/web-interface/archive/desc"
         ) {
             url {
-                if (avid != null) {
-                    parameter("aid", avid)
+                if (aid != null) {
+                    parameter("aid", aid)
                 }
                 if (bvid != null) {
                     parameter("bvid", bvid)
@@ -68,15 +69,15 @@ class VideoPlayerApi {
      * 获取视频详细信息
      */
     suspend fun getVideoDetails(
-        avid: String? = null,
+        aid: Long? = null,
         bvid: String? = null,
     ): BiliResponse.Success<VideoInfo> {
         return client.get(
             "/x/web-interface/view"
         ) {
             url {
-                if (avid != null) {
-                    parameter("aid", avid)
+                if (aid != null) {
+                    parameter("aid", aid)
                 }
                 if (bvid != null) {
                     parameter("bvid", bvid)
@@ -90,14 +91,14 @@ class VideoPlayerApi {
      * 必须包含 cid+avid/bvid
      */
     suspend fun getPlayerInfo(
-        avid: String? = null,
+        avid: Long? = null,
         bvid: String? = null,
         epid: String? = null,
         seasonId: String? = null,
-        cid: String,
+        cid: Long,
         qn: Int = 80
     ): BiliResponse.Success<PlayerArgsItem> {
-        val data = mutableMapOf<String, String>().apply {
+        val data = mutableMapOf<String, Any>().apply {
             if (avid != null) this["avid"] = avid
             if (bvid != null) this["bvid"] = bvid
             if (epid != null) this["ep_id"] = epid

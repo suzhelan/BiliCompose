@@ -1,13 +1,13 @@
 package top.sacz.bili.biz.recvids.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import top.sacz.bili.biz.recvids.data.FeedVideoDataSource
+import top.sacz.bili.shared.common.base.BaseViewModel
 
-class FeedViewModel : ViewModel() {
+class FeedViewModel : BaseViewModel() {
 
     val recommendedListFlow = Pager(
         config = PagingConfig(
@@ -19,5 +19,6 @@ class FeedViewModel : ViewModel() {
             FeedVideoDataSource()
         }
     ).flow.cachedIn(viewModelScope)
+
 
 }

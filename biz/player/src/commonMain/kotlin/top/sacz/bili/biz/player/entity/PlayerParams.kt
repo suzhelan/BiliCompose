@@ -6,11 +6,11 @@ import top.sacz.bili.api.HttpJsonDecoder
 
 @Serializable
 data class PlayerParams(
-    val avid: String? = null,
+    val avid: Long? = null,
     val bvid: String? = null,
     val epid: String? = null,
     val seasonId: String? = null,
-    val cid: String,
+    val cid: Long,
     val qn: Int = 80
 ) {
     fun toJson() = HttpJsonDecoder.encodeToString(this)

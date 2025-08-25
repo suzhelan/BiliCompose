@@ -1,4 +1,4 @@
-package top.sacz.bili.biz.recvids.model
+package top.sacz.bili.biz.recvids.entity
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName

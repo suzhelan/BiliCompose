@@ -27,7 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
-import top.sacz.bili.biz.recvids.model.SmallCoverV2Item
+import top.sacz.bili.biz.recvids.entity.SmallCoverV2Item
 import top.sacz.bili.biz.recvids.ui.card.EmptyCard
 import top.sacz.bili.biz.recvids.ui.card.UnknownTypeCoverCard
 import top.sacz.bili.biz.recvids.ui.card.VideoCard

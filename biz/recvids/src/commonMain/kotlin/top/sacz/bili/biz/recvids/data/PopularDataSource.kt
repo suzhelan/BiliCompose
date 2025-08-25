@@ -3,7 +3,7 @@ package top.sacz.bili.biz.recvids.data
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import top.sacz.bili.biz.recvids.api.PopularApi
-import top.sacz.bili.biz.recvids.model.PopularItem
+import top.sacz.bili.biz.recvids.entity.PopularItem
 
 class PopularDataSource : PagingSource<Int, PopularItem>() {
 
