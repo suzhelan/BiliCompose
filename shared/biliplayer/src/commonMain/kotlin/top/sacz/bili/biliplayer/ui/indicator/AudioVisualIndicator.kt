@@ -12,12 +12,12 @@ import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import top.sacz.bili.biliplayer.ui.theme.PlayerColor
 
 
 sealed class AudioVisualIndicator {
@@ -70,7 +70,7 @@ private fun Indicator(
     Row(
         modifier = modifier.fillMaxWidth(0.5f)
             .background(
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                PlayerColor.onSurface.copy(alpha = 0.5f),
                 RoundedCornerShape(20.dp)
             )
             .padding(20.dp),
@@ -78,12 +78,12 @@ private fun Indicator(
     ) {
         Icon(
             icon,
-            tint = MaterialTheme.colorScheme.surface,
+            tint = PlayerColor.surface.copy(alpha = 0.8f),
             contentDescription = null
         )
         Spacer(modifier = Modifier.width(10.dp))
         LinearProgressIndicator(
-            trackColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+            trackColor = PlayerColor.surface.copy(alpha = 0.8f),
             progress = {
                 progress()
             }

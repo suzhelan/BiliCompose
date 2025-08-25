@@ -23,6 +23,7 @@ import org.openani.mediamp.ExperimentalMediampApi
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState
 import org.openani.mediamp.features.Buffering
+import top.sacz.bili.biliplayer.ui.theme.PlayerColor
 
 /**
  * 视频指示器
@@ -83,7 +84,7 @@ private fun VideoLoadingIndicator(
 private fun Indicator(
     modifier: Modifier = Modifier,
     showProgress: Boolean = true,
-    color: Color = MaterialTheme.colorScheme.primary,
+    color: Color = PlayerColor.primary,
     text: @Composable () -> Unit = {}
 ) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {

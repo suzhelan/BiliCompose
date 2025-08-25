@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
@@ -24,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import top.sacz.bili.biliplayer.ui.theme.PlayerColor
 import kotlin.math.roundToLong
 
 @Composable
@@ -128,31 +128,19 @@ class MediaProgressSliderColors(
     val trackBackgroundColor: Color,
     val trackProgressColor: Color,
     val thumbColor: Color,
-    val downloadingColor: Color,
-    val chapterColor: Color,
-    val previewTimeBackgroundColor: Color,
-    val previewTimeTextColor: Color,
 )
 
 object MediaProgressSliderDefaults {
     @Composable
     fun colors(
-        trackBackgroundColor: Color = MaterialTheme.colorScheme.surface,
-        trackProgressColor: Color = MaterialTheme.colorScheme.primary,
-        thumbColor: Color = MaterialTheme.colorScheme.primary,
-        downloadingColor: Color = Color.Yellow,
-        chapterColor: Color = MaterialTheme.colorScheme.onSurface,
-        previewTimeBackgroundColor: Color = MaterialTheme.colorScheme.surface,
-        previewTimeTextColor: Color = MaterialTheme.colorScheme.onSurface,
+        trackBackgroundColor: Color = PlayerColor.primary,
+        trackProgressColor: Color = PlayerColor.primary,
+        thumbColor: Color = PlayerColor.primary,
     ): MediaProgressSliderColors {
         return MediaProgressSliderColors(
             trackBackgroundColor,
             trackProgressColor,
             thumbColor,
-            downloadingColor,
-            chapterColor,
-            previewTimeBackgroundColor,
-            previewTimeTextColor
         )
     }
 }
