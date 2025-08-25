@@ -133,7 +133,7 @@ class MediaProgressSliderColors(
 object MediaProgressSliderDefaults {
     @Composable
     fun colors(
-        trackBackgroundColor: Color = PlayerColor.primary,
+        trackBackgroundColor: Color = PlayerColor.surface,
         trackProgressColor: Color = PlayerColor.primary,
         thumbColor: Color = PlayerColor.primary,
     ): MediaProgressSliderColors {

@@ -3,12 +3,14 @@ package top.sacz.bili.biliplayer.ui.bottombar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -22,6 +24,7 @@ import top.sacz.bili.biliplayer.controller.PlayerSyncController
 import top.sacz.bili.biliplayer.ui.progress.PlayerProgressSlider
 import top.sacz.bili.biliplayer.ui.progress.PlayerProgressSliderState
 import top.sacz.bili.biliplayer.ui.theme.PlayerColor
+import top.sacz.bili.biliplayer.util.TimeUtil
 
 @Composable
 fun PlayerBottomBar(
@@ -66,5 +69,15 @@ fun PlayerBottomBar(
     PlayerProgressSlider(
         modifier = Modifier.weight(1f),
         state = progressSliderState,
+    )
+    //右边 时长,全屏
+    Text(
+        text = "${TimeUtil.formatMillisToTime(progressSliderState.currentPositionMillis)}/${
+            TimeUtil.formatMillisToTime(
+                progressSliderState.totalDurationMillis
+            )
+        }",
+        color = PlayerColor.surface,
+        modifier = Modifier.padding(start = 8.dp)
     )
 }
