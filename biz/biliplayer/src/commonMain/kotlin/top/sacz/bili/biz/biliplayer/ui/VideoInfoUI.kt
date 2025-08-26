@@ -59,9 +59,9 @@ import top.sacz.bili.shared.common.util.TimeUtils
 import top.sacz.bili.shared.common.util.toStringCount
 
 @Composable
-fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel = viewModel()) {
+fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel) {
     val vmVideoInfo by viewModel.videoDetailsInfo.collectAsState()
-    LaunchedEffect(Unit) {
+    LaunchedEffect(playerParams) {
         viewModel.getVideoDetailsInfo(
             avid = playerParams.avid,
             bvid = playerParams.bvid,
@@ -72,7 +72,7 @@ fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel = vi
             Text(text = "加载中...", modifier = Modifier.fillMaxWidth().shimmerEffect())
         }
         onSuccess { data ->
-            VideoDetailsUI(videoInfo = data)
+            VideoDetailsUI(videoInfo = data, viewModel = viewModel)
         }
     }
 }
@@ -80,6 +80,7 @@ fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel = vi
 @Composable
 private fun VideoDetailsUI(
     videoInfo: VideoInfo,
+    viewModel: VideoPlayerViewModel,
     userViewModel: UserViewModel = viewModel(),
 ) {
     val userCard by userViewModel.userCard.collectAsState()
@@ -89,18 +90,18 @@ private fun VideoDetailsUI(
     //作者卡片在最上方
     AuthorItemUI(userCard, userViewModel)
     //然后是一个可以展开的视频基本信息,包含标题,播放量,弹幕数量,发布时间,n人正在看
-    VideoBasicInfoUI(videoInfo)
+    VideoBasicInfoUI(videoInfo, viewModel)
     //然后是点赞 播放量 评论量等信息
 
     //最后是推荐视频
-    RecommendedVideoUI(videoInfo.aid)
+    RecommendedVideoUI(videoInfo.aid, viewModel)
 }
 
 /**
  * 标题+描述+基本数据指标+标签
  */
 @Composable
-private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel = viewModel()) {
+private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel) {
     //正在观看的人数
     val onlineCountText by viewModel.onlineCountText.collectAsState()
     //视频关联标签
@@ -325,7 +326,7 @@ private fun AuthorItemUI(
 @Composable
 private fun RecommendedVideoUI(
     aid: Long,
-    viewModel: VideoPlayerViewModel = viewModel()
+    viewModel: VideoPlayerViewModel
 ) {
     val recommendedVideo = viewModel.recommendedVideo
     LaunchedEffect(aid) {

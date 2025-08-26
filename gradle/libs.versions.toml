@@ -66,6 +66,7 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 #导航库
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyagerNavigator" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyagerNavigator" }
+voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyagerNavigator" }
 #跨平台加密
 krypto = { module = "com.soywiz.korlibs.krypto:krypto", version.ref = "krypto" }
 

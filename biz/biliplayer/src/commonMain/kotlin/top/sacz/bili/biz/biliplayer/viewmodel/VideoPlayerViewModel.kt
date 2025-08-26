@@ -1,21 +1,25 @@
 package top.sacz.bili.biz.biliplayer.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import top.sacz.bili.api.BiliResponse
+import top.sacz.bili.api.HttpJsonDecoder
 import top.sacz.bili.api.ext.apiCall
 import top.sacz.bili.biz.biliplayer.api.VideoInfoApi
 import top.sacz.bili.biz.biliplayer.api.VideoPlayerApi
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
+import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.sacz.bili.biz.biliplayer.entity.VideoInfo
 import top.sacz.bili.biz.biliplayer.entity.VideoTag
-import top.sacz.bili.shared.common.base.BaseViewModel
+import top.sacz.bili.shared.navigation.BaseScreenViewModel
 
-class VideoPlayerViewModel : BaseViewModel() {
+class VideoPlayerViewModel(
+    private val body: String
+) : BaseScreenViewModel() {
+    val playerArgs: PlayerParams = HttpJsonDecoder.decodeFromString(body)
+
     private val api = VideoPlayerApi()
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
     val videoUrlData = _videoUrlData.asStateFlow()
@@ -26,7 +30,7 @@ class VideoPlayerViewModel : BaseViewModel() {
         seasonId: String? = null,
         cid: Long,
         qn: Int = 80
-    ) = viewModelScope.launch {
+    ) = launchTask {
         _videoUrlData.value = apiCall {
             api.getPlayerInfo(
                 avid = avid,
@@ -45,7 +49,7 @@ class VideoPlayerViewModel : BaseViewModel() {
     fun getVideoDetailsInfo(
         avid: Long? = null,
         bvid: String? = null,
-    ) = viewModelScope.launch {
+    ) = launchTask {
         _videoDetailsInfo.value = BiliResponse.Loading
         _videoDetailsInfo.value = apiCall {
             api.getVideoDetails(

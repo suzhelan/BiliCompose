@@ -122,8 +122,6 @@ data class RecommendedVideoByVideo(
 
     @Serializable
     data class Owner(
-        @SerialName("avatar")
-        val avatar: Avatar,
         @SerialName("face")
         val face: String, // https://i0.hdslb.com/bfs/face/706ef370ccb11a46716f593fd8daf005d3c967f6.jpg
         @SerialName("fans")
@@ -235,15 +233,6 @@ data class RecommendedVideoByVideo(
     )
 
 
-    @Serializable
-    data class Avatar(
-        @SerialName("container_size")
-        val containerSize: ContainerSize,
-        @SerialName("fallback_layers")
-        val fallbackLayers: FallbackLayers,
-        @SerialName("mid")
-        val mid: String // 1992648798
-    )
 
     @Serializable
     data class OfficialVerify(

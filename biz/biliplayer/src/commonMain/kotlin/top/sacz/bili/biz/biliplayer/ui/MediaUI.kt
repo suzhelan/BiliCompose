@@ -1,10 +1,10 @@
 package top.sacz.bili.biz.biliplayer.ui
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
@@ -12,7 +12,7 @@ import top.sacz.bili.player.ui.VideoPlayerUI
 
 
 @Composable
-fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel = viewModel()) {
+fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
     val videoUrlData by vm.videoUrlData.collectAsState()
     LaunchedEffect(playerParams) {
         vm.getPlayerUrl(
@@ -38,7 +38,7 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel = viewModel()) 
             )
         }
         onError { code, msg, cause ->
-            vm.showMessageDialog(message = msg)
+            Text(text = "获取视频失败: $msg")
         }
     }
 }

@@ -3,7 +3,7 @@ package top.sacz.bili.biz.biliplayer.entity
 import kotlinx.serialization.Serializable
 import top.sacz.bili.api.HttpJsonDecoder
 
-
+//状态类型为稳定
 @Serializable
 data class PlayerParams(
     val avid: Long? = null,

@@ -16,6 +16,7 @@ kotlin {
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.voyager.navigator)
+            implementation(libs.voyager.screenmodel)
             implementation(libs.mediamp.all)
 
             //尽可能只使用公共模块
@@ -23,6 +24,7 @@ kotlin {
             implementation(projects.shared.api)
             implementation(projects.shared.player)
             implementation(projects.shared.common)
+            implementation(projects.shared.navigation)
         }
 
         sourceSets.androidMain.dependencies {
