@@ -1,7 +1,7 @@
 package top.sacz.bili.app
 
 import android.app.Application
-import top.sacz.bili.biliplayer.controller.AndroidPlayerParam
+import top.sacz.bili.player.controller.AndroidPlayerParam
 
 import top.sacz.bili.storage.config.SettingsConfig
 

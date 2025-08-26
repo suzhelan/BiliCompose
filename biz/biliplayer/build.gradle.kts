@@ -6,24 +6,32 @@ plugins {
 kotlin {
 
     sourceSets {
-
         commonMain.dependencies {
             implementation(libs.paging.compose.common)
             implementation(libs.coil.network.ktor3)
             implementation(libs.coil.compose)
             implementation(libs.ktor.client.core)
             implementation(libs.lifecycle.viewmodel.compose)
+            implementation(libs.lifecycle.runtime.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
-            implementation(projects.biz.user)
-            implementation(projects.biz.biliplayer)
-            implementation(projects.shared.auth)
-            implementation(projects.shared.api)
             implementation(libs.voyager.navigator)
+            implementation(libs.mediamp.all)
+
+            //尽可能只使用公共模块
+            implementation(projects.biz.user)
+            implementation(projects.shared.api)
+            implementation(projects.shared.player)
             implementation(projects.shared.common)
-            implementation(projects.shared.navigation)
         }
+
+        sourceSets.androidMain.dependencies {
+            implementation(libs.androidx.media3.exoplayer)
+        }
+
+
     }
 
 }
+
 

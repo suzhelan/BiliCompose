@@ -38,7 +38,7 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
-import top.sacz.bili.biz.player.entity.PlayerParams
+import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.recvids.entity.SmallCoverV2Item
 import top.sacz.bili.shared.common.ui.autoSkeleton
 import top.sacz.bili.shared.navigation.SharedScreen

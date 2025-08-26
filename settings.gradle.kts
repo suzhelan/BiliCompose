@@ -27,11 +27,11 @@ include(
     ":shared:common",
     ":shared:navigation",
     ":shared:auth",
-    ":shared:biliplayer",
+    ":shared:player",
 )
 include(
     ":biz:home",
-    ":biz:player",
+    ":biz:biliplayer",
     ":biz:user",
     ":biz:login",
     ":biz:recvids"

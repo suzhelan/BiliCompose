@@ -42,12 +42,15 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.transitions)
+            //业务
             implementation(projects.biz.home)
             implementation(projects.biz.user)
             implementation(projects.biz.login)
-            implementation(projects.biz.player)
+            implementation(projects.biz.biliplayer)
+            implementation(projects.biz.recvids)
+            //共享通用模块
+            implementation(projects.shared.player)
             implementation(projects.shared.api)
-            implementation(projects.shared.biliplayer)
             implementation(projects.shared.navigation)
         }
         desktopMain.dependencies {
