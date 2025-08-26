@@ -202,7 +202,7 @@ data class VideoInfo(
     @Serializable
     data class DescV2(
         @SerialName("biz_id")
-        val bizId: Int = 0, // 示例值：0
+        val bizId: Long = 0, // 示例值：0
         @SerialName("raw_text")
         val rawText: String = "", // 示例值："【CB想说的】看完拜年祭之后最爱的一个节目！..."
         @SerialName("type")
