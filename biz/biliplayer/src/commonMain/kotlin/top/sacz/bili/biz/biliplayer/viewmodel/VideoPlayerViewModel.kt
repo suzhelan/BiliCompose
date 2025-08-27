@@ -4,21 +4,17 @@ import androidx.compose.runtime.mutableStateListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import top.sacz.bili.api.BiliResponse
-import top.sacz.bili.api.HttpJsonDecoder
 import top.sacz.bili.api.ext.apiCall
 import top.sacz.bili.biz.biliplayer.api.VideoInfoApi
 import top.sacz.bili.biz.biliplayer.api.VideoPlayerApi
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
-import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.sacz.bili.biz.biliplayer.entity.VideoInfo
 import top.sacz.bili.biz.biliplayer.entity.VideoTag
-import top.sacz.bili.shared.navigation.BaseScreenViewModel
+import top.sacz.bili.shared.common.base.BaseViewModel
 
 class VideoPlayerViewModel(
-    private val body: String
-) : BaseScreenViewModel() {
-    val playerArgs: PlayerParams = HttpJsonDecoder.decodeFromString(body)
+) : BaseViewModel() {
 
     private val api = VideoPlayerApi()
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)

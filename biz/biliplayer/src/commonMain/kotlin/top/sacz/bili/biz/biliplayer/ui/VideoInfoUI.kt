@@ -2,9 +2,11 @@ package top.sacz.bili.biz.biliplayer.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,8 +21,13 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardControlKey
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.SmartDisplay
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.Subtitles
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material.icons.outlined.Toll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -34,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -54,6 +62,7 @@ import top.sacz.bili.biz.user.viewmodel.UserViewModel
 import top.sacz.bili.shared.common.ui.ProvideContentColor
 import top.sacz.bili.shared.common.ui.card.Expandable
 import top.sacz.bili.shared.common.ui.shimmerEffect
+import top.sacz.bili.shared.common.ui.theme.TextColor
 import top.sacz.bili.shared.common.ui.theme.TipTextColor
 import top.sacz.bili.shared.common.util.TimeUtils
 import top.sacz.bili.shared.common.util.toStringCount
@@ -61,7 +70,7 @@ import top.sacz.bili.shared.common.util.toStringCount
 @Composable
 fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel) {
     val vmVideoInfo by viewModel.videoDetailsInfo.collectAsState()
-    LaunchedEffect(playerParams) {
+    LaunchedEffect(Unit) {
         viewModel.getVideoDetailsInfo(
             avid = playerParams.avid,
             bvid = playerParams.bvid,
@@ -84,7 +93,7 @@ private fun VideoDetailsUI(
     userViewModel: UserViewModel = viewModel(),
 ) {
     val userCard by userViewModel.userCard.collectAsState()
-    LaunchedEffect(videoInfo) {
+    LaunchedEffect(Unit) {
         userViewModel.getUserInfo(mid = videoInfo.owner.mid)
     }
     //作者卡片在最上方
@@ -92,7 +101,7 @@ private fun VideoDetailsUI(
     //然后是一个可以展开的视频基本信息,包含标题,播放量,弹幕数量,发布时间,n人正在看
     VideoBasicInfoUI(videoInfo, viewModel)
     //然后是点赞 播放量 评论量等信息
-
+    BasicIndicatorsUI(videoInfo)
     //最后是推荐视频
     RecommendedVideoUI(videoInfo.aid, viewModel)
 }
@@ -106,7 +115,7 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
     val onlineCountText by viewModel.onlineCountText.collectAsState()
     //视频关联标签
     val videoTags by viewModel.videoTags.collectAsState()
-    LaunchedEffect(videoInfo) {
+    LaunchedEffect(Unit) {
         viewModel.getVideoOnlineCountText(videoInfo.aid, videoInfo.cid)
         viewModel.getVideoTags(
             aid = videoInfo.aid,
@@ -227,6 +236,51 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
 
 }
 
+@Composable
+private fun BasicIndicatorsUI(videoInfo: VideoInfo) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
+    ) {
+        OperateItemUI(
+            icon = Icons.Outlined.ThumbUp,
+            text = videoInfo.stat.like.toStringCount(),
+            onClick = {})
+        OperateItemUI(icon = Icons.Outlined.ThumbDown, text = "不喜欢", onClick = {})
+        OperateItemUI(
+            icon = Icons.Outlined.Toll,
+            text = videoInfo.stat.coin.toStringCount(),
+            onClick = {})
+        OperateItemUI(
+            icon = Icons.Outlined.StarOutline,
+            text = videoInfo.stat.favorite.toStringCount(),
+            onClick = {})
+        OperateItemUI(icon = Icons.Outlined.Share, text = "分享", onClick = {})
+    }
+
+
+}
+
+@Composable
+private fun RowScope.OperateItemUI(icon: ImageVector, text: String, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier.weight(1f).clickable {
+            onClick()
+        },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = TextColor.copy(alpha = 0.7f)
+        )
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            color = TextColor.copy(alpha = 0.7f)
+        )
+    }
+}
 
 @Composable
 private fun AuthorItemUI(
@@ -329,7 +383,7 @@ private fun RecommendedVideoUI(
     viewModel: VideoPlayerViewModel
 ) {
     val recommendedVideo = viewModel.recommendedVideo
-    LaunchedEffect(aid) {
+    LaunchedEffect(Unit) {
         viewModel.getRecommendedVideoByVideo(aid)
     }
     LazyColumn(

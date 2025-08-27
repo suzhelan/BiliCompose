@@ -1,23 +1,26 @@
 package top.sacz.bili.biz.biliplayer.ui
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DoorBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
+import top.sacz.bili.shared.common.ui.CommonComposeUI
 
 
 class VideoPlayerScreen(private val body: String) : Screen {
@@ -28,13 +31,7 @@ class VideoPlayerScreen(private val body: String) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val viewModel = rememberScreenModel(
-            tag = body
-        ) {
-            VideoPlayerViewModel(body)
-        }
-        val playerParams = viewModel.playerArgs
-        Scaffold(
+        CommonComposeUI<VideoPlayerViewModel>(
             topBar = {
                 CenterAlignedTopAppBar(
                     navigationIcon = {
@@ -42,7 +39,7 @@ class VideoPlayerScreen(private val body: String) : Screen {
                             navigator.pop()
                         }) {
                             Icon(
-                                imageVector = Icons.Outlined.DoorBack,
+                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                                 contentDescription = "Back"
                             )
                         }
@@ -52,16 +49,31 @@ class VideoPlayerScreen(private val body: String) : Screen {
                     }
                 )
             }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier.padding(paddingValues)
-            ) {
-                //播放器
-                MediaUI(playerParams, viewModel)
-                //视频信息
-                VideoInfoUI(playerParams, viewModel)
-            }
+        ) { vm ->
+            PlayerUI(
+                body = body,
+                viewModel = vm
+            )
         }
+    }
+}
+
+
+@Composable
+private fun PlayerUI(
+    body: String,
+    viewModel: VideoPlayerViewModel
+) {
+    val playerParams by remember {
+        mutableStateOf(PlayerParams.fromJson(body))
+    }
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        //播放器
+        MediaUI(playerParams, viewModel)
+        //视频信息
+        VideoInfoUI(playerParams, viewModel)
     }
 }
 

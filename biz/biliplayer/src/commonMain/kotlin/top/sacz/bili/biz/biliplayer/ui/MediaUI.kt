@@ -14,7 +14,7 @@ import top.sacz.bili.player.ui.VideoPlayerUI
 @Composable
 fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
     val videoUrlData by vm.videoUrlData.collectAsState()
-    LaunchedEffect(playerParams) {
+    LaunchedEffect(Unit) {
         vm.getPlayerUrl(
             avid = playerParams.avid,
             bvid = playerParams.bvid,

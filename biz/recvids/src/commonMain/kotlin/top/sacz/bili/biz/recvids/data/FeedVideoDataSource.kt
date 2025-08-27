@@ -35,8 +35,12 @@ class FeedVideoDataSource : PagingSource<Int, BaseCoverItem>() {
                 .filter {
                     //只得到标准的视频数据
                     it["card_type"]?.jsonPrimitive?.content == SmallCoverV2Item.targetCardType
-                }.map {
-                    HttpJsonDecoder.decodeFromJsonElement(BaseCoverSerializer, it)
+                }.mapNotNull {
+                    runCatching {
+                        HttpJsonDecoder.decodeFromJsonElement(BaseCoverSerializer, it)
+                    }.onFailure { e ->
+                        LogUtils.e("主页视频获取失败", HttpJsonDecoder.encodeToString(it), e)
+                    }.getOrNull()
                 }
             LoadResult.Page(
                 data = items,
