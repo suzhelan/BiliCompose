@@ -6,11 +6,8 @@ import io.ktor.client.request.parameter
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
-
-import top.sacz.bili.biz.biliplayer.entity.OnlineCount
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.sacz.bili.biz.biliplayer.entity.VideoInfo
-import top.sacz.bili.biz.biliplayer.entity.VideoTag
 
 /**
  * 获取视频信息
@@ -44,26 +41,6 @@ class VideoPlayerApi {
         }.body()
     }
 
-    /**
-     * 获取视频简介
-     */
-    suspend fun getVideoDescr(
-        aid: String? = null,
-        bvid: String? = null,
-    ): BiliResponse.Success<String> {
-        return client.get(
-            "/x/web-interface/archive/desc"
-        ) {
-            url {
-                if (aid != null) {
-                    parameter("aid", aid)
-                }
-                if (bvid != null) {
-                    parameter("bvid", bvid)
-                }
-            }
-        }.body()
-    }
 
     /**
      * 获取视频详细信息
@@ -124,46 +101,4 @@ class VideoPlayerApi {
         }.body()
     }
 
-    /**
-     * 获取视频在线观看数量文本
-     */
-    suspend fun getVideoOnlineCountText(
-        aid: Long,
-        cid: Long
-    ): BiliResponse.Success<OnlineCount> {
-        val appClient = getKtorClient(AppConfig.APP_BASE_URL)
-        return appClient.get(
-            "/x/v2/view/video/online"
-        ) {
-            //添加视频信息参数
-            parameter("aid", aid)
-            parameter("cid", cid)
-            //key sign ts等参数由client自行填充
-        }.body()
-    }
-
-    /**
-     * 获取视频标签信息
-     */
-    suspend fun getVideoTags(
-        aid: Long? = null,
-        bvid: String? = null,
-        cid: Long? = null
-    ): BiliResponse.Success<List<VideoTag>> {
-        return client.get(
-            "/x/web-interface/view/detail/tag"
-        ) {
-            url {
-                if (aid != null) {
-                    parameter("aid", aid)
-                }
-                if (bvid != null) {
-                    parameter("bvid", bvid)
-                }
-                if (cid != null) {
-                    parameter("cid", cid)
-                }
-            }
-        }.body()
-    }
 }

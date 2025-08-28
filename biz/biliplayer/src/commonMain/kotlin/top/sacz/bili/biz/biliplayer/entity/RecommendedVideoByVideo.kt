@@ -104,8 +104,6 @@ data class RecommendedVideoByVideo(
         val uri: String, // bilibili://story/114996004654324?cid=31577146929&player_height=1920&player_preload=%7B%22cid%22%3A31577146929%2C%22expire_time%22%3A1756093981%2C%22file_info%22%3A%7B%2216%22%3A%5B%7B%22timelength%22%3A43833%2C%22filesize%22%3A600390%7D%5D%7D%2C%22support_quality%22%3Anull%2C%22support_formats%22%3Anull%2C%22support_description%22%3Anull%2C%22quality%22%3A16%2C%22url%22%3A%22http%3A%2F%2F182.89.195.11%3A4480%2Fupgcxcode%2F29%2F69%2F31577146929%2F31577146929-1-16.mp4%3Fe%3Dig8euxZM2rNcNbRVhwdVhwdlhWdVhwdVhoNvNC8BqJIzNbfqXBvEuENvNC8aNEVEtEvE9IMvXBvE2ENvNCImNEVEIj0Y2J_aug859r1qXg8gNEVE5XREto8z5JZC2X2gkX5L5F1eTX1jkXlsTXHeux_f2o859IB_%5Cu0026platform%3D%5Cu0026oi%3D2095235124%5Cu0026deadline%3D1756097581%5Cu0026os%3Dmcdn%5Cu0026og%3Dcos%5Cu0026trid%3D00002ee5f08cf1ec47768df9a28a392eb5cO%5Cu0026mid%3D0%5Cu0026uipk%3D5%5Cu0026gen%3Dplayurlv3%5Cu0026nbs%3D1%5Cu0026upsig%3Df80055d3b2b74baf6d4ed34ba237fcc9%5Cu0026uparams%3De%2Cplatform%2Coi%2Cdeadline%2Cos%2Cog%2Ctrid%2Cmid%2Cuipk%2Cgen%2Cnbs%5Cu0026mcdnid%3D50037561%5Cu0026bvc%3Dvod%5Cu0026nettype%3D0%5Cu0026bw%3D111700%5Cu0026lrs%3D46%5Cu0026dl%3D0%5Cu0026f%3DO_0_0%5Cu0026agrr%3D0%5Cu0026buvid%3D%5Cu0026build%3D0%5Cu0026orderid%3D0%2C3%22%2C%22video_codecid%22%3A7%2C%22video_project%22%3Atrue%2C%22fnver%22%3A0%2C%22fnval%22%3A0%7D&player_rotate=0&player_width=1080&report_flow_data=%7B%22flow_card_type%22%3A%22vertical_av%22%7D
         @SerialName("view_content")
         val viewContent: String, // 169.9万
-        @SerialName("vip")
-        val vip: Vip
     )
 
 
@@ -198,39 +196,6 @@ data class RecommendedVideoByVideo(
     )
 
 
-    @Serializable
-    data class Vip(
-        @SerialName("avatar_subscript")
-        val avatarSubscript: Int, // 0
-        @SerialName("avatar_subscript_url")
-        val avatarSubscriptUrl: String,
-        @SerialName("due_date")
-        val dueDate: Long, // 1768492800000
-        @SerialName("label")
-        val label: Label,
-        @SerialName("nickname_color")
-        val nicknameColor: String,
-        @SerialName("ott_info")
-        val ottInfo: OttInfo,
-        @SerialName("role")
-        val role: Int, // 0
-        @SerialName("status")
-        val status: Int, // 0
-        @SerialName("super_vip")
-        val superVip: SuperVip,
-        @SerialName("theme_type")
-        val themeType: Int, // 0
-        @SerialName("tv_due_date")
-        val tvDueDate: Int, // 0
-        @SerialName("tv_vip_pay_type")
-        val tvVipPayType: Int, // 0
-        @SerialName("tv_vip_status")
-        val tvVipStatus: Int, // 0
-        @SerialName("type")
-        val type: Int, // 0
-        @SerialName("vip_pay_type")
-        val vipPayType: Int // 0
-    )
 
 
 

@@ -21,13 +21,13 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardControlKey
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.SmartDisplay
-import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.Subtitles
-import androidx.compose.material.icons.outlined.ThumbDown
-import androidx.compose.material.icons.outlined.ThumbUp
-import androidx.compose.material.icons.outlined.Toll
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.StarOutline
+import androidx.compose.material.icons.rounded.ThumbDown
+import androidx.compose.material.icons.rounded.ThumbUp
+import androidx.compose.material.icons.rounded.Toll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -38,6 +38,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,6 +65,7 @@ import top.sacz.bili.biz.user.viewmodel.UserViewModel
 import top.sacz.bili.shared.common.ui.ProvideContentColor
 import top.sacz.bili.shared.common.ui.card.Expandable
 import top.sacz.bili.shared.common.ui.shimmerEffect
+import top.sacz.bili.shared.common.ui.theme.ColorPrimary
 import top.sacz.bili.shared.common.ui.theme.TextColor
 import top.sacz.bili.shared.common.ui.theme.TipTextColor
 import top.sacz.bili.shared.common.util.TimeUtils
@@ -236,32 +240,45 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
 
 }
 
+/**
+ * 基本指标信息和操作 例如点赞
+ */
 @Composable
 private fun BasicIndicatorsUI(videoInfo: VideoInfo) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
     ) {
+        var isSelected by remember { mutableStateOf(false) }
         OperateItemUI(
-            icon = Icons.Outlined.ThumbUp,
+            icon = Icons.Rounded.ThumbUp,
             text = videoInfo.stat.like.toStringCount(),
-            onClick = {})
-        OperateItemUI(icon = Icons.Outlined.ThumbDown, text = "不喜欢", onClick = {})
+            isSelected = isSelected,
+            onClick = {
+                isSelected = !isSelected
+            })
+        OperateItemUI(icon = Icons.Rounded.ThumbDown, text = "不喜欢", onClick = {})
         OperateItemUI(
-            icon = Icons.Outlined.Toll,
+            icon = Icons.Rounded.Toll,
             text = videoInfo.stat.coin.toStringCount(),
             onClick = {})
         OperateItemUI(
-            icon = Icons.Outlined.StarOutline,
-            text = videoInfo.stat.favorite.toStringCount(),
+            icon = Icons.Rounded.StarOutline,
+            text = if (videoInfo.stat.favorite > 0) videoInfo.stat.favorite.toStringCount() else "收藏",
             onClick = {})
-        OperateItemUI(icon = Icons.Outlined.Share, text = "分享", onClick = {})
+        OperateItemUI(
+            icon = Icons.Rounded.Share,
+            text = if (videoInfo.stat.share > 0) videoInfo.stat.share.toStringCount() else "分享",
+            onClick = {})
     }
-
-
 }
 
 @Composable
-private fun RowScope.OperateItemUI(icon: ImageVector, text: String, onClick: () -> Unit) {
+private fun RowScope.OperateItemUI(
+    icon: ImageVector,
+    isSelected: Boolean = false,
+    text: String,
+    onClick: () -> Unit
+) {
     Column(
         modifier = Modifier.weight(1f).clickable {
             onClick()
@@ -272,7 +289,7 @@ private fun RowScope.OperateItemUI(icon: ImageVector, text: String, onClick: () 
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = TextColor.copy(alpha = 0.7f)
+            tint = if (isSelected) ColorPrimary.copy(alpha = 0.8f) else TextColor.copy(alpha = 0.5f)
         )
         Text(
             text = text,

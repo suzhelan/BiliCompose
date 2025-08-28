@@ -65,6 +65,7 @@ class VideoPlayerViewModel(
         aid: Long,
         cid: Long
     ) = launchTask {
+        val api = VideoInfoApi()
         _onlineCountText.value = api.getVideoOnlineCountText(
             aid = aid,
             cid = cid
@@ -83,6 +84,7 @@ class VideoPlayerViewModel(
         bvid: String? = null,
         cid: Long? = null,
     ) = launchTask {
+        val api = VideoInfoApi()
         _videoTags.value = api.getVideoTags(
             aid = aid,
             bvid = bvid,
