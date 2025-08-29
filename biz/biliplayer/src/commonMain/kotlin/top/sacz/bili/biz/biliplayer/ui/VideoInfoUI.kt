@@ -38,9 +38,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -105,7 +102,7 @@ private fun VideoDetailsUI(
     //然后是一个可以展开的视频基本信息,包含标题,播放量,弹幕数量,发布时间,n人正在看
     VideoBasicInfoUI(videoInfo, viewModel)
     //然后是点赞 播放量 评论量等信息
-    BasicIndicatorsUI(videoInfo)
+    BasicIndicatorsUI(videoInfo, viewModel)
     //最后是推荐视频
     RecommendedVideoUI(videoInfo.aid, viewModel)
 }
@@ -244,27 +241,39 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
  * 基本指标信息和操作 例如点赞
  */
 @Composable
-private fun BasicIndicatorsUI(videoInfo: VideoInfo) {
+private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel) {
+    val isLike by viewModel.isLike.collectAsState()
+    val isCoinQuotation by viewModel.isCoinQuotation.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.updateUserActionState(videoInfo.aid)
+    }
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
     ) {
-        var isSelected by remember { mutableStateOf(false) }
+        //点赞
         OperateItemUI(
             icon = Icons.Rounded.ThumbUp,
             text = videoInfo.stat.like.toStringCount(),
-            isSelected = isSelected,
+            isSelected = isLike,
             onClick = {
-                isSelected = !isSelected
+                viewModel.like(videoInfo.aid, !isLike)
             })
+        //点踩
         OperateItemUI(icon = Icons.Rounded.ThumbDown, text = "不喜欢", onClick = {})
+        //投币
         OperateItemUI(
             icon = Icons.Rounded.Toll,
             text = videoInfo.stat.coin.toStringCount(),
+            isSelected = isCoinQuotation > 0,
             onClick = {})
+        //收藏
         OperateItemUI(
             icon = Icons.Rounded.StarOutline,
+            isSelected = isFavorite,
             text = if (videoInfo.stat.favorite > 0) videoInfo.stat.favorite.toStringCount() else "收藏",
             onClick = {})
+        //分享
         OperateItemUI(
             icon = Icons.Rounded.Share,
             text = if (videoInfo.stat.share > 0) videoInfo.stat.share.toStringCount() else "分享",

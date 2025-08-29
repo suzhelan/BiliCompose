@@ -106,4 +106,44 @@ class VideoPlayerViewModel(
         val result = api.getRecommendedVideosByVideo(aid)
         _recommendedVideo.addAll(result.data.items)
     }
+
+    //是否点赞
+    val isLike = MutableStateFlow(false)
+
+    //是否投币
+    val isCoinQuotation = MutableStateFlow(-1)
+
+    //是否收藏
+    val isFavorite = MutableStateFlow(false)
+    fun updateUserActionState(
+        aid: Long,
+    ) = launchTask {
+        updateLikeWait(aid)
+        updateCoinQuotationWait(aid)
+        updateFavoriteWait(aid)
+    }
+
+    private suspend fun updateLikeWait(aid: Long) {
+        val api = VideoInfoApi()
+        isLike.value = api.isLike(aid = aid).data
+    }
+
+    private suspend fun updateCoinQuotationWait(aid: Long) {
+        val api = VideoInfoApi()
+        isCoinQuotation.value = api.isCoins(aid = aid).data
+    }
+
+    private suspend fun updateFavoriteWait(aid: Long) {
+        val api = VideoInfoApi()
+        isFavorite.value = api.isFavoured(aid = aid).data
+    }
+
+    fun like(
+        aid: Long,
+        like: Boolean
+    ) = launchTask {
+        val api = VideoInfoApi()
+        api.like(aid = aid, isLike = like)
+        updateLikeWait(aid)
+    }
 }

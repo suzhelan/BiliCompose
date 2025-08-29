@@ -1,8 +1,15 @@
 package top.sacz.bili.biz.biliplayer.api
 
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.parameters
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.jsonPrimitive
 import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
@@ -114,23 +121,74 @@ class VideoInfoApi {
     }
 
     /**
+     * 视频是否投币
+     * @return 已投硬币数量
+     */
+    suspend fun isCoins(
+        aid: Long? = null,
+        bvid: String? = null
+    ): BiliResponse.Success<Int> {
+        val response: BiliResponse.SuccessOrNull<Map<String, Int>> = client.get(
+            "/x/web-interface/archive/coins"
+        ) {
+            if (aid != null) {
+                parameter("aid", aid)
+            }
+            if (bvid != null) {
+                parameter("bvid", bvid)
+            }
+        }.body()
+        return BiliResponse.Success(
+            code = response.code,
+            message = response.message,
+            ttl = response.ttl,
+            data = response.data?.get("multiply") ?: 0
+        )
+    }
+
+    /**
+     * 视频是否被收藏
+     */
+    suspend fun isFavoured(
+        aid: Long,
+    ): BiliResponse.Success<Boolean> {
+        val response: BiliResponse.SuccessOrNull<JsonObject> = client.get(
+            "/x/v2/fav/video/favoured"
+        ) {
+            parameter("aid", aid)
+        }.body()
+        /*
+        "count": 1,
+		"favoured": true
+         */
+        return BiliResponse.Success(
+            code = response.code,
+            message = response.message,
+            ttl = response.ttl,
+            data = response.data?.getValue("favoured")!!.jsonPrimitive.boolean
+        )
+    }
+
+    /**
      * 点赞或者取消点赞
      **/
     suspend fun like(
         aid: Long,
         isLike: Boolean
     ): BiliResponse.Success<String> {
-        val response: BiliResponse.SuccessOrNull<String> = appClient.get(
+        val response: BiliResponse.SuccessOrNull<Map<String, String>> = appClient.post(
             "/x/v2/view/like"
         ) {
-            parameter("aid", aid)
-            parameter("like", if (isLike) 0 else 1)
+            setBody(FormDataContent(parameters {
+                append("aid", aid.toString())
+                append("like", (if (isLike) 0 else 1).toString())
+            }))
         }.body()
         return BiliResponse.Success(
             code = response.code,
             message = response.message,
             ttl = response.ttl,
-            data = response.data ?: ""
+            data = response.data?.get("toast") ?: "异常 未响应data"
         )
     }
 }
