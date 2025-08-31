@@ -4,6 +4,7 @@ package top.sacz.bili.api
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpSend
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
@@ -88,6 +89,13 @@ fun getKtorClient(
         //泛型结果返回
         install(ContentNegotiation) {
             json(HttpJsonDecoder)
+        }
+        //设置请求超时时间
+        install(HttpTimeout) {
+            requestTimeoutMillis = 10000
+            connectTimeoutMillis = 10000
+            socketTimeoutMillis = 10000
+
         }
     }
     //进行签名和添加常用参数

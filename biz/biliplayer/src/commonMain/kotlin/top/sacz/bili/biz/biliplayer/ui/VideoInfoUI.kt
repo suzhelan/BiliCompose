@@ -245,6 +245,7 @@ private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
     val isLike by viewModel.isLike.collectAsState()
     val isCoinQuotation by viewModel.isCoinQuotation.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
+
     LaunchedEffect(Unit) {
         viewModel.updateUserActionState(videoInfo.aid)
     }

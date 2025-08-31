@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.ext.apiCall
+import top.sacz.bili.api.isSuccess
 import top.sacz.bili.biz.biliplayer.api.VideoInfoApi
 import top.sacz.bili.biz.biliplayer.api.VideoPlayerApi
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
@@ -107,6 +108,8 @@ class VideoPlayerViewModel(
         _recommendedVideo.addAll(result.data.items)
     }
 
+    val operationState = MutableStateFlow<ActionState>(ActionState.None)
+
     //是否点赞
     val isLike = MutableStateFlow(false)
 
@@ -118,9 +121,11 @@ class VideoPlayerViewModel(
     fun updateUserActionState(
         aid: Long,
     ) = launchTask {
+        operationState.value = ActionState.AllLoading
         updateLikeWait(aid)
         updateCoinQuotationWait(aid)
         updateFavoriteWait(aid)
+        operationState.value = ActionState.None
     }
 
     private suspend fun updateLikeWait(aid: Long) {
@@ -142,8 +147,23 @@ class VideoPlayerViewModel(
         aid: Long,
         like: Boolean
     ) = launchTask {
+        if (operationState.value == ActionState.Like) {
+            return@launchTask
+        }
+        operationState.value = ActionState.Like
         val api = VideoInfoApi()
-        api.like(aid = aid, isLike = like)
-        updateLikeWait(aid)
+        val response = api.like(aid = aid, isLike = like)
+        if (response.isSuccess()) {
+            isLike.value = response.isSuccess() && like
+        }
+        operationState.value = ActionState.None
     }
+}
+
+sealed class ActionState {
+    object Like : ActionState()
+    object Coin : ActionState()
+    object Favorite : ActionState()
+    object AllLoading : ActionState()
+    object None : ActionState()
 }
