@@ -243,7 +243,7 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
 @Composable
 private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel) {
     val isLike by viewModel.isLike.collectAsState()
-    val isCoinQuotation by viewModel.isCoinQuotation.collectAsState()
+    val coinQuotation by viewModel.coinQuotationCount.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -265,9 +265,11 @@ private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
         //投币
         OperateItemUI(
             icon = Icons.Rounded.Toll,
-            text = videoInfo.stat.coin.toStringCount(),
-            isSelected = isCoinQuotation > 0,
-            onClick = {})
+            text = (videoInfo.stat.coin + coinQuotation).toStringCount(),
+            isSelected = coinQuotation > 0,
+            onClick = {
+                viewModel.addCoin(videoInfo.aid, 1)
+            })
         //收藏
         OperateItemUI(
             icon = Icons.Rounded.StarOutline,

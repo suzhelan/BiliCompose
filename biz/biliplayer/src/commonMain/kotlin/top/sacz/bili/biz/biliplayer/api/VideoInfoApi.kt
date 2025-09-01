@@ -191,4 +191,26 @@ class VideoInfoApi {
             data = response.data?.get("toast") ?: "异常 未响应data"
         )
     }
+
+    suspend fun coin(
+        aid: Long,
+        multiply: Int,
+        selectLike : Boolean = false
+    ): BiliResponse.Success<Boolean> {
+        val response: BiliResponse.SuccessOrNull<JsonObject> = appClient.post(
+            "/x/v2/view/coin/add"
+        ) {
+            setBody(FormDataContent(parameters {
+                append("aid", aid.toString())
+                append("multiply", multiply.toString())
+                append("select_like", if (selectLike) "1" else "0")
+            }))
+        }.body()
+        return BiliResponse.Success(
+            code = response.code,
+            message = response.message,
+            ttl = response.ttl,
+            data = response.data?.getValue("like")?.jsonPrimitive!!.boolean
+        )
+    }
 }

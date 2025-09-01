@@ -21,6 +21,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.shared.common.ui.CommonComposeUI
+import top.sacz.bili.shared.common.ui.dialog.DialogHandler
 
 
 class VideoPlayerScreen(private val body: String) : Screen {
@@ -50,6 +51,7 @@ class VideoPlayerScreen(private val body: String) : Screen {
                 )
             }
         ) { vm ->
+            DialogHandler(vm)
             PlayerUI(
                 body = body,
                 viewModel = vm

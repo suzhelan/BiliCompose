@@ -114,7 +114,7 @@ class VideoPlayerViewModel(
     val isLike = MutableStateFlow(false)
 
     //是否投币
-    val isCoinQuotation = MutableStateFlow(-1)
+    val coinQuotationCount = MutableStateFlow(-1)
 
     //是否收藏
     val isFavorite = MutableStateFlow(false)
@@ -135,7 +135,7 @@ class VideoPlayerViewModel(
 
     private suspend fun updateCoinQuotationWait(aid: Long) {
         val api = VideoInfoApi()
-        isCoinQuotation.value = api.isCoins(aid = aid).data
+        coinQuotationCount.value = api.isCoins(aid = aid).data
     }
 
     private suspend fun updateFavoriteWait(aid: Long) {
@@ -154,7 +154,26 @@ class VideoPlayerViewModel(
         val api = VideoInfoApi()
         val response = api.like(aid = aid, isLike = like)
         if (response.isSuccess()) {
-            isLike.value = response.isSuccess() && like
+            isLike.value = like
+        }
+        operationState.value = ActionState.None
+    }
+
+    fun addCoin(
+        aid: Long,
+        multiply: Int,
+        selectLike: Boolean = false
+    ) = launchTask {
+        if (operationState.value == ActionState.Coin) {
+            return@launchTask
+        }
+        operationState.value = ActionState.Coin
+        val api = VideoInfoApi()
+        val response = api.coin(aid = aid, multiply = multiply, selectLike = selectLike)
+        if (response.isSuccess()) {
+            coinQuotationCount.value += multiply
+        } else {
+            showMessageDialog("提示", response.message)
         }
         operationState.value = ActionState.None
     }
