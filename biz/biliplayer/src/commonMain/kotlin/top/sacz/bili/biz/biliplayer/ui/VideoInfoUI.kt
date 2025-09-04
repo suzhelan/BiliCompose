@@ -21,13 +21,13 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardControlKey
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.SmartDisplay
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.Subtitles
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.rounded.StarOutline
-import androidx.compose.material.icons.rounded.ThumbDown
-import androidx.compose.material.icons.rounded.ThumbUp
-import androidx.compose.material.icons.rounded.Toll
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material.icons.outlined.Toll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -254,17 +254,17 @@ private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
     ) {
         //点赞
         OperateItemUI(
-            icon = Icons.Rounded.ThumbUp,
+            icon = Icons.Outlined.ThumbUp,
             text = videoInfo.stat.like.toStringCount(),
             isSelected = isLike,
             onClick = {
                 viewModel.like(videoInfo.aid, !isLike)
             })
         //点踩
-        OperateItemUI(icon = Icons.Rounded.ThumbDown, text = "不喜欢", onClick = {})
+        OperateItemUI(icon = Icons.Outlined.ThumbDown, text = "不喜欢", onClick = {})
         //投币
         OperateItemUI(
-            icon = Icons.Rounded.Toll,
+            icon = Icons.Outlined.Toll,
             text = (videoInfo.stat.coin + coinQuotation).toStringCount(),
             isSelected = coinQuotation > 0,
             onClick = {
@@ -272,13 +272,13 @@ private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
             })
         //收藏
         OperateItemUI(
-            icon = Icons.Rounded.StarOutline,
+            icon = Icons.Outlined.StarOutline,
             isSelected = isFavorite,
             text = if (videoInfo.stat.favorite > 0) videoInfo.stat.favorite.toStringCount() else "收藏",
             onClick = {})
         //分享
         OperateItemUI(
-            icon = Icons.Rounded.Share,
+            icon = Icons.Outlined.Share,
             text = if (videoInfo.stat.share > 0) videoInfo.stat.share.toStringCount() else "分享",
             onClick = {})
     }
