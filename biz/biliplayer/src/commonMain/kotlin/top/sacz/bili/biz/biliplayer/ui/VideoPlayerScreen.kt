@@ -10,10 +10,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -21,7 +19,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.shared.common.ui.CommonComposeUI
-import top.sacz.bili.shared.common.ui.dialog.DialogHandler
+import top.sacz.bili.shared.common.ui.DefaultViewModel
+import top.sacz.bili.shared.navigation.DialogHandler
 
 
 class VideoPlayerScreen(private val body: String) : Screen {
@@ -32,7 +31,7 @@ class VideoPlayerScreen(private val body: String) : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        CommonComposeUI<VideoPlayerViewModel>(
+        CommonComposeUI<DefaultViewModel>(
             topBar = {
                 CenterAlignedTopAppBar(
                     navigationIcon = {
@@ -50,10 +49,13 @@ class VideoPlayerScreen(private val body: String) : Screen {
                     }
                 )
             }
-        ) { vm ->
+        ) { _ ->
+            val vm = rememberScreenModel {
+                VideoPlayerViewModel()
+            }
             DialogHandler(vm)
             PlayerUI(
-                body = body,
+                playerParams = PlayerParams.fromJson(body),
                 viewModel = vm
             )
         }
@@ -61,14 +63,12 @@ class VideoPlayerScreen(private val body: String) : Screen {
 }
 
 
+
 @Composable
 private fun PlayerUI(
-    body: String,
-    viewModel: VideoPlayerViewModel
+    playerParams: PlayerParams,
+    viewModel: VideoPlayerViewModel,
 ) {
-    val playerParams by remember {
-        mutableStateOf(PlayerParams.fromJson(body))
-    }
     Column(
         modifier = Modifier.fillMaxSize()
     ) {

@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.isLoading
@@ -411,6 +413,7 @@ private fun RecommendedVideoUI(
     aid: Long,
     viewModel: VideoPlayerViewModel
 ) {
+    val navigator = LocalNavigator.currentOrThrow
     val recommendedVideo = viewModel.recommendedVideo
     LaunchedEffect(Unit) {
         viewModel.getRecommendedVideoByVideo(aid)
@@ -421,7 +424,16 @@ private fun RecommendedVideoUI(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(recommendedVideo) {
-            SimpleVideoCard(it)
+            SimpleVideoCard(it) {
+                navigator.push(
+                    VideoPlayerScreen(
+                        PlayerParams(
+                            avid = it.playerArgs.aid,
+                            cid = it.playerArgs.cid,
+                        ).toJson()
+                    )
+                )
+            }
         }
     }
 }

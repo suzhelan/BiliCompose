@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.sacz.bili.shared.common.base.BaseViewModel
 
+
+class DefaultViewModel : BaseViewModel()
 /**
  * 常规脚手架布局
  */
@@ -57,7 +59,8 @@ inline fun <reified VM : BaseViewModel> CommonComposeUI(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TitleUI(
-    title: String, onClickBack: () -> Unit
+    title: String,
+    onClickBack: () -> Unit
 ) {
     TopAppBar(
         title = {

@@ -24,30 +24,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
-import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.entity.RecommendedVideoByVideo
-import top.sacz.bili.biz.biliplayer.ui.VideoPlayerScreen
 import top.sacz.bili.shared.common.util.TimeUtils
 import top.sacz.bili.shared.common.util.formatPlayCount
 
 @Composable
 fun SimpleVideoCard(
-    item: RecommendedVideoByVideo.Item
+    item: RecommendedVideoByVideo.Item,
+    onClick: () -> Unit
 ) {
-    val navigator = LocalNavigator.currentOrThrow
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth()
             .height(80.dp)
             .clickable {
-                val playerParams = PlayerParams(
-                    avid = item.playerArgs.aid,
-                    bvid = item.bvid,
-                    cid = item.playerArgs.cid,
-                ).toJson()
-                navigator.push(VideoPlayerScreen(playerParams))
+                onClick()
             }
     ) {
         val (coverImage, durationText, titleText, upNameText, extraText, moreIc) = createRefs()
