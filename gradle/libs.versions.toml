@@ -1,13 +1,13 @@
 [versions]
-agp = "8.12.1"
+agp = "8.13.0"
 androidx-activityCompose = "1.10.1"
 androidx-appcompat = "1.7.1"
-androidx-lifecycle = "2.9.2"
-androidx-material = "1.12.0"
+androidx-lifecycle = "2.9.3"
+androidx-material = "1.13.0"
 
 coil = "3.3.0"
-compose-multiplatform = "1.9.0-beta03"
-composeWebviewMultiplatform = "2.0.2"
+compose-multiplatform = "1.10.0-alpha01"
+composeWebviewMultiplatform = "2.0.3"
 constraintlayoutComposeMultiplatform = "0.6.0"
 fastkv = "3.0.1"
 kotlin = "2.2.10"
@@ -52,7 +52,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 # JetBrains Compose Multiplatform
 lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
-
+navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "androidx-lifecycle" }
 #跨平台导航栏 可以代替使用implementation(compose.material3AdaptiveNavigationSuite)
 material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version = "compose-multiplatform" }
 #音视频播放器
