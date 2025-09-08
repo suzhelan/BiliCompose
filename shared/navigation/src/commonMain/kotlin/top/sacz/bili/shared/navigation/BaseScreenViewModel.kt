@@ -17,6 +17,7 @@ import top.sacz.bili.shared.common.ui.dialog.MessageDialog
 
 /**
  * 结构和[top.sacz.bili.shared.common.base.BaseViewModel]一样,不依赖BaseViewModel是因为会依赖冲突错误
+ * 用哪个其实都行 我个人推荐使用[top.sacz.bili.shared.common.base.BaseViewModel]
  */
 abstract class BaseScreenViewModel : ScreenModel {
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->

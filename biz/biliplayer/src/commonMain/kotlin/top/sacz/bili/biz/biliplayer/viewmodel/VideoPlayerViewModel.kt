@@ -12,10 +12,10 @@ import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.sacz.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.sacz.bili.biz.biliplayer.entity.VideoInfo
 import top.sacz.bili.biz.biliplayer.entity.VideoTag
-import top.sacz.bili.shared.navigation.BaseScreenViewModel
+import top.sacz.bili.shared.common.base.BaseViewModel
 
 class VideoPlayerViewModel(
-) : BaseScreenViewModel() {
+) : BaseViewModel() {
 
     private val api = VideoPlayerApi()
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
@@ -102,7 +102,9 @@ class VideoPlayerViewModel(
     fun getRecommendedVideoByVideo(
         aid: Long
     ) = launchTask {
-        _recommendedVideo.clear()
+        if (_recommendedVideo.isNotEmpty()) {
+            return@launchTask
+        }
         val api = VideoInfoApi()
         while (_recommendedVideo.size < 50) {
             val result = api.getRecommendedVideosByVideo(aid)

@@ -11,7 +11,7 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.core.model.rememberScreenModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -20,7 +20,7 @@ import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.shared.common.ui.CommonComposeUI
 import top.sacz.bili.shared.common.ui.DefaultViewModel
-import top.sacz.bili.shared.navigation.DialogHandler
+import top.sacz.bili.shared.common.ui.dialog.DialogHandler
 
 
 class VideoPlayerScreen(private val body: String) : Screen {
@@ -50,7 +50,7 @@ class VideoPlayerScreen(private val body: String) : Screen {
                 )
             }
         ) { _ ->
-            val vm = rememberScreenModel {
+            val vm = viewModel {
                 VideoPlayerViewModel()
             }
             DialogHandler(vm)
