@@ -163,6 +163,8 @@ class VideoPlayerViewModel(
         operationState.value = ActionState.None
     }
 
+    val isShowAddCoinDialog = MutableStateFlow(false)
+
     fun addCoin(
         aid: Long,
         multiply: Int,

@@ -57,10 +57,13 @@ import top.sacz.bili.api.isSuccess
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.entity.VideoInfo
+import top.sacz.bili.biz.biliplayer.ui.dialog.SelectCoinCountDialog
 import top.sacz.bili.biz.biliplayer.ui.item.SimpleVideoCard
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.biz.user.entity.UserCard
 import top.sacz.bili.biz.user.viewmodel.UserViewModel
+import top.sacz.bili.shared.common.ext.dismiss
+import top.sacz.bili.shared.common.ext.show
 import top.sacz.bili.shared.common.ui.ProvideContentColor
 import top.sacz.bili.shared.common.ui.card.Expandable
 import top.sacz.bili.shared.common.ui.shimmerEffect
@@ -99,6 +102,8 @@ private fun VideoDetailsUI(
     LaunchedEffect(Unit) {
         userViewModel.getUserInfo(mid = videoInfo.owner.mid)
     }
+    //Dialog
+    Dialogs(aid = videoInfo.aid, viewModel = viewModel)
     //作者卡片在最上方
     AuthorItemUI(userCard, userViewModel)
     //然后是一个可以展开的视频基本信息,包含标题,播放量,弹幕数量,发布时间,n人正在看
@@ -107,6 +112,30 @@ private fun VideoDetailsUI(
     BasicIndicatorsUI(videoInfo, viewModel)
     //最后是推荐视频
     RecommendedVideoUI(videoInfo.aid, viewModel)
+}
+
+@Composable
+private fun Dialogs(aid: Long, viewModel: VideoPlayerViewModel) {
+    val isShowAddCoinDialog by viewModel.isShowAddCoinDialog.collectAsState()
+    val coinQuotationCount by viewModel.coinQuotationCount.collectAsState()
+    if (isShowAddCoinDialog) {
+        if (coinQuotationCount >= 2) {
+            viewModel.showMessageDialog("提示", "您已经投过币了,请勿重复投币")
+            viewModel.isShowAddCoinDialog.dismiss()
+        } else {
+            SelectCoinCountDialog(
+                onSelect = { count ->
+                    viewModel.addCoin(
+                        aid = aid,
+                        multiply = count
+                    )
+                },
+                onDismissRequest = {
+                    viewModel.isShowAddCoinDialog.dismiss()
+                }
+            )
+        }
+    }
 }
 
 /**
@@ -270,7 +299,7 @@ private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
             text = (videoInfo.stat.coin + coinQuotation).toStringCount(),
             isSelected = coinQuotation > 0,
             onClick = {
-                viewModel.addCoin(videoInfo.aid, 1)
+                viewModel.isShowAddCoinDialog.show()
             })
         //收藏
         OperateItemUI(
