@@ -7,7 +7,6 @@ import top.sacz.bili.api.AppConfig
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
-import top.sacz.bili.biz.biliplayer.entity.VideoInfo
 
 /**
  * 获取视频信息
@@ -41,27 +40,6 @@ class VideoPlayerApi {
         }.body()
     }
 
-
-    /**
-     * 获取视频详细信息
-     */
-    suspend fun getVideoDetails(
-        aid: Long? = null,
-        bvid: String? = null,
-    ): BiliResponse.Success<VideoInfo> {
-        return client.get(
-            "/x/web-interface/view"
-        ) {
-            url {
-                if (aid != null) {
-                    parameter("aid", aid)
-                }
-                if (bvid != null) {
-                    parameter("bvid", bvid)
-                }
-            }
-        }.body()
-    }
 
     /**
      * 获取视频流信息

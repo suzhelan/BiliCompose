@@ -1,14 +1,19 @@
 package top.sacz.bili.biz.biliplayer.ui
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
-import top.sacz.bili.player.ui.VideoPlayerUI
+import top.sacz.bili.player.controller.rememberPlayerSyncController
+import top.sacz.bili.player.ui.VideoPlayer
 
 
 @Composable
@@ -32,9 +37,11 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
             val audio = video.dash.audio
             val maxVideoUrl = allVideo.maxBy { it.id }
             val maxAudioUrl = audio.maxBy { it.id }
-            VideoPlayerUI(
-                videoUrl = maxVideoUrl.baseUrl,
-                audioUrl = maxAudioUrl.baseUrl
+            val playerController = rememberPlayerSyncController()
+            playerController.play(maxVideoUrl.baseUrl, maxAudioUrl.baseUrl)
+            VideoPlayer(
+                controller = playerController,
+                modifier = Modifier.height(230.dp).fillMaxWidth()
             )
         }
         onError { code, msg, cause ->

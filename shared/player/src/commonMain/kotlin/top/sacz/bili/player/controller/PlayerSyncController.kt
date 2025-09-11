@@ -11,18 +11,24 @@ import kotlinx.coroutines.flow.StateFlow
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState
 import org.openani.mediamp.compose.rememberMediampPlayer
+import org.openani.mediamp.metadata.MediaProperties
 
 /**
  * 音频流和视频流同步控制
  */
 @Stable
 class PlayerSyncController(
-    val videoPlayer: MediampPlayer,
+    val videoPlayer: MediampPlayer
 ) {
     var visibility by mutableStateOf(PlayerToolBarVisibility.Visible)
         private set
 
     val playbackState: StateFlow<PlaybackState> get() = videoPlayer.playbackState
+
+    //当前播放时长
+    val currentPositionMillis: StateFlow<Long> get() = videoPlayer.currentPositionMillis
+
+    val totalDurationMillis: StateFlow<MediaProperties?> get() = videoPlayer.mediaProperties
 
     fun updateVisibility(newVisibility: PlayerToolBarVisibility) {
         visibility = newVisibility
@@ -142,7 +148,8 @@ expect object PlayerMediaDataUtils {
  * @return PlayerSyncController
  */
 @Composable
-fun rememberPlayerSyncController(): PlayerSyncController {
+fun rememberPlayerSyncController(
+): PlayerSyncController {
     val videoPlayer = rememberMediampPlayer()
     val controller = remember { PlayerSyncController(videoPlayer) }
     return controller

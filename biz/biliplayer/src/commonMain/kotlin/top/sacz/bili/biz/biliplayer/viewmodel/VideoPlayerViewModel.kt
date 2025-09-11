@@ -17,7 +17,8 @@ import top.sacz.bili.shared.common.base.BaseViewModel
 class VideoPlayerViewModel(
 ) : BaseViewModel() {
 
-    private val api = VideoPlayerApi()
+    private val playerApi = VideoPlayerApi()
+    private val api = VideoInfoApi()
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
     val videoUrlData = _videoUrlData.asStateFlow()
     fun getPlayerUrl(
@@ -29,7 +30,7 @@ class VideoPlayerViewModel(
         qn: Int = 80
     ) = launchTask {
         _videoUrlData.value = apiCall {
-            api.getPlayerInfo(
+            playerApi.getPlayerInfo(
                 avid = avid,
                 bvid = bvid,
                 epid = epid,
@@ -66,7 +67,7 @@ class VideoPlayerViewModel(
         aid: Long,
         cid: Long
     ) = launchTask {
-        val api = VideoInfoApi()
+
         _onlineCountText.value = api.getVideoOnlineCountText(
             aid = aid,
             cid = cid
@@ -85,8 +86,8 @@ class VideoPlayerViewModel(
         bvid: String? = null,
         cid: Long? = null,
     ) = launchTask {
-        val api = VideoInfoApi()
-        _videoTags.value = api.getVideoTags(
+
+    _videoTags.value = api.getVideoTags(
             aid = aid,
             bvid = bvid,
             cid = cid
@@ -105,7 +106,7 @@ class VideoPlayerViewModel(
         if (_recommendedVideo.isNotEmpty()) {
             return@launchTask
         }
-        val api = VideoInfoApi()
+
         while (_recommendedVideo.size < 50) {
             val result = api.getRecommendedVideosByVideo(aid)
             _recommendedVideo.addAll(result.data.items)
@@ -133,17 +134,17 @@ class VideoPlayerViewModel(
     }
 
     private suspend fun updateLikeWait(aid: Long) {
-        val api = VideoInfoApi()
+
         isLike.value = api.isLike(aid = aid).data
     }
 
     private suspend fun updateCoinQuotationWait(aid: Long) {
-        val api = VideoInfoApi()
+
         coinQuotationCount.value = api.isCoins(aid = aid).data
     }
 
     private suspend fun updateFavoriteWait(aid: Long) {
-        val api = VideoInfoApi()
+
         isFavorite.value = api.isFavoured(aid = aid).data
     }
 
@@ -155,7 +156,7 @@ class VideoPlayerViewModel(
             return@launchTask
         }
         operationState.value = ActionState.Like
-        val api = VideoInfoApi()
+
         val response = api.like(aid = aid, isLike = like)
         if (response.isSuccess()) {
             isLike.value = like
@@ -174,7 +175,7 @@ class VideoPlayerViewModel(
             return@launchTask
         }
         operationState.value = ActionState.Coin
-        val api = VideoInfoApi()
+
         val response = api.coin(aid = aid, multiply = multiply, selectLike = selectLike)
         if (response.isSuccess()) {
             coinQuotationCount.value += multiply
@@ -182,6 +183,17 @@ class VideoPlayerViewModel(
             showMessageDialog("提示", response.message)
         }
         operationState.value = ActionState.None
+    }
+
+    /**
+     * 报告播放进度
+     */
+    fun reportViewingProgress(
+        aid: Long,
+        cid: Long,
+        seconds: Int
+    ) = launchTask {
+
     }
 }
 

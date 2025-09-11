@@ -15,11 +15,33 @@ import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.getKtorClient
 import top.sacz.bili.biz.biliplayer.entity.OnlineCount
 import top.sacz.bili.biz.biliplayer.entity.RecommendedVideoByVideo
+import top.sacz.bili.biz.biliplayer.entity.VideoInfo
 import top.sacz.bili.biz.biliplayer.entity.VideoTag
 
 class VideoInfoApi {
-    private val client = getKtorClient(AppConfig.API_BASE_URL)
+    private val apiClient = getKtorClient(AppConfig.API_BASE_URL)
     private val appClient = getKtorClient(AppConfig.APP_BASE_URL)
+
+    /**
+     * 获取视频详细信息
+     */
+    suspend fun getVideoDetails(
+        aid: Long? = null,
+        bvid: String? = null,
+    ): BiliResponse.Success<VideoInfo> {
+        return apiClient.get(
+            "/x/web-interface/view"
+        ) {
+            url {
+                if (aid != null) {
+                    parameter("aid", aid)
+                }
+                if (bvid != null) {
+                    parameter("bvid", bvid)
+                }
+            }
+        }.body()
+    }
 
     /**
      * 根据主页点击进来的视频推荐
@@ -57,7 +79,7 @@ class VideoInfoApi {
         bvid: String? = null,
         cid: Long? = null
     ): BiliResponse.Success<List<VideoTag>> {
-        return client.get(
+        return apiClient.get(
             "/x/web-interface/view/detail/tag"
         ) {
             url {
@@ -81,7 +103,7 @@ class VideoInfoApi {
         aid: String? = null,
         bvid: String? = null,
     ): BiliResponse.Success<String> {
-        return client.get(
+        return apiClient.get(
             "/x/web-interface/archive/desc"
         ) {
             url {
@@ -102,7 +124,7 @@ class VideoInfoApi {
         aid: Long? = null,
         bvid: String? = null,
     ): BiliResponse.Success<Boolean> {
-        val response: BiliResponse.SuccessOrNull<Int> = client.get(
+        val response: BiliResponse.SuccessOrNull<Int> = apiClient.get(
             "/x/web-interface/archive/has/like"
         ) {
             if (aid != null) {
@@ -128,7 +150,7 @@ class VideoInfoApi {
         aid: Long? = null,
         bvid: String? = null
     ): BiliResponse.Success<Int> {
-        val response: BiliResponse.SuccessOrNull<Map<String, Int>> = client.get(
+        val response: BiliResponse.SuccessOrNull<Map<String, Int>> = apiClient.get(
             "/x/web-interface/archive/coins"
         ) {
             if (aid != null) {
@@ -152,7 +174,7 @@ class VideoInfoApi {
     suspend fun isFavoured(
         aid: Long,
     ): BiliResponse.Success<Boolean> {
-        val response: BiliResponse.SuccessOrNull<JsonObject> = client.get(
+        val response: BiliResponse.SuccessOrNull<JsonObject> = apiClient.get(
             "/x/v2/fav/video/favoured"
         ) {
             parameter("aid", aid)
@@ -195,7 +217,7 @@ class VideoInfoApi {
     suspend fun coin(
         aid: Long,
         multiply: Int,
-        selectLike : Boolean = false
+        selectLike: Boolean = false
     ): BiliResponse.Success<Boolean> {
         val response: BiliResponse.SuccessOrNull<JsonObject> = appClient.post(
             "/x/v2/view/coin/add"
@@ -212,5 +234,24 @@ class VideoInfoApi {
             ttl = response.ttl,
             data = response.data?.getValue("like")?.jsonPrimitive!!.boolean
         )
+    }
+
+    /**
+     * 报告当前观看进度 每秒上报一次就可以
+     **/
+    suspend fun reportViewingProgress(
+        aid: Long,
+        cid: Long,
+        seconds: Int
+    ) {
+        apiClient.post(
+            "/x/v2/history/report"
+        ) {
+            setBody(FormDataContent(parameters {
+                append("aid", aid.toString())
+                append("cid", cid.toString())
+                append("progress", seconds.toString())
+            }))
+        }
     }
 }

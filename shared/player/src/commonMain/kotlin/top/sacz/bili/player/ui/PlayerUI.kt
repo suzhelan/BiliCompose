@@ -3,7 +3,6 @@ package top.sacz.bili.player.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,12 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import org.openani.mediamp.compose.MediampPlayerSurface
 import top.sacz.bili.player.controller.PlayerSyncController
 import top.sacz.bili.player.controller.PlayerToolBarVisibility
 import top.sacz.bili.player.controller.rememberAudioLevelController
-import top.sacz.bili.player.controller.rememberPlayerSyncController
 import top.sacz.bili.player.ui.bottombar.PlayerBottomBar
 import top.sacz.bili.player.ui.gesture.GestureHost
 import top.sacz.bili.player.ui.indicator.AudioVisualIndicator
@@ -28,21 +25,13 @@ import top.sacz.bili.player.ui.progress.PlayerProgressIndicator
 import top.sacz.bili.player.ui.progress.rememberPlayerProgressSliderState
 import top.sacz.bili.player.ui.video.VideoScaffold
 
-@Composable
-fun VideoPlayerUI(
-    videoUrl: String,
-    audioUrl: String,
-) {
-    val controller = rememberPlayerSyncController()
-    controller.play(videoUrl, audioUrl)
-    VideoPlayer(controller)
-}
 
 @Composable
-private fun VideoPlayer(controller: PlayerSyncController) = Box(
-    modifier = Modifier.fillMaxWidth().height(230.dp)
+fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier) = Box(
+    modifier = modifier
 ) {
-    // 总时长
+
+// 总时长
     val totalDurationMillis by controller.videoPlayer.mediaProperties.collectAsState()
     // 当前播放进度
     val currentPositionMillis by controller.videoPlayer.currentPositionMillis.collectAsState()
