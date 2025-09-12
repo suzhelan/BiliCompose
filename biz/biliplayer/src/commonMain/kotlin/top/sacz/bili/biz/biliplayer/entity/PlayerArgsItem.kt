@@ -21,15 +21,15 @@ data class PlayerArgsItem(
     @SerialName("dash") val dash: Dash = Dash(),
     @SerialName("durl") val durl: List<Durl> = emptyList(),
     @SerialName("support_formats") val supportFormats: List<FormatItem> = emptyList(),
-    @SerialName("last_play_time") val lastPlayTime: Int = 0,
-    @SerialName("last_play_cid") val lastPlayCid: Int = 0
+    @SerialName("last_play_time") val lastPlayTime: Long = 0,
+    @SerialName("last_play_cid") val lastPlayCid: Long = 0
 ) {
     @Serializable
     data class Dash(
         @SerialName("duration") val duration: Int = 0,
         @SerialName("minBufferTime") val minBufferTime: Double = 0.0,
         @SerialName("video") val video: List<VideoItem> = emptyList(),
-        @SerialName("audio") val audio: List<AudioItem> = emptyList(),
+        @SerialName("audio") val audio: List<AudioItem>? = emptyList(),
         @SerialName("dolby") val dolby: Dolby = Dolby(),
         @SerialName("flac") val flac: Flac? = null
     )
@@ -47,12 +47,12 @@ data class PlayerArgsItem(
 
     @Serializable
     data class VideoItem(
-        @SerialName("id") val id: Int = 0,
-        @SerialName("baseUrl") val baseUrl: String = "",
-        @SerialName("backupUrl") val backupUrl: List<String> = emptyList(),
-        @SerialName("bandWidth") val bandWidth: Int = 0,
-        @SerialName("mime_type") val mimeType: String = "",
-        @SerialName("codecs") val codecs: String = "",
+        @SerialName("id") val id: Int = 0,//80
+        @SerialName("baseUrl") val baseUrl: String = "",//备用url
+        @SerialName("backupUrl") val backupUrl: List<String> = emptyList(),//备用url List
+        @SerialName("bandWidth") val bandWidth: Int = 0,//没什么意义
+        @SerialName("mime_type") val mimeType: String = "",//video/mp4
+        @SerialName("codecs") val codecs: String = "",//avc1.64001E
         @SerialName("width") val width: Int = 0,
         @SerialName("height") val height: Int = 0,
         @SerialName("frameRate") val frameRate: String = "",

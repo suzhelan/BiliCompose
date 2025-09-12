@@ -214,6 +214,9 @@ class VideoInfoApi {
         )
     }
 
+    /**
+     * 投币
+     */
     suspend fun coin(
         aid: Long,
         multiply: Int,
@@ -237,12 +240,12 @@ class VideoInfoApi {
     }
 
     /**
-     * 报告当前观看进度 每秒上报一次就可以
+     * 报告当前观看进度 每秒上报一次就可以,也会出现在历史观看记录,以及获取视频流中的last_play_time
      **/
     suspend fun reportViewingProgress(
         aid: Long,
         cid: Long,
-        seconds: Int
+        seconds: Long
     ) {
         apiClient.post(
             "/x/v2/history/report"

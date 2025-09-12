@@ -191,9 +191,9 @@ class VideoPlayerViewModel(
     fun reportViewingProgress(
         aid: Long,
         cid: Long,
-        seconds: Int
+        seconds: Long
     ) = launchTask {
-
+        api.reportViewingProgress(aid = aid, cid = cid, seconds = seconds)
     }
 }
 

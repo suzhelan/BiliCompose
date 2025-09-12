@@ -7,11 +7,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState
 import org.openani.mediamp.compose.rememberMediampPlayer
-import org.openani.mediamp.metadata.MediaProperties
 
 /**
  * 音频流和视频流同步控制
@@ -28,7 +32,17 @@ class PlayerSyncController(
     //当前播放时长
     val currentPositionMillis: StateFlow<Long> get() = videoPlayer.currentPositionMillis
 
-    val totalDurationMillis: StateFlow<MediaProperties?> get() = videoPlayer.mediaProperties
+    /**
+     * 总时长 没有获取到视频时长时为0L
+     */
+    val totalDurationMillis: MutableStateFlow<Long> = MutableStateFlow(0L).apply {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        scope.launch {
+            videoPlayer.mediaProperties.collect {
+                value = (it?.durationMillis ?: 0)
+            }
+        }
+    }
 
     fun updateVisibility(newVisibility: PlayerToolBarVisibility) {
         visibility = newVisibility
