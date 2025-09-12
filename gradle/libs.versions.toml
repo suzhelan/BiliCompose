@@ -1,9 +1,7 @@
 [versions]
 agp = "8.13.0"
 androidx-activityCompose = "1.11.0"
-androidx-appcompat = "1.7.1"
 androidx-lifecycle = "2.9.3"
-androidx-material = "1.13.0"
 
 coil = "3.3.0"
 compose-multiplatform = "1.9.0-rc02"
@@ -38,23 +36,17 @@ compose-multiplatfrom-gradle-plugin = { module = "org.jetbrains.compose:org.jetb
 kotlin-compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 
 #comon libraries
-#只能在fleet预览 那我不用了
-components-ui-tooling-preview = { module = "org.jetbrains.compose.components:components-ui-tooling-preview", version.ref = "compose-multiplatform" }
 #webview 在desktop需要额外配置
 compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
 #coil 异步图片加载库
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
-coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coil" }
 #kotlinx跨平台时间工具库
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 #viewmodel
 # JetBrains Compose Multiplatform
 lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "androidx-lifecycle" }
-#跨平台导航栏 可以代替使用implementation(compose.material3AdaptiveNavigationSuite)
-material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version = "compose-multiplatform" }
 #音视频播放器
 mediamp-all = { module = "org.openani.mediamp:mediamp-all", version.ref = "mediampAll" }
 #跨平台存储框架
@@ -83,10 +75,6 @@ kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-seria
 
 #android
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
-androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
-androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
-androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "compose-multiplatform" }
 fastkv = { module = "io.github.billywei01:fastkv", version.ref = "fastkv" }
 
 #ios
