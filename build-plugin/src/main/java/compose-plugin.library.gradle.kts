@@ -1,23 +1,36 @@
 
 //应用常用插件
-
 plugins {
     //multiplatform (kmp)
     id("org.jetbrains.kotlin.multiplatform")
-    //android模块
-    id("com.android.library")
     //compose
     id("org.jetbrains.compose")
     //kotlin (cmp)
     id("org.jetbrains.kotlin.plugin.compose")
+    //android模块
+    id("com.android.kotlin.multiplatform.library")
 }
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(BuildVersionConfig.JVM_TARGET)
+    android {
+        namespace = "${BuildVersionConfig.APPLICATION_ID}.${project.name}"
+        compileSdk = BuildVersionConfig.COMPILE_SDK
+        minSdk = BuildVersionConfig.MIN_SDK
+        withJava() // enable java compilation support
+        androidResources {
+            enable = true
+        }
+        withHostTestBuilder {}.configure {}
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
+        }
+        compilations.configureEach {
+            compileTaskProvider.configure {
+                compilerOptions.jvmTarget.set(BuildVersionConfig.JVM_TARGET)
+            }
         }
     }
+
     if (BuildVersionConfig.ENABLE_IOS) {
         listOf(
             iosX64(),
@@ -51,22 +64,3 @@ kotlin {
         }
     }
 }
-
-
-android {
-    namespace = "${BuildVersionConfig.APPLICATION_ID}.${project.name}"
-    compileSdk = BuildVersionConfig.COMPILE_SDK
-    defaultConfig {
-        minSdk = BuildVersionConfig.MIN_SDK
-    }
-
-    buildFeatures {
-        compose = true
-    }
-    compileOptions {
-        sourceCompatibility = BuildVersionConfig.JAVA_VERSION
-        targetCompatibility = BuildVersionConfig.JAVA_VERSION
-    }
-}
-
-

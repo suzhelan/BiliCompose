@@ -4,11 +4,6 @@ plugins {
 }
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(BuildVersionConfig.JVM_TARGET)
-        }
-    }
 
     sourceSets {
         commonMain.dependencies {

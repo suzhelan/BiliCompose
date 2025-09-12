@@ -1,12 +1,12 @@
 [versions]
 agp = "8.13.0"
-androidx-activityCompose = "1.10.1"
+androidx-activityCompose = "1.11.0"
 androidx-appcompat = "1.7.1"
 androidx-lifecycle = "2.9.3"
 androidx-material = "1.13.0"
 
 coil = "3.3.0"
-compose-multiplatform = "1.10.0-alpha01"
+compose-multiplatform = "1.9.0-rc02"
 composeWebviewMultiplatform = "2.0.3"
 constraintlayoutComposeMultiplatform = "0.6.0"
 fastkv = "3.0.1"
@@ -111,7 +111,6 @@ androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplaye
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
-androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
