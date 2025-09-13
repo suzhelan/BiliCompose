@@ -13,16 +13,28 @@ kotlin {
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.voyager.navigator)
-            implementation(libs.mediamp.all)
+
+            implementation(mediampLibs.mediamp.api)
         }
 
         sourceSets.androidMain.dependencies {
+            implementation(mediampLibs.mediamp.exoplayer)
             implementation(libs.androidx.media3.exoplayer)
         }
-
-
+        desktopMain.dependencies {
+            implementation(mediampLibs.mediamp.vlc)
+            implementation(libs.vlcj)
+        }
     }
 
 }
+compose.desktop {
+
+    application {
+
+    }
+}
+
+
 
 

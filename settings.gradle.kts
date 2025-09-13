@@ -10,12 +10,18 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
     repositories {
         mavenCentral()
         google()
         maven { url = uri("https://jitpack.io") }
         //webview
         maven("https://jogamp.org/deployment/maven")
+    }
+    versionCatalogs {
+        create("mediampLibs") {
+            from("org.openani.mediamp:catalog:0.0.29")
+        }
     }
 }
 includeBuild("build-plugin")

@@ -115,6 +115,10 @@ compose.desktop {
 
         nativeDistributions {
 
+            nativeDistributions {
+                appResourcesRootDir.set(file("appResources"))
+            }
+
             targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "BiliCompose"
             packageVersion = "1.0.0"
@@ -131,4 +135,8 @@ compose.desktop {
             }
         }
     }
+}
+
+tasks.withType<JavaExec> {
+    systemProperty("compose.application.resources.dir", file("appResources").absolutePath)
 }
