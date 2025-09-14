@@ -23,16 +23,9 @@ kotlin {
         }
         desktopMain.dependencies {
             implementation(mediampLibs.mediamp.vlc)
-            implementation(libs.vlcj)
         }
     }
 
-}
-compose.desktop {
-
-    application {
-
-    }
 }
 
 

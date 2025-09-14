@@ -53,7 +53,7 @@ data class RecommendedVideoByVideo(
         @SerialName("card_goto")
         val cardGoto: String, // vertical_av
         @SerialName("copyright")
-        val copyright: Int, // 1
+        val copyright: Int? = null, // 1
         @SerialName("cover")
         val cover: String, // http://i1.hdslb.com/bfs/archive/1d40e476bcc618428407122c5547d7dcc08bf152.jpg
         @SerialName("desc")
@@ -77,7 +77,7 @@ data class RecommendedVideoByVideo(
         @SerialName("param")
         val `param`: String, // 114996004654324
         @SerialName("part")
-        val part: String, // studio_video_1754699535185.mp4
+        val part: String? = null, // studio_video_1754699535185.mp4
         @SerialName("player_args")
         val playerArgs: PlayerArgs,
         @SerialName("pubdate")

@@ -23,4 +23,5 @@ captures
 **.exe
 **.json
 /composeApp/release
+/composeApp/windows
 /composeApp/debug

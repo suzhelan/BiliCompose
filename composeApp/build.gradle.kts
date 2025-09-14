@@ -115,9 +115,7 @@ compose.desktop {
 
         nativeDistributions {
 
-            nativeDistributions {
-                appResourcesRootDir.set(file("appResources"))
-            }
+            appResourcesRootDir.set(file("appResources"))
 
             targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "BiliCompose"
