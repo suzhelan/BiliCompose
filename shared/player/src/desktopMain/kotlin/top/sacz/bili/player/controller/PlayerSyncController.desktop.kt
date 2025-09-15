@@ -14,9 +14,8 @@ actual object PlayerMediaDataUtils {
     ) {
         //协程
         CoroutineScope(Dispatchers.IO).launch {
-
-            val url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-            mediampPlayer.setMediaData(UriMediaData(uri = url, headers = PlayerSyncController.headers))
+//            val url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            mediampPlayer.setMediaData(UriMediaData(uri = videoUrl, headers = PlayerSyncController.headers))
             mediampPlayer.resume()
         }
     }
