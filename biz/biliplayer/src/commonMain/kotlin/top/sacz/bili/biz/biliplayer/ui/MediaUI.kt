@@ -75,6 +75,7 @@ private fun ProgressReport(
         if (
             totalDurationMillis > 0//视频时长已加载
             && argsItem.lastPlayTime > 0//必须有上次观看的记录
+            && argsItem.lastPlayTime < totalDurationMillis - 500
         ) {
             playerSyncController.seekTo(argsItem.lastPlayTime)
         }
