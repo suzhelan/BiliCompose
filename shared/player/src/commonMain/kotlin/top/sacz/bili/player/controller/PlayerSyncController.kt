@@ -56,8 +56,8 @@ class PlayerSyncController(
 
     companion object {
         val headers = mutableMapOf(
-            "user-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-            "referer" to "https://www.bilibili.com",
+            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+            "Referer" to "https://www.bilibili.com",
             //试过app端user-agent,但是仍然403,决定用web端了
         )
     }
