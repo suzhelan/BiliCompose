@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.source.UriMediaData
+import top.sacz.bili.player.platform.BiliContext
 
 actual object PlayerMediaDataUtils {
     actual fun doLoadMediaData(
@@ -18,5 +19,8 @@ actual object PlayerMediaDataUtils {
             mediampPlayer.setMediaData(UriMediaData(uri = videoUrl, headers = PlayerSyncController.headers))
             mediampPlayer.resume()
         }
+    }
+
+    actual fun setFullScreen(context: BiliContext, fullScreen: Boolean) {
     }
 }

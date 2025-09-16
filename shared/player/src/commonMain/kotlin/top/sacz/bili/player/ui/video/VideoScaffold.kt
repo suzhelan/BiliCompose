@@ -1,13 +1,20 @@
 package top.sacz.bili.player.ui.video
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import top.sacz.bili.player.controller.PlayerSyncController
 
 /**
@@ -25,8 +32,9 @@ fun VideoScaffold(
     video: @Composable BoxScope.() -> Unit,
     bottomBar: @Composable BoxScope.() -> Unit,
     progressIndicator: @Composable BoxScope.() -> Unit,
-    gesture: @Composable BoxWithConstraintsScope.() -> Unit
-) = Box(modifier = Modifier.fillMaxSize()) {
+    gesture: @Composable BoxWithConstraintsScope.() -> Unit,
+    modifier: Modifier
+) = Box(modifier = modifier.background(color = Color.Black)) {
     //是否展示工具栏
     val toolBarVisibility = playerSyncController.visibility
 
@@ -37,9 +45,15 @@ fun VideoScaffold(
     Box(modifier = Modifier.align(Alignment.Center)) {
         floatMessageCenter()
     }
+    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val navigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
     //手势控制器 控制全屏的手势
     BoxWithConstraints(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().padding(
+            top = statusBarHeight,
+            bottom = navigationBarHeight
+        )
     ) {
         gesture()
     }

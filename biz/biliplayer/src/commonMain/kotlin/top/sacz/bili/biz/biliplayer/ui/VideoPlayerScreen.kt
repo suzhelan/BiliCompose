@@ -2,20 +2,12 @@ package top.sacz.bili.biz.biliplayer.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.shared.common.ui.CommonComposeUI
@@ -30,26 +22,7 @@ class VideoPlayerScreen(private val body: String) : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        CommonComposeUI<DefaultViewModel>(
-            topBar = {
-                CenterAlignedTopAppBar(
-                    navigationIcon = {
-                        OutlinedIconButton(onClick = {
-                            navigator.pop()
-                        }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    },
-                    title = {
-                        Text(text = "视频播放页")
-                    }
-                )
-            }
-        ) { _ ->
+        CommonComposeUI<DefaultViewModel> { _ ->
             val vm = viewModel {
                 VideoPlayerViewModel()
             }
@@ -63,7 +36,6 @@ class VideoPlayerScreen(private val body: String) : Screen {
 }
 
 
-
 @Composable
 private fun PlayerUI(
     playerParams: PlayerParams,
@@ -74,7 +46,6 @@ private fun PlayerUI(
     ) {
         //播放器
         MediaUI(playerParams, viewModel)
-        //视频信息
         VideoInfoUI(playerParams, viewModel)
     }
 }

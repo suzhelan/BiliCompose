@@ -49,18 +49,18 @@ kotlin {
         commonMain.dependencies {
             // 添加常用依赖
             // Compose
-            api(compose.runtime)
-            api(compose.foundation)
+            implementation(compose.runtime)
+            implementation(compose.foundation)
             //动画
-            api(compose.animation)
+            implementation(compose.animation)
             //UI
-            api(compose.ui)
+            implementation(compose.ui)
             //material3主题系列控件 m3.material.io
-            api(compose.material3)
+            implementation(compose.material3)
             //图标拓展 可在https://fonts.google.com/icons找到许多图标
-            api(compose.materialIconsExtended)
+            implementation(compose.materialIconsExtended)
             //res
-            api(compose.components.resources)
+            implementation(compose.components.resources)
         }
     }
 }

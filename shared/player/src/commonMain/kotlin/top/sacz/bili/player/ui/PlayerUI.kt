@@ -1,6 +1,5 @@
 package top.sacz.bili.player.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -27,11 +26,8 @@ import top.sacz.bili.player.ui.video.VideoScaffold
 
 
 @Composable
-fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier) = Box(
-    modifier = modifier
-) {
-
-// 总时长
+fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier) {
+    // 总时长
     val totalDurationMillis by controller.videoPlayer.mediaProperties.collectAsState()
     // 当前播放进度
     val currentPositionMillis by controller.videoPlayer.currentPositionMillis.collectAsState()
@@ -55,6 +51,7 @@ fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier)
     }
     VideoScaffold(
         playerSyncController = controller,
+        modifier = modifier,
         floatMessageCenter = {
             //缓冲/错误指示器
             BiliVideoLoadingIndicator(

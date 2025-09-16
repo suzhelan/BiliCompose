@@ -1,7 +1,12 @@
 package top.sacz.bili.player.controller
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
+import android.view.View
+import android.view.WindowManager
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
@@ -16,6 +21,7 @@ import androidx.media3.extractor.DefaultExtractorsFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.metadata.MediaProperties
+import top.sacz.bili.player.platform.BiliContext
 
 
 @SuppressLint("StaticFieldLeak", "UnsafeOptInUsageError")
@@ -68,6 +74,54 @@ actual object PlayerMediaDataUtils {
                     )
                 }
             })
+        }
+    }
+
+    actual fun setFullScreen(context: BiliContext, fullScreen: Boolean) {
+        if (context is Activity) {
+            if (fullScreen) {
+                //切换到横屏
+                context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                //屏幕常亮
+                context.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                // 使用 WindowInsetsController 隐藏系统 UI（推荐方式）
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                    context.window.insetsController?.let { controller ->
+                        controller.hide(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+                        controller.systemBarsBehavior =
+                            android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    }
+                } else {
+                    @Suppress("DEPRECATION")
+                    context.window.decorView.systemUiVisibility = (
+                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            )
+                }
+            } else {
+                //取消方向锁定
+                context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                //取消屏幕常亮
+                context.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                // 恢复系统 UI 显示
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                    context.window.insetsController?.show(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+                } else {
+                    @Suppress("DEPRECATION")
+                    context.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+                }
+            }
+        } else {
+            val orientation = if (fullScreen) {
+                Configuration.ORIENTATION_LANDSCAPE
+            } else {
+                Configuration.ORIENTATION_PORTRAIT
+            }
+            context.resources.configuration.orientation = orientation
         }
     }
 }

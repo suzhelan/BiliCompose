@@ -1,5 +1,6 @@
 package top.sacz.bili.biz.biliplayer.ui
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
@@ -10,6 +11,8 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
+import cafe.adriel.voyager.navigator.internal.BackHandler
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
@@ -19,6 +22,7 @@ import top.sacz.bili.player.controller.rememberPlayerSyncController
 import top.sacz.bili.player.ui.VideoPlayer
 
 
+@OptIn(InternalVoyagerApi::class)
 @Composable
 fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
     val videoUrlData by vm.videoUrlData.collectAsState()
@@ -33,6 +37,7 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
         )
     }
 
+
     videoUrlData.registerStatusListener {
         onSuccess { video ->
             //获取质量最好的音频
@@ -41,13 +46,17 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
             val maxVideoUrl = allVideo.maxBy { it.id }
             val maxAudioUrl = audio?.maxBy { it.id }
             val playerController = rememberPlayerSyncController()
-            //当前播放进度
+            val isFullScreen = playerController.isFullScreen
             playerController.play(maxVideoUrl.baseUrl, maxAudioUrl?.baseUrl ?: "")
             VideoPlayer(
                 controller = playerController,
-                modifier = Modifier.height(230.dp).fillMaxWidth()
+                modifier = if (isFullScreen) Modifier.fillMaxSize() else Modifier.height(230.dp)
+                    .fillMaxWidth()
             )
             ProgressReport(playerParams, video, vm, playerController)
+            BackHandler(isFullScreen) {
+                playerController.reversalFullScreen()
+            }
         }
         onError { code, msg, cause ->
             Text(text = "获取视频失败: $msg")
@@ -75,7 +84,7 @@ private fun ProgressReport(
         if (
             totalDurationMillis > 0//视频时长已加载
             && argsItem.lastPlayTime > 0//必须有上次观看的记录
-            && argsItem.lastPlayTime < totalDurationMillis - 500
+            && argsItem.lastPlayTime < totalDurationMillis - 500//如果已经看完
         ) {
             playerSyncController.seekTo(argsItem.lastPlayTime)
         }

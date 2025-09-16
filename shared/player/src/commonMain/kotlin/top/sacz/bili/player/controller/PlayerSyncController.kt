@@ -16,9 +16,13 @@ import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState
 import org.openani.mediamp.compose.rememberMediampPlayer
+import top.sacz.bili.player.platform.BiliContext
 
 /**
  * 音频流和视频流同步控制
+ * 设计原则
+ * UI控制用State(mutableStateOf)
+ * 数据订阅用Flow(StateFlow)
  */
 @Stable
 class PlayerSyncController(
@@ -37,7 +41,7 @@ class PlayerSyncController(
     /**
      * 总时长 没有获取到视频时长时为0L
      */
-    val totalDurationMillis: MutableStateFlow<Long> = MutableStateFlow(0L).apply {
+    val totalDurationMillis: StateFlow<Long> = MutableStateFlow(0L).apply {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         scope.launch {
             videoPlayer.mediaProperties.collect {
@@ -161,6 +165,8 @@ expect object PlayerMediaDataUtils {
         videoUrl: String,
         audioUrl: String
     )
+
+    fun setFullScreen(context: BiliContext, fullScreen: Boolean)
 }
 
 

@@ -26,12 +26,6 @@ kotlin {
             implementation(projects.shared.common)
             implementation(projects.shared.navigation)
         }
-
-        sourceSets.androidMain.dependencies {
-            implementation(libs.androidx.media3.exoplayer)
-        }
-
-
     }
 
 }

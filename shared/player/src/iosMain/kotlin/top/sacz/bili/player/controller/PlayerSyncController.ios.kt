@@ -1,6 +1,7 @@
 package top.sacz.bili.player.controller
 
 import org.openani.mediamp.MediampPlayer
+import top.sacz.bili.player.platform.BiliContext
 
 actual object PlayerMediaDataUtils {
     actual fun doLoadMediaData(
@@ -8,5 +9,8 @@ actual object PlayerMediaDataUtils {
         videoUrl: String,
         audioUrl: String
     ) {
+    }
+
+    actual fun setFullScreen(context: BiliContext, fullScreen: Boolean) {
     }
 }

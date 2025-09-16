@@ -14,15 +14,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import top.sacz.bili.player.controller.PlayerMediaDataUtils
 import top.sacz.bili.player.controller.PlayerSyncController
+import top.sacz.bili.player.platform.BiliLocalContext
 import top.sacz.bili.player.ui.progress.PlayerProgressSlider
 import top.sacz.bili.player.ui.progress.PlayerProgressSliderState
 import top.sacz.bili.player.ui.theme.PlayerColor
@@ -47,7 +51,11 @@ fun PlayerBottomBar(
         playbackState.isPlaying
     }
     val isFullScreen = controller.isFullScreen
-
+    val context by rememberUpdatedState(BiliLocalContext.current)
+    //订阅全屏状态
+    LaunchedEffect(isFullScreen) {
+        PlayerMediaDataUtils.setFullScreen(context, isFullScreen)
+    }
     //最左侧 播放/暂时按钮
     IconButton(
         onClick = {
