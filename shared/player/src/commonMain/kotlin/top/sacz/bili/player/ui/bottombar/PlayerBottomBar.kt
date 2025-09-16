@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Fullscreen
+import androidx.compose.material.icons.outlined.FullscreenExit
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Icon
@@ -44,6 +46,8 @@ fun PlayerBottomBar(
     val isPlaying by derivedStateOf {
         playbackState.isPlaying
     }
+    val isFullScreen = controller.isFullScreen
+
     //最左侧 播放/暂时按钮
     IconButton(
         onClick = {
@@ -80,4 +84,17 @@ fun PlayerBottomBar(
         color = PlayerColor.surface,
         modifier = Modifier.padding(start = 8.dp)
     )
+    //全屏
+    IconButton(
+        onClick = {
+            controller.reversalFullScreen()
+        }
+    ) {
+        Icon(
+            imageVector = if (isFullScreen) Icons.Outlined.FullscreenExit else Icons.Outlined.Fullscreen,
+            tint = PlayerColor.surface,
+            modifier = Modifier.size(30.dp),
+            contentDescription = null
+        )
+    }
 }

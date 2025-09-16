@@ -27,6 +27,8 @@ class PlayerSyncController(
     var visibility by mutableStateOf(PlayerToolBarVisibility.Visible)
         private set
 
+    var isFullScreen by mutableStateOf(false)
+
     val playbackState: StateFlow<PlaybackState> get() = videoPlayer.playbackState
 
     //当前播放时长
@@ -110,6 +112,11 @@ class PlayerSyncController(
         } else {
             videoPlayer.resume()
         }
+    }
+
+
+    fun reversalFullScreen() {
+        isFullScreen = !isFullScreen
     }
 
 }
