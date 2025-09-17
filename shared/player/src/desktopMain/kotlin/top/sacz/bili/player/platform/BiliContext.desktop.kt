@@ -25,7 +25,12 @@ actual fun getCurrentPlatform(): Platform {
 
 actual val BiliLocalContext: ProvidableCompositionLocal<BiliContext>
     get() = compositionLocalOf {
-        error("Not implemented")
+        //构造空的BiliContext
+        DesktopBiliContext()
     }
 
 actual abstract class BiliContext
+
+class DesktopBiliContext : BiliContext() {
+
+}

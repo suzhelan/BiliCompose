@@ -1,5 +1,6 @@
 package top.sacz.bili.biz.biliplayer.ui
 
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +22,8 @@ import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.player.controller.PlayerSyncController
 import top.sacz.bili.player.controller.rememberPlayerSyncController
+import top.sacz.bili.player.platform.getCurrentPlatform
+import top.sacz.bili.player.platform.isDesktop
 import top.sacz.bili.player.ui.VideoPlayer
 
 
@@ -60,8 +63,9 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
             playerController.play(maxVideoUrl.baseUrl, maxAudioUrl?.baseUrl ?: "")
             VideoPlayer(
                 controller = playerController,
-                modifier = if (isFullScreen) Modifier.fillMaxSize() else Modifier.height(230.dp)
-                    .fillMaxWidth()
+                modifier = if (isFullScreen) Modifier.fillMaxSize()
+                else if (getCurrentPlatform().isDesktop()) Modifier.fillMaxWidth().aspectRatio(16f / 9f)
+                else Modifier.fillMaxWidth().height(230.dp)
             )
             ProgressReport(playerParams, video, vm, playerController)
             BackHandler(isFullScreen) {
