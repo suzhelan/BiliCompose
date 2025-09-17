@@ -123,6 +123,9 @@ class PlayerSyncController(
         isFullScreen = !isFullScreen
     }
 
+
+    var onBack: () -> Unit = {}
+
 }
 
 /**

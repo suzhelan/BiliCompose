@@ -23,13 +23,13 @@ kotlin {
     sourceSets.commonMain.dependencies {
         // 添加常用依赖
         // Compose
-        api(compose.runtime)
-        api(compose.foundation)
-        api(compose.animation)
-        api(compose.ui)
-        api(compose.material3)
-        api(compose.materialIconsExtended)
-        api(compose.components.resources)
+        implementation(compose.runtime)
+        implementation(compose.foundation)
+        implementation(compose.animation)
+        implementation(compose.ui)
+        implementation(compose.material3)
+        implementation(compose.materialIconsExtended)
+        implementation(compose.components.resources)
     }
 }
 

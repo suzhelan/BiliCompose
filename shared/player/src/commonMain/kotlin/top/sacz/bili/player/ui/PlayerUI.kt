@@ -22,6 +22,7 @@ import top.sacz.bili.player.ui.indicator.BrightnessIndicator
 import top.sacz.bili.player.ui.indicator.VolumeIndicator
 import top.sacz.bili.player.ui.progress.PlayerProgressIndicator
 import top.sacz.bili.player.ui.progress.rememberPlayerProgressSliderState
+import top.sacz.bili.player.ui.topbar.PlayerTopBar
 import top.sacz.bili.player.ui.video.VideoScaffold
 
 
@@ -52,6 +53,9 @@ fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier)
     VideoScaffold(
         playerSyncController = controller,
         modifier = modifier,
+        topBar = {
+            PlayerTopBar(controller = controller)
+        },
         floatMessageCenter = {
             //缓冲/错误指示器
             BiliVideoLoadingIndicator(

@@ -78,12 +78,12 @@ private fun Indicator(
     ) {
         Icon(
             icon,
-            tint = PlayerColor.surface.copy(alpha = 0.8f),
+            tint = PlayerColor.control.copy(alpha = 0.8f),
             contentDescription = null
         )
         Spacer(modifier = Modifier.width(10.dp))
         LinearProgressIndicator(
-            trackColor = PlayerColor.surface.copy(alpha = 0.8f),
+            trackColor = PlayerColor.control.copy(alpha = 0.8f),
             progress = {
                 progress()
             }

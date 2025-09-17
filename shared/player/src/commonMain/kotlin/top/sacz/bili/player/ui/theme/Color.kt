@@ -11,12 +11,13 @@ object PlayerColor {
     val primaryContainer: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.primaryContainer
 
     /**
-     * 正常情况为白色,当深色模式时为黑色,通常用来当背景色
+     * 控件颜色
+     * 正常情况为白色,当深色模式时为黑色
      */
-    val surface @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.surface
+    val control @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.surface
 
     /**
-     * 默认为黑,当深色模式时为白色,通常用来当文本颜色
+     * 默认为黑,当深色模式时为白色
      */
     val onSurface @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.onSurface
 }

@@ -89,7 +89,7 @@ fun PlayerBottomBar(
                 progressSliderState.totalDurationMillis
             )
         }",
-        color = PlayerColor.surface,
+        color = PlayerColor.control,
         modifier = Modifier.padding(start = 8.dp)
     )
     //全屏
@@ -100,7 +100,7 @@ fun PlayerBottomBar(
     ) {
         Icon(
             imageVector = if (isFullScreen) Icons.Outlined.FullscreenExit else Icons.Outlined.Fullscreen,
-            tint = PlayerColor.surface,
+            tint = PlayerColor.control,
             modifier = Modifier.size(30.dp),
             contentDescription = null
         )

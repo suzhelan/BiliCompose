@@ -12,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.internal.BackHandler
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
@@ -25,6 +27,7 @@ import top.sacz.bili.player.ui.VideoPlayer
 @OptIn(InternalVoyagerApi::class)
 @Composable
 fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
+    val navigator = LocalNavigator.currentOrThrow
     val videoUrlData by vm.videoUrlData.collectAsState()
     LaunchedEffect(Unit) {
         vm.getPlayerUrl(
@@ -47,6 +50,13 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
             val maxAudioUrl = audio?.maxBy { it.id }
             val playerController = rememberPlayerSyncController()
             val isFullScreen = playerController.isFullScreen
+            playerController.onBack = {
+                if (isFullScreen) {
+                    playerController.reversalFullScreen()
+                } else {
+                    navigator.pop()
+                }
+            }
             playerController.play(maxVideoUrl.baseUrl, maxAudioUrl?.baseUrl ?: "")
             VideoPlayer(
                 controller = playerController,

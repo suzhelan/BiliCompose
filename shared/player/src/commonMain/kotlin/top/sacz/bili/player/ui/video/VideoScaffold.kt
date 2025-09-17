@@ -28,6 +28,7 @@ import top.sacz.bili.player.controller.PlayerSyncController
 @Composable
 fun VideoScaffold(
     playerSyncController: PlayerSyncController,
+    topBar: @Composable BoxScope.() -> Unit,
     floatMessageCenter: @Composable BoxScope.() -> Unit,
     video: @Composable BoxScope.() -> Unit,
     bottomBar: @Composable BoxScope.() -> Unit,
@@ -41,21 +42,25 @@ fun VideoScaffold(
     //对于视频主界面 总是显示
     video()
 
+    //手势控制器 控制全屏的手势
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize().padding(
+            top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        )
+    ) {
+        gesture()
+    }
+
     //缓冲中...
     Box(modifier = Modifier.align(Alignment.Center)) {
         floatMessageCenter()
     }
-    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val navigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-
-    //手势控制器 控制全屏的手势
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxSize().padding(
-            top = statusBarHeight,
-            bottom = navigationBarHeight
-        )
-    ) {
-        gesture()
+    //顶栏
+    Box(modifier = Modifier.align(Alignment.TopStart)) {
+        if (toolBarVisibility.topBar) {
+            topBar()
+        }
     }
     //进度条 + 操作栏
     Box(modifier = Modifier.align(Alignment.BottomCenter)) {
