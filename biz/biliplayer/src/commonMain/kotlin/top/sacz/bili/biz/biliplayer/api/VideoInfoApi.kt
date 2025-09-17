@@ -187,7 +187,7 @@ class VideoInfoApi {
             code = response.code,
             message = response.message,
             ttl = response.ttl,
-            data = response.data?.getValue("favoured")!!.jsonPrimitive.boolean
+            data = response.data?.getValue("favoured")?.jsonPrimitive?.boolean ?: false
         )
     }
 
