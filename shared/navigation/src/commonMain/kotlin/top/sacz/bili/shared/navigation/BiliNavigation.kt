@@ -41,7 +41,11 @@ fun MainNavHost(
             navController = LocalNavigation.currentOrThrow.navigator,
             startDestination = startDestination,
             modifier = modifier,
-            builder = builder
+            builder = builder,
+            enterTransition = BiliStandardTransitions.enterTransition,
+            exitTransition = BiliStandardTransitions.exitTransition,
+            popEnterTransition = BiliStandardTransitions.popEnterTransition,
+            popExitTransition = BiliStandardTransitions.popExitTransition
         )
     }
 }
