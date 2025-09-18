@@ -18,7 +18,7 @@ import top.sacz.bili.player.platform.BiliContext
 import top.sacz.bili.shared.common.base.BaseViewModel
 
 class VideoPlayerViewModel(
-    private val context: BiliContext
+    context: BiliContext
 ) : BaseViewModel() {
 
     private val playerApi = VideoPlayerApi()
@@ -70,6 +70,9 @@ class VideoPlayerViewModel(
         avid: Long? = null,
         bvid: String? = null,
     ) = launchTask {
+        if (_videoDetailsInfo.value is BiliResponse.Success) {
+            return@launchTask
+        }
         _videoDetailsInfo.value = BiliResponse.Loading
         _videoDetailsInfo.value = apiCall {
             api.getVideoDetails(
@@ -89,7 +92,9 @@ class VideoPlayerViewModel(
         aid: Long,
         cid: Long
     ) = launchTask {
-
+        if (_onlineCountText.value.isNotEmpty()) {
+            return@launchTask
+        }
         _onlineCountText.value = api.getVideoOnlineCountText(
             aid = aid,
             cid = cid
@@ -108,7 +113,9 @@ class VideoPlayerViewModel(
         bvid: String? = null,
         cid: Long? = null,
     ) = launchTask {
-
+        if (_videoTags.value.isNotEmpty()) {
+            return@launchTask
+        }
         _videoTags.value = api.getVideoTags(
             aid = aid,
             bvid = bvid,
@@ -128,7 +135,6 @@ class VideoPlayerViewModel(
         if (_recommendedVideo.isNotEmpty()) {
             return@launchTask
         }
-
         while (_recommendedVideo.size < 50) {
             val result = api.getRecommendedVideosByVideo(aid)
             _recommendedVideo.addAll(result.data.items)
