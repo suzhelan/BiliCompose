@@ -6,18 +6,26 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.player.controller.PlayerSyncController
-import top.sacz.bili.player.controller.rememberPlayerSyncController
 import top.sacz.bili.player.platform.getCurrentPlatform
 import top.sacz.bili.player.platform.isDesktop
 import top.sacz.bili.player.ui.VideoPlayer
@@ -45,11 +53,9 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
     videoUrlData.registerStatusListener {
         onSuccess { video ->
             //获取质量最好的音频
-            val allVideo = video.dash.video
-            val audio = video.dash.audio
-            val maxVideoUrl = allVideo.maxBy { it.id }
-            val maxAudioUrl = audio?.maxBy { it.id }
-            val playerController = rememberPlayerSyncController()
+            val playerController = remember {
+                vm.controller
+            }
             val isFullScreen = playerController.isFullScreen
             playerController.onBack = {
                 if (isFullScreen) {
@@ -58,20 +64,63 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
                     navigator.pop()
                 }
             }
-            playerController.play(maxVideoUrl.baseUrl, maxAudioUrl?.baseUrl ?: "")
+            vm.doPlayer(playerController)
             VideoPlayer(
                 controller = playerController,
                 modifier = if (isFullScreen) Modifier.fillMaxSize()
-                else if (getCurrentPlatform().isDesktop()) Modifier.fillMaxWidth().aspectRatio(16f / 9f)
+                else if (getCurrentPlatform().isDesktop()) Modifier.fillMaxWidth()
+                    .aspectRatio(16f / 9f)
                 else Modifier.fillMaxWidth().height(230.dp)
             )
             ProgressReport(playerParams, video, vm, playerController)
             BiliBackHandler(isFullScreen) {
                 playerController.reversalFullScreen()
             }
+            AutoPaused(playerController)
         }
         onError { code, msg, cause ->
             Text(text = "获取视频失败: $msg")
+        }
+    }
+}
+
+
+@Composable
+private fun AutoPaused(playerSyncController: PlayerSyncController) {
+    var pausedVideo by rememberSaveable { mutableStateOf(true) }
+    val lifecycleOwner by rememberUpdatedState(LocalLifecycleOwner.current)
+    DisposableEffect(lifecycleOwner) {
+        val lifecycle = lifecycleOwner.lifecycle
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_STOP -> {
+                    if (playerSyncController.isPlaying) {
+                        pausedVideo = true
+                        playerSyncController.pause()
+                    } else {
+                        pausedVideo = false // 明确表示不是自动暂停
+                    }
+                }
+
+                Lifecycle.Event.ON_START -> {
+                    if (pausedVideo) {
+                        playerSyncController.resume()
+                        pausedVideo = false
+                    }
+                }
+
+                Lifecycle.Event.ON_DESTROY -> {
+                    playerSyncController.close()
+                    pausedVideo = true // 重置状态，防止复用时状态错乱
+                }
+
+                else -> {}
+            }
+        }
+
+        lifecycle.addObserver(observer)
+        onDispose {
+            lifecycle.removeObserver(observer)
         }
     }
 }
@@ -92,10 +141,12 @@ private fun ProgressReport(
     val currentPositionSeconds by derivedStateOf {
         currentPositionMillis / 1000
     }
+
     LaunchedEffect(totalDurationMillis) {
-        if (
-            totalDurationMillis > 0//视频时长已加载
-            && argsItem.lastPlayTime > 0//必须有上次观看的记录
+        if (totalDurationMillis == 0L) {
+            return@LaunchedEffect
+        }
+        if (argsItem.lastPlayTime > 0//必须有上次观看的记录
             && argsItem.lastPlayTime < totalDurationMillis - 500//如果已经看完
         ) {
             playerSyncController.seekTo(argsItem.lastPlayTime)

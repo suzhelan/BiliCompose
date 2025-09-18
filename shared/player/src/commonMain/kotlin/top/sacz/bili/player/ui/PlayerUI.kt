@@ -29,16 +29,16 @@ import top.sacz.bili.player.ui.video.VideoScaffold
 @Composable
 fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier) {
     // 总时长
-    val totalDurationMillis by controller.videoPlayer.mediaProperties.collectAsState()
+    val totalDurationMillis by controller.totalDurationMillis.collectAsState()
     // 当前播放进度
-    val currentPositionMillis by controller.videoPlayer.currentPositionMillis.collectAsState()
+    val currentPositionMillis by controller.currentPositionMillis.collectAsState()
     // 添加一个用于跟踪Slider位置的状态
     val progressSliderState = rememberPlayerProgressSliderState(
         currentPositionMillis = {
             currentPositionMillis
         },
         totalDurationMillis = {
-            totalDurationMillis?.durationMillis ?: 0L
+            totalDurationMillis
         },
         onProView = {
         },

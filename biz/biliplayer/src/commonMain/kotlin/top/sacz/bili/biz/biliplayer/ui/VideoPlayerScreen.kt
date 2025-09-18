@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
+import top.sacz.bili.player.platform.BiliLocalContext
 import top.sacz.bili.shared.common.ui.CommonComposeUI
 import top.sacz.bili.shared.common.ui.DefaultViewModel
 import top.sacz.bili.shared.common.ui.dialog.DialogHandler
@@ -15,8 +16,9 @@ import top.sacz.bili.shared.common.ui.dialog.DialogHandler
 @Composable
 fun VideoPlayerScreen(body: String) {
     CommonComposeUI<DefaultViewModel> { _ ->
+        val context = BiliLocalContext.current
         val vm = viewModel {
-            VideoPlayerViewModel()
+            VideoPlayerViewModel(context)
         }
         DialogHandler(vm)
         PlayerUI(

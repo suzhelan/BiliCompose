@@ -17,6 +17,7 @@ import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState
 import org.openani.mediamp.compose.rememberMediampPlayer
 import top.sacz.bili.player.platform.BiliContext
+import top.sacz.bili.player.platform.BiliLocalContext
 
 /**
  * 音频流和视频流同步控制
@@ -26,8 +27,9 @@ import top.sacz.bili.player.platform.BiliContext
  */
 @Stable
 class PlayerSyncController(
-    val videoPlayer: MediampPlayer
+    val context: BiliContext
 ) {
+    val videoPlayer: MediampPlayer = MediampPlayer(context)
     var visibility by mutableStateOf(PlayerToolBarVisibility.Visible)
         private set
 
@@ -35,6 +37,8 @@ class PlayerSyncController(
         private set
 
     val playbackState: StateFlow<PlaybackState> get() = videoPlayer.playbackState
+
+    val isPlaying: Boolean get() = videoPlayer.playbackState.value.isPlaying
 
     //当前播放时长
     val currentPositionMillis: StateFlow<Long> get() = videoPlayer.currentPositionMillis
@@ -181,7 +185,8 @@ expect object PlayerMediaDataUtils {
 @Composable
 fun rememberPlayerSyncController(
 ): PlayerSyncController {
+    val context = BiliLocalContext.current
     val videoPlayer = rememberMediampPlayer()
-    val controller = remember { PlayerSyncController(videoPlayer) }
+    val controller = remember { PlayerSyncController(context) }
     return controller
 }

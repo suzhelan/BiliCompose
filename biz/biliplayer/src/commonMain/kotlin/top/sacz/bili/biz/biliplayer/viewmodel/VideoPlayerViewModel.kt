@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.ext.apiCall
+import top.sacz.bili.api.getOrThrow
 import top.sacz.bili.api.isSuccess
 import top.sacz.bili.biz.biliplayer.api.VideoInfoApi
 import top.sacz.bili.biz.biliplayer.api.VideoPlayerApi
@@ -12,15 +13,21 @@ import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.sacz.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.sacz.bili.biz.biliplayer.entity.VideoInfo
 import top.sacz.bili.biz.biliplayer.entity.VideoTag
+import top.sacz.bili.player.controller.PlayerSyncController
+import top.sacz.bili.player.platform.BiliContext
 import top.sacz.bili.shared.common.base.BaseViewModel
 
 class VideoPlayerViewModel(
+    private val context: BiliContext
 ) : BaseViewModel() {
 
     private val playerApi = VideoPlayerApi()
     private val api = VideoInfoApi()
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
     val videoUrlData = _videoUrlData.asStateFlow()
+
+    val controller: PlayerSyncController = PlayerSyncController(context)
+
     fun getPlayerUrl(
         avid: Long? = null,
         bvid: String? = null,
@@ -29,6 +36,9 @@ class VideoPlayerViewModel(
         cid: Long,
         qn: Int = 80
     ) = launchTask {
+        if (_videoUrlData.value is BiliResponse.Success) {
+            return@launchTask
+        }
         _videoUrlData.value = apiCall {
             playerApi.getPlayerInfo(
                 avid = avid,
@@ -39,6 +49,18 @@ class VideoPlayerViewModel(
                 qn = qn
             )
         }
+    }
+
+    fun doPlayer(controller: PlayerSyncController) {
+        if (controller.isPlaying) {
+            return
+        }
+        val video = _videoUrlData.value.getOrThrow()
+        val allVideo = video.dash.video
+        val audio = video.dash.audio
+        val maxVideoUrl = allVideo.maxBy { it.id }
+        val maxAudioUrl = audio?.maxBy { it.id }
+        controller.play(maxVideoUrl.baseUrl, maxAudioUrl?.baseUrl ?: "")
     }
 
 
@@ -87,7 +109,7 @@ class VideoPlayerViewModel(
         cid: Long? = null,
     ) = launchTask {
 
-    _videoTags.value = api.getVideoTags(
+        _videoTags.value = api.getVideoTags(
             aid = aid,
             bvid = bvid,
             cid = cid
