@@ -40,8 +40,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(libs.voyager.navigator)
-            implementation(libs.voyager.transitions)
+            implementation(libs.navigation.compose)
             //业务
             implementation(projects.biz.home)
             implementation(projects.biz.user)

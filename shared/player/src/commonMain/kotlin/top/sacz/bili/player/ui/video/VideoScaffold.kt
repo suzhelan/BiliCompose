@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import top.sacz.bili.player.controller.PlayerSyncController
 
 /**
@@ -42,11 +43,15 @@ fun VideoScaffold(
     //对于视频主界面 总是显示
     video()
 
+    val stateBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val navigationBarPadding =
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
     //手势控制器 控制全屏的手势
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize().padding(
-            top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
-            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            top = stateBarPadding + 30.dp,
+            bottom = navigationBarPadding
         )
     ) {
         gesture()
@@ -57,7 +62,9 @@ fun VideoScaffold(
         floatMessageCenter()
     }
     //顶栏
-    Box(modifier = Modifier.align(Alignment.TopStart)) {
+    Box(
+        modifier = Modifier.align(Alignment.TopStart)
+    ) {
         if (toolBarVisibility.topBar) {
             topBar()
         }

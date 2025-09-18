@@ -48,8 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.api.isLoading
@@ -72,6 +70,10 @@ import top.sacz.bili.shared.common.ui.theme.TextColor
 import top.sacz.bili.shared.common.ui.theme.TipTextColor
 import top.sacz.bili.shared.common.util.TimeUtils
 import top.sacz.bili.shared.common.util.toStringCount
+import top.sacz.bili.shared.navigation.LocalNavigation
+import top.sacz.bili.shared.navigation.SharedScreen
+import top.sacz.bili.shared.navigation.currentOrThrow
+
 
 @Composable
 fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel) {
@@ -442,7 +444,7 @@ private fun RecommendedVideoUI(
     aid: Long,
     viewModel: VideoPlayerViewModel
 ) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalNavigation.currentOrThrow
     val recommendedVideo = viewModel.recommendedVideo
     LaunchedEffect(Unit) {
         viewModel.getRecommendedVideoByVideo(aid)
@@ -455,7 +457,7 @@ private fun RecommendedVideoUI(
         items(recommendedVideo) {
             SimpleVideoCard(it) {
                 navigator.push(
-                    VideoPlayerScreen(
+                    SharedScreen.VideoPlayer(
                         PlayerParams(
                             avid = it.playerArgs.aid,
                             cid = it.playerArgs.cid,

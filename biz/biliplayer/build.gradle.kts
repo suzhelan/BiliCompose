@@ -15,9 +15,6 @@ kotlin {
             implementation(libs.lifecycle.runtime.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.voyager.navigator)
-            implementation(libs.voyager.screenmodel)
-            implementation(libs.mediamp.all)
 
             //尽可能只使用公共模块
             implementation(projects.biz.user)

@@ -12,7 +12,6 @@ kotlin {
             implementation(libs.lifecycle.runtime.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.voyager.navigator)
 
             implementation(mediampLibs.mediamp.api)
         }

@@ -11,7 +11,6 @@ kotlin {
             implementation(projects.biz.login)
             implementation(projects.biz.user)
             implementation(projects.biz.recvids)
-            implementation(libs.voyager.navigator)
         }
     }
 

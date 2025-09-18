@@ -34,14 +34,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.registry.rememberScreen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.recvids.entity.SmallCoverV2Item
 import top.sacz.bili.shared.common.ui.autoSkeleton
+import top.sacz.bili.shared.navigation.LocalNavigation
 import top.sacz.bili.shared.navigation.SharedScreen
+import top.sacz.bili.shared.navigation.currentOrThrow
 
 @Composable
 fun EmptyCard() {
@@ -57,13 +56,14 @@ fun EmptyCard() {
 
 @Composable
 fun VideoCard(video: SmallCoverV2Item) {
-    val navigator  = LocalNavigator.currentOrThrow
-    val videoScreen = rememberScreen(SharedScreen.VideoPlayer(
+    val navigator = LocalNavigation.currentOrThrow
+    val videoScreen = SharedScreen.VideoPlayer(
         PlayerParams(
             avid = video.playerArgs.aid,
             cid = video.playerArgs.cid,
         ).toJson()
-    ))    //首先就是一个圆角卡片背景
+    )
+    //首先就是一个圆角卡片背景
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -191,7 +191,7 @@ private fun VideoInfoBar(video: SmallCoverV2Item) {
             text = video.args.upName,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = upColor ,
+            color = upColor,
             style = MaterialTheme.typography.headlineSmall,
             fontSize = 12.sp
         )

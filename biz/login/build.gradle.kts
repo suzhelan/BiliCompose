@@ -14,10 +14,9 @@ kotlin {
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.sonner)
             implementation(libs.constraintlayout.compose.multiplatform)
-            implementation(libs.voyager.navigator)
             implementation(libs.kotlinx.serialization.json)
-            //二维码
-            implementation("io.github.alexzhirkevich:qrose:1.0.1")
+            implementation(libs.qrose)
+
             implementation(projects.shared.auth)
             implementation(projects.shared.navigation)
             implementation(projects.shared.api)

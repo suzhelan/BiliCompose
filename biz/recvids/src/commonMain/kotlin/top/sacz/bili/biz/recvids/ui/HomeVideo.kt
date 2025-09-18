@@ -42,9 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.recvids.generated.resources.Res
 import bilicompose.biz.recvids.generated.resources.text_search
 import bilicompose.biz.recvids.generated.resources.text_search_hint
-import cafe.adriel.voyager.core.registry.rememberScreen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -56,7 +54,9 @@ import top.sacz.bili.biz.user.entity.AccountInfo
 import top.sacz.bili.biz.user.viewmodel.MineViewModel
 import top.sacz.bili.shared.auth.config.LoginMapper
 import top.sacz.bili.shared.common.ui.theme.ColorPrimary
+import top.sacz.bili.shared.navigation.LocalNavigation
 import top.sacz.bili.shared.navigation.SharedScreen
+import top.sacz.bili.shared.navigation.currentOrThrow
 
 val pages = listOf("推荐", "热门")
 
@@ -68,7 +68,7 @@ val pages = listOf("推荐", "热门")
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeVideoScreen() {
+fun HomeVideoContent() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val pagerState = rememberPagerState(pageCount = { pages.size }, initialPage = 0)
     Scaffold(
@@ -154,9 +154,8 @@ private fun HomeTopBar(mineViewModel: MineViewModel = viewModel(), onClickSearch
             }
         } else {
             //获取最近的导航
-            val navigator = LocalNavigator.currentOrThrow
+            val navigator = LocalNavigation.currentOrThrow
             //创建登录屏幕
-            val login = rememberScreen(SharedScreen.Login)
             Icon(
                 imageVector = Icons.Outlined.AccountCircle,
                 tint = ColorPrimary,
@@ -164,7 +163,7 @@ private fun HomeTopBar(mineViewModel: MineViewModel = viewModel(), onClickSearch
                 modifier = Modifier.size(36.dp)
                     .clip(RoundedCornerShape(50.dp))
                     .clickable {
-                        navigator.push(login)
+                        navigator.push(SharedScreen.Login)
                     }
             )
         }

@@ -12,10 +12,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.navigator.internal.BackHandler
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
@@ -25,12 +21,14 @@ import top.sacz.bili.player.controller.rememberPlayerSyncController
 import top.sacz.bili.player.platform.getCurrentPlatform
 import top.sacz.bili.player.platform.isDesktop
 import top.sacz.bili.player.ui.VideoPlayer
+import top.sacz.bili.shared.navigation.BiliBackHandler
+import top.sacz.bili.shared.navigation.LocalNavigation
+import top.sacz.bili.shared.navigation.currentOrThrow
 
 
-@OptIn(InternalVoyagerApi::class)
 @Composable
 fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalNavigation.currentOrThrow
     val videoUrlData by vm.videoUrlData.collectAsState()
     LaunchedEffect(Unit) {
         vm.getPlayerUrl(
@@ -68,7 +66,7 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
                 else Modifier.fillMaxWidth().height(230.dp)
             )
             ProgressReport(playerParams, video, vm, playerController)
-            BackHandler(isFullScreen) {
+            BiliBackHandler(isFullScreen) {
                 playerController.reversalFullScreen()
             }
         }

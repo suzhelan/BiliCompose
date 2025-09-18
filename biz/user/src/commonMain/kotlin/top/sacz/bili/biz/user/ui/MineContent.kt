@@ -47,8 +47,7 @@ import bilicompose.biz.user.generated.resources.ic_lv3
 import bilicompose.biz.user.generated.resources.ic_lv4
 import bilicompose.biz.user.generated.resources.ic_lv5
 import bilicompose.biz.user.generated.resources.ic_lv6
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -61,6 +60,9 @@ import top.sacz.bili.shared.auth.config.LoginMapper
 import top.sacz.bili.shared.common.ui.theme.ColorPrimaryContainer
 import top.sacz.bili.shared.common.ui.theme.DividingLineColor
 import top.sacz.bili.shared.common.ui.theme.TipTextColor
+import top.sacz.bili.shared.navigation.LocalNavigation
+import top.sacz.bili.shared.navigation.SharedScreen
+import top.sacz.bili.shared.navigation.currentOrThrow
 
 private val levelIconMap = mapOf(
     0 to Res.drawable.ic_lv0,
@@ -213,7 +215,7 @@ private fun ColumnScope.HeaderUserCard(
 private fun ColumnScope.UserAmount(
     mine: Mine
 ) {
-    val navigate = LocalNavigator.currentOrThrow
+    val navigate = LocalNavigation.currentOrThrow
     // 聚合数据列表
     val data = mapOf(
         Res.string.dynamic to mine.dynamic,
@@ -238,7 +240,7 @@ private fun ColumnScope.UserAmount(
                             }
 
                             Res.string.follow -> {
-                                navigate.push(FollowListScreen)
+                                navigate.push(SharedScreen.FollowList)
                             }
 
                             Res.string.fans -> {

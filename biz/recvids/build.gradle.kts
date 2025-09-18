@@ -19,7 +19,6 @@ kotlin {
             implementation(projects.biz.biliplayer)
             implementation(projects.shared.auth)
             implementation(projects.shared.api)
-            implementation(libs.voyager.navigator)
             implementation(projects.shared.common)
             implementation(projects.shared.navigation)
         }

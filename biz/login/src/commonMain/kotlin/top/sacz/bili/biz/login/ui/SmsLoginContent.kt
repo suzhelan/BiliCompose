@@ -27,7 +27,6 @@ import androidx.compose.material.icons.rounded.Sms
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -66,8 +65,6 @@ import bilicompose.biz.login.generated.resources.title_mobile_phone_number_login
 import bilicompose.biz.login.generated.resources.toast_phone_number_is_not_valid
 import bilicompose.biz.login.generated.resources.verify_error
 import bilicompose.biz.login.generated.resources.verify_success
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import org.jetbrains.compose.resources.stringResource
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.login.model.Captcha
@@ -78,6 +75,8 @@ import top.sacz.bili.biz.login.model.VerifyResult
 import top.sacz.bili.biz.login.viewmodel.GeeTestViewModel
 import top.sacz.bili.biz.login.viewmodel.SmsLoginViewModel
 import top.sacz.bili.shared.common.ui.theme.ColorPrimary
+import top.sacz.bili.shared.navigation.LocalNavigation
+import top.sacz.bili.shared.navigation.currentOrThrow
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -92,7 +91,7 @@ fun SmsLoginContent(
     showToast: (String) -> Unit = {}
 ) {
     //获取最近的导航 登录成功后pop当前页面
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalNavigation.currentOrThrow
 
     //手机号输入
     var inputPhoneNumber by rememberSaveable {

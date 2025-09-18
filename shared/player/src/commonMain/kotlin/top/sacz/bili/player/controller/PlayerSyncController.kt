@@ -32,6 +32,7 @@ class PlayerSyncController(
         private set
 
     var isFullScreen by mutableStateOf(false)
+        private set
 
     val playbackState: StateFlow<PlaybackState> get() = videoPlayer.playbackState
 

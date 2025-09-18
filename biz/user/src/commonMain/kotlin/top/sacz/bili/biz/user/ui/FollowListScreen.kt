@@ -47,9 +47,6 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import top.sacz.bili.api.BiliResponse
@@ -64,214 +61,214 @@ import top.sacz.bili.shared.common.ui.TitleUI
 import top.sacz.bili.shared.common.ui.dialog.DialogHandler
 import top.sacz.bili.shared.common.ui.theme.TextColor
 import top.sacz.bili.shared.common.ui.theme.TipTextColor
+import top.sacz.bili.shared.navigation.LocalNavigation
+import top.sacz.bili.shared.navigation.currentOrThrow
 
 /**
  * 我的关注列表
  */
-object FollowListScreen : Screen {
-    @Composable
-    override fun Content() {
-        CommonComposeUI<FollowListViewModel>(
-            initAction = { vm ->
-                vm.queryTags()
-            },
-            topBar = {
-                val navigate = LocalNavigator.currentOrThrow
-                TitleUI(title = "关注列表", onClickBack = {
-                    navigate.pop()
-                })
-            }
-        ) { vm ->
-            DialogHandler(vm)
-            Dialogs(vm)
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                TabPageUI(vm)
-            }
+@Composable
+fun FollowListScreen() {
+    CommonComposeUI<FollowListViewModel>(
+        initAction = { vm ->
+            vm.queryTags()
+        },
+        topBar = {
+            val navigate = LocalNavigation.currentOrThrow
+            TitleUI(title = "关注列表", onClickBack = {
+                navigate.pop()
+            })
         }
-    }
-
-    @Composable
-    private fun Dialogs(vm: FollowListViewModel) {
-        val isShowSettingTagsDialog by vm.isShowSettingTagsDialog.collectAsState()
-        if (isShowSettingTagsDialog) {
-            TagsDialog(
-                vm,
-                onUpdate = {
-                    vm.queryTags()
-                },
-                onDismissRequest = {
-                    vm.isShowSettingTagsDialog.toFalse()
-                }
-            )
-        }
-    }
-
-    @Composable
-    private fun ColumnScope.TabPageUI(vm: FollowListViewModel) {
-        val scoop = rememberCoroutineScope()
-        val tags = vm.tags
-        val pagerState = rememberPagerState(pageCount = { tags.size }, initialPage = 0)
-        //如果tags为空 则显示加载进度条
-        if (tags.isEmpty()) {
-            LoadingIndicator()
-            return
-        }
-
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            tags.forEachIndexed { index, tag ->
-                FilterChip(
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        scoop.launch { pagerState.animateScrollToPage(index) }
-                    },
-                    label = {
-                        Text(text = tag.name)
-                    }
-                )
-            }
-        }
-
-        HorizontalPager(
-            state = pagerState,
-        ) { page ->
-            val tag = tags[page]
-            FollowListPage(vm, tag.tagid)
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun PagerScope.FollowListPage(vm: FollowListViewModel, tagId: Int) {
-        val lazyPagingItems = vm.getFollowListFlow(tagId).collectAsLazyPagingItems()
-        LazyColumn(
+    ) { vm ->
+        DialogHandler(vm)
+        Dialogs(vm)
+        Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(
-                count = lazyPagingItems.itemCount,
-                key = lazyPagingItems.itemKey {
-                    it.mid
-                }
-            ) { index ->
-                val relationUser = lazyPagingItems[index]
-                if (relationUser == null) {
-                    return@items
-                }
-                UserItemUI(vm, relationUser)
-            }
-            when (lazyPagingItems.loadState.append) {
-                is LoadState.Loading -> {
-                    item {
-                        LoadingIndicator()
-                    }
-                }
+            TabPageUI(vm)
+        }
+    }
+}
 
-                is LoadState.NotLoading -> {
-                    item {
-                        Text(
-                            text = "没有更多了",
-                            modifier = Modifier.fillMaxWidth().padding(10.dp),
-                            textAlign = TextAlign.Center,
-                            color = TipTextColor
-                        )
-                    }
-                }
-
-                else -> {
-                }
+@Composable
+private fun Dialogs(vm: FollowListViewModel) {
+    val isShowSettingTagsDialog by vm.isShowSettingTagsDialog.collectAsState()
+    if (isShowSettingTagsDialog) {
+        TagsDialog(
+            vm,
+            onUpdate = {
+                vm.queryTags()
+            },
+            onDismissRequest = {
+                vm.isShowSettingTagsDialog.toFalse()
             }
+        )
+    }
+}
+
+@Composable
+private fun ColumnScope.TabPageUI(vm: FollowListViewModel) {
+    val scoop = rememberCoroutineScope()
+    val tags = vm.tags
+    val pagerState = rememberPagerState(pageCount = { tags.size }, initialPage = 0)
+    //如果tags为空 则显示加载进度条
+    if (tags.isEmpty()) {
+        LoadingIndicator()
+        return
+    }
+
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        tags.forEachIndexed { index, tag ->
+            FilterChip(
+                selected = pagerState.currentPage == index,
+                onClick = {
+                    scoop.launch { pagerState.animateScrollToPage(index) }
+                },
+                label = {
+                    Text(text = tag.name)
+                }
+            )
         }
     }
 
-    @Composable
-    private fun LazyItemScope.UserItemUI(
-        vm: FollowListViewModel,
-        item: RelationUser,
+    HorizontalPager(
+        state = pagerState,
+    ) { page ->
+        val tag = tags[page]
+        FollowListPage(vm, tag.tagid)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PagerScope.FollowListPage(vm: FollowListViewModel, tagId: Int) {
+    val lazyPagingItems = vm.getFollowListFlow(tagId).collectAsLazyPagingItems()
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
     ) {
-        var userState by remember { mutableStateOf(item) }
-        val actionState = vm.followList[item.mid]
-        ConstraintLayout(
-            modifier = Modifier.fillMaxWidth()
-                .height(70.dp)
-                .combinedClickable(
-                    onClick = {},
-                    onLongClick = {
-                        vm.showSettingTagsDialog(item.mid)
-                    }
-                ).padding(10.dp)
-        ) {
-            //元素内容 头像 昵称 签名 关注按钮 头像左下角会员标识
-            val (avatar, text, followBtn, actionLoading) = createRefs()
-            AsyncImage(
-                model = userState.face,
-                contentDescription = "avatar",
-                modifier = Modifier.constrainAs(avatar) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                }
-                    .height(50.dp)
-                    .width(50.dp).clip(RoundedCornerShape(50.dp))
-            )
-            Column(
-                modifier = Modifier.constrainAs(text) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(avatar.end, 15.dp)
-                    end.linkTo(followBtn.start, 10.dp)
-                    width = Dimension.fillToConstraints
-                },
-                verticalArrangement = Arrangement.spacedBy((-2).dp)
-            ) {
-                Text(
-                    text = userState.uname,
-                    color = TextColor,
-                    fontSize = 15.sp
-                )
-                Text(
-                    text = userState.sign,
-                    color = TipTextColor,
-                    fontSize = 14.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+        items(
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey {
+                it.mid
             }
-
-            if (actionState is BiliResponse.Loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(30.dp)
-                        .constrainAs(actionLoading) {
-                            start.linkTo(followBtn.start)
-                            end.linkTo(followBtn.end)
-                            top.linkTo(followBtn.top)
-                            bottom.linkTo(followBtn.bottom)
-                        }
-                )
+        ) { index ->
+            val relationUser = lazyPagingItems[index]
+            if (relationUser == null) {
+                return@items
             }
-            ButtonByAttribute(
-                modifier = Modifier
-                    .isInvisible(actionState is BiliResponse.Loading)
-                    .constrainAs(followBtn) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        end.linkTo(parent.end)
-                    },
-                attribute = userState.attribute,
-                mid = userState.mid,
-                vm = vm
-            ) {
-                userState = userState.copy(attribute = it)
-            }
-
-
+            UserItemUI(vm, relationUser)
         }
+        when (lazyPagingItems.loadState.append) {
+            is LoadState.Loading -> {
+                item {
+                    LoadingIndicator()
+                }
+            }
+
+            is LoadState.NotLoading -> {
+                item {
+                    Text(
+                        text = "没有更多了",
+                        modifier = Modifier.fillMaxWidth().padding(10.dp),
+                        textAlign = TextAlign.Center,
+                        color = TipTextColor
+                    )
+                }
+            }
+
+            else -> {
+            }
+        }
+    }
+}
+
+@Composable
+private fun LazyItemScope.UserItemUI(
+    vm: FollowListViewModel,
+    item: RelationUser,
+) {
+    var userState by remember { mutableStateOf(item) }
+    val actionState = vm.followList[item.mid]
+    ConstraintLayout(
+        modifier = Modifier.fillMaxWidth()
+            .height(70.dp)
+            .combinedClickable(
+                onClick = {},
+                onLongClick = {
+                    vm.showSettingTagsDialog(item.mid)
+                }
+            ).padding(10.dp)
+    ) {
+        //元素内容 头像 昵称 签名 关注按钮 头像左下角会员标识
+        val (avatar, text, followBtn, actionLoading) = createRefs()
+        AsyncImage(
+            model = userState.face,
+            contentDescription = "avatar",
+            modifier = Modifier.constrainAs(avatar) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+            }
+                .height(50.dp)
+                .width(50.dp).clip(RoundedCornerShape(50.dp))
+        )
+        Column(
+            modifier = Modifier.constrainAs(text) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(avatar.end, 15.dp)
+                end.linkTo(followBtn.start, 10.dp)
+                width = Dimension.fillToConstraints
+            },
+            verticalArrangement = Arrangement.spacedBy((-2).dp)
+        ) {
+            Text(
+                text = userState.uname,
+                color = TextColor,
+                fontSize = 15.sp
+            )
+            Text(
+                text = userState.sign,
+                color = TipTextColor,
+                fontSize = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        if (actionState is BiliResponse.Loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(30.dp)
+                    .constrainAs(actionLoading) {
+                        start.linkTo(followBtn.start)
+                        end.linkTo(followBtn.end)
+                        top.linkTo(followBtn.top)
+                        bottom.linkTo(followBtn.bottom)
+                    }
+            )
+        }
+        ButtonByAttribute(
+            modifier = Modifier
+                .isInvisible(actionState is BiliResponse.Loading)
+                .constrainAs(followBtn) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(parent.end)
+                },
+            attribute = userState.attribute,
+            mid = userState.mid,
+            vm = vm
+        ) {
+            userState = userState.copy(attribute = it)
+        }
+
+
     }
 }
 
