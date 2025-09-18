@@ -49,7 +49,6 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
         )
     }
 
-
     videoUrlData.registerStatusListener {
         onSuccess { video ->
             //获取质量最好的音频
@@ -84,7 +83,9 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
     }
 }
 
-
+/**
+ * 监听生命周期自动暂停播放
+ */
 @Composable
 private fun AutoPaused(playerSyncController: PlayerSyncController) {
     var pausedVideo by rememberSaveable { mutableStateOf(true) }
@@ -109,15 +110,9 @@ private fun AutoPaused(playerSyncController: PlayerSyncController) {
                     }
                 }
 
-                Lifecycle.Event.ON_DESTROY -> {
-                    playerSyncController.close()
-                    pausedVideo = true // 重置状态，防止复用时状态错乱
-                }
-
                 else -> {}
             }
         }
-
         lifecycle.addObserver(observer)
         onDispose {
             lifecycle.removeObserver(observer)
@@ -127,6 +122,7 @@ private fun AutoPaused(playerSyncController: PlayerSyncController) {
 
 /**
  * 不要把这个放在上面 容易导致局部重组 Compose智能重组单位是方法 这样重组也只会重组这个方法
+ * 上报和回滚观看进度
  */
 @Composable
 private fun ProgressReport(

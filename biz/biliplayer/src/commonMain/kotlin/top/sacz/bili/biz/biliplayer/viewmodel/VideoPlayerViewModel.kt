@@ -28,6 +28,11 @@ class VideoPlayerViewModel(
 
     val controller: PlayerSyncController = PlayerSyncController(context)
 
+    override fun onCleared() {
+        super.onCleared()
+        controller.close() // 释放播放器资源
+    }
+
     fun getPlayerUrl(
         avid: Long? = null,
         bvid: String? = null,
