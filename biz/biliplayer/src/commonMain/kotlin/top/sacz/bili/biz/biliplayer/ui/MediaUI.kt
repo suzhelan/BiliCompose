@@ -3,7 +3,6 @@ package top.sacz.bili.biz.biliplayer.ui
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -17,7 +16,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -26,8 +24,6 @@ import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
 import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.player.controller.PlayerSyncController
-import top.sacz.bili.player.platform.getCurrentPlatform
-import top.sacz.bili.player.platform.isDesktop
 import top.sacz.bili.player.ui.VideoPlayer
 import top.sacz.bili.shared.navigation.BiliBackHandler
 import top.sacz.bili.shared.navigation.LocalNavigation
@@ -67,9 +63,7 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
             VideoPlayer(
                 controller = playerController,
                 modifier = if (isFullScreen) Modifier.fillMaxSize()
-                else if (getCurrentPlatform().isDesktop()) Modifier.fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                else Modifier.fillMaxWidth().height(230.dp)
+                else Modifier.fillMaxWidth().aspectRatio(16f / 9f)
             )
             ProgressReport(playerParams, video, vm, playerController)
             BiliBackHandler(isFullScreen) {
