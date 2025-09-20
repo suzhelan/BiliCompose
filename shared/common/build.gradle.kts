@@ -13,6 +13,7 @@ kotlin {
             implementation(libs.paging.compose.common)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.lifecycle.viewmodel.compose)
+            implementation(libs.lifecycle.runtime.compose)
             implementation(libs.napier)
             implementation(libs.okio)
             implementation(libs.kotlinx.datetime)

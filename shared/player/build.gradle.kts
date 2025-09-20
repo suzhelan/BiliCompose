@@ -7,22 +7,16 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.ktor.client.core)
-            implementation(libs.lifecycle.viewmodel.compose)
-            implementation(libs.lifecycle.runtime.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
+            implementation(libs.lifecycle.runtime.compose)
             implementation(libs.kotlinx.serialization.json)
-
-            implementation(mediampLibs.mediamp.api)
+            implementation(mediampLibs.mediamp.all)
         }
 
         sourceSets.androidMain.dependencies {
-            implementation(mediampLibs.mediamp.exoplayer)
             implementation(libs.androidx.media3.exoplayer)
         }
-        desktopMain.dependencies {
-            implementation(mediampLibs.mediamp.vlc)
-        }
+
     }
 
 }
