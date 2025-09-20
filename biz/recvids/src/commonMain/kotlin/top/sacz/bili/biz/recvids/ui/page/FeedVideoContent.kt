@@ -40,7 +40,9 @@ import top.sacz.bili.biz.recvids.viewmodel.FeedViewModel
 @Composable
 fun FeedVideoContent(
     modifier: Modifier = Modifier,
-    viewModel: FeedViewModel = viewModel()
+    viewModel: FeedViewModel = viewModel {
+        FeedViewModel()
+    }
 ) {
 
     val lazyPagingItems = viewModel.recommendedListFlow.collectAsLazyPagingItems()

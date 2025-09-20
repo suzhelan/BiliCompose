@@ -33,7 +33,9 @@ import top.sacz.bili.biz.recvids.viewmodel.PopularViewModel
 @Composable
 fun PopularVideoContent(
     modifier: Modifier = Modifier,
-    viewModel: PopularViewModel = viewModel()
+    viewModel: PopularViewModel = viewModel {
+        PopularViewModel()
+    }
 ) {
     val lazyPagingItems = viewModel.popularListFlow.collectAsLazyPagingItems()
     val isRefreshing by remember {

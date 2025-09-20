@@ -12,14 +12,14 @@ repositories {
 }
 
 dependencies {
-    api(gradleApi())
-    api(gradleKotlinDsl())
-    api(libs.android.gradle.plugin)
-    api(libs.android.application.gradle.plugin)
-    api(libs.android.library.gradle.plugin)
-    api(libs.kotlin.gradle.plugin)
-    api(libs.compose.multiplatfrom.gradle.plugin)
-    api(libs.kotlin.compose.compiler.gradle.plugin)
+    implementation(gradleApi())
+    implementation(gradleKotlinDsl())
+    implementation(libs.android.gradle.plugin)
+    implementation(libs.android.application.gradle.plugin)
+    implementation(libs.android.library.gradle.plugin)
+    implementation(libs.kotlin.gradle.plugin)
+    implementation(libs.compose.multiplatfrom.gradle.plugin)
+    implementation(libs.kotlin.compose.compiler.gradle.plugin)
 }
 
 java {

@@ -94,7 +94,7 @@ fun MineContent() {
  * 用户信息
  */
 @Composable
-private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewModel = viewModel()) {
+private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewModel = viewModel { MineViewModel() }) {
     LaunchedEffect(Unit) {
         mineViewModel.updateMine()
     }

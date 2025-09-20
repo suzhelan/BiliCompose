@@ -16,7 +16,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import top.sacz.bili.shared.common.base.BaseViewModel
 
 
@@ -27,6 +26,7 @@ class DefaultViewModel : BaseViewModel()
 @Composable
 inline fun <reified VM : BaseViewModel> CommonComposeUI(
     isNeedLoading: Boolean = false,
+    viewModel: () -> VM,
     crossinline initAction: (vm: VM) -> Unit = {},
     crossinline topBar: @Composable (vm: VM) -> Unit = {},
     crossinline bottomBar: @Composable (vm: VM) -> Unit = {},

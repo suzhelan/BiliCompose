@@ -73,6 +73,7 @@ fun FollowListScreen() {
         initAction = { vm ->
             vm.queryTags()
         },
+        viewModel = { FollowListViewModel() },
         topBar = {
             val navigate = LocalNavigation.currentOrThrow
             TitleUI(title = "关注列表", onClickBack = {

@@ -98,7 +98,9 @@ fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel) {
 private fun VideoDetailsUI(
     videoInfo: VideoInfo,
     viewModel: VideoPlayerViewModel,
-    userViewModel: UserViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel {
+        UserViewModel()
+    },
 ) {
     val userCard by userViewModel.userCard.collectAsState()
     LaunchedEffect(Unit) {

@@ -131,7 +131,10 @@ private fun Tab(pagerState: PagerState) {
 }
 
 @Composable
-private fun HomeTopBar(mineViewModel: MineViewModel = viewModel(), onClickSearchBar: () -> Unit) {
+private fun HomeTopBar(
+    mineViewModel: MineViewModel = viewModel { MineViewModel() },
+    onClickSearchBar: () -> Unit
+) {
     val isLogin by remember {
         LoginMapper.isLoginState
     }

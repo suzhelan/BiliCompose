@@ -16,7 +16,9 @@ import top.sacz.bili.shared.common.ui.dialog.DialogHandler
 
 @Composable
 fun VideoPlayerScreen(body: String) {
-    CommonComposeUI<DefaultViewModel> { _ ->
+    CommonComposeUI<DefaultViewModel>(
+        viewModel = { DefaultViewModel() }
+    ) { _ ->
         val context = BiliLocalContext.current
         val vm = viewModel {
             VideoPlayerViewModel(context)
