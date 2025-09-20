@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +54,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.user.entity.RelationTags
 import top.sacz.bili.biz.user.viewmodel.FollowListViewModel
+import top.sacz.bili.shared.common.ext.dismiss
+import top.sacz.bili.shared.common.ext.show
 import top.sacz.bili.shared.common.ext.toFalse
 import top.sacz.bili.shared.common.ext.toTrue
 import top.sacz.bili.shared.common.ui.dialog.WarnDialog
@@ -92,21 +95,21 @@ fun TagsDialog(
                 onUpdate()
             },
             onDismissRequest = {
-                vm.isShowCreateTagDialog.toFalse()
+                vm.isShowCreateTagDialog.dismiss()
             }
         )
     }
     if (isShowDeleteTagDialog) {
         WarnDialog(
             title = "删除分组",
-            text = "该分组下还有用户,确定要删除该分组吗？",
+            text = "该分组下还有用户,确定要删除该分组吗？删除后用户会被移至默认分组",
             confirmButtonText = "删除",
             onConfirmRequest = {
                 vm.deleteTag(deleteTag)
-                vm.isShowDeleteTagDialog.toFalse()
+                vm.isShowDeleteTagDialog.dismiss()
             },
             onDismissRequest = {
-                vm.isShowDeleteTagDialog.toFalse()
+                vm.isShowDeleteTagDialog.dismiss()
             }
         )
     }
@@ -116,11 +119,11 @@ fun TagsDialog(
             onUpdate = { newTagName ->
                 vm.renameTag(tagId = renameTag.tagid, tagName = newTagName) {
                     vm.queryTags()
-                    vm.isShowRenameTagDialog.toFalse()
+                    vm.isShowRenameTagDialog.dismiss()
                 }
             },
             onDismissRequest = {
-                vm.isShowRenameTagDialog.toFalse()
+                vm.isShowRenameTagDialog.dismiss()
             }
         )
     }
@@ -170,10 +173,19 @@ fun TagsDialog(
                             Text(text = "保存")
                         }
                     }
-                    Spacer(modifier = Modifier.size(8.dp))
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        item {
+                            Text(
+                                text = "向右滑动项可重命名,向左滑动可删除",
+                                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                                color = TipTextColor,
+                                fontSize = 12.sp,
+                                maxLines = 1,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                         items(
                             items = allTags,
                             key = { tag -> tag.tagid }
@@ -213,7 +225,7 @@ private fun TodoListItemWithAnimation(
                 vm.hasUserInTag(tag.tagid) { haUser ->
                     //有用户的话展示一下dialog
                     if (haUser) {
-                        vm.isShowDeleteTagDialog.toTrue()
+                        vm.isShowDeleteTagDialog.show()
                     } else {
                         //没有用户则直接删除
                         vm.deleteTag(tag.tagid)
