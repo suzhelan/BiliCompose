@@ -29,7 +29,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,11 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.recvids.generated.resources.Res
 import bilicompose.biz.recvids.generated.resources.text_search
 import bilicompose.biz.recvids.generated.resources.text_search_hint
-
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -143,7 +142,7 @@ private fun HomeTopBar(
             mineViewModel.fetchMyInfo()
         }
     }
-    val data by mineViewModel.myInfo.collectAsState()
+    val data by mineViewModel.myInfo.collectAsStateWithLifecycle()
     Row {
         if (isLogin) {
             if (data.isSuccess()) {

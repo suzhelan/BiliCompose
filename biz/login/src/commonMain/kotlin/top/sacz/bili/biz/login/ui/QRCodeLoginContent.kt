@@ -14,14 +14,13 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-
 import io.github.alexzhirkevich.qrose.ImageFormat
 import io.github.alexzhirkevich.qrose.options.QrBallShape
 import io.github.alexzhirkevich.qrose.options.QrBrush
@@ -50,10 +49,10 @@ import top.sacz.bili.shared.navigation.currentOrThrow
 @Composable
 fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
     //获取最近的导航 登录成功后pop当前页面
-    val getQRCode by viewModel.qrCode.collectAsState()
-    val sendCountdown by viewModel.sendCountdown.collectAsState()
-    val queryMessage by viewModel.queryMessage.collectAsState()
-    val isShowLoginSuccessDialog by viewModel.isShowLoginSuccessDialog.collectAsState()
+    val getQRCode by viewModel.qrCode.collectAsStateWithLifecycle()
+    val sendCountdown by viewModel.sendCountdown.collectAsStateWithLifecycle()
+    val queryMessage by viewModel.queryMessage.collectAsStateWithLifecycle()
+    val isShowLoginSuccessDialog by viewModel.isShowLoginSuccessDialog.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.getQRCode()
     }

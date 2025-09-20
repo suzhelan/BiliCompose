@@ -36,7 +36,6 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import top.sacz.bili.api.BiliResponse
@@ -77,7 +77,7 @@ import top.sacz.bili.shared.navigation.currentOrThrow
 
 @Composable
 fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel) {
-    val vmVideoInfo by viewModel.videoDetailsInfo.collectAsState()
+    val vmVideoInfo by viewModel.videoDetailsInfo.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.getVideoDetailsInfo(
             avid = playerParams.avid,
@@ -102,7 +102,7 @@ private fun VideoDetailsUI(
         UserViewModel()
     },
 ) {
-    val userCard by userViewModel.userCard.collectAsState()
+    val userCard by userViewModel.userCard.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         userViewModel.getUserInfo(mid = videoInfo.owner.mid)
     }
@@ -120,8 +120,8 @@ private fun VideoDetailsUI(
 
 @Composable
 private fun Dialogs(aid: Long, viewModel: VideoPlayerViewModel) {
-    val isShowAddCoinDialog by viewModel.isShowAddCoinDialog.collectAsState()
-    val coinQuotationCount by viewModel.coinQuotationCount.collectAsState()
+    val isShowAddCoinDialog by viewModel.isShowAddCoinDialog.collectAsStateWithLifecycle()
+    val coinQuotationCount by viewModel.coinQuotationCount.collectAsStateWithLifecycle()
     if (isShowAddCoinDialog) {
         if (coinQuotationCount >= 2) {
             viewModel.showMessageDialog("提示", "您已经投过币了,请勿重复投币")
@@ -148,9 +148,9 @@ private fun Dialogs(aid: Long, viewModel: VideoPlayerViewModel) {
 @Composable
 private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel) {
     //正在观看的人数
-    val onlineCountText by viewModel.onlineCountText.collectAsState()
+    val onlineCountText by viewModel.onlineCountText.collectAsStateWithLifecycle()
     //视频关联标签
-    val videoTags by viewModel.videoTags.collectAsState()
+    val videoTags by viewModel.videoTags.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.getVideoOnlineCountText(videoInfo.aid, videoInfo.cid)
         viewModel.getVideoTags(
@@ -277,9 +277,9 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
  */
 @Composable
 private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel) {
-    val isLike by viewModel.isLike.collectAsState()
-    val coinQuotation by viewModel.coinQuotationCount.collectAsState()
-    val isFavorite by viewModel.isFavorite.collectAsState()
+    val isLike by viewModel.isLike.collectAsStateWithLifecycle()
+    val coinQuotation by viewModel.coinQuotationCount.collectAsStateWithLifecycle()
+    val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.updateUserActionState(videoInfo.aid)
@@ -362,7 +362,7 @@ private fun AuthorItemUI(
     if (!userCardResponse.isSuccess()) {
         return@ConstraintLayout
     }
-    val actionState by viewModel.actionState.collectAsState()
+    val actionState by viewModel.actionState.collectAsStateWithLifecycle()
     val userCard = (userCardResponse as BiliResponse.Success).data
     val (avatar, name, sign, concern) = createRefs()
     AsyncImage(

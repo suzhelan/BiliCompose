@@ -1,9 +1,9 @@
 package top.sacz.bili.shared.common.ui.dialog
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import top.sacz.bili.shared.common.base.BaseViewModel
 
 /**
@@ -29,7 +29,7 @@ sealed class DialogState {
 
 @Composable
 fun DialogHandler(vm: BaseViewModel) {
-    val collectAsState by vm.showDialog.collectAsState()
+    val collectAsState by vm.showDialog.collectAsStateWithLifecycle()
     when (val dialogState = collectAsState) {
         is DialogState.Loading -> {
             LoadingDialog(

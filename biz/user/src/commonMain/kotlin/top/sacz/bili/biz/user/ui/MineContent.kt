@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.user.generated.resources.Res
 import bilicompose.biz.user.generated.resources.b_coin
@@ -47,7 +47,6 @@ import bilicompose.biz.user.generated.resources.ic_lv3
 import bilicompose.biz.user.generated.resources.ic_lv4
 import bilicompose.biz.user.generated.resources.ic_lv5
 import bilicompose.biz.user.generated.resources.ic_lv6
-
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -98,7 +97,7 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
     LaunchedEffect(Unit) {
         mineViewModel.updateMine()
     }
-    val mineResponse by mineViewModel.mine.collectAsState()
+    val mineResponse by mineViewModel.mine.collectAsStateWithLifecycle()
     if (!mineResponse.isSuccess()) {
         return
     }

@@ -29,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
@@ -93,7 +93,7 @@ fun FollowListScreen() {
 
 @Composable
 private fun Dialogs(vm: FollowListViewModel) {
-    val isShowSettingTagsDialog by vm.isShowSettingTagsDialog.collectAsState()
+    val isShowSettingTagsDialog by vm.isShowSettingTagsDialog.collectAsStateWithLifecycle()
     if (isShowSettingTagsDialog) {
         TagsDialog(
             vm,

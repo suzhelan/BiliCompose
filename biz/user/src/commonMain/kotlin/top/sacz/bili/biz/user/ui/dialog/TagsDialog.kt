@@ -35,7 +35,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.user.entity.RelationTags
 import top.sacz.bili.biz.user.viewmodel.FollowListViewModel
@@ -78,13 +78,13 @@ fun TagsDialog(
         it.tagid != -20 && it.tagid != 0
     }
     //获取用户所在的分组
-    val userInTags by vm.userInTags.collectAsState()
+    val userInTags by vm.userInTags.collectAsStateWithLifecycle()
 
-    val isShowCreateTagDialog by vm.isShowCreateTagDialog.collectAsState()
-    val isShowDeleteTagDialog by vm.isShowDeleteTagDialog.collectAsState()
-    val isShowRenameTagDialog by vm.isShowRenameTagDialog.collectAsState()
-    val renameTag by vm.renameTag.collectAsState()
-    val deleteTag by vm.deleteTagId.collectAsState()
+    val isShowCreateTagDialog by vm.isShowCreateTagDialog.collectAsStateWithLifecycle()
+    val isShowDeleteTagDialog by vm.isShowDeleteTagDialog.collectAsStateWithLifecycle()
+    val isShowRenameTagDialog by vm.isShowRenameTagDialog.collectAsStateWithLifecycle()
+    val renameTag by vm.renameTag.collectAsStateWithLifecycle()
+    val deleteTag by vm.deleteTagId.collectAsStateWithLifecycle()
     if (isShowCreateTagDialog) {
         CreateTagDialog(
             vm = vm,
@@ -204,7 +204,7 @@ private fun TodoListItemWithAnimation(
     //选中的状态
     val tagsCheckedMap: Map<Int, Boolean> = vm.tagsCheckedMap
     // 监听删除确认对话框状态，在对话框关闭时（取消删除）重置滑动状态
-    val isShowDeleteTagDialog by vm.isShowDeleteTagDialog.collectAsState()
+    val isShowDeleteTagDialog by vm.isShowDeleteTagDialog.collectAsStateWithLifecycle()
     //监听拖动状态
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
         confirmValueChange = {

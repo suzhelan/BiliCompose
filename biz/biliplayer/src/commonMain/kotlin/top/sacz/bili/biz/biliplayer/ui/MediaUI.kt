@@ -7,7 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import top.sacz.bili.api.registerStatusListener
 import top.sacz.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
@@ -33,7 +33,7 @@ import top.sacz.bili.shared.navigation.currentOrThrow
 @Composable
 fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
     val navigator = LocalNavigation.currentOrThrow
-    val videoUrlData by vm.videoUrlData.collectAsState()
+    val videoUrlData by vm.videoUrlData.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         vm.getPlayerUrl(
             avid = playerParams.avid,
@@ -125,8 +125,8 @@ private fun ProgressReport(
     vm: VideoPlayerViewModel,
     playerSyncController: PlayerSyncController
 ) {
-    val totalDurationMillis by playerSyncController.totalDurationMillis.collectAsState()
-    val currentPositionMillis by playerSyncController.currentPositionMillis.collectAsState()
+    val totalDurationMillis by playerSyncController.totalDurationMillis.collectAsStateWithLifecycle()
+    val currentPositionMillis by playerSyncController.currentPositionMillis.collectAsStateWithLifecycle()
     //转换为秒 秒级变化才重组
     val currentPositionSeconds by derivedStateOf {
         currentPositionMillis / 1000

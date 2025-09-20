@@ -3,13 +3,13 @@ package top.sacz.bili.player.ui
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.openani.mediamp.compose.MediampPlayerSurface
 import top.sacz.bili.player.controller.PlayerSyncController
 import top.sacz.bili.player.controller.PlayerToolBarVisibility
@@ -29,9 +29,9 @@ import top.sacz.bili.player.ui.video.VideoScaffold
 @Composable
 fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier) {
     // 总时长
-    val totalDurationMillis by controller.totalDurationMillis.collectAsState()
+    val totalDurationMillis by controller.totalDurationMillis.collectAsStateWithLifecycle()
     // 当前播放进度
-    val currentPositionMillis by controller.currentPositionMillis.collectAsState()
+    val currentPositionMillis by controller.currentPositionMillis.collectAsStateWithLifecycle()
     // 添加一个用于跟踪Slider位置的状态
     val progressSliderState = rememberPlayerProgressSliderState(
         currentPositionMillis = {

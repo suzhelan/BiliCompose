@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +46,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.login.generated.resources.Res
 import bilicompose.biz.login.generated.resources.error_code_1002
@@ -108,9 +108,9 @@ fun SmsLoginContent(
     }
 
     //国家列表包含区号
-    val countryList by smsLoginViewModel.countryList.collectAsState()
+    val countryList by smsLoginViewModel.countryList.collectAsStateWithLifecycle()
     //请求申请极验的结果
-    val geetest by geeTestViewModel.captcha.collectAsState()
+    val geetest by geeTestViewModel.captcha.collectAsStateWithLifecycle()
     //获取国家区号
     LaunchedEffect(Unit) {
         smsLoginViewModel.getCountryCode()
@@ -128,9 +128,9 @@ fun SmsLoginContent(
         mutableStateOf(VerifyResult(null, "await", Clock.System.now().epochSeconds))
     }
     //验证码发送倒计时 60 ... 0
-    val countdown by smsLoginViewModel.sendCountdown.collectAsState()
+    val countdown by smsLoginViewModel.sendCountdown.collectAsStateWithLifecycle()
     //发送验证码结果
-    val sendSmsResult by smsLoginViewModel.sendSmsResult.collectAsState()
+    val sendSmsResult by smsLoginViewModel.sendSmsResult.collectAsStateWithLifecycle()
 
     val verifyPhoneNumber by remember {
         derivedStateOf {
@@ -201,7 +201,7 @@ fun SmsLoginContent(
         }
     }
 
-    val loginResult by smsLoginViewModel.loginResult.collectAsState()
+    val loginResult by smsLoginViewModel.loginResult.collectAsStateWithLifecycle()
     val loginErrorMessages = mapOf(
         1002 to stringResource(Res.string.error_code_1006),
         86203 to stringResource(Res.string.error_code_1007),
