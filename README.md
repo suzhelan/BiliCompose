@@ -2,9 +2,19 @@
 
 个人练习使用 持续维护中
 
+当前进度,更多内容可在您自行构建运行后查看,等待将来完成常用功能后会发布release,这或许不会很久
+
+在手机(Android)上
+<img width="1166" height="632" alt="IMG_20250920_202709" src="https://github.com/user-attachments/assets/3adb910d-13ea-41ce-b9d5-2e5197312e1a" />
+
+在Desktop(Win)上
+<img width="1589" height="1199" alt="image" src="https://github.com/user-attachments/assets/6c3c0497-2ab8-40d7-b7a1-727473c31e5a" />
+<img width="1992" height="1063" alt="image" src="https://github.com/user-attachments/assets/6fed6603-7840-48be-99d8-75dafc1ba926" />
+
+
 ### 已适配的平台
 - [x] Android
-- [ ] Win (尚未完全适配)
+- [x] Win (正在推进)
 - [ ] Mac
 - [ ] Ios
 - [ ] Linux
@@ -19,6 +29,7 @@
 - [x] 关注操作(关注,取关)分组添加设置删除等
 
 ### 等待实现的功能
+- [x] 我的页(基本指标已实现)
 - [x] 播放器(Android平台已基本实现播放功能,Desktop正在继续推进)
 - [ ] 搜索功能
 - [ ] 直播功能
@@ -31,7 +42,7 @@
 
 ### 正在解决的问题
 - [x] 播放器音频流和视频流无法声画同步(Android平台解决)
-- [ ] 解决Desktop Player的问题(Video Audio Sync)
+- [ ] 解决Desktop Player音频流和视频流同步的问题(VLC VideoUrl AudioUrl Sync)
 - [ ] 解决Desktop Webview无法使用的问题(现有方案KCEF在Desktop上无法正常运行) 受到影响的功能: 登录业务-极验人机验证
 
 ## 项目架构
