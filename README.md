@@ -4,10 +4,10 @@
 
 当前进度,更多内容可在您自行构建运行后查看,等待将来完成常用功能后会发布release,这或许不会很久
 
-在手机(Android)上
+在手机(Android)
 <img width="1166" height="632" alt="IMG_20250920_202709" src="https://github.com/user-attachments/assets/3adb910d-13ea-41ce-b9d5-2e5197312e1a" />
 
-在Desktop(Win)上
+在Desktop(Win)
 <img width="1589" height="1199" alt="image" src="https://github.com/user-attachments/assets/6c3c0497-2ab8-40d7-b7a1-727473c31e5a" />
 <img width="1992" height="1063" alt="image" src="https://github.com/user-attachments/assets/6fed6603-7840-48be-99d8-75dafc1ba926" />
 
@@ -42,7 +42,7 @@
 
 ### 正在解决的问题
 - [x] 播放器音频流和视频流无法声画同步(Android平台解决)
-- [ ] 解决Desktop Player音频流和视频流同步的问题(VLC VideoUrl AudioUrl Sync)
+- [ ] 解决Desktop Player音频流和视频流同步的问题(VLC VideoUrl AudioUrl Sync)，哔哩哔哩的视频使用的是音频链接+视频链接的视频流组合，目前VLCJ还没有找到可靠的方法来实现合并同步
 - [ ] 解决Desktop Webview无法使用的问题(现有方案KCEF在Desktop上无法正常运行) 受到影响的功能: 登录业务-极验人机验证
 
 ## 项目架构
@@ -51,7 +51,7 @@
 
 ### 技术栈 
 这些开源项目非常的伟大 他们为ComposeMultiplatform提供了不可代替的作用
-- 网络请求:[ctor](https://github.com/ktorio/ktor)
+- 网络请求:[ktor](https://github.com/ktorio/ktor)
 - 导航:封装+[jetbrains navigation](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation.html)
 - 视频播放:[mediamp](https://github.com/open-ani/mediamp)
 - 图片加载:[coil3](https://github.com/coil-kt/coil)
