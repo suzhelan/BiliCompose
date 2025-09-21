@@ -45,21 +45,20 @@ private fun PlayerUI(
     val scaffoldNavigator = rememberSupportingPaneScaffoldNavigator(
 
     )
-
     SupportingPaneScaffold(
         directive = scaffoldNavigator.scaffoldDirective,
         scaffoldState = scaffoldNavigator.scaffoldState,
         mainPane = {
-            if (scaffoldNavigator.scaffoldValue[SupportingPaneScaffoldRole.Supporting] == PaneAdaptedValue.Hidden) {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    //播放器
-                    MediaUI(playerParams, viewModel)
-                    VideoInfoUI(playerParams, viewModel)
-                }
-            } else {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                //播放器
                 MediaUI(playerParams, viewModel)
+                if (scaffoldNavigator.scaffoldValue[SupportingPaneScaffoldRole.Supporting] == PaneAdaptedValue.Hidden) {
+                    VideoInfoUI(playerParams, viewModel)
+                } else {
+                    viewModel.controller.isFillMaxSize = true
+                }
             }
         },
         supportingPane = {
@@ -71,6 +70,7 @@ private fun PlayerUI(
         },
         extraPane = {},
     )
+
 
 }
 

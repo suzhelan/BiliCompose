@@ -36,6 +36,8 @@ class PlayerSyncController(
     var isFullScreen by mutableStateOf(false)
         private set
 
+    var isFillMaxSize by mutableStateOf(false)
+
     val playbackState: StateFlow<PlaybackState> get() = videoPlayer.playbackState
 
     val isPlaying: Boolean get() = videoPlayer.playbackState.value.isPlaying

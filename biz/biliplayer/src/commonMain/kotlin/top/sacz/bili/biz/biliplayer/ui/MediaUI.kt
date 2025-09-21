@@ -52,6 +52,7 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
                 vm.controller
             }
             val isFullScreen = playerController.isFullScreen
+            val isFillMaxSize = playerController.isFillMaxSize
             playerController.onBack = {
                 if (isFullScreen) {
                     playerController.reversalFullScreen()
@@ -62,7 +63,7 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
             vm.doPlayer(playerController)
             VideoPlayer(
                 controller = playerController,
-                modifier = if (isFullScreen) Modifier.fillMaxSize()
+                modifier = if (isFullScreen || isFillMaxSize) Modifier.fillMaxSize()
                 else Modifier.fillMaxWidth().aspectRatio(16f / 9f)
             )
             ProgressReport(playerParams, video, vm, playerController)
