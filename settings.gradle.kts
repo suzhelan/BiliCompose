@@ -43,3 +43,4 @@ include(
     ":biz:login",
     ":biz:recvids"
 )
+include(":app:android", ":app:desktop")
