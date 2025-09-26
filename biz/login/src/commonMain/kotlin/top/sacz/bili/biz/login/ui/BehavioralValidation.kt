@@ -12,27 +12,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import bilicompose.biz.login.generated.resources.Res
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import top.sacz.bili.api.BiliResponse
 import top.sacz.bili.biz.login.js.StatusJsMessageHandler
 import top.sacz.bili.biz.login.model.Captcha
 import top.sacz.bili.biz.login.model.VerifyResult
+import top.sacz.bili.biz.login.viewmodel.BehavioralViewModel
 
 /**
  * 进行行为验证的Dialog
@@ -65,12 +60,12 @@ fun BehavioralValidationDialog(
 fun BehavioralValidation(
     response: BiliResponse<Captcha>,
     verifyCallback: (VerifyResult) -> Unit,
+    vm : BehavioralViewModel = viewModel { BehavioralViewModel() } ,
 ) {
-    val htmlDataState by produceState(initialValue = "await") {
-        value = withContext(Dispatchers.IO) {
-            return@withContext Res.readBytes("files/geetest-lite.html").decodeToString()
-        }
+    LaunchedEffect(Unit){
+        vm.loadHtmlData()
     }
+    val htmlDataState by vm.htmlData.collectAsStateWithLifecycle()
     //从html文件/字符串渲染
     val webViewState = rememberWebViewStateWithHTMLData(htmlDataState)
     //导航控制 可以调用js方法 以及页面的回退等常规操作
@@ -81,23 +76,12 @@ fun BehavioralValidation(
         val handler = StatusJsMessageHandler(verifyCallback)
         jsBridge.register(handler)
     }
-    // 新增状态锁
-    var hasExecuted by remember { mutableStateOf(false) }
+
     LaunchedEffect(response, webViewState.loadingState) {
-        if (response is BiliResponse.Success
-            && webViewState.loadingState is LoadingState.Finished
-            && !hasExecuted) {
+        if (response is BiliResponse.Success && webViewState.loadingState is LoadingState.Finished) {
             val gt = response.data.geetest.gt
             val challenge = response.data.geetest.challenge
-            navigator.evaluateJavaScript("startVerify('$gt','$challenge')") {
-                // 执行完成后解锁（根据业务需求决定是否需要）
-                // hasExecuted = false
-            }
-            hasExecuted = true // 标记已执行
-        }
-        // 当依赖项失效时重置状态
-        if (response !is BiliResponse.Success) {
-            hasExecuted = false
+            navigator.evaluateJavaScript("startVerify('$gt','$challenge')")
         }
     }
 
@@ -107,11 +91,13 @@ fun BehavioralValidation(
             top = 10.dp
         ).wrapContentWidth(align = Alignment.CenterHorizontally)
     )
-    //请求到了 进行展示webview以进行验证
-    WebView(
-        navigator = navigator,
-        webViewJsBridge = jsBridge,
-        state = webViewState,
-        modifier = Modifier.fillMaxSize()
-    )
+    if (htmlDataState.length > 64) {
+        //请求到了 进行展示webview以进行验证
+        WebView(
+            navigator = navigator,
+            webViewJsBridge = jsBridge,
+            state = webViewState,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
 }

@@ -7,7 +7,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.compose.webview.multiplatform)
             implementation(libs.coil.network.ktor3)
             implementation(libs.coil.compose)
             implementation(libs.ktor.client.core)
@@ -17,6 +16,7 @@ kotlin {
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.qrose)
+            implementation(libs.compose.webview.multiplatform)
 
             implementation(projects.shared.auth)
             implementation(projects.shared.navigation)
@@ -26,4 +26,17 @@ kotlin {
         }
     }
 
+}
+
+compose.desktop {
+    application {
+
+        jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
+        jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED")
+
+        if (System.getProperty("os.name").contains("Mac")) {
+            jvmArgs("--add-opens", "java.desktop/sun.lwawt=ALL-UNNAMED")
+            jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
+        }
+    }
 }

@@ -86,8 +86,8 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 @Composable
 fun SmsLoginContent(
-    smsLoginViewModel: SmsLoginViewModel = viewModel(),
-    geeTestViewModel: GeeTestViewModel = viewModel(),
+    smsLoginViewModel: SmsLoginViewModel = viewModel { SmsLoginViewModel()},
+    geeTestViewModel: GeeTestViewModel = viewModel{  GeeTestViewModel()},
     showToast: (String) -> Unit = {}
 ) {
     //获取最近的导航 登录成功后pop当前页面

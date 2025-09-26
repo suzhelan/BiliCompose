@@ -1,15 +1,28 @@
 package top.sacz.bili
 
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
+import androidx.compose.runtime.Composable
+import top.sacz.bili.biz.login.KCEFInit
+import top.sacz.bili.biz.login.desktopDestroyed
 
 /**
  * Desktop平台的初始化逻辑
  */
-class AppLifecycleDelegate() : DefaultLifecycleObserver {
+object DesktopAppLifecycleDelegate  {
 
-    override fun onCreate(owner: LifecycleOwner) {
+    /**
+     * Desktop App创建时调用
+     */
+    @Composable
+    fun onCreate() {
+        KCEFInit()
+    }
 
+
+    /**
+     * Desktop App销毁时调用
+     */
+    fun onDestroy() {
+        desktopDestroyed()
     }
 
 }

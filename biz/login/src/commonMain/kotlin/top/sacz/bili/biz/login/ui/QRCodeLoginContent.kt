@@ -47,7 +47,7 @@ import top.sacz.bili.shared.navigation.currentOrThrow
  * 2. 用qrcode轮询二维码状态
  */
 @Composable
-fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel()) {
+fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel { QRCodeLoginViewModel() }) {
     //获取最近的导航 登录成功后pop当前页面
     val getQRCode by viewModel.qrCode.collectAsStateWithLifecycle()
     val sendCountdown by viewModel.sendCountdown.collectAsStateWithLifecycle()
