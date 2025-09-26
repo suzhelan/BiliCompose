@@ -69,5 +69,4 @@ interface BiliScreenProvider
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BiliBackHandler(enabled: Boolean, onBack: () -> Unit) {
-
 }

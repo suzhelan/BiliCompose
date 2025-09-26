@@ -15,7 +15,9 @@ import top.sacz.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.sacz.bili.player.platform.BiliLocalContext
 import top.sacz.bili.shared.common.ui.CommonComposeUI
 import top.sacz.bili.shared.common.ui.DefaultViewModel
+import top.sacz.bili.shared.common.ui.ScreenSizeCalculation
 import top.sacz.bili.shared.common.ui.dialog.DialogHandler
+import top.sacz.bili.shared.common.ui.isPhone
 
 
 @Composable
@@ -42,34 +44,42 @@ private fun PlayerUI(
     playerParams: PlayerParams,
     viewModel: VideoPlayerViewModel,
 ) {
-    val scaffoldNavigator = rememberSupportingPaneScaffoldNavigator(
 
-    )
-    SupportingPaneScaffold(
-        directive = scaffoldNavigator.scaffoldDirective,
-        scaffoldState = scaffoldNavigator.scaffoldState,
-        mainPane = {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                //播放器
+    ScreenSizeCalculation(modifier = Modifier.fillMaxSize()) { screenType ->
+        if (screenType.isPhone()) {
+            Column(modifier = Modifier.fillMaxSize()) {
                 MediaUI(playerParams, viewModel)
-                if (scaffoldNavigator.scaffoldValue[SupportingPaneScaffoldRole.Supporting] == PaneAdaptedValue.Hidden) {
-                    VideoInfoUI(playerParams, viewModel)
-                } else {
-                    viewModel.controller.isFillMaxSize = true
-                }
-            }
-        },
-        supportingPane = {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
                 VideoInfoUI(playerParams, viewModel)
             }
-        },
-        extraPane = {},
-    )
+        } else {
+            val scaffoldNavigator = rememberSupportingPaneScaffoldNavigator()
+            SupportingPaneScaffold(
+                directive = scaffoldNavigator.scaffoldDirective,
+                scaffoldState = scaffoldNavigator.scaffoldState,
+                modifier = Modifier.fillMaxSize(),
+                mainPane = {
+                    Column(
+                        modifier = Modifier
+                    ) {
+                        //播放器
+                        MediaUI(playerParams, viewModel)
+                        if (scaffoldNavigator.scaffoldValue[SupportingPaneScaffoldRole.Supporting] == PaneAdaptedValue.Hidden) {
+                            VideoInfoUI(playerParams, viewModel)
+                        } else {
+                            viewModel.controller.isFillMaxSize = true
+                        }
+                    }
+                },
+                supportingPane = {
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        VideoInfoUI(playerParams, viewModel)
+                    }
+                },
+            )
+        }
+    }
 
 
 }
