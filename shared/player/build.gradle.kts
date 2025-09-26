@@ -10,7 +10,7 @@ kotlin {
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.lifecycle.runtime.compose)
             implementation(libs.kotlinx.serialization.json)
-            implementation(mediampLibs.mediamp.all)
+            implementation(libs.mediamp.all)
         }
 
         sourceSets.androidMain.dependencies {

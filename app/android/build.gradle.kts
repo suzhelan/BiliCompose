@@ -51,6 +51,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.compose.material3)
-    implementation(projects.composeApp)
+    implementation(projects.bili)
     implementation(projects.shared.storage)
 }

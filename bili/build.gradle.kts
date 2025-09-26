@@ -3,14 +3,7 @@ plugins {
 }
 
 kotlin {
-
     sourceSets {
-
-        androidMain.dependencies {
-            implementation(projects.shared.storage)
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-        }
         commonMain.dependencies {
             //由compose.*提供的依赖不用写,由compose-plugin.library插件处理
             //标准依赖
@@ -22,6 +15,7 @@ kotlin {
             implementation(projects.biz.biliplayer)
             implementation(projects.biz.recvids)
             //共享通用模块
+            implementation(projects.shared.storage)
             implementation(projects.shared.player)
             implementation(projects.shared.api)
             implementation(projects.shared.navigation)

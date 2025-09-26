@@ -19,15 +19,10 @@ dependencyResolutionManagement {
         //webview
         maven("https://jogamp.org/deployment/maven")
     }
-    versionCatalogs {
-        create("mediampLibs") {
-            from("org.openani.mediamp:catalog:0.0.29")
-        }
-    }
 }
 includeBuild("build-plugin")
 
-include(":composeApp")
+include(":bili")
 include(
     ":shared:api",
     ":shared:storage",
