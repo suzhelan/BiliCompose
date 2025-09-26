@@ -1,14 +1,10 @@
 package top.sacz.bili.biz.biliplayer.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
-import androidx.compose.material3.adaptive.layout.SupportingPaneScaffold
-import androidx.compose.material3.adaptive.layout.SupportingPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.rememberSupportingPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
@@ -48,35 +44,19 @@ private fun PlayerUI(
 
     ScreenSizeCalculation(modifier = Modifier.fillMaxSize()) { screenType ->
         if (screenType.isPhone()) {
+            viewModel.controller.isFillMaxSize = false
             Column(modifier = Modifier.fillMaxSize()) {
                 MediaUI(playerParams, viewModel)
                 VideoInfoUI(playerParams, viewModel)
             }
         } else {
-            val scaffoldNavigator = rememberSupportingPaneScaffoldNavigator()
-            val isSupportingPaneHidden =
-                scaffoldNavigator.scaffoldValue[SupportingPaneScaffoldRole.Supporting] == PaneAdaptedValue.Hidden
-            LaunchedEffect(isSupportingPaneHidden) {
-                viewModel.controller.isFillMaxSize = !isSupportingPaneHidden
+            viewModel.controller.isFillMaxSize = true
+            Row(modifier = Modifier.fillMaxSize()){
+                MediaUI(playerParams, viewModel, modifier = Modifier.weight(2f))
+                Column(modifier = Modifier.weight(1f)){
+                    VideoInfoUI(playerParams, viewModel)
+                }
             }
-            SupportingPaneScaffold(
-                directive = scaffoldNavigator.scaffoldDirective,
-                scaffoldState = scaffoldNavigator.scaffoldState,
-                modifier = Modifier.fillMaxSize(),
-                mainPane = {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        MediaUI(playerParams, viewModel)
-                        if (isSupportingPaneHidden) {
-                            VideoInfoUI(playerParams, viewModel)
-                        }
-                    }
-                },
-                supportingPane = {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        VideoInfoUI(playerParams, viewModel)
-                    }
-                },
-            )
         }
     }
 

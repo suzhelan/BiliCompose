@@ -31,7 +31,7 @@ import top.sacz.bili.shared.navigation.currentOrThrow
 
 
 @Composable
-fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
+fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel,modifier: Modifier = Modifier) {
     val navigator = LocalNavigation.currentOrThrow
     val videoUrlData by vm.videoUrlData.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
@@ -63,8 +63,8 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel) {
             vm.doPlayer(playerController)
             VideoPlayer(
                 controller = playerController,
-                modifier = if (isFullScreen || isFillMaxSize) Modifier.fillMaxSize()
-                else Modifier.fillMaxWidth().aspectRatio(16f / 9f)
+                modifier = if (isFullScreen || isFillMaxSize) modifier.fillMaxSize()
+                else modifier.fillMaxWidth().aspectRatio(16f / 9f)
             )
             ProgressReport(playerParams, video, vm, playerController)
             BiliBackHandler(isFullScreen) {
