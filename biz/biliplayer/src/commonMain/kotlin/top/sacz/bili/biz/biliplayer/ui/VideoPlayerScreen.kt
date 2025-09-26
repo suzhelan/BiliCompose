@@ -8,6 +8,7 @@ import androidx.compose.material3.adaptive.layout.SupportingPaneScaffold
 import androidx.compose.material3.adaptive.layout.SupportingPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.rememberSupportingPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.sacz.bili.biz.biliplayer.entity.PlayerParams
@@ -53,27 +54,25 @@ private fun PlayerUI(
             }
         } else {
             val scaffoldNavigator = rememberSupportingPaneScaffoldNavigator()
+            val isSupportingPaneHidden =
+                scaffoldNavigator.scaffoldValue[SupportingPaneScaffoldRole.Supporting] == PaneAdaptedValue.Hidden
+            LaunchedEffect(isSupportingPaneHidden) {
+                viewModel.controller.isFillMaxSize = !isSupportingPaneHidden
+            }
             SupportingPaneScaffold(
                 directive = scaffoldNavigator.scaffoldDirective,
                 scaffoldState = scaffoldNavigator.scaffoldState,
                 modifier = Modifier.fillMaxSize(),
                 mainPane = {
-                    Column(
-                        modifier = Modifier
-                    ) {
-                        //播放器
+                    Column(modifier = Modifier.fillMaxSize()) {
                         MediaUI(playerParams, viewModel)
-                        if (scaffoldNavigator.scaffoldValue[SupportingPaneScaffoldRole.Supporting] == PaneAdaptedValue.Hidden) {
+                        if (isSupportingPaneHidden) {
                             VideoInfoUI(playerParams, viewModel)
-                        } else {
-                            viewModel.controller.isFillMaxSize = true
                         }
                     }
                 },
                 supportingPane = {
-                    Column(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         VideoInfoUI(playerParams, viewModel)
                     }
                 },
