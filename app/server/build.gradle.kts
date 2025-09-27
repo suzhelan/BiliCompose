@@ -4,10 +4,10 @@ plugins {
     application
 }
 
-group = "top.sacz.bili"
+group = "top.suzhelan.bili"
 version = "1.0.0"
 application {
-    mainClass.set("top.sacz.bili.ApplicationKt")
+    mainClass.set("top.suzhelan.bili.ApplicationKt")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=${extra["io.ktor.development"] ?: "false"}")
 }
 

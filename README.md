@@ -97,6 +97,6 @@
  - Entity 需要使用到的请求或交互数据实体
 
  2.想要构建一个页面(screen/activity/page)需要完成以下三步
- - 创建[XXXScreen](./biz/home/src/commonMain/kotlin/top/sacz/bili/biz/home/HomeScreen.kt)方法
+ - 创建[XXXScreen](./biz/home/src/commonMain/kotlin/top/suzhelan/bili/biz/home/HomeScreen.kt)方法
  - 在[Navigation]( ./shared/navigation)中SharedScreen声明路由
  - 在[RouteScreenRegistry](./composeApp/src/commonMain/kotlin/top/sacz/bili/route/RouteScreenRegistry.kt)注册路由和Screen

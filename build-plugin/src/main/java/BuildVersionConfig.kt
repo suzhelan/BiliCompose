@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  ＊*/
 object BuildVersionConfig {
 
-    const val APPLICATION_ID = "top.sacz.bili"
+    const val APPLICATION_ID = "top.suzhelan.bili"
     val JVM_TARGET = JvmTarget.JVM_17
     val JAVA_VERSION = JavaVersion.VERSION_17
     const val KOTLIN = "17"

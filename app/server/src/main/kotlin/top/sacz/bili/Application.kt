@@ -1,4 +1,4 @@
-package top.sacz.bili
+package top.suzhelan.bili
 
 import io.ktor.server.application.*
 import io.ktor.server.engine.*

@@ -15,7 +15,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "top.sacz.bili.MainKt"
+        mainClass = "top.suzhelan.bili.MainKt"
 
         nativeDistributions {
 

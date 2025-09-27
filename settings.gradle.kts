@@ -36,6 +36,8 @@ include(
     ":biz:biliplayer",
     ":biz:user",
     ":biz:login",
-    ":biz:recvids"
+    ":biz:recvids",
+    ":biz:comment"
 )
 include(":app:android", ":app:desktop")
+include(":biz:comment")
