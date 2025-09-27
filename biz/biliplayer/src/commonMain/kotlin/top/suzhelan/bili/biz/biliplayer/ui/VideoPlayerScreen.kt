@@ -49,11 +49,9 @@ private fun PlayerUI(
             }
         } else {
             viewModel.controller.isFillMaxSize = true
-            Row(modifier = Modifier.fillMaxSize()){
+            Row(modifier = Modifier.fillMaxSize()) {
                 MediaUI(playerParams, viewModel, modifier = Modifier.weight(2f))
-                Column(modifier = Modifier.weight(1f)){
-                    VideoInfoUI(playerParams, viewModel)
-                }
+                VideoInfoUI(playerParams, viewModel, modifier = Modifier.weight(1f))
             }
         }
     }

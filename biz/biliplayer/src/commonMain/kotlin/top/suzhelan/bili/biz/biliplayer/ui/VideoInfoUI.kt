@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -32,11 +34,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +54,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.launch
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.isLoading
 import top.suzhelan.bili.api.isSuccess
@@ -60,6 +66,8 @@ import top.suzhelan.bili.biz.biliplayer.ui.item.SimpleVideoCard
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.biz.user.entity.UserCard
 import top.suzhelan.bili.biz.user.viewmodel.UserViewModel
+import top.suzhelan.bili.comment.CommentContent
+import top.suzhelan.bili.comment.entity.CommentSourceType
 import top.suzhelan.bili.shared.common.ext.dismiss
 import top.suzhelan.bili.shared.common.ext.show
 import top.suzhelan.bili.shared.common.ui.ProvideContentColor
@@ -76,7 +84,7 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
 @Composable
-fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel) {
+fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel,modifier: Modifier = Modifier) = Column(modifier = modifier) {
     val vmVideoInfo by viewModel.videoDetailsInfo.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.getVideoDetailsInfo(
@@ -89,10 +97,47 @@ fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel) {
             Text(text = "加载中...", modifier = Modifier.fillMaxWidth().shimmerEffect())
         }
         onSuccess { data ->
-            VideoDetailsUI(videoInfo = data, viewModel = viewModel)
+            TabPage(videoInfo = data, viewModel = viewModel)
         }
     }
 }
+@Composable
+private fun TabPage(videoInfo: VideoInfo,
+                    viewModel: VideoPlayerViewModel) {
+    val tabs = listOf(
+        "简介",
+        "评论",
+    )
+    val scoop = rememberCoroutineScope()
+    val pagerState = rememberPagerState(pageCount = { tabs.size }, initialPage = 0)
+    SecondaryTabRow(
+        selectedTabIndex = pagerState.currentPage,
+    ) {
+        tabs.forEachIndexed { index, title ->
+            Tab(
+                text = { Text(text = title) },
+                selected = pagerState.currentPage == index,
+                onClick = {
+                    scoop.launch { pagerState.animateScrollToPage(index) }
+                }
+            )
+        }
+    }
+    HorizontalPager(
+        state = pagerState,
+    ) { page ->
+        when (page) {
+            0 -> {
+                VideoDetailsUI(videoInfo = videoInfo, viewModel = viewModel)
+            }
+            1 -> {
+                CommentContent(oid = videoInfo.aid.toString(), type = CommentSourceType.Video)
+            }
+        }
+    }
+
+}
+
 
 @Composable
 private fun VideoDetailsUI(
@@ -101,7 +146,7 @@ private fun VideoDetailsUI(
     userViewModel: UserViewModel = viewModel {
         UserViewModel()
     },
-) {
+) = Column( modifier = Modifier.fillMaxWidth()) {
     val userCard by userViewModel.userCard.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         userViewModel.getUserInfo(mid = videoInfo.owner.mid)
