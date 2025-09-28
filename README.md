@@ -60,7 +60,8 @@
 - 登录时的二维码生成:[qrose](https://github.com/alexzhirkevich/qrose)
 - 加解密编码(后续需要使用更加活跃的工具):[krypto](https://mvnrepository.com/artifact/com.soywiz.korlibs.krypto/krypto)
 - WebView+极验人机验证:[geetest](./biz/login/src/commonMain/composeResources/files/geetest-lite.html)
-- 跨平台分页加载(google已经在9月更新中开始支持了Cmp,后续需更换):[paging](https://github.com/cashapp/multiplatform-paging)
+- 跨平台分页加载:
+  ~~[cashapp-paging](https://github.com/cashapp/multiplatform-paging)~~,[google-paging-compose](https://developer.android.com/jetpack/androidx/releases/paging?hl=zh-cn#3.4.0-alpha04)
 - IO读写:[okio](https://github.com/square/okio)
 - 多平台日志读写:[napier](https://github.com/AAkira/Napier)
 - WebView:[kevinnzou:compose-webview-multiplatform](https://github.com/KevinnZou/compose-webview-multiplatform)

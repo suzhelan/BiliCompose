@@ -20,7 +20,7 @@ ktor = "3.3.0"
 logback = "1.5.18"
 navigationCompose = "2.9.0"
 okio = "3.16.0"
-pagingComposeCommon = "3.3.0-alpha02-0.5.1"
+paging = "3.4.0-alpha04"
 qrose = "1.0.1"
 sonner = "0.3.8"
 
@@ -71,7 +71,7 @@ krypto = { module = "com.soywiz.korlibs.krypto:krypto", version.ref = "krypto" }
 #约束布局
 constraintlayout-compose-multiplatform = { module = "tech.annexflow.compose:constraintlayout-compose-multiplatform", version.ref = "constraintlayoutComposeMultiplatform" }
 #跨平台分页加载
-paging-compose-common = { module = "app.cash.paging:paging-compose-common", version.ref = "pagingComposeCommon" }
+paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 #toast
 sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
 

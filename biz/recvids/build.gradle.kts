@@ -8,7 +8,7 @@ kotlin {
     sourceSets {
 
         commonMain.dependencies {
-            implementation(libs.paging.compose.common)
+            implementation(libs.paging.compose)
             implementation(libs.coil.network.ktor3)
             implementation(libs.coil.compose)
             implementation(libs.ktor.client.core)

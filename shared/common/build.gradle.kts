@@ -10,7 +10,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.animation)
             implementation(compose.animationGraphics)
-            implementation(libs.paging.compose.common)
+            implementation(libs.paging.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.runtime.compose)
