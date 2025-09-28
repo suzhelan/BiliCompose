@@ -40,4 +40,3 @@ include(
     ":biz:comment"
 )
 include(":app:android", ":app:desktop")
-include(":biz:comment")

@@ -16,13 +16,9 @@ kotlin {
         namespace = "${BuildVersionConfig.APPLICATION_ID}.${project.name}"
         compileSdk = BuildVersionConfig.COMPILE_SDK
         minSdk = BuildVersionConfig.MIN_SDK
-        withJava() // enable java compilation support
+        withJava()
         androidResources {
             enable = true
-        }
-        withHostTestBuilder {}.configure {}
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
         }
         compilations.configureEach {
             compileTaskProvider.configure {
