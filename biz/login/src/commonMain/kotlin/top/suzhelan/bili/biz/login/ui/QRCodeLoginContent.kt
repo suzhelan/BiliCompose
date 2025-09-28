@@ -45,6 +45,7 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
  * 扫码登录组件 比较简单
  * 1. 获取二维码和qrcodeKey
  * 2. 用qrcode轮询二维码状态
+ * 技术难点只有轮询时间校准和任务取消
  */
 @Composable
 fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel { QRCodeLoginViewModel() }) {
@@ -53,13 +54,12 @@ fun QRCodeLoginContent(viewModel: QRCodeLoginViewModel = viewModel { QRCodeLogin
     val sendCountdown by viewModel.sendCountdown.collectAsStateWithLifecycle()
     val queryMessage by viewModel.queryMessage.collectAsStateWithLifecycle()
     val isShowLoginSuccessDialog by viewModel.isShowLoginSuccessDialog.collectAsStateWithLifecycle()
-    LaunchedEffect(Unit) {
-        viewModel.getQRCode()
-    }
     if (isShowLoginSuccessDialog) {
         LoginSuccessDialog()
     }
-
+    LaunchedEffect(Unit) {
+        viewModel.getQRCode()
+    }
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

@@ -111,6 +111,7 @@ private fun VideoPage(index: Int) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Tab(pagerState: PagerState) {
     val scoop = rememberCoroutineScope()

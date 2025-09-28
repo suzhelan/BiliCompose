@@ -4,7 +4,7 @@ androidx-activityCompose = "1.11.0"
 androidx-lifecycle = "2.9.4"
 
 coil = "3.3.0"
-compose-multiplatform = "1.10.0-alpha01"
+compose-multiplatform = "1.9.0"
 composeWebviewMultiplatform = "2.0.3"
 constraintlayoutComposeMultiplatform = "0.6.1"
 fastkv = "3.0.1"

@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-
 import kotlinx.coroutines.launch
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.currentOrThrow
@@ -36,8 +35,7 @@ private enum class Destination(val label: String) {
 fun LoginScreen() {
     val navigator = LocalNavigation.currentOrThrow
     val scope = rememberCoroutineScope()
-    val pagerState =
-        rememberPagerState(pageCount = { Destination.entries.size }, initialPage = 0)
+    val pagerState = rememberPagerState(pageCount = { Destination.entries.size }, initialPage = 0)
     val snackbarHostState = remember { SnackbarHostState() }
     //登录界面内容
     Scaffold(
@@ -86,15 +84,22 @@ fun LoginScreen() {
                 }
             }
 
-            HorizontalPager(state = pagerState) { page ->
+            HorizontalPager(
+                state = pagerState
+            ) { page ->
                 when (page) {
-                    0 -> SmsLoginContent { message ->
-                        scope.launch {
-                            snackbarHostState.showSnackbar(message)
+                    0 -> {
+                        SmsLoginContent { message ->
+                            scope.launch {
+                                snackbarHostState.showSnackbar(message)
+                            }
+
                         }
                     }
 
-                    1 -> QRCodeLoginContent()
+                    1 -> {
+                        QRCodeLoginContent()
+                    }
                 }
             }
         }

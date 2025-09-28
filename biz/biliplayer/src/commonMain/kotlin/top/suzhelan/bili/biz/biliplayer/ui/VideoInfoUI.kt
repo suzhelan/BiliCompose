@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.icons.outlined.Toll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -101,6 +102,8 @@ fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel,modi
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TabPage(videoInfo: VideoInfo,
                     viewModel: VideoPlayerViewModel) {
