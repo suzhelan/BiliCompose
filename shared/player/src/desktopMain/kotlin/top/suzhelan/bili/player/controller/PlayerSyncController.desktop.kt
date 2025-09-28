@@ -12,9 +12,19 @@ actual object PlayerMediaDataUtils {
         audioUrl: String
     ) {
         val vlcPlayer = mediampPlayer.impl as EmbeddedMediaPlayer
-        vlcPlayer.media().prepare(
+        vlcPlayer.media().play(
             videoUrl,
-            "input-slave=$audioUrl"  // 直接指定外部音频作为从属输入
+            //播放参数
+            *buildList {
+                //音频流合并
+                add("input-slave=$audioUrl")
+                //请求头
+                /*add("http-user-agent=${PlayerSyncController.headers["User-Agent"]}")
+                add("http-referrer=${PlayerSyncController.headers["Referer"]}")*/
+                for ((key, value) in PlayerSyncController.headers) {
+                    add("http-header=$key:$value")
+                }
+            }.toTypedArray()
         )
         /*vlcPlayer.media().prepare(
             videoUrl,

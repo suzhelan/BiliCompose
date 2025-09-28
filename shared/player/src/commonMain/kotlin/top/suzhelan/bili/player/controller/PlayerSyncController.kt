@@ -68,6 +68,9 @@ class PlayerSyncController(
         )
     }
 
+    /**
+     * 播放视频
+     */
     fun play(videoUrl: String, audioUrl: String) {
         PlayerMediaDataUtils.doLoadMediaData(videoPlayer, videoUrl, audioUrl)
     }
