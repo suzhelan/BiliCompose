@@ -16,6 +16,9 @@ kotlin {
         sourceSets.androidMain.dependencies {
             implementation(libs.androidx.media3.exoplayer)
         }
+        desktopMain.dependencies {
+            implementation(libs.vlcj)
+        }
 
     }
 

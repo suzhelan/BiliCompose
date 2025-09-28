@@ -1,11 +1,9 @@
 package top.suzhelan.bili.player.controller
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
-import org.openani.mediamp.source.UriMediaData
 import top.suzhelan.bili.player.platform.BiliContext
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
+
 
 actual object PlayerMediaDataUtils {
     actual fun doLoadMediaData(
@@ -13,12 +11,18 @@ actual object PlayerMediaDataUtils {
         videoUrl: String,
         audioUrl: String
     ) {
-        //协程
-        CoroutineScope(Dispatchers.IO).launch {
-//            val url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-            mediampPlayer.setMediaData(UriMediaData(uri = videoUrl, headers = PlayerSyncController.headers))
-            mediampPlayer.resume()
-        }
+        val vlcPlayer = mediampPlayer.impl as EmbeddedMediaPlayer
+        vlcPlayer.media().prepare(
+            videoUrl,
+            "input-slave=$audioUrl"  // 直接指定外部音频作为从属输入
+        )
+        /*vlcPlayer.media().prepare(
+            videoUrl,
+            "input-slave=$audioUrl",
+            ":network-caching=1000",       // 缓冲1秒减少抖动
+            ":clock-jitter=0",             // 关闭时钟抖动补偿
+            ":clock-synchronization=exact" // 强制精确同步模式
+        )*/
     }
 
     actual fun setFullScreen(context: BiliContext, fullScreen: Boolean) {
