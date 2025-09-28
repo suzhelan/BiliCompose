@@ -45,6 +45,9 @@ android {
         sourceCompatibility = BuildVersionConfig.JAVA_VERSION
         targetCompatibility = BuildVersionConfig.JAVA_VERSION
     }
+    kotlin {
+        jvmToolchain(BuildVersionConfig.KOTLIN.toInt())
+    }
 }
 
 dependencies {
