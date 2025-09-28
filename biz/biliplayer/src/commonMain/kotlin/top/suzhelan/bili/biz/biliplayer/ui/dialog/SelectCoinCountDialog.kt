@@ -25,7 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
 
-
+/**
+ * 选择投币数量时间轮Dialog
+ */
 @Composable
 fun SelectCoinCountDialog(
     onSelect: (count: Int) -> Unit,

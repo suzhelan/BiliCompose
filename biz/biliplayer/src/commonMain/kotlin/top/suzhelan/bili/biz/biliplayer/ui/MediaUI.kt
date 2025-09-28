@@ -10,7 +10,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -22,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import top.suzhelan.bili.api.registerStatusListener
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
+import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.ui.VideoPlayer
@@ -48,9 +48,7 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel,modifier: Modif
     videoUrlData.registerStatusListener {
         onSuccess { video ->
             //获取质量最好的音频
-            val playerController = remember {
-                vm.controller
-            }
+            val playerController = rememberPlayerController(vm)
             val isFullScreen = playerController.isFullScreen
             val isFillMaxSize = playerController.isFillMaxSize
             playerController.onBack = {

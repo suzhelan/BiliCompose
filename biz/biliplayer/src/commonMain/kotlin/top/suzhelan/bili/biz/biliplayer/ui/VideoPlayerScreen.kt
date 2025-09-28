@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
+import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.player.platform.BiliLocalContext
 import top.suzhelan.bili.shared.common.ui.CommonComposeUI
@@ -39,19 +40,23 @@ private fun PlayerUI(
     playerParams: PlayerParams,
     viewModel: VideoPlayerViewModel,
 ) {
-
+    val controller = rememberPlayerController(viewModel)
     ScreenSizeCalculation(modifier = Modifier.fillMaxSize()) { screenType ->
         if (screenType.isPhone()) {
             viewModel.controller.isFillMaxSize = false
             Column(modifier = Modifier.fillMaxSize()) {
                 MediaUI(playerParams, viewModel)
-                VideoInfoUI(playerParams, viewModel)
+                if (!controller.isFullScreen) {
+                    VideoInfoUI(playerParams, viewModel)
+                }
             }
         } else {
             viewModel.controller.isFillMaxSize = true
             Row(modifier = Modifier.fillMaxSize()) {
                 MediaUI(playerParams, viewModel, modifier = Modifier.weight(2f))
-                VideoInfoUI(playerParams, viewModel, modifier = Modifier.weight(1f))
+                if (!controller.isFullScreen) {
+                    VideoInfoUI(playerParams, viewModel, modifier = Modifier.weight(1f))
+                }
             }
         }
     }

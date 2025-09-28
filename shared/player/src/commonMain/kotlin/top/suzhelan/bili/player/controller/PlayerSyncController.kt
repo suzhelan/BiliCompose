@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState
-import org.openani.mediamp.compose.rememberMediampPlayer
 import top.suzhelan.bili.player.platform.BiliContext
 import top.suzhelan.bili.player.platform.BiliLocalContext
 
@@ -188,7 +187,6 @@ expect object PlayerMediaDataUtils {
 fun rememberPlayerSyncController(
 ): PlayerSyncController {
     val context = BiliLocalContext.current
-    val videoPlayer = rememberMediampPlayer()
     val controller = remember { PlayerSyncController(context) }
     return controller
 }
