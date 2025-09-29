@@ -14,7 +14,6 @@ class CommentViewModel : BaseViewModel() {
                 page = 1,
                 pageSize = 10
             )
-            println(response)
         }
     }
 }

@@ -27,8 +27,7 @@ sonner = "0.3.8"
 kotlinx-serialization = "1.9.0"
 androidx-media3 = "1.8.0"
 
-#noinspection NewerVersionAvailable
-vlcj = "4.8.4"
+vlcj = "4.11.0"
 material3 = "1.4.0"
 
 [libraries]

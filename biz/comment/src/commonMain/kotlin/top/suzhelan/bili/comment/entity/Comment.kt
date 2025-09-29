@@ -22,7 +22,7 @@ data class Comment(
     @SerialName("ctime")
     val ctime: Int, // 1759050606
     @SerialName("dialog")
-    val dialog: Int, // 0
+    val dialog: Long, // 0
     @SerialName("dialog_str")
     val dialogStr: String, // 0
     @SerialName("dynamic_id_str")
@@ -38,7 +38,7 @@ data class Comment(
     @SerialName("member")
     val member: Member,
     @SerialName("mid")
-    val mid: Int, // 378491392
+    val mid: Long, // 378491392
     @SerialName("mid_str")
     val midStr: String, // 378491392
     @SerialName("note_cvid_str")
@@ -48,7 +48,7 @@ data class Comment(
     @SerialName("oid_str")
     val oidStr: String, // 115280630192742
     @SerialName("parent")
-    val parent: Int, // 0
+    val parent: Long, // 0
     @SerialName("parent_str")
     val parentStr: String, // 0
     @SerialName("rcount")
@@ -58,7 +58,7 @@ data class Comment(
     @SerialName("reply_control")
     val replyControl: ReplyControl,
     @SerialName("root")
-    val root: Int, // 0
+    val root: Long, // 0
     @SerialName("root_str")
     val rootStr: String, // 0
     @SerialName("rpid")
@@ -77,23 +77,22 @@ data class Comment(
     @Serializable
     data class Content(
         @SerialName("emote")
-        val emote: Map<String, Emote>,
-        @SerialName("jump_url")
-        val jumpUrl: JumpUrl,
+        val emote: Map<String, Emote> = emptyMap(),
         @SerialName("max_line")
         val maxLine: Int, // 6
         @SerialName("members")
-        val members: List<Member>,
+        val members: List<Member> = emptyList(),
         @SerialName("message")
         val message: String, // 宝宝好可爱[喜欢],
-        val pictures: List<Picture>
+        @SerialName("pictures")
+        val pictures: List<Picture> = emptyList(),
     ) {
         @Serializable
         data class Picture(
             @SerialName("img_src")
             val imgSrc: String,
             @SerialName("img_size")
-            val imgSize: List<Int>,
+            val imgSize: Int,
             @SerialName("img_width")
             val imgWidth: Int, // 0
             @SerialName("img_height")
@@ -128,13 +127,9 @@ data class Comment(
                 @SerialName("size")
                 val size: Int, // 1
                 @SerialName("suggest")
-                val suggest: List<String>
+                val suggest: List<String> = emptyList(),
             )
         }
-
-
-        @Serializable
-        class JumpUrl
     }
 
     @Serializable
@@ -151,20 +146,18 @@ data class Comment(
     data class Member(
         @SerialName("avatar")
         val avatar: String, // https://i1.hdslb.com/bfs/face/b8bf52bb209be7d6a531ea318af0bf860bc443c6.jpg
-        @SerialName("avatar_item")
-        val avatarItem: AvatarItem,
-        @SerialName("contract_desc")
-        val contractDesc: String,
         @SerialName("face_nft_new")
         val faceNftNew: Int, // 0
+        @SerialName("contract_desc")
+        val contractDesc: String? = null,//合作用户说明
         @SerialName("is_contractor")
-        val isContractor: Boolean, // false
+        val isContractor: Boolean? = null, // false 是否合作用户
         @SerialName("is_senior_member")
         val isSeniorMember: Int, // 1
         @SerialName("level_info")
         val levelInfo: LevelInfo,
         @SerialName("mid")
-        val mid: String, // 378491392
+        val mid: Long, // 378491392
         @SerialName("nameplate")
         val nameplate: Nameplate,
         @SerialName("official_verify")
@@ -173,8 +166,6 @@ data class Comment(
         val pendant: Pendant,
         @SerialName("rank")
         val rank: String, // 10000
-        @SerialName("senior")
-        val senior: Senior,
         @SerialName("sex")
         val sex: String, // 保密
         @SerialName("sign")
@@ -184,253 +175,7 @@ data class Comment(
         @SerialName("vip")
         val vip: Vip
     ) {
-        @Serializable
-        data class AvatarItem(
-            @SerialName("container_size")
-            val containerSize: ContainerSize,
-            @SerialName("fallback_layers")
-            val fallbackLayers: FallbackLayers,
-            @SerialName("mid")
-            val mid: String // 378491392
-        ) {
-            @Serializable
-            data class ContainerSize(
-                @SerialName("height")
-                val height: Double, // 1.8
-                @SerialName("width")
-                val width: Double // 1.8
-            )
 
-            @Serializable
-            data class FallbackLayers(
-                @SerialName("is_critical_group")
-                val isCriticalGroup: Boolean, // true
-                @SerialName("layers")
-                val layers: List<Layer>
-            ) {
-                @Serializable
-                data class Layer(
-                    @SerialName("general_spec")
-                    val generalSpec: GeneralSpec,
-                    @SerialName("layer_config")
-                    val layerConfig: LayerConfig,
-                    @SerialName("resource")
-                    val resource: Resource,
-                    @SerialName("visible")
-                    val visible: Boolean // true
-                ) {
-                    @Serializable
-                    data class GeneralSpec(
-                        @SerialName("pos_spec")
-                        val posSpec: PosSpec,
-                        @SerialName("render_spec")
-                        val renderSpec: RenderSpec,
-                        @SerialName("size_spec")
-                        val sizeSpec: SizeSpec
-                    ) {
-                        @Serializable
-                        data class PosSpec(
-                            @SerialName("axis_x")
-                            val axisX: Double, // 0.9
-                            @SerialName("axis_y")
-                            val axisY: Double, // 0.9
-                            @SerialName("coordinate_pos")
-                            val coordinatePos: Int // 2
-                        )
-
-                        @Serializable
-                        data class RenderSpec(
-                            @SerialName("opacity")
-                            val opacity: Int // 1
-                        )
-
-                        @Serializable
-                        data class SizeSpec(
-                            @SerialName("height")
-                            val height: Double, // 0.4
-                            @SerialName("width")
-                            val width: Double // 0.4
-                        )
-                    }
-
-                    @Serializable
-                    data class LayerConfig(
-                        @SerialName("is_critical")
-                        val isCritical: Boolean?, // true
-                        @SerialName("layer_mask")
-                        val layerMask: LayerMask?,
-                        @SerialName("tags")
-                        val tags: Tags
-                    ) {
-                        @Serializable
-                        data class LayerMask(
-                            @SerialName("general_spec")
-                            val generalSpec: GeneralSpec,
-                            @SerialName("mask_src")
-                            val maskSrc: MaskSrc
-                        ) {
-                            @Serializable
-                            data class GeneralSpec(
-                                @SerialName("pos_spec")
-                                val posSpec: PosSpec,
-                                @SerialName("render_spec")
-                                val renderSpec: RenderSpec,
-                                @SerialName("size_spec")
-                                val sizeSpec: SizeSpec
-                            ) {
-                                @Serializable
-                                data class PosSpec(
-                                    @SerialName("axis_x")
-                                    val axisX: Double, // 0.9
-                                    @SerialName("axis_y")
-                                    val axisY: Double, // 0.9
-                                    @SerialName("coordinate_pos")
-                                    val coordinatePos: Int // 2
-                                )
-
-                                @Serializable
-                                data class RenderSpec(
-                                    @SerialName("opacity")
-                                    val opacity: Int // 1
-                                )
-
-                                @Serializable
-                                data class SizeSpec(
-                                    @SerialName("height")
-                                    val height: Int, // 1
-                                    @SerialName("width")
-                                    val width: Int // 1
-                                )
-                            }
-
-                            @Serializable
-                            data class MaskSrc(
-                                @SerialName("draw")
-                                val draw: Draw,
-                                @SerialName("src_type")
-                                val srcType: Int // 3
-                            ) {
-                                @Serializable
-                                data class Draw(
-                                    @SerialName("color_config")
-                                    val colorConfig: ColorConfig,
-                                    @SerialName("draw_type")
-                                    val drawType: Int, // 1
-                                    @SerialName("fill_mode")
-                                    val fillMode: Int // 1
-                                ) {
-                                    @Serializable
-                                    data class ColorConfig(
-                                        @SerialName("day")
-                                        val day: Day
-                                    ) {
-                                        @Serializable
-                                        data class Day(
-                                            @SerialName("argb")
-                                            val argb: String // #FF000000
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        @Serializable
-                        data class Tags(
-                            @SerialName("AVATAR_LAYER")
-                            val aVATARLAYER: AVATARLAYER?,
-                            @SerialName("ICON_LAYER")
-                            val iCONLAYER: ICONLAYER?
-                        ) {
-                            @Serializable
-                            class AVATARLAYER
-
-                            @Serializable
-                            class ICONLAYER
-                        }
-                    }
-
-                    @Serializable
-                    data class Resource(
-                        @SerialName("res_image")
-                        val resImage: ResImage?,
-                        @SerialName("res_native_draw")
-                        val resNativeDraw: ResNativeDraw?,
-                        @SerialName("res_type")
-                        val resType: Int // 3
-                    ) {
-                        @Serializable
-                        data class ResImage(
-                            @SerialName("image_src")
-                            val imageSrc: ImageSrc
-                        ) {
-                            @Serializable
-                            data class ImageSrc(
-                                @SerialName("placeholder")
-                                val placeholder: Int, // 6
-                                @SerialName("remote")
-                                val remote: Remote,
-                                @SerialName("src_type")
-                                val srcType: Int // 1
-                            ) {
-                                @Serializable
-                                data class Remote(
-                                    @SerialName("bfs_style")
-                                    val bfsStyle: String, // widget-layer-avatar
-                                    @SerialName("url")
-                                    val url: String // https://i1.hdslb.com/bfs/face/b8bf52bb209be7d6a531ea318af0bf860bc443c6.jpg
-                                )
-                            }
-                        }
-
-                        @Serializable
-                        data class ResNativeDraw(
-                            @SerialName("draw_src")
-                            val drawSrc: DrawSrc
-                        ) {
-                            @Serializable
-                            data class DrawSrc(
-                                @SerialName("draw")
-                                val draw: Draw,
-                                @SerialName("src_type")
-                                val srcType: Int // 3
-                            ) {
-                                @Serializable
-                                data class Draw(
-                                    @SerialName("color_config")
-                                    val colorConfig: ColorConfig,
-                                    @SerialName("draw_type")
-                                    val drawType: Int, // 1
-                                    @SerialName("fill_mode")
-                                    val fillMode: Int // 1
-                                ) {
-                                    @Serializable
-                                    data class ColorConfig(
-                                        @SerialName("day")
-                                        val day: Day,
-                                        @SerialName("is_dark_mode_aware")
-                                        val isDarkModeAware: Boolean, // true
-                                        @SerialName("night")
-                                        val night: Night
-                                    ) {
-                                        @Serializable
-                                        data class Day(
-                                            @SerialName("argb")
-                                            val argb: String // #FFFFFFFF
-                                        )
-
-                                        @Serializable
-                                        data class Night(
-                                            @SerialName("argb")
-                                            val argb: String // #FF17181A
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         @Serializable
         data class LevelInfo(
@@ -479,17 +224,11 @@ data class Comment(
             @SerialName("image_enhance_frame")
             val imageEnhanceFrame: String,
             @SerialName("n_pid")
-            val nPid: Int, // 0
+            val nPid: Long, // 0
             @SerialName("name")
             val name: String,
             @SerialName("pid")
-            val pid: Int // 0
-        )
-
-        @Serializable
-        data class Senior(
-            @SerialName("status")
-            val status: Int // 2
+            val pid: Long // 0
         )
 
         @Serializable
@@ -532,7 +271,7 @@ data class Comment(
                 @SerialName("img_label_uri_hant_static")
                 val imgLabelUriHantStatic: String, // https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png
                 @SerialName("label_goto")
-                val labelGoto: LabelGoto,
+                val labelGoto: LabelGoto?,
                 @SerialName("label_id")
                 val labelId: Int, // 47
                 @SerialName("label_theme")
