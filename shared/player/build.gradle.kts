@@ -10,14 +10,11 @@ kotlin {
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.lifecycle.runtime.compose)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.mediamp.all)
+            implementation(mediampLibs.mediamp.all)
         }
 
         sourceSets.androidMain.dependencies {
             implementation(libs.androidx.media3.exoplayer)
-        }
-        desktopMain.dependencies {
-            implementation(libs.vlcj)
         }
 
     }

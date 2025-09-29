@@ -19,6 +19,11 @@ dependencyResolutionManagement {
         //webview
         maven("https://jogamp.org/deployment/maven")
     }
+    versionCatalogs {
+        create("mediampLibs") {
+            from("org.openani.mediamp:catalog:0.0.29")
+        }
+    }
 }
 includeBuild("build-plugin")
 
@@ -44,6 +49,7 @@ include(":app:android", ":app:desktop")
 //判断父目录存不存在mediamp的项目
 File("../mediamp").also { mediampDir ->
     if (mediampDir.exists()) {
+        println("mediamp project exists,use local mediamp")
         includeBuild(mediampDir) {
             //将项目中的远程依赖项替换为项目模块依赖项
             dependencySubstitution {

@@ -1,8 +1,11 @@
 package top.suzhelan.bili.player.controller
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
+import org.openani.mediamp.source.UriMediaData
 import top.suzhelan.bili.player.platform.BiliContext
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
 
 
 actual object PlayerMediaDataUtils {
@@ -11,18 +14,15 @@ actual object PlayerMediaDataUtils {
         videoUrl: String,
         audioUrl: String
     ) {
-        val vlcPlayer = mediampPlayer.impl as EmbeddedMediaPlayer
-        vlcPlayer.media().play(
-            videoUrl,
-            //播放参数
-            *buildList {
-                //音频流合并
-                add("input-slave=$audioUrl")
-                //请求头
-                add("http-user-agent=${PlayerSyncController.headers["User-Agent"]}")
-                add("http-referrer=${PlayerSyncController.headers["Referer"]}")
-            }.toTypedArray()
-        )
+        CoroutineScope(Dispatchers.IO).launch {
+            mediampPlayer.setMediaData(
+                UriMediaData(
+                    uri = videoUrl,
+                    headers = PlayerSyncController.headers,
+                    options = listOf("input-slave=$audioUrl")
+                )
+            )
+        }
     }
 
     actual fun setFullScreen(context: BiliContext, fullScreen: Boolean) {
