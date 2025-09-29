@@ -40,3 +40,22 @@ include(
     ":biz:comment"
 )
 include(":app:android", ":app:desktop")
+
+includeBuild("../mediamp") {
+    dependencySubstitution {
+        substitute(module("org.openani.mediamp:mediamp-api"))
+            .using(project(":mediamp-api"))
+        substitute(module("org.openani.mediamp:mediamp-exoplayer"))
+            .using(project(":mediamp-exoplayer"))
+        substitute(module("org.openani.mediamp:mediamp-vlc"))
+            .using(project(":mediamp-vlc"))
+        substitute(module("org.openani.mediamp:mediamp-mpv"))
+            .using(project(":mediamp-mpv"))
+        substitute(module("org.openani.mediamp:mediamp-source-ktxio"))
+            .using(project(":mediamp-source-ktxio"))
+        substitute(module("org.openani.mediamp:mediamp-avkit"))
+            .using(project(":mediamp-avkit"))
+        substitute(module("org.openani.mediamp:mediamp-all"))
+            .using(project(":mediamp-all"))
+    }
+}
