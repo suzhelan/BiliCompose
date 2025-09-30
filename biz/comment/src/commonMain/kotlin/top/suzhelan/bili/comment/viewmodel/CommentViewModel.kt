@@ -1,19 +1,24 @@
 package top.suzhelan.bili.comment.viewmodel
 
-import top.suzhelan.bili.comment.api.CommentApi
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import top.suzhelan.bili.comment.entity.CommentSourceType
+import top.suzhelan.bili.comment.source.CommentDataSource
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 
 class CommentViewModel : BaseViewModel() {
-    private val api = CommentApi()
-    fun getCommentList(oid: String, type: CommentSourceType) {
-        launchTask {
-            val response = api.getCommentList(
-                oid = oid,
-                type = type,
-                page = 1,
-                pageSize = 10
-            )
-        }
-    }
+
+    fun getCommentList(oid: String, type: CommentSourceType) = Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                prefetchDistance = 5,//提前多少页开始预加载
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                CommentDataSource(oid, type)
+            }
+        ).flow.cachedIn(viewModelScope)
+
 }

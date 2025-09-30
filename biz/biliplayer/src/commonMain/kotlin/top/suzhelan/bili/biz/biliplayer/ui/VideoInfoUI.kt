@@ -67,7 +67,7 @@ import top.suzhelan.bili.biz.biliplayer.ui.item.SimpleVideoCard
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.biz.user.entity.UserCard
 import top.suzhelan.bili.biz.user.viewmodel.UserViewModel
-import top.suzhelan.bili.comment.CommentContent
+import top.suzhelan.bili.comment.ui.CommentContent
 import top.suzhelan.bili.comment.entity.CommentSourceType
 import top.suzhelan.bili.shared.common.ext.dismiss
 import top.suzhelan.bili.shared.common.ext.show

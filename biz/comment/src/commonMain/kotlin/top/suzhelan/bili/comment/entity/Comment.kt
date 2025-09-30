@@ -92,7 +92,7 @@ data class Comment(
             @SerialName("img_src")
             val imgSrc: String,
             @SerialName("img_size")
-            val imgSize: Int,
+            val imgSize: Double,
             @SerialName("img_width")
             val imgWidth: Int, // 0
             @SerialName("img_height")
@@ -159,11 +159,11 @@ data class Comment(
         @SerialName("mid")
         val mid: Long, // 378491392
         @SerialName("nameplate")
-        val nameplate: Nameplate,
+        val nameplate: Nameplate,//勋章
         @SerialName("official_verify")
-        val officialVerify: OfficialVerify,
+        val officialVerify: OfficialVerify,//认证信息
         @SerialName("pendant")
-        val pendant: Pendant,
+        val pendant: Pendant,//头像框
         @SerialName("rank")
         val rank: String, // 10000
         @SerialName("sex")
@@ -173,8 +173,61 @@ data class Comment(
         @SerialName("uname")
         val uname: String, // ゚゚生盐诺亚
         @SerialName("vip")
-        val vip: Vip
+        val vip: Vip,
+        @SerialName("user_sailing_v2")
+        val userSailing: UserSailing?= null
+
     ) {
+
+        @Serializable
+        data class UserSailing(
+            @SerialName("card_bg")
+            val cardBg: CardBg? = null,
+        ) {
+            @Serializable
+            data class CardBg(
+                @SerialName("fan")
+                val fan: Fan,
+                @SerialName("id")
+                val id: Long, // 72238
+                @SerialName("image")
+                val image: String, // http://i0.hdslb.com/bfs/archive/5a70d93faf507689b3980da92cc4941c20343f57.png
+                @SerialName("jump_url")
+                val jumpUrl: String, // https://www.bilibili.com/h5/mall/digital-card/home?act_id=105606&from=reply&f_source=garb&-Abrowser=live&hybrid_set_header=2&navhide=1&anchor_task=1
+                @SerialName("name")
+                val name: String, // ε�������ղؼ�ѫ��
+                @SerialName("type")
+                val type: String // collect_card
+            ) {
+                @Serializable
+                data class Fan(
+                    @SerialName("color")
+                    val color: String, // #BFC8D2
+                    @SerialName("color_format")
+                    val colorFormat: ColorFormat,
+                    @SerialName("is_fan")
+                    val isFan: Int, // 1
+                    @SerialName("num_desc")
+                    val numDesc: String, // 039416
+                    @SerialName("num_prefix")
+                    val numPrefix: String, // CD.
+                    @SerialName("number")
+                    val number: Int // 39416
+                ) {
+                    @Serializable
+                    data class ColorFormat(
+                        @SerialName("colors")
+                        val colors: List<String>,
+                        @SerialName("end_point")
+                        val endPoint: String, // 100,100
+                        @SerialName("gradients")
+                        val gradients: List<Int>,
+                        @SerialName("start_point")
+                        val startPoint: String // 0,0
+                    )
+                }
+            }
+        }
 
 
         @Serializable
@@ -218,11 +271,11 @@ data class Comment(
             @SerialName("expire")
             val expire: Int, // 0
             @SerialName("image")
-            val image: String,
+            val image: String,//头像框链接
             @SerialName("image_enhance")
-            val imageEnhance: String,
+            val imageEnhance: String,//同上
             @SerialName("image_enhance_frame")
-            val imageEnhanceFrame: String,
+            val imageEnhanceFrame: String,//常态为空
             @SerialName("n_pid")
             val nPid: Long, // 0
             @SerialName("name")

@@ -15,7 +15,7 @@ class CommentApi {
         oid: String,
         type: CommentSourceType,
         page: Int,
-        pageSize: Int
+        pageSize: Int = 20
     ): BiliResponse.Success<CommentPage> {
         /*
         type	num	评论区类型代码	必要	类型代码见表
