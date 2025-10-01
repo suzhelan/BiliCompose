@@ -25,13 +25,21 @@ actual object PlayerMediaDataUtils {
             val vlcPlayer = mediampPlayer as VlcMediampPlayer
             val embeddedMediaPlayer = vlcPlayer.impl
             embeddedMediaPlayer.media().play(
-                videoUrl,
+                audioUrl,
                 *buildList {
-                    //音频流合并
-                    add("input-slave=$audioUrl")
-                    //请求头
-                    add("http-user-agent=${PlayerSyncController.headers["User-Agent"]}")
-                    add("http-referrer=${PlayerSyncController.headers["Referer"]}")
+                    // 主从同步设置
+                    add("input-slave=$videoUrl")
+                    add("input-slave-sync")  // 强制同步
+                    add("avsync-force")      // 强制音视频同步
+
+                    // 请求头
+                    PlayerSyncController.headers.forEach  { (key, value) ->
+                        when (key.lowercase())  {
+                            "user-agent" -> add("http-user-agent=$value")
+                            "referer" -> add("http-referrer=$value")
+                            else -> add("http-$key=$value")
+                        }
+                    }
                 }.toTypedArray()
             )
         }

@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import bilicompose.biz.comment.generated.resources.Res
 import bilicompose.biz.comment.generated.resources.ic_lv0
 import bilicompose.biz.comment.generated.resources.ic_lv1
@@ -27,6 +28,8 @@ import bilicompose.biz.comment.generated.resources.ic_lv6
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.comment.entity.Comment
+import top.suzhelan.bili.comment.ui.text.CompoundEmojiMessage
+import top.suzhelan.bili.comment.ui.text.CompoundEmojiMessageModel
 
 val levelIconMap = mapOf(
     0 to Res.drawable.ic_lv0,
@@ -47,8 +50,9 @@ fun CommentCard(comment: Comment) {
     //时间 ‘回复’ 点赞 点踩 更多操作
     //被回复预览
     ConstraintLayout(modifier = Modifier.fillMaxWidth().padding(0.dp)) {
-        val (avatar, nickname, level, background, _, _, _, _, _, _, _) = createRefs()
+        val (avatar, nickname, level, background, content, _, _, _, _, _, _) = createRefs()
 
+        //背景
         AsyncImage(
             model = comment.member.userSailing?.cardBg?.image,
 //            model = "https://i0.hdslb.com/bfs/garb/item/b96c1df81ca32fc79165c94c4da1f7dd404f42d3.png",//示例背景
@@ -62,17 +66,23 @@ fun CommentCard(comment: Comment) {
                     end.linkTo(parent.end)
                 }
         )
+
+        //头像
         Avatar(member = comment.member, modifier = Modifier.constrainAs(avatar) {
-            top.linkTo(parent.top,8.dp)
-            start.linkTo(parent.start,8.dp)
+            top.linkTo(parent.top, 8.dp)
+            start.linkTo(parent.start, 8.dp)
         })
+
+        //昵称
         Text(
             text = comment.member.uname,
             fontSize = 14.sp,
             modifier = Modifier.constrainAs(nickname) {
-                top.linkTo(avatar.top,15.dp)
+                top.linkTo(avatar.top, 15.dp)
                 start.linkTo(avatar.end)
             })
+
+        //等级
         Image(
             painter = painterResource(
                 levelIconMap[comment.member.levelInfo.currentLevel] ?: Res.drawable.ic_lv0
@@ -86,6 +96,19 @@ fun CommentCard(comment: Comment) {
                     bottom.linkTo(nickname.bottom)
                     start.linkTo(nickname.end)
                 },
+        )
+
+        CompoundEmojiMessage(
+            content = CompoundEmojiMessageModel.MessageContent(
+                comment.content.message,
+                comment.content.emote
+            ),
+            modifier = Modifier.constrainAs(content) {
+                top.linkTo(nickname.bottom)
+                start.linkTo(nickname.start)
+                end.linkTo(parent.end, 8.dp)
+                width = Dimension.fillToConstraints
+            }
         )
 
     }
