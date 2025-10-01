@@ -63,15 +63,7 @@ import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
 
-private val levelIconMap = mapOf(
-    0 to Res.drawable.ic_lv0,
-    1 to Res.drawable.ic_lv1,
-    2 to Res.drawable.ic_lv2,
-    3 to Res.drawable.ic_lv3,
-    4 to Res.drawable.ic_lv4,
-    5 to Res.drawable.ic_lv5,
-    6 to Res.drawable.ic_lv6,
-)
+
 
 /**
  * 我的页
@@ -116,6 +108,16 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
 private fun ColumnScope.HeaderUserCard(
     mine: Mine
 ) {
+    val levelIconMap = mapOf(
+        0 to Res.drawable.ic_lv0,
+        1 to Res.drawable.ic_lv1,
+        2 to Res.drawable.ic_lv2,
+        3 to Res.drawable.ic_lv3,
+        4 to Res.drawable.ic_lv4,
+        5 to Res.drawable.ic_lv5,
+        6 to Res.drawable.ic_lv6,
+    )
+
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (avatar, nickname, level, entry, identity, bCoin, coin) = createRefs()
         //头像

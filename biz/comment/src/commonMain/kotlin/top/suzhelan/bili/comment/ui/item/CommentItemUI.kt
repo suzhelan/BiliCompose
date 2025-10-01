@@ -1,49 +1,112 @@
 package top.suzhelan.bili.comment.ui.item
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import bilicompose.biz.comment.generated.resources.Res
+import bilicompose.biz.comment.generated.resources.ic_lv0
+import bilicompose.biz.comment.generated.resources.ic_lv1
+import bilicompose.biz.comment.generated.resources.ic_lv2
+import bilicompose.biz.comment.generated.resources.ic_lv3
+import bilicompose.biz.comment.generated.resources.ic_lv4
+import bilicompose.biz.comment.generated.resources.ic_lv5
+import bilicompose.biz.comment.generated.resources.ic_lv6
 import coil3.compose.AsyncImage
+import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.comment.entity.Comment
+
+val levelIconMap = mapOf(
+    0 to Res.drawable.ic_lv0,
+    1 to Res.drawable.ic_lv1,
+    2 to Res.drawable.ic_lv2,
+    3 to Res.drawable.ic_lv3,
+    4 to Res.drawable.ic_lv4,
+    5 to Res.drawable.ic_lv5,
+    6 to Res.drawable.ic_lv6,
+)
 
 @Composable
 fun CommentCard(comment: Comment) {
+
     //构成 头像,头像框背景
     //昵称 等级 评论背景
     //评论内容
     //时间 ‘回复’ 点赞 点踩 更多操作
     //被回复预览
-    ConstraintLayout(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-        val (avatar, _, _, _, _, _, _, _, _, _, _) = createRefs()
+    ConstraintLayout(modifier = Modifier.fillMaxWidth().padding(0.dp)) {
+        val (avatar, nickname, level, background, _, _, _, _, _, _, _) = createRefs()
+
+        AsyncImage(
+            model = comment.member.userSailing?.cardBg?.image,
+//            model = "https://i0.hdslb.com/bfs/garb/item/b96c1df81ca32fc79165c94c4da1f7dd404f42d3.png",//示例背景
+            contentDescription = "Avatar",
+            alignment = Alignment.CenterEnd,
+            modifier = Modifier
+                .height(80.dp)
+                .fillMaxWidth()
+                .constrainAs(background) {
+                    top.linkTo(parent.bottom)
+                    end.linkTo(parent.end)
+                }
+        )
         Avatar(member = comment.member, modifier = Modifier.constrainAs(avatar) {
-            top.linkTo(parent.top)
-            start.linkTo(parent.start)
+            top.linkTo(parent.top,8.dp)
+            start.linkTo(parent.start,8.dp)
         })
+        Text(
+            text = comment.member.uname,
+            fontSize = 14.sp,
+            modifier = Modifier.constrainAs(nickname) {
+                top.linkTo(avatar.top,15.dp)
+                start.linkTo(avatar.end)
+            })
+        Image(
+            painter = painterResource(
+                levelIconMap[comment.member.levelInfo.currentLevel] ?: Res.drawable.ic_lv0
+            ),
+            contentDescription = "lv${comment.member.levelInfo.currentLevel}",
+            modifier = Modifier
+                .height(15.dp)
+                .padding(start = 10.dp)
+                .constrainAs(level) {
+                    top.linkTo(nickname.top)
+                    bottom.linkTo(nickname.bottom)
+                    start.linkTo(nickname.end)
+                },
+        )
+
     }
 }
 
 @Composable
-private fun Avatar(member: Comment.Member, modifier: Modifier) = Box(modifier = modifier.size(80.dp)) {
-    //头像框边距 大概是父布局也就是80dp的1/4
-    AsyncImage(
-        model = member.avatar,
-        contentDescription = "Avatar",
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp) // 留出头像框空间
-            .clip(CircleShape)
-    )
-    AsyncImage(
-        model = "https://i1.hdslb.com/bfs/garb/item/f8498be6ba4e87e7469943abafa27fff9975c658.png",
-        contentDescription = "Pendant",
-        modifier = Modifier.fillMaxSize() // 背景填满整个Box
-    )
-}
+private fun Avatar(member: Comment.Member, modifier: Modifier) =
+    Box(modifier = modifier.size(80.dp)) {
+        //头像框边距 大概是父布局也就是80dp的1/4
+        AsyncImage(
+            model = member.avatar,
+            contentDescription = "Avatar",
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp) // 留出头像框空间
+                .clip(CircleShape)
+        )
+        AsyncImage(
+//            model = "https://i1.hdslb.com/bfs/garb/item/f8498be6ba4e87e7469943abafa27fff9975c658.png",//示例头像框
+            model = member.pendant.image,
+            contentDescription = "Pendant",
+            modifier = Modifier.fillMaxSize() // 背景填满整个Box
+        )
+    }
