@@ -10,6 +10,7 @@ kotlin {
             implementation(libs.navigation.compose)
             //业务
             implementation(projects.biz.home)
+            implementation(projects.biz.comment)
             implementation(projects.biz.user)
             implementation(projects.biz.login)
             implementation(projects.biz.biliplayer)

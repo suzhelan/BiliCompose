@@ -84,7 +84,7 @@ fun CommentCard(comment: Comment) {
 
         //头像
         Avatar(member = comment.member, modifier = Modifier.constrainAs(avatar) {
-            top.linkTo(parent.top, 8.dp)
+            top.linkTo(parent.top,8.dp)
             start.linkTo(parent.start, 8.dp)
         })
 
@@ -93,7 +93,7 @@ fun CommentCard(comment: Comment) {
             text = comment.member.uname,
             fontSize = 14.sp,
             modifier = Modifier.constrainAs(nickname) {
-                top.linkTo(avatar.top, 15.dp)
+                top.linkTo(avatar.top,8.dp)
                 start.linkTo(avatar.end)
             })
 
@@ -144,14 +144,14 @@ fun CommentCard(comment: Comment) {
 
 @Composable
 private fun Avatar(member: Comment.Member, modifier: Modifier) =
-    Box(modifier = modifier.size(80.dp)) {
+    Box(modifier = modifier.size(60.dp)) {
         //头像框边距 大概是父布局也就是80dp的1/4
         AsyncImage(
             model = member.avatar,
             contentDescription = "Avatar",
             modifier = Modifier
                 .fillMaxSize()
-                .padding(15.dp) // 留出头像框空间
+                .padding(12.dp) // 留出头像框空间
                 .clip(CircleShape)
         )
         AsyncImage(
@@ -205,7 +205,7 @@ private fun InfoLineRow(
                 modifier = Modifier.size(14.dp),
                 tint = if (action == 1) ColorPrimary else TipColor
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(2.dp))
             Text(
                 text = comment.like.toStringCount(),
                 color = if (action == 1) ColorPrimary else TipColor,
