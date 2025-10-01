@@ -60,7 +60,7 @@ import top.suzhelan.bili.shared.common.ext.toFalse
 import top.suzhelan.bili.shared.common.ext.toTrue
 import top.suzhelan.bili.shared.common.ui.dialog.WarnDialog
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
-import top.suzhelan.bili.shared.common.ui.theme.TipTextColor
+import top.suzhelan.bili.shared.common.ui.theme.TipColor
 
 
 /**
@@ -180,7 +180,7 @@ fun TagsDialog(
                             Text(
                                 text = "向右滑动项可重命名,向左滑动可删除",
                                 modifier = Modifier.fillMaxWidth().padding(8.dp),
-                                color = TipTextColor,
+                                color = TipColor,
                                 fontSize = 12.sp,
                                 maxLines = 1,
                                 textAlign = TextAlign.Center
@@ -345,7 +345,7 @@ private fun TagItem(tag: RelationTags, isChecked: Boolean, onChecked: (Boolean) 
             Text(
                 text = tag.tip,
                 fontSize = 12.sp,
-                color = TipTextColor,
+                color = TipColor,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.constrainAs(tipRef) {
                     start.linkTo(nameRef.start)

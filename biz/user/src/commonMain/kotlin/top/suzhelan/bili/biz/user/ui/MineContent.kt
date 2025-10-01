@@ -58,7 +58,7 @@ import top.suzhelan.bili.biz.user.viewmodel.MineViewModel
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimaryContainer
 import top.suzhelan.bili.shared.common.ui.theme.DividingLineColor
-import top.suzhelan.bili.shared.common.ui.theme.TipTextColor
+import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
@@ -190,7 +190,7 @@ private fun ColumnScope.HeaderUserCard(
         Text(
             text = stringResource(Res.string.b_coin, mine.bcoin),
             fontSize = 12.sp,
-            style = TextStyle(color = TipTextColor),
+            style = TextStyle(color = TipColor),
             modifier = Modifier.constrainAs(bCoin) {
                 top.linkTo(identity.bottom, 5.dp)
                 start.linkTo(identity.start)
@@ -200,7 +200,7 @@ private fun ColumnScope.HeaderUserCard(
         Text(
             text = stringResource(Res.string.coin, mine.coin),
             fontSize = 12.sp,
-            style = TextStyle(color = TipTextColor),
+            style = TextStyle(color = TipColor),
             modifier = Modifier.constrainAs(coin) {
                 top.linkTo(bCoin.top)
                 start.linkTo(bCoin.end, 15.dp)
@@ -258,7 +258,7 @@ private fun ColumnScope.UserAmount(
                 Text(
                     text = stringResource(amountTextRes),
                     fontSize = 12.sp,
-                    color = TipTextColor
+                    color = TipColor
                 )
             }
             //如果是最后一个的话 不添加分割线

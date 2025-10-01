@@ -60,7 +60,7 @@ import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.TitleUI
 import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
 import top.suzhelan.bili.shared.common.ui.theme.TextColor
-import top.suzhelan.bili.shared.common.ui.theme.TipTextColor
+import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.currentOrThrow
 
@@ -178,7 +178,7 @@ private fun PagerScope.FollowListPage(vm: FollowListViewModel, tagId: Int) {
                         text = "没有更多了",
                         modifier = Modifier.fillMaxWidth().padding(10.dp),
                         textAlign = TextAlign.Center,
-                        color = TipTextColor
+                        color = TipColor
                     )
                 }
             }
@@ -236,7 +236,7 @@ private fun LazyItemScope.UserItemUI(
             )
             Text(
                 text = userState.sign,
-                color = TipTextColor,
+                color = TipColor,
                 fontSize = 14.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

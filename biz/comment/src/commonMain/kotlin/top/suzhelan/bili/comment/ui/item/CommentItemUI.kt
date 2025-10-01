@@ -1,13 +1,24 @@
 package top.suzhelan.bili.comment.ui.item
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,6 +41,10 @@ import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.comment.entity.Comment
 import top.suzhelan.bili.comment.ui.text.CompoundEmojiMessage
 import top.suzhelan.bili.comment.ui.text.CompoundEmojiMessageModel
+import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
+import top.suzhelan.bili.shared.common.ui.theme.TextColor
+import top.suzhelan.bili.shared.common.ui.theme.TipColor
+import top.suzhelan.bili.shared.common.util.toStringCount
 
 val levelIconMap = mapOf(
     0 to Res.drawable.ic_lv0,
@@ -47,10 +62,10 @@ fun CommentCard(comment: Comment) {
     //构成 头像,头像框背景
     //昵称 等级 评论背景
     //评论内容
-    //时间 ‘回复’ 点赞 点踩 更多操作
+    //时间 ip ‘回复’ 点赞 点踩 更多操作
     //被回复预览
     ConstraintLayout(modifier = Modifier.fillMaxWidth().padding(0.dp)) {
-        val (avatar, nickname, level, background, content, _, _, _, _, _, _) = createRefs()
+        val (avatar, nickname, level, background, content, infoLine, _, _, _, _, _) = createRefs()
 
         //背景
         AsyncImage(
@@ -98,6 +113,7 @@ fun CommentCard(comment: Comment) {
                 },
         )
 
+        //复合消息卡片
         CompoundEmojiMessage(
             content = CompoundEmojiMessageModel.MessageContent(
                 comment.content.message,
@@ -110,6 +126,18 @@ fun CommentCard(comment: Comment) {
                 width = Dimension.fillToConstraints
             }
         )
+
+        //信息行
+        InfoLineRow(
+            comment = comment, modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 8.dp)
+                .constrainAs(infoLine) {
+                    top.linkTo(content.bottom)
+                    start.linkTo(content.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.fillToConstraints
+                })
 
     }
 }
@@ -133,3 +161,80 @@ private fun Avatar(member: Comment.Member, modifier: Modifier) =
             modifier = Modifier.fillMaxSize() // 背景填满整个Box
         )
     }
+
+@Composable
+private fun InfoLineRow(
+    comment: Comment,
+    modifier: Modifier
+) {
+    val action = comment.action
+    //时间 ip ‘回复’ 点赞 点踩 更多操作
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = comment.replyControl.timeDesc,
+            color = TipColor,
+            fontSize = 12.sp,
+        )
+        Text(
+            text = " ${comment.replyControl.location.replace("IP属地：", "")}",
+            color = TipColor,
+            fontSize = 12.sp,
+        )
+        Text(
+            text = " 回复",
+            color = TextColor,
+            fontSize = 12.sp,
+        )
+        Spacer(modifier = Modifier.weight(1f))
+
+
+        Row(
+            modifier = Modifier.wrapContentSize()
+                .padding(horizontal = 4.dp)
+                .clip(CircleShape)
+                .clickable {
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.ThumbUp,
+                contentDescription = "Like",
+                modifier = Modifier.size(14.dp),
+                tint = if (action == 1) ColorPrimary else TipColor
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = comment.like.toStringCount(),
+                color = if (action == 1) ColorPrimary else TipColor,
+                fontSize = 12.sp,
+            )
+        }
+
+
+        IconButton(onClick = {
+
+        }, modifier = Modifier.size(18.dp)) {
+            Icon(
+                imageVector = Icons.Outlined.ThumbDown,
+                modifier = Modifier.size(14.dp),
+                contentDescription = "Dislike",
+                tint = if (action == 2) ColorPrimary else TipColor
+            )
+        }
+
+        IconButton(onClick = {
+
+        }, modifier = Modifier.size(18.dp)) {
+            Icon(
+                imageVector = Icons.Outlined.MoreVert,
+                modifier = Modifier.size(14.dp),
+                contentDescription = "More",
+                tint = TipColor
+            )
+        }
+
+    }
+}

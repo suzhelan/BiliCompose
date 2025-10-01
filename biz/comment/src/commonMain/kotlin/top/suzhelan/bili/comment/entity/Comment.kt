@@ -34,7 +34,7 @@ data class Comment(
     @SerialName("invisible")
     val invisible: Boolean, // false
     @SerialName("like")
-    val like: Int, // 0
+    val like: Int, // 0 点赞数应该是
     @SerialName("member")
     val member: Member,
     @SerialName("mid")
@@ -202,17 +202,17 @@ data class Comment(
                 @Serializable
                 data class Fan(
                     @SerialName("color")
-                    val color: String, // #BFC8D2
+                    val color: String ?= null, // #BFC8D2
                     @SerialName("color_format")
-                    val colorFormat: ColorFormat,
+                    val colorFormat: ColorFormat?= null,
                     @SerialName("is_fan")
-                    val isFan: Int, // 1
+                    val isFan: Int?= null, // 1
                     @SerialName("num_desc")
-                    val numDesc: String, // 039416
+                    val numDesc: String?= null, // 039416
                     @SerialName("num_prefix")
-                    val numPrefix: String, // CD.
+                    val numPrefix: String?= null, // CD.
                     @SerialName("number")
-                    val number: Int // 39416
+                    val number: Int?= null // 39416
                 ) {
                     @Serializable
                     data class ColorFormat(

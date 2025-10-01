@@ -17,6 +17,6 @@ val TitleTextStyle: TextStyle
 val TipTextStyle: TextStyle
     @Composable @ReadOnlyComposable get() = TextStyle(
         fontSize = 14.sp,
-        color = TipTextColor,
+        color = TipColor,
         fontWeight = FontWeight.Thin
     )

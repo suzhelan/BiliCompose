@@ -76,7 +76,7 @@ import top.suzhelan.bili.shared.common.ui.card.Expandable
 import top.suzhelan.bili.shared.common.ui.shimmerEffect
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
 import top.suzhelan.bili.shared.common.ui.theme.TextColor
-import top.suzhelan.bili.shared.common.ui.theme.TipTextColor
+import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.TimeUtils
 import top.suzhelan.bili.shared.common.util.toStringCount
 import top.suzhelan.bili.shared.navigation.LocalNavigation
@@ -231,11 +231,11 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
                 Icon(
                     imageVector = if (isExpanded) Icons.Outlined.KeyboardControlKey else Icons.Outlined.KeyboardArrowDown,
                     contentDescription = null,
-                    tint = TipTextColor,
+                    tint = TipColor,
                 )
             }
             ProvideContentColor(
-                color = TipTextColor
+                color = TipColor
             ) {
                 //基本指标
                 Row(
@@ -285,13 +285,13 @@ private fun VideoBasicInfoUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMod
             //BVID
             Text(
                 text = videoInfo.bvid,
-                color = TipTextColor,
+                color = TipColor,
                 fontSize = textSize
             )
             //视频简介
             Text(
                 text = videoInfo.desc,
-                color = TipTextColor,
+                color = TipColor,
                 fontSize = textSize
             )
             //视频标签

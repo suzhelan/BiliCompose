@@ -16,10 +16,10 @@ val ColorPrimaryContainer: Color @Composable @ReadOnlyComposable get() = Materia
 val ColorError: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.error
 val ColorSurface @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.surface
 val TextColor: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.onSurface
-val TipTextColor: Color @Composable @ReadOnlyComposable get() = if (isSystemInDarkTheme()) Color.LightGray else Color.Gray
+val TipColor: Color @Composable @ReadOnlyComposable get() = if (isSystemInDarkTheme()) Color.LightGray else Color.Gray
 val ErrorTextColor: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.error
 
-val DividingLineColor: Color @Composable @ReadOnlyComposable get() = TipTextColor.copy(alpha = 0.5f)
+val DividingLineColor: Color @Composable @ReadOnlyComposable get() = TipColor.copy(alpha = 0.5f)
 
 
 //字体风格
