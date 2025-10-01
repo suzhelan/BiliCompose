@@ -9,7 +9,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import top.suzhelan.bili.shared.common.ui.theme.ErrorTextColor
+import top.suzhelan.bili.shared.common.ui.theme.ErrorColor
 
 /**
  * 警告对话框 用于显示警告信息
@@ -22,7 +22,7 @@ fun WarnDialog(
     text: String = "",
     cancelButtonText: String = "",
     confirmButtonText: String = "",
-    confirmTextColor: Color = ErrorTextColor,
+    confirmTextColor: Color = ErrorColor.error,
     onDismissRequest: () -> Unit = {},
     onConfirmRequest: () -> Unit = {},
 ) {

@@ -12,6 +12,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import top.suzhelan.bili.comment.entity.CommentSourceType
 import top.suzhelan.bili.comment.ui.item.CommentCard
 import top.suzhelan.bili.comment.viewmodel.CommentViewModel
+import top.suzhelan.bili.shared.common.ui.PagerBottomIndicator
 
 
 @Composable
@@ -20,8 +21,8 @@ fun CommentContent(oid: String, type: CommentSourceType) {
 
     val lazyPagingItems = viewModel.getCommentList(oid, type).collectAsLazyPagingItems()
 
-    LazyColumn(modifier = Modifier.fillMaxSize()){
-        items(lazyPagingItems.itemCount){ index ->
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        items(lazyPagingItems.itemCount) { index ->
             CommentCard(lazyPagingItems[index]!!)
             if (index < lazyPagingItems.itemCount - 1) {
                 HorizontalDivider(
@@ -29,5 +30,9 @@ fun CommentContent(oid: String, type: CommentSourceType) {
                 )
             }
         }
+        item {
+            PagerBottomIndicator(lazyPagingItems)
+        }
     }
 }
+
