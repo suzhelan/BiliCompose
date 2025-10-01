@@ -1,4 +1,4 @@
-[versions]
+ [versions]
 agp = "8.13.0"
 androidx-activityCompose = "1.11.0"
 androidx-lifecycle = "2.9.4"
@@ -27,7 +27,7 @@ sonner = "0.3.8"
 kotlinx-serialization = "1.9.0"
 androidx-media3 = "1.8.0"
 
-vlcj = "4.11.0"
+vlcj = "4.8.4"
 material3 = "1.4.0"
 
 [libraries]
