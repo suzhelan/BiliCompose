@@ -57,7 +57,7 @@
 - 图片加载:[coil3](https://github.com/coil-kt/coil)
 - 视频流媒体播放器:[mediamp](https://github.com/open-ani/mediamp)->android使用ExoPlayer,Desktop使用
 - 持久化存储:[multiplatform-settings](https://github.com/russhwolf/multiplatform-settings)
-- 登录时的二维码生成:[qrose](https://github.com/alexzhirkevich/qrose)
+- 登录时的二维码生成:[qr-kit](https://github.com/Chaintech-Network/QRKitComposeMultiplatform)
 - 加解密编码(后续需要使用更加活跃的工具):[krypto](https://mvnrepository.com/artifact/com.soywiz.korlibs.krypto/krypto)
 - WebView+极验人机验证:[geetest](./biz/login/src/commonMain/composeResources/files/geetest-lite.html)
 - 跨平台分页加载:

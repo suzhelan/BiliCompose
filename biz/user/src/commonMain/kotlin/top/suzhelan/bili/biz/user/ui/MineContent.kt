@@ -15,7 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -40,29 +44,24 @@ import bilicompose.biz.user.generated.resources.coin
 import bilicompose.biz.user.generated.resources.dynamic
 import bilicompose.biz.user.generated.resources.fans
 import bilicompose.biz.user.generated.resources.follow
-import bilicompose.biz.user.generated.resources.ic_lv0
-import bilicompose.biz.user.generated.resources.ic_lv1
-import bilicompose.biz.user.generated.resources.ic_lv2
-import bilicompose.biz.user.generated.resources.ic_lv3
-import bilicompose.biz.user.generated.resources.ic_lv4
-import bilicompose.biz.user.generated.resources.ic_lv5
-import bilicompose.biz.user.generated.resources.ic_lv6
+
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.api.isSuccess
-import top.suzhelan.bili.biz.login.ui.NotLoggedInContent
+import top.suzhelan.bili.biz.login.ui.content.NotLoggedInContent
 import top.suzhelan.bili.biz.user.entity.mine.Mine
 import top.suzhelan.bili.biz.user.viewmodel.MineViewModel
 import top.suzhelan.bili.shared.auth.config.LoginMapper
+import top.suzhelan.bili.shared.common.ui.icons.LevelIcons
+
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimaryContainer
 import top.suzhelan.bili.shared.common.ui.theme.DividingLineColor
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
-
 
 
 /**
@@ -85,7 +84,10 @@ fun MineContent() {
  * 用户信息
  */
 @Composable
-private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewModel = viewModel { MineViewModel() }) {
+private fun UserProfile(
+    modifier: Modifier = Modifier,
+    mineViewModel: MineViewModel = viewModel { MineViewModel() }
+) {
     LaunchedEffect(Unit) {
         mineViewModel.updateMine()
     }
@@ -94,10 +96,47 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
         return
     }
     val mine = mineResponse.getOrThrow()
-    Column(modifier = modifier.fillMaxWidth().padding(top = 50.dp)) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        ToolBar()
         HeaderUserCard(mine)
         Spacer(modifier = Modifier.height(20.dp))
         UserAmount(mine)
+    }
+}
+
+@Composable
+private fun ColumnScope.ToolBar() {
+    val navigation = LocalNavigation.currentOrThrow
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+        //end
+        horizontalArrangement = Arrangement.End,
+        //vertical
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = {}, enabled = false) {
+            Icon(
+                imageVector = Icons.Outlined.LightMode,
+                contentDescription = "SwitchModes",
+            )
+        }
+        //logout
+        IconButton(onClick = {
+            LoginMapper.clear()
+        }){
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.Logout,
+                contentDescription = "Logout",
+            )
+        }
+        IconButton(onClick = {
+            navigation.push(SharedScreen.ScanQRCode)
+        }) {
+            Icon(
+                imageVector = Icons.Outlined.QrCodeScanner,
+                contentDescription = "ScanQRCode",
+            )
+        }
     }
 }
 
@@ -108,15 +147,6 @@ private fun UserProfile(modifier: Modifier = Modifier, mineViewModel: MineViewMo
 private fun ColumnScope.HeaderUserCard(
     mine: Mine
 ) {
-    val levelIconMap = mapOf(
-        0 to Res.drawable.ic_lv0,
-        1 to Res.drawable.ic_lv1,
-        2 to Res.drawable.ic_lv2,
-        3 to Res.drawable.ic_lv3,
-        4 to Res.drawable.ic_lv4,
-        5 to Res.drawable.ic_lv5,
-        6 to Res.drawable.ic_lv6,
-    )
 
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (avatar, nickname, level, entry, identity, bCoin, coin) = createRefs()
@@ -143,7 +173,7 @@ private fun ColumnScope.HeaderUserCard(
         )
         //等级
         Image(
-            painter = painterResource(levelIconMap[mine.level] ?: Res.drawable.ic_lv0),
+            painter = painterResource(LevelIcons.levelIconMap.getValue(mine.level)),
             contentDescription = "lv${mine.level}",
             modifier = Modifier
                 .height(15.dp)

@@ -15,8 +15,9 @@ kotlin {
             implementation(libs.sonner)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.qrose)
+
             implementation(libs.compose.webview.multiplatform)
+            implementation(libs.qr.kit)
 
             implementation(projects.shared.auth)
             implementation(projects.shared.navigation)

@@ -1,4 +1,4 @@
-package top.suzhelan.bili.biz.login.ui
+package top.suzhelan.bili.biz.login.ui.dialog
 
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize

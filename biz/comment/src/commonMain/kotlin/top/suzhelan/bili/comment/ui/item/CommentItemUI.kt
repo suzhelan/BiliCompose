@@ -28,33 +28,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import bilicompose.biz.comment.generated.resources.Res
-import bilicompose.biz.comment.generated.resources.ic_lv0
-import bilicompose.biz.comment.generated.resources.ic_lv1
-import bilicompose.biz.comment.generated.resources.ic_lv2
-import bilicompose.biz.comment.generated.resources.ic_lv3
-import bilicompose.biz.comment.generated.resources.ic_lv4
-import bilicompose.biz.comment.generated.resources.ic_lv5
-import bilicompose.biz.comment.generated.resources.ic_lv6
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.comment.entity.Comment
 import top.suzhelan.bili.comment.ui.text.CompoundEmojiMessage
 import top.suzhelan.bili.comment.ui.text.CompoundEmojiMessageModel
+import top.suzhelan.bili.shared.common.ui.icons.LevelIcons
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
 import top.suzhelan.bili.shared.common.ui.theme.TextColor
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.toStringCount
 
-val levelIconMap = mapOf(
-    0 to Res.drawable.ic_lv0,
-    1 to Res.drawable.ic_lv1,
-    2 to Res.drawable.ic_lv2,
-    3 to Res.drawable.ic_lv3,
-    4 to Res.drawable.ic_lv4,
-    5 to Res.drawable.ic_lv5,
-    6 to Res.drawable.ic_lv6,
-)
 
 @Composable
 fun CommentCard(comment: Comment) {
@@ -84,7 +68,7 @@ fun CommentCard(comment: Comment) {
 
         //头像
         Avatar(member = comment.member, modifier = Modifier.constrainAs(avatar) {
-            top.linkTo(parent.top,8.dp)
+            top.linkTo(parent.top, 8.dp)
             start.linkTo(parent.start, 8.dp)
         })
 
@@ -93,14 +77,14 @@ fun CommentCard(comment: Comment) {
             text = comment.member.uname,
             fontSize = 14.sp,
             modifier = Modifier.constrainAs(nickname) {
-                top.linkTo(avatar.top,8.dp)
+                top.linkTo(avatar.top, 8.dp)
                 start.linkTo(avatar.end)
             })
 
         //等级
         Image(
             painter = painterResource(
-                levelIconMap[comment.member.levelInfo.currentLevel] ?: Res.drawable.ic_lv0
+                LevelIcons.levelIconMap.getValue(comment.member.levelInfo.currentLevel)
             ),
             contentDescription = "lv${comment.member.levelInfo.currentLevel}",
             modifier = Modifier

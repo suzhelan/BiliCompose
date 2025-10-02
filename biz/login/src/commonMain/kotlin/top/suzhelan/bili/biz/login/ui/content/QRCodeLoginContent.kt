@@ -1,4 +1,4 @@
-package top.suzhelan.bili.biz.login.ui
+package top.suzhelan.bili.biz.login.ui.content
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -17,20 +17,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.alexzhirkevich.qrose.ImageFormat
-import io.github.alexzhirkevich.qrose.options.QrBallShape
-import io.github.alexzhirkevich.qrose.options.QrBrush
-import io.github.alexzhirkevich.qrose.options.QrFrameShape
-import io.github.alexzhirkevich.qrose.options.QrPixelShape
-import io.github.alexzhirkevich.qrose.options.circle
-import io.github.alexzhirkevich.qrose.options.roundCorners
-import io.github.alexzhirkevich.qrose.options.solid
-import io.github.alexzhirkevich.qrose.rememberQrCodePainter
-import io.github.alexzhirkevich.qrose.toByteArray
+import qrgenerator.qrkitpainter.PatternType
+import qrgenerator.qrkitpainter.QrBallType
+import qrgenerator.qrkitpainter.QrFrameType
+import qrgenerator.qrkitpainter.QrKitBrush
+import qrgenerator.qrkitpainter.QrKitColors
+import qrgenerator.qrkitpainter.QrKitShapes
+import qrgenerator.qrkitpainter.QrPixelType
+import qrgenerator.qrkitpainter.customBrush
+import qrgenerator.qrkitpainter.getSelectedFrameShape
+import qrgenerator.qrkitpainter.getSelectedPattern
+import qrgenerator.qrkitpainter.getSelectedPixel
+import qrgenerator.qrkitpainter.getSelectedQrBall
+import qrgenerator.qrkitpainter.rememberQrKitPainter
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.biz.login.model.TvQRCode
 import top.suzhelan.bili.biz.login.viewmodel.QRCodeLoginViewModel
@@ -129,35 +133,34 @@ private fun LoginSuccessDialog() {
 @Composable
 private fun QRCodeImage(url: String) {
     val qrcodeColor = ColorPrimary
-    val qrcodePainter: Painter = rememberQrCodePainter(url) {
-        //可以在二维码加logo 但是没什么必要
-        shapes {
-            ball = QrBallShape.circle()
-            darkPixel = QrPixelShape.roundCorners()
-            frame = QrFrameShape.roundCorners(.25f)
-        }
-        colors {
-            //主要色块
-            dark = QrBrush.solid(qrcodeColor)
-            //渐变形
-            /*QrBrush.brush {
+//    val centerLogo = painterResource(Res.drawable)
+    val painter = rememberQrKitPainter(url) {
+        shapes = QrKitShapes(
+            //方块内心
+            ballShape = getSelectedQrBall(QrBallType.RoundCornersQrBall(0.2f)),
+            //像素点
+            darkPixelShape = getSelectedPixel(QrPixelType.RoundCornerPixel()),
+            //方块边框
+            frameShape = getSelectedFrameShape(QrFrameType.RoundCornersFrame(0.2f)),
+            //整个二维码的形状
+            codeShape = getSelectedPattern(PatternType.SquarePattern),
+        )
+        colors = QrKitColors(
+            darkBrush = QrKitBrush.customBrush {
                 Brush.linearGradient(
-                    0f to qrcodeEndColor,
-                    1f to qrcodeEndColor,
+                    0f to qrcodeColor,
+                    1f to qrcodeColor,
                     end = Offset(it, it)
                 )
-            }*/
-            /*            //边框色块
-                        frame = QrBrush.solid(cornerColor)
-                        //边框内圆点色块
-                        ball  = QrBrush.solid(cornerColor)*/
-        }
+            }
+        )
+//        logo = QrKitLogo(centerLogo)
     }
     Image(
-        painter = qrcodePainter,
+        painter = painter,
         contentDescription = "二维码",
         modifier = Modifier.size(150.dp).clickable {
-            qrcodePainter.toByteArray(1024, 1024, ImageFormat.PNG)
+
         }
     )
 }

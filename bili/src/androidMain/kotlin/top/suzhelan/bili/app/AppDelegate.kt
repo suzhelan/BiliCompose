@@ -3,6 +3,7 @@ package top.suzhelan.bili.app
 import android.content.Context
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import qrgenerator.AppContext
 import top.suzhelan.bili.player.controller.AndroidPlayerParam
 import top.suzhelan.bili.storage.config.SettingsConfig
 
@@ -15,6 +16,7 @@ class AppLifecycleDelegate(private val context: Context) : DefaultLifecycleObser
         //初始化数据库和一些需要context的操作
         SettingsConfig.context = context
         AndroidPlayerParam.init(context)
+        AppContext.set(context)
     }
 
 }

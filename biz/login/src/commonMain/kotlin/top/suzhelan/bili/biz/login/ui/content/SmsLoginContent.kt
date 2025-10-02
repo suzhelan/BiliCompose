@@ -1,4 +1,4 @@
-package top.suzhelan.bili.biz.login.ui
+package top.suzhelan.bili.biz.login.ui.content
 
 
 import androidx.compose.animation.core.RepeatMode
@@ -72,6 +72,7 @@ import top.suzhelan.bili.biz.login.model.Country
 import top.suzhelan.bili.biz.login.model.CountryList
 import top.suzhelan.bili.biz.login.model.SendSmsLoginCodeResult
 import top.suzhelan.bili.biz.login.model.VerifyResult
+import top.suzhelan.bili.biz.login.ui.dialog.BehavioralValidationDialog
 import top.suzhelan.bili.biz.login.viewmodel.GeeTestViewModel
 import top.suzhelan.bili.biz.login.viewmodel.SmsLoginViewModel
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary

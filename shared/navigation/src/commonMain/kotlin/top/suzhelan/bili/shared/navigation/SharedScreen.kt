@@ -15,4 +15,6 @@ sealed class SharedScreen(val path: String) : BiliScreenProvider {
 
     @Serializable
     data class VideoPlayer(val body: String) : SharedScreen("/video")
+    @Serializable
+    data object ScanQRCode : SharedScreen("/scanQRCode")
 }

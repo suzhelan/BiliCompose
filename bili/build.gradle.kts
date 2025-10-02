@@ -15,6 +15,7 @@ kotlin {
             implementation(projects.biz.login)
             implementation(projects.biz.biliplayer)
             implementation(projects.biz.recvids)
+            implementation(libs.qr.kit)
             //共享通用模块
             implementation(projects.shared.storage)
             implementation(projects.shared.player)
