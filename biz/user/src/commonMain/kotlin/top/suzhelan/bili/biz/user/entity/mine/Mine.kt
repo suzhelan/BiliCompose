@@ -13,9 +13,9 @@ data class Mine(
 //    @SerialName("achievement") val achievement: Achievement, // 用户成就
 //    @SerialName("audio_type") val audioType: Int, // 音频类型
 //    @SerialName("avatar") val avatar: Avatar, // 用户头像
-    @SerialName("bcoin") val bcoin: Int, // B币数量
+    @SerialName("bcoin") val bcoin: Double, // B币数量
 //    @SerialName("bubbles") val bubbles: Unknown?, // 气泡
-    @SerialName("coin") val coin: Int, // 硬币数量
+    @SerialName("coin") val coin: Double, // 硬币数量
     @SerialName("dynamic") val dynamic: Int, // 动态数量
     @SerialName("enable_bili_link") val enableBiliLink: Boolean, // 是否启用B站链接
     @SerialName("face") val face: String, // 用户头像URL
