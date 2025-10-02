@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="b_coin">B币: %1$d</string>
-    <string name="coin">硬币: %1$d</string>
+    <string name="b_coin">B币: %1$.2f</string>
+    <string name="coin">硬币: %1$.2f</string>
     <string name="dynamic">动态</string>
     <string name="follow">关注</string>
     <string name="fans">粉丝</string>
