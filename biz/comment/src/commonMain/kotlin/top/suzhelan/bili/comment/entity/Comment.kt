@@ -352,7 +352,7 @@ data class Comment(
     @Serializable
     data class ReplyControl(
         @SerialName("location")
-        val location: String, // IP属地：广东
+        val location: String ="早期评论无属地信息", // IP属地：广东
         @SerialName("max_line")
         val maxLine: Int, // 6
         @SerialName("time_desc")

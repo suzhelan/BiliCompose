@@ -1,8 +1,10 @@
 package top.suzhelan.bili.comment.ui.item
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.ThumbDown
@@ -49,7 +52,7 @@ fun CommentCard(comment: Comment) {
     //时间 ip ‘回复’ 点赞 点踩 更多操作
     //被回复预览
     ConstraintLayout(modifier = Modifier.fillMaxWidth().padding(0.dp)) {
-        val (avatar, nickname, level, background, content, infoLine, _, _, _, _, _) = createRefs()
+        val (avatar, nickname, level, background, content, infoLine, repliedPreview, _, _, _, _) = createRefs()
 
         //背景
         AsyncImage(
@@ -123,6 +126,15 @@ fun CommentCard(comment: Comment) {
                     width = Dimension.fillToConstraints
                 })
 
+        if (comment.rcount > 0) {
+            //被回复预览
+            RepliedPreview(comment, modifier = Modifier.constrainAs(repliedPreview) {
+                top.linkTo(infoLine.bottom)
+                start.linkTo(content.start)
+                end.linkTo(parent.end, 8.dp)
+                width = Dimension.fillToConstraints
+            })
+        }
     }
 }
 
@@ -221,4 +233,36 @@ private fun InfoLineRow(
         }
 
     }
+}
+
+@Composable
+private fun RepliedPreview(comment: Comment, modifier: Modifier) = Column(
+    modifier = modifier.fillMaxWidth()
+        .background(TipColor.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
+        .padding(6.dp)
+) {
+    val replied = comment.replies?: emptyList()
+    replied.forEach {
+        SimpleReplyCard(it)
+    }
+    //如果预览可以完全展示所有回复消息 那就不展示被回复总数
+    if (replied.size != comment.rcount) {
+        Text(
+            text = "共${comment.rcount}条回复",
+            color = ColorPrimary,
+            fontSize = 12.sp
+        )
+    }
+}
+
+@Composable
+private fun SimpleReplyCard(comment: Comment) {
+    CompoundEmojiMessage(
+        content = CompoundEmojiMessageModel.MessageContent(
+            "${comment.member.uname}: "+comment.content.message,
+            comment.content.emote
+        ),
+        size = 13,
+        modifier = Modifier.padding(vertical = 2.dp)
+    )
 }

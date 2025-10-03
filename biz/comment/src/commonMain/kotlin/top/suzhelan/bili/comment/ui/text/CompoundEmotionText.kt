@@ -1,6 +1,6 @@
 package top.suzhelan.bili.comment.ui.text
 
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
@@ -12,7 +12,6 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import top.suzhelan.bili.api.HttpJsonDecoder
@@ -73,7 +72,6 @@ fun CompoundEmojiMessage(
     content: CompoundEmojiMessageModel.MessageContent,
     modifier: Modifier = Modifier,
     size: Int = 14,
-    emotionSize : Int = 16,
     textStyle: TextStyle = TextStyle.Default.copy(fontSize = size.sp)
 ) {
     val messageParts = remember(content) {
@@ -85,18 +83,24 @@ fun CompoundEmojiMessage(
         messageParts.filterIsInstance<CompoundEmojiMessageModel.MessagePart.Emote>()
             .forEach { emote ->
                 val key = "emote_${emote.key.hashCode()}"
+                //计算高度，小表情要比文本高一点，大表情正常算
+                val emotionSize = if (emote.data.meta.size == 1) {
+                    size * 1.3f
+                } else {
+                    emote.data.meta.size.toFloat()
+                }
                 put(
                     key, InlineTextContent(
                         Placeholder(
-                            width = (emotionSize * emote.data.meta.size).sp,
-                            height = (emotionSize * emote.data.meta.size).sp,
+                            width = emotionSize.sp,
+                            height = emotionSize.sp,
                             placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                         )
                     ) {
                         AsyncImage(
                             model = emote.data.url,
                             contentDescription = emote.data.text,
-                            modifier = Modifier.size((emotionSize * emote.data.meta.size).dp),
+                            modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Fit
                         )
                     })

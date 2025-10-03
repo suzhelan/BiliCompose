@@ -13,11 +13,23 @@ import androidx.compose.ui.text.TextStyle
  */
 val ColorPrimary: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.primary
 val ColorPrimaryContainer: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.primaryContainer
-val ColorError: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.error
 val ColorSurface @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.surface
+
+/**
+ * 标准字体颜色
+ * 常态为黑，深色模式为白
+ */
 val TextColor: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.onSurface
+
+/**
+ * 提示颜色
+ * 常态为灰色，深色模式为浅灰色
+ */
 val TipColor: Color @Composable @ReadOnlyComposable get() = if (isSystemInDarkTheme()) Color.LightGray else Color.Gray
 
+/**
+ * 分割线颜色
+ */
 val DividingLineColor: Color @Composable @ReadOnlyComposable get() = TipColor.copy(alpha = 0.5f)
 
 object ErrorColor {
