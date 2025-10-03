@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -24,6 +25,8 @@ import top.suzhelan.bili.biz.recvids.ui.card.UnknownTypeCoverCard
 import top.suzhelan.bili.biz.recvids.ui.card.VideoCard
 import top.suzhelan.bili.biz.recvids.viewmodel.FeedViewModel
 import top.suzhelan.bili.shared.common.ui.PagerBottomIndicator
+import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
+import top.suzhelan.bili.shared.common.ui.dialog.DialogState
 
 /**
  * 视频流布局实现
@@ -37,11 +40,30 @@ fun FeedVideoContent(
     }
 ) {
 
+
     val lazyPagingItems = viewModel.recommendedListFlow.collectAsLazyPagingItems()
     val isRefreshing by remember {
         derivedStateOf { lazyPagingItems.loadState.refresh is LoadState.Loading }
     }
 
+    LaunchedEffect(lazyPagingItems.loadState.refresh) {
+        val refreshState = lazyPagingItems.loadState.refresh
+        //出现异常
+        if (refreshState is LoadState.Error) {
+            viewModel.updateDialog(
+                DialogState.Message(
+                title = "提示",
+                text = "网络异常，请稍后再试,点击确定可重试,下面是异常信息，尽管你可能并看不懂：\n${refreshState.error}",
+                confirmButtonText = "确定",
+                onConfirmRequest = {
+                    viewModel.dismissDialog()
+                    lazyPagingItems.refresh()
+                }
+            ))
+        }
+    }
+
+    DialogHandler(viewModel)
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
@@ -79,6 +101,7 @@ fun FeedVideoContent(
                     is SmallCoverV2Item -> {
                         VideoCard(video)
                     }
+
                     else -> {
                         UnknownTypeCoverCard(video)
                     }
