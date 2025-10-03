@@ -90,7 +90,7 @@ fun CompoundEmojiMessage(
                         Placeholder(
                             width = (emotionSize * emote.data.meta.size).sp,
                             height = (emotionSize * emote.data.meta.size).sp,
-                            placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                            placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                         )
                     ) {
                         AsyncImage(
