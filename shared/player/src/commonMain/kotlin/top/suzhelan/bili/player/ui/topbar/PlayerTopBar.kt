@@ -29,7 +29,7 @@ fun PlayerTopBar(
         modifier = Modifier.fillMaxWidth()
             .background(
                 Brush.verticalGradient(
-                    0f to Color.Black.copy(alpha = 0.4f),
+                    0f to PlayerColor.background.copy(alpha = 0.4f),
                     1f to Color.Transparent,
                 )
             )

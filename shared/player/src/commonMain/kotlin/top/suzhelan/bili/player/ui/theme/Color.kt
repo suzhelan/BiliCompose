@@ -14,10 +14,10 @@ object PlayerColor {
      * 控件颜色
      * 正常情况为白色,当深色模式时为黑色
      */
-    val control @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.surface
+    val control @Composable @ReadOnlyComposable get() = Color.White
 
     /**
      * 默认为黑,当深色模式时为白色
      */
-    val onSurface @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.onSurface
+    val background @Composable @ReadOnlyComposable get() = Color.Black
 }

@@ -70,7 +70,7 @@ private fun Indicator(
     Row(
         modifier = modifier.fillMaxWidth(0.5f)
             .background(
-                PlayerColor.onSurface.copy(alpha = 0.5f),
+                PlayerColor.background.copy(alpha = 0.5f),
                 RoundedCornerShape(20.dp)
             )
             .padding(20.dp),
