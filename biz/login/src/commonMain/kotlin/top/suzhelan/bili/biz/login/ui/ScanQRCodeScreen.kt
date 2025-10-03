@@ -13,6 +13,11 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,6 +27,7 @@ import top.suzhelan.bili.shared.common.logger.LogUtils
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimaryContainer
 import top.suzhelan.bili.shared.common.ui.theme.ColorSurface
 import top.suzhelan.bili.shared.navigation.LocalNavigation
+import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
@@ -29,8 +35,16 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 fun ScanQRCodeScreen() {
     val navigation = LocalNavigation.currentOrThrow
 
+    var scanQRCodeResult by remember {
+        mutableStateOf("")
+    }
     //获取状态栏高度
     val stateBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    LaunchedEffect(scanQRCodeResult) {
+        if (scanQRCodeResult.isNotEmpty()) {
+            navigation.push(SharedScreen.WebView(scanQRCodeResult))
+        }
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         QrScanner(
             modifier = Modifier.fillMaxWidth(),
@@ -38,8 +52,8 @@ fun ScanQRCodeScreen() {
             cameraLens = CameraLens.Back,
             openImagePicker = false,
             overlayBorderColor = ColorPrimaryContainer,
-            onCompletion = {
-                LogUtils.d("QRCode", "Result: $it")
+            onCompletion = { url ->
+                scanQRCodeResult = url
             },
             imagePickerHandler = {
 
@@ -67,3 +81,5 @@ fun ScanQRCodeScreen() {
     }
 
 }
+
+

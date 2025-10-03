@@ -7,6 +7,7 @@ import top.suzhelan.bili.biz.biliplayer.ui.VideoPlayerScreen
 import top.suzhelan.bili.biz.home.HomeScreen
 import top.suzhelan.bili.biz.login.ui.LoginScreen
 import top.suzhelan.bili.biz.login.ui.ScanQRCodeScreen
+import top.suzhelan.bili.biz.login.ui.WebViewScreen
 import top.suzhelan.bili.biz.user.ui.FollowListScreen
 import top.suzhelan.bili.shared.navigation.SharedScreen
 
@@ -28,6 +29,10 @@ fun NavGraphBuilder.routingScreenRegistration() {
     }
     composable<SharedScreen.ScanQRCode> {
         ScanQRCodeScreen()
+    }
+    composable<SharedScreen.WebView> { backStackEntry ->
+        val param = backStackEntry.toRoute<SharedScreen.WebView>()
+        WebViewScreen(param.url)
     }
 }
 
