@@ -52,7 +52,7 @@ fun CommentCard(comment: Comment) {
     //时间 ip ‘回复’ 点赞 点踩 更多操作
     //被回复预览
     ConstraintLayout(modifier = Modifier.fillMaxWidth().padding(0.dp)) {
-        val (avatar, nickname, level, background, content, infoLine, repliedPreview, _, _, _, _) = createRefs()
+        val (avatar, nickname, level, background, content, infoLine, repliedPreview) = createRefs()
 
         //背景
         AsyncImage(

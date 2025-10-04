@@ -28,10 +28,14 @@ import bilicompose.biz.recvids.generated.resources.Res
 import bilicompose.biz.recvids.generated.resources.more
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.stringResource
+import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.recvids.entity.PopularItem
 import top.suzhelan.bili.shared.common.ui.shimmerEffect
 import top.suzhelan.bili.shared.common.util.TimeUtils
 import top.suzhelan.bili.shared.common.util.formatPlayCount
+import top.suzhelan.bili.shared.navigation.LocalNavigation
+import top.suzhelan.bili.shared.navigation.SharedScreen
+import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 @Composable
 fun PopularLoadingCard() {
@@ -40,13 +44,21 @@ fun PopularLoadingCard() {
 
 @Composable
 fun PopularCoverCard(popularItem: PopularItem) {
+    val navigation = LocalNavigation.currentOrThrow
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
             .padding(vertical = 6.dp, horizontal = 12.dp)
             .clickable {
-
+                val videoScreen = SharedScreen.VideoPlayer(
+                    PlayerParams(
+                        avid = popularItem.aid,
+                        bvid = popularItem.bvid,
+                        cid = popularItem.cid
+                    ).toJson()
+                )
+                navigation.push(videoScreen)
             }
     ) {
         val (coverImage, durationText, titleText, reasonText, upNameText, extraText, moreIc) = createRefs()
