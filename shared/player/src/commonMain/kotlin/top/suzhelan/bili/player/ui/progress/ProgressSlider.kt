@@ -30,14 +30,14 @@ import kotlin.math.roundToLong
 fun rememberPlayerProgressSliderState(
     currentPositionMillis: () -> Long,
     totalDurationMillis: () -> Long,
-    onProView: (Long) -> Unit = {},
+    onPreView: (Long) -> Unit = {},
     onFinished: (Long) -> Unit = {}
 ): PlayerProgressSliderState {
     return remember {
         PlayerProgressSliderState(
             currentPositionMillis = currentPositionMillis,
             totalDurationMillis = totalDurationMillis,
-            onPreView = onProView,
+            onPreView = onPreView,
             onFinished = onFinished,
         )
     }

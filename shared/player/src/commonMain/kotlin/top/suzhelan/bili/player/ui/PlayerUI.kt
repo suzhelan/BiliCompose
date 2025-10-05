@@ -16,9 +16,10 @@ import top.suzhelan.bili.player.controller.PlayerToolBarVisibility
 import top.suzhelan.bili.player.controller.rememberAudioLevelController
 import top.suzhelan.bili.player.ui.bottombar.PlayerBottomBar
 import top.suzhelan.bili.player.ui.gesture.GestureHost
-import top.suzhelan.bili.player.ui.indicator.AudioVisualIndicator
 import top.suzhelan.bili.player.ui.indicator.BiliVideoLoadingIndicator
 import top.suzhelan.bili.player.ui.indicator.BrightnessIndicator
+import top.suzhelan.bili.player.ui.indicator.GestureVisualIndicator
+import top.suzhelan.bili.player.ui.indicator.OnPreviewIndicator
 import top.suzhelan.bili.player.ui.indicator.VolumeIndicator
 import top.suzhelan.bili.player.ui.progress.PlayerProgressIndicator
 import top.suzhelan.bili.player.ui.progress.rememberPlayerProgressSliderState
@@ -40,15 +41,15 @@ fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier)
         totalDurationMillis = {
             totalDurationMillis
         },
-        onProView = {
+        onPreView = {
         },
         onFinished = {
             controller.seekTo(it)
         }
     )
     val audioVisualState = rememberAudioLevelController()
-    var indicatorType: AudioVisualIndicator by remember {
-        mutableStateOf(AudioVisualIndicator.None)
+    var indicatorType: GestureVisualIndicator by remember {
+        mutableStateOf(GestureVisualIndicator.None)
     }
     VideoScaffold(
         playerSyncController = controller,
@@ -64,8 +65,8 @@ fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier)
             )
             //亮度和音量调整指示器
             when (indicatorType) {
-                AudioVisualIndicator.None -> {}
-                AudioVisualIndicator.Brightness -> {
+                GestureVisualIndicator.None -> {}
+                GestureVisualIndicator.Brightness -> {
                     BrightnessIndicator(
                         modifier = Modifier.align(Alignment.Center),
                         progress = {
@@ -74,12 +75,23 @@ fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier)
                     )
                 }
 
-                AudioVisualIndicator.Volume -> {
+                GestureVisualIndicator.Volume -> {
                     VolumeIndicator(
                         modifier = Modifier.align(Alignment.Center),
                         progress = {
                             audioVisualState.volumePercentage
                         }
+                    )
+                }
+
+                is GestureVisualIndicator.OnPreview -> {
+                    val onPreview = indicatorType as GestureVisualIndicator.OnPreview
+                    val current = onPreview.currentPositionMillis
+                    val total = onPreview.totalDurationMillis
+                    OnPreviewIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        progress = current,
+                        total = total,
                     )
                 }
             }
@@ -121,35 +133,40 @@ fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier)
                     if (controller.visibility != PlayerToolBarVisibility.Visible) {
                         controller.updateVisibility(PlayerToolBarVisibility.Visible)
                     }
+                    indicatorType = GestureVisualIndicator.OnPreview(
+                        currentPositionMillis = (progress * totalDurationMillis).toLong(),
+                        totalDurationMillis = totalDurationMillis
+                    )
                     progressSliderState.previewPositionRatio(progress)
                 },
                 onProgressFinished = {
                     controller.updateVisibility(PlayerToolBarVisibility.Invisible)
+                    indicatorType = GestureVisualIndicator.None
                     progressSliderState.changeFinished()
                 },
                 currentVolume = {
                     audioVisualState.volumePercentage
                 },
                 onVolume = {
-                    if (indicatorType != AudioVisualIndicator.Volume) {
-                        indicatorType = AudioVisualIndicator.Volume
+                    if (indicatorType != GestureVisualIndicator.Volume) {
+                        indicatorType = GestureVisualIndicator.Volume
                     }
                     audioVisualState.setVolume(it)
                 },
                 onVolumeFinished = {
-                    indicatorType = AudioVisualIndicator.None
+                    indicatorType = GestureVisualIndicator.None
                 },
                 currentBrightness = {
                     audioVisualState.brightnessPercentage
                 },
                 onBrightness = {
-                    if (indicatorType != AudioVisualIndicator.Brightness) {
-                        indicatorType = AudioVisualIndicator.Brightness
+                    if (indicatorType != GestureVisualIndicator.Brightness) {
+                        indicatorType = GestureVisualIndicator.Brightness
                     }
                     audioVisualState.setBrightness(it)
                 },
                 onBrightnessFinished = {
-                    indicatorType = AudioVisualIndicator.None
+                    indicatorType = GestureVisualIndicator.None
                 }
             )
         }
