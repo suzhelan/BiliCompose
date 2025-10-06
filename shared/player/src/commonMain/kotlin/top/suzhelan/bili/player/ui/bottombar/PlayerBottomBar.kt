@@ -54,7 +54,7 @@ fun PlayerBottomBar(
     val context by rememberUpdatedState(BiliLocalContext.current)
     //订阅全屏状态
     LaunchedEffect(isFullScreen) {
-        PlayerMediaDataUtils.setFullScreen(context, isFullScreen)
+        PlayerMediaDataUtils.setFullScreen(context, isFullScreen, controller.isPortraitVideo)
     }
     //最左侧 播放/暂时按钮
     IconButton(

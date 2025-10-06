@@ -37,6 +37,21 @@ class PlayerSyncController(
 
     var isFillMaxSize by mutableStateOf(false)
 
+    // 视频尺寸信息
+    var videoWidth by mutableStateOf(0)
+        private set
+
+    var videoHeight by mutableStateOf(0)
+        private set
+
+    // 视频宽高比
+    val videoAspectRatio: Float get() = if (videoWidth > 0 && videoHeight > 0) {
+        videoWidth.toFloat() / videoHeight.toFloat()
+    } else 0f
+
+    // 判断是否为竖屏视频（宽高比小于1）
+    val isPortraitVideo: Boolean get() = videoAspectRatio < 1f
+
     val playbackState: StateFlow<PlaybackState> get() = videoPlayer.playbackState
 
     val isPlaying: Boolean get() = videoPlayer.playbackState.value.isPlaying
@@ -72,7 +87,14 @@ class PlayerSyncController(
      * 播放视频
      */
     fun play(videoUrl: String, audioUrl: String) {
-        PlayerMediaDataUtils.doLoadMediaData(videoPlayer, videoUrl, audioUrl)
+        PlayerMediaDataUtils.doLoadMediaData(
+            videoPlayer,
+            videoUrl,
+            audioUrl,
+            onVideoSizeChanged = { width, height ->
+                updateVideoSize(width, height)
+            }
+        )
     }
 
     /**
@@ -127,6 +149,14 @@ class PlayerSyncController(
         }
     }
 
+    /**
+     * 更新视频尺寸信息
+     */
+    fun updateVideoSize(width: Int, height: Int) {
+        videoWidth = width
+        videoHeight = height
+    }
+
 
     fun reversalFullScreen() {
         isFullScreen = !isFullScreen
@@ -175,10 +205,11 @@ expect object PlayerMediaDataUtils {
     fun doLoadMediaData(
         mediampPlayer: MediampPlayer,
         videoUrl: String,
-        audioUrl: String
+        audioUrl: String,
+        onVideoSizeChanged: ((width: Int, height: Int) -> Unit)? = null
     )
 
-    fun setFullScreen(context: BiliContext, fullScreen: Boolean)
+    fun setFullScreen(context: BiliContext, fullScreen: Boolean, isPortraitVideo: Boolean = false)
 }
 
 

@@ -12,7 +12,8 @@ actual object PlayerMediaDataUtils {
     actual fun doLoadMediaData(
         mediampPlayer: MediampPlayer,
         videoUrl: String,
-        audioUrl: String
+        audioUrl: String,
+        onVideoSizeChanged: ((width: Int, height: Int) -> Unit)?
     ) {
         CoroutineScope(Dispatchers.IO).launch {
            /* mediampPlayer.setMediaData(
@@ -45,6 +46,6 @@ actual object PlayerMediaDataUtils {
         }
     }
 
-    actual fun setFullScreen(context: BiliContext, fullScreen: Boolean) {
+    actual fun setFullScreen(context: BiliContext, fullScreen: Boolean, isPortraitVideo: Boolean) {
     }
 }
