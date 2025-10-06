@@ -56,7 +56,8 @@ actual object PlayerMediaDataUtils {
     actual fun doLoadMediaData(
         mediampPlayer: MediampPlayer,
         videoUrl: String,
-        audioUrl: String
+        audioUrl: String,
+        onVideoSizeChanged: ((width: Int, height: Int) -> Unit)?
     ) {
         val exoPlayer = mediampPlayer.impl as ExoPlayer
         val videoSource = AndroidPlayerParam.buildMediaSource(videoUrl)
@@ -72,16 +73,27 @@ actual object PlayerMediaDataUtils {
                         title = "",
                         durationMillis = duration,
                     )
+
+                    onVideoSizeChanged?.invoke(videoSize.width, videoSize.height)
                 }
             })
         }
     }
 
-    actual fun setFullScreen(context: BiliContext, fullScreen: Boolean) {
+    actual fun setFullScreen(context: BiliContext, fullScreen: Boolean, isPortraitVideo: Boolean) {
         if (context is Activity) {
             if (fullScreen) {
-                //切换到横屏
-                context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                // 根据传入的视频比例信息决定屏幕方向
+
+                // 根据视频类型选择合适的屏幕方向
+                if (isPortraitVideo) {
+                    // 竖屏视频：保持竖屏方向，不做横屏切换
+                    context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                } else {
+                    // 横屏视频：切换到横屏
+                    context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                }
+
                 //屏幕常亮
                 context.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 // 使用 WindowInsetsController 隐藏系统 UI（推荐方式）
