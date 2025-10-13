@@ -5,7 +5,21 @@ import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 
 /**
  * 短视频项实体
- * 封装SmallCoverV2Item用于短视频场景
+ *
+ * 封装短视频播放所需的核心数据模型
+ * 从推荐流的SmallCoverV2Item转换而来
+ *
+ * @property aid 视频aid，唯一标识符
+ * @property cid 视频cid，分P标识符
+ * @property title 视频标题
+ * @property cover 封面图URL
+ * @property author 作者名称
+ * @property authorId 作者UID
+ * @property authorAvatar 作者头像URL，可能为空需异步加载
+ * @property duration 视频时长（秒）
+ * @property playCount 播放量显示文本
+ * @property danmakuCount 弹幕数显示文本
+ * @property isVertical 是否为竖屏视频
  */
 @Serializable
 data class ShortVideoItem(
@@ -22,6 +36,12 @@ data class ShortVideoItem(
     val isVertical: Boolean = true
 ) {
     companion object {
+        /**
+         * 从推荐流视频项转换为短视频项
+         *
+         * @param item 推荐流视频项
+         * @return 短视频项
+         */
         fun fromSmallCoverV2Item(item: SmallCoverV2Item): ShortVideoItem {
             return ShortVideoItem(
                 aid = item.playerArgs.aid,
@@ -39,4 +59,3 @@ data class ShortVideoItem(
         }
     }
 }
-

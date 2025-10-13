@@ -1,13 +1,8 @@
 package top.suzhelan.bili.biz.shorts.ui.component
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -40,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -51,7 +45,18 @@ import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
 
 /**
  * 短视频侧边操作栏组件
- * 包含头像、点赞、评论、分享等交互
+ *
+ * 提供作者头像、点赞、评论、分享等交互按钮
+ * 采用竖向排列，位于屏幕右侧
+ *
+ * @param video 视频数据
+ * @param modifier Modifier
+ * @param onClickAuthor 点击作者回调
+ * @param onClickLike 点击点赞回调
+ * @param onClickComment 点击评论回调
+ * @param onClickShare 点击分享回调
+ *
+ * @author suzhelan
  */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -71,34 +76,11 @@ fun ShortVideoSideActions(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         // 作者头像
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .clickable { onClickAuthor(video.authorId) }
-        ) {
-            AsyncImage(
-                model = video.authorAvatar,
-                contentDescription = video.author,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentScale = ContentScale.Crop
-            )
-
-            // 关注按钮
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "关注",
-                modifier = Modifier
-                    .size(18.dp)
-                    .align(Alignment.BottomCenter)
-                    .offset(y = 8.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
-                    .padding(2.dp),
-                tint = Color.White
-            )
-        }
+        AuthorAvatar(
+            avatarUrl = video.authorAvatar,
+            authorName = video.author,
+            onClick = { onClickAuthor(video.authorId) }
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -128,6 +110,58 @@ fun ShortVideoSideActions(
     }
 }
 
+/**
+ * 作者头像组件
+ *
+ * @param avatarUrl 头像URL
+ * @param authorName 作者名称
+ * @param onClick 点击回调
+ */
+@Composable
+private fun AuthorAvatar(
+    avatarUrl: String,
+    authorName: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(50.dp)
+            .clickable { onClick() }
+    ) {
+        AsyncImage(
+            model = avatarUrl,
+            contentDescription = authorName,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentScale = ContentScale.Crop
+        )
+
+        // 关注按钮
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "关注",
+            modifier = Modifier
+                .size(18.dp)
+                .align(Alignment.BottomCenter)
+                .offset(y = 8.dp)
+                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                .padding(2.dp),
+            tint = Color.White
+        )
+    }
+}
+
+/**
+ * 动画点赞按钮
+ *
+ * 点击时带有放大缩小的动画效果
+ *
+ * @param isLiked 是否已点赞
+ * @param count 点赞数量文本
+ * @param onLikedClicked 点击回调
+ */
 @Composable
 private fun AnimatedLikeButton(
     isLiked: Boolean,
@@ -173,6 +207,13 @@ private fun AnimatedLikeButton(
     }
 }
 
+/**
+ * 通用操作按钮
+ *
+ * @param icon 图标
+ * @param count 数量文本
+ * @param onClick 点击回调
+ */
 @Composable
 private fun ActionButton(
     icon: ImageVector,
@@ -204,7 +245,15 @@ private fun ActionButton(
 
 /**
  * 短视频底部信息组件
- * 显示标题、作者等信息
+ *
+ * 显示视频标题和作者名称
+ * 位于屏幕底部左侧
+ *
+ * @param video 视频数据
+ * @param modifier Modifier
+ * @param onClickAuthor 点击作者回调
+ *
+ * @author suzhelan
  */
 @Composable
 fun ShortVideoBottomInfo(
@@ -241,39 +290,3 @@ fun ShortVideoBottomInfo(
         )
     }
 }
-
-/**
- * 旋转音乐图标
- */
-@Composable
-fun RotatingMusicIcon(
-    imageUrl: String,
-    modifier: Modifier = Modifier
-) {
-    val infiniteTransition = rememberInfiniteTransition()
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(8000, easing = LinearEasing)
-        )
-    )
-
-    Box(
-        modifier = modifier
-            .size(50.dp)
-            .rotate(rotation)
-            .background(Color.White.copy(alpha = 0.2f), CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = "音乐",
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop
-        )
-    }
-}
-

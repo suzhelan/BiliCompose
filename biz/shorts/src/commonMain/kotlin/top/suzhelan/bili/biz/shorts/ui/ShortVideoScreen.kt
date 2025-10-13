@@ -46,10 +46,22 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 /**
  * 短视频播放Screen
- * 纯 UI 层，所有状态由 ViewModel 管理
+ *
+ * 提供类似抖音的竖屏视频流播放体验
+ * 采用MVVM架构，纯UI层不包含业务逻辑，所有状态由ViewModel管理
+ *
+ * ## 功能特性
+ * - 竖屏视频流播放
+ * - 上下滑动切换视频
+ * - 自动播放/暂停管理
+ * - 加载状态展示
+ * - 错误处理
  *
  * @param initialAid 初始播放的视频aid
- * @param videoJson 视频的JSON序列化字符串
+ * @param videoJson 初始视频的JSON序列化字符串（可选）
+ * @param viewModel 视频ViewModel
+ *
+ * @author suzhelan
  */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +72,7 @@ fun ShortVideoScreen(
 ) {
     val navigator = LocalNavigation.currentOrThrow
 
-    // 从 ViewModel 获取所有状态
+    // 从ViewModel获取所有状态
     val videoList by viewModel.videoList.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
@@ -73,67 +85,42 @@ fun ShortVideoScreen(
             try {
                 kotlinx.serialization.json.Json.decodeFromString<SmallCoverV2Item>(videoJson)
             } catch (e: Exception) {
-                LogUtils.e("解析初始视频失败", e)
+                LogUtils.e("ShortVideoScreen: 解析初始视频失败", e)
                 null
             }
         } else null
     }
 
-    // 仅在进入时初始化会话 - 由 ViewModel 管理所有状态
+    // 初始化会话 - 只在进入时执行一次
     LaunchedEffect(initialAid, videoJson) {
         viewModel.initSession(initialAid, initialVideo)
     }
 
-    // 错误提示
+    // 错误提示处理
     LaunchedEffect(errorMessage) {
         errorMessage?.let {
-            // 可以在这里显示 Toast 或 Snackbar
+            // 自动清除错误信息
             viewModel.clearError()
         }
     }
 
+    // 对话框处理
     DialogHandler(viewModel)
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             videoList.isEmpty() && isLoading -> {
                 // 加载状态
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color.White)
-                }
+                LoadingContent()
             }
 
             videoList.isEmpty() && !isLoading -> {
                 // 空状态
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Text(
-                            text = "暂无竖屏视频",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White
-                        )
-                        Button(onClick = { viewModel.loadMoreVideos() }) {
-                            Text("重新加载")
-                        }
-                    }
-                }
+                EmptyContent(onRetry = viewModel::loadMoreVideos)
             }
 
             else -> {
-                // 视频列表 - 使用 sessionId 作为 key 强制重新创建
+                // 视频列表 - 使用sessionId作为key强制重新创建
                 key(sessionId) {
                     ShortVideoVerticalPager(
                         videos = videoList,
@@ -162,7 +149,59 @@ fun ShortVideoScreen(
 }
 
 /**
- * 竖向视频Pager组件 - 纯 UI，无状态管理
+ * 加载状态内容
+ */
+@Composable
+private fun LoadingContent() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(color = Color.White)
+    }
+}
+
+/**
+ * 空状态内容
+ *
+ * @param onRetry 重试回调
+ */
+@Composable
+private fun EmptyContent(onRetry: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "暂无竖屏视频",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White
+            )
+            Button(onClick = onRetry) {
+                Text("重新加载")
+            }
+        }
+    }
+}
+
+/**
+ * 竖向视频Pager组件
+ *
+ * 负责视频列表的垂直滚动和页面管理
+ * 纯UI组件，不包含业务逻辑
+ *
+ * @param videos 视频列表
+ * @param initialPage 初始页码
+ * @param onPageChanged 页面变化回调
+ * @param onLoadMore 加载更多回调
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -181,7 +220,7 @@ private fun ShortVideoVerticalPager(
         pageCount = { videos.size }
     )
 
-    // 播放器控制器映射 - 只存储引用，不在这里创建
+    // 播放器控制器映射 - 统一管理所有播放器实例
     val playerControllers = remember { mutableMapOf<Long, PlayerSyncController>() }
 
     // 监听页面变化
@@ -196,11 +235,29 @@ private fun ShortVideoVerticalPager(
         }
     }
 
-    // 清理不再需要的播放器
-    DisposableEffect(videos) {
+    // 清理所有播放器
+    DisposableEffect(Unit) {
         onDispose {
+            LogUtils.d("ShortVideoScreen: 清理所有播放器，共 ${playerControllers.size} 个")
             playerControllers.values.forEach { it.close() }
             playerControllers.clear()
+        }
+    }
+
+    // 清理不在视口范围内的播放器
+    LaunchedEffect(pagerState.settledPage, videos.size) {
+        if (playerControllers.size > 5) {
+            val currentPage = pagerState.settledPage
+            val keysToRemove = playerControllers.keys.filter { aid ->
+                val index = videos.indexOfFirst { it.aid == aid }
+                index != -1 && (index < currentPage - 2 || index > currentPage + 2)
+            }
+
+            keysToRemove.forEach { aid ->
+                LogUtils.d("ShortVideoScreen: 清理远离视口的播放器 - aid=$aid")
+                playerControllers[aid]?.close()
+                playerControllers.remove(aid)
+            }
         }
     }
 
@@ -220,50 +277,75 @@ private fun ShortVideoVerticalPager(
 
         val video = videos[page]
 
-        // 修复：使用 settledPage 来判断是否为当前页，并且考虑初始页面
-        // 在 pagerState 未稳定之前，使用 initialPage 判断
+        // 判断是否为当前页
         val isCurrentPage = if (pagerState.settledPage == pagerState.currentPage) {
-            // 已稳定，使用 settledPage
             pagerState.settledPage == page
         } else {
-            // 正在滚动或初始化中，使用 currentPage
             pagerState.currentPage == page
         }
 
-        // 为每个页面创建独立的播放器控制器
         val playerController = rememberPlayerSyncController()
 
-        // 将控制器添加到映射中以便清理
+        // 将控制器添加到映射中进行统一管理
         DisposableEffect(video.aid) {
-            playerControllers[video.aid] = playerController
+            if (!playerControllers.containsKey(video.aid)) {
+                playerControllers[video.aid] = playerController
+                LogUtils.d("ShortVideoScreen: 注册播放器实例 - aid=${video.aid}, title=${video.title}")
+            }
+
             onDispose {
-                playerControllers.remove(video.aid)
-                playerController.close()
+                // 不在这里关闭播放器，避免重复关闭
+                // 播放器由上面的 LaunchedEffect 或最终的 DisposableEffect 统一清理
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            ShortVideoPlayer(
-                video = video,
-                isCurrentPage = isCurrentPage,
-                modifier = Modifier.fillMaxSize(),
-                playerController = playerController
-            )
+        ShortVideoPage(
+            video = video,
+            isCurrentPage = isCurrentPage,
+            playerController = playerController
+        )
+    }
+}
 
-            ShortVideoBottomInfo(
-                video = video,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 16.dp, bottom = 80.dp)
-                    .fillMaxWidth(0.7f)
-            )
+/**
+ * 单个短视频页面
+ *
+ * 组合播放器、信息和操作按钮
+ *
+ * @param video 视频数据
+ * @param isCurrentPage 是否为当前页
+ * @param playerController 播放器控制器
+ */
+@Composable
+private fun ShortVideoPage(
+    video: ShortVideoItem,
+    isCurrentPage: Boolean,
+    playerController: PlayerSyncController
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 播放器
+        ShortVideoPlayer(
+            video = video,
+            isCurrentPage = isCurrentPage,
+            modifier = Modifier.fillMaxSize(),
+            playerController = playerController
+        )
 
-            ShortVideoSideActions(
-                video = video,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 12.dp, bottom = 80.dp)
-            )
-        }
+        // 底部信息
+        ShortVideoBottomInfo(
+            video = video,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 16.dp, bottom = 80.dp)
+                .fillMaxWidth(0.7f)
+        )
+
+        // 侧边操作栏
+        ShortVideoSideActions(
+            video = video,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 12.dp, bottom = 80.dp)
+        )
     }
 }
