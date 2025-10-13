@@ -54,7 +54,7 @@ data class ShortVideoItem(
                 duration = item.playerArgs.duration,
                 playCount = item.coverLeftText1,
                 danmakuCount = item.coverLeftText2,
-                isVertical = item.rCmdReasonStyle?.text?.contains("竖屏") == true
+                isVertical = item.goto == "vertical_av"
             )
         }
     }
