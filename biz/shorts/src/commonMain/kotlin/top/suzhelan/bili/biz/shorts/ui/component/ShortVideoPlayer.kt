@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,18 +15,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import kotlinx.coroutines.launch
 import org.openani.mediamp.compose.MediampPlayerSurface
 import top.suzhelan.bili.biz.biliplayer.api.VideoPlayerApi
 import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
@@ -37,8 +32,18 @@ import top.suzhelan.bili.shared.common.logger.LogUtils
 
 /**
  * 短视频播放器组件
+ *
  * 负责单个视频的播放、暂停和生命周期管理
- * 注意：使用 MediampPlayerSurface 而不是 VideoPlayer 以避免手势冲突
+ * 使用MediampPlayerSurface渲染，避免手势冲突
+ *
+ *
+ * @param video 视频数据
+ * @param isCurrentPage 是否为当前显示页
+ * @param modifier Modifier
+ * @param onSingleTap 单击回调
+ * @param onDoubleTap 双击回调
+ * @param playerController 播放器控制器
+ *
  */
 @Composable
 fun ShortVideoPlayer(
@@ -49,16 +54,13 @@ fun ShortVideoPlayer(
     onDoubleTap: () -> Unit = {},
     playerController: PlayerSyncController? = null
 ) {
-    val scope = rememberCoroutineScope()
 
-    // 播放器状态
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isPaused by remember { mutableStateOf(false) }
     var videoData by remember { mutableStateOf<Pair<String, String>?>(null) }
     var playerInitialized by remember { mutableStateOf(false) }
 
-    // 第一步：先加载视频数据（完全模仿横屏播放器的方式）
     LaunchedEffect(video.aid) {
         isLoading = true
         errorMessage = null
@@ -96,7 +98,6 @@ fun ShortVideoPlayer(
         }
     }
 
-    // 生命周期管理
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner, playerController) {
         val lifecycle = lifecycleOwner.lifecycle
@@ -104,11 +105,13 @@ fun ShortVideoPlayer(
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {
                     playerController?.pause()
+                    LogUtils.d("ShortVideoPlayer: 生命周期暂停 - ${video.title}")
                 }
 
                 Lifecycle.Event.ON_RESUME -> {
                     if (isCurrentPage && !isPaused) {
                         playerController?.resume()
+                        LogUtils.d("ShortVideoPlayer: 生命周期恢复 - ${video.title}")
                     }
                 }
 
@@ -119,9 +122,9 @@ fun ShortVideoPlayer(
 
         onDispose {
             lifecycle.removeObserver(observer)
-            scope.launch {
-                playerController?.close()
-            }
+            // 不在这里关闭播放器，由 ShortVideoScreen 统一管理
+            // scope.launch { playerController?.close() }
+            LogUtils.d("ShortVideoPlayer: 组件销毁 - ${video.title}")
         }
     }
 
@@ -130,131 +133,177 @@ fun ShortVideoPlayer(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        // 如果 playerController 为 null，显示加载中
+        // 播放器为空时显示加载中
         if (playerController == null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = Color.White)
-            }
+            LoadingIndicator()
             return@Box
         }
 
         when {
-            isLoading -> {
-                // 加载中
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color.White)
-                }
-            }
+            isLoading -> LoadingIndicator()
 
-            errorMessage != null -> {
-                // 错误状态
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "播放失败",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White
-                        )
-                        Text(
-                            text = errorMessage ?: "",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.7f)
-                        )
-                    }
-                }
-            }
+            errorMessage != null -> ErrorContent(errorMessage!!)
 
             videoData != null -> {
                 val (videoUrl, audioUrl) = videoData!!
 
-                // 初始化播放器（只执行一次）
-                LaunchedEffect(videoUrl, audioUrl) {
-                    if (!playerController.isPlaying) {
-                        playerController.play(videoUrl, audioUrl)
-                        playerInitialized = true
-                        LogUtils.d("ShortVideoPlayer: 播放器初始化完成 - ${video.title}")
+                // 初始化播放器
+                InitializePlayer(
+                    videoUrl = videoUrl,
+                    audioUrl = audioUrl,
+                    playerController = playerController,
+                    isCurrentPage = isCurrentPage,
+                    isPaused = isPaused,
+                    onInitialized = { playerInitialized = true }
+                )
 
-                        // 立即根据当前页面状态决定是否播放
-                        if (isCurrentPage && !isPaused) {
-                            playerController.resume()
-                            LogUtils.d("ShortVideoPlayer: 开始播放 - ${video.title}")
-                        } else {
-                            playerController.pause()
-                            LogUtils.d("ShortVideoPlayer: 初始暂停 - ${video.title}, isCurrentPage=$isCurrentPage")
-                        }
-                    }
-                }
+                // 根据页面状态控制播放
+                ControlPlayback(
+                    playerController = playerController,
+                    isCurrentPage = isCurrentPage,
+                    isPaused = isPaused,
+                    playerInitialized = playerInitialized,
+                    videoTitle = video.title
+                )
 
-                // 根据页面状态控制播放（只在播放器初始化完成后才执行）
-                LaunchedEffect(isCurrentPage, isPaused, playerInitialized) {
-                    if (!playerInitialized) {
-                        LogUtils.d("ShortVideoPlayer: 等待播放器初始化完成 - ${video.title}")
-                        return@LaunchedEffect
-                    }
-
-                    if (isCurrentPage && !isPaused) {
-                        playerController.resume()
-                        LogUtils.d("ShortVideoPlayer: 恢复播放 - ${video.title}")
-                    } else {
-                        playerController.pause()
-                        LogUtils.d("ShortVideoPlayer: 暂停播放 - ${video.title}, isCurrentPage=$isCurrentPage, isPaused=$isPaused")
-                    }
-                }
-
-                // 渲染播放器 Surface
+                // 渲染播放器Surface
                 MediampPlayerSurface(
                     playerController.videoPlayer,
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // 手势检测层
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onDoubleTap = {
-                                    onDoubleTap()
-                                },
-                                onTap = {
-                                    isPaused = !isPaused
-                                    if (isPaused) {
-                                        playerController.pause()
-                                    } else {
-                                        playerController.resume()
-                                    }
-                                    onSingleTap()
-                                }
-                            )
-                        }
-                )
 
-                // 渐变遮罩
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                1f to Color.Black.copy(alpha = 0.6f)
-                            )
-                        )
+                // 手势检测层
+                GestureLayer(
+                    onTap = {
+                        isPaused = !isPaused
+                        if (isPaused) {
+                            playerController.pause()
+                        } else {
+                            playerController.resume()
+                        }
+                        onSingleTap()
+                    },
+                    onDoubleTap = onDoubleTap
                 )
             }
         }
     }
+}
+
+/**
+ * 加载指示器
+ */
+@Composable
+private fun LoadingIndicator() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(color = Color.White)
+    }
+}
+
+/**
+ * 错误内容
+ */
+@Composable
+private fun ErrorContent(message: String) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "播放失败",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White
+            )
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+/**
+ * 初始化播放器
+ */
+@Composable
+private fun InitializePlayer(
+    videoUrl: String,
+    audioUrl: String,
+    playerController: PlayerSyncController,
+    isCurrentPage: Boolean,
+    isPaused: Boolean,
+    onInitialized: () -> Unit
+) {
+    LaunchedEffect(videoUrl, audioUrl) {
+        if (!playerController.isPlaying) {
+            playerController.play(videoUrl, audioUrl)
+            onInitialized()
+            LogUtils.d("ShortVideoPlayer: 播放器初始化完成")
+
+            // 立即根据当前页面状态决定是否播放
+            if (isCurrentPage && !isPaused) {
+                playerController.resume()
+                LogUtils.d("ShortVideoPlayer: 开始播放")
+            } else {
+                playerController.pause()
+                LogUtils.d("ShortVideoPlayer: 初始暂停, isCurrentPage=$isCurrentPage")
+            }
+        }
+    }
+}
+
+/**
+ * 控制播放状态
+ */
+@Composable
+private fun ControlPlayback(
+    playerController: PlayerSyncController,
+    isCurrentPage: Boolean,
+    isPaused: Boolean,
+    playerInitialized: Boolean,
+    videoTitle: String
+) {
+    LaunchedEffect(isCurrentPage, isPaused, playerInitialized) {
+        if (!playerInitialized) {
+            LogUtils.d("ShortVideoPlayer: 等待播放器初始化完成 - $videoTitle")
+            return@LaunchedEffect
+        }
+
+        if (isCurrentPage && !isPaused) {
+            playerController.resume()
+            LogUtils.d("ShortVideoPlayer: 恢复播放 - $videoTitle")
+        } else {
+            playerController.pause()
+            LogUtils.d("ShortVideoPlayer: 暂停播放 - $videoTitle, isCurrentPage=$isCurrentPage, isPaused=$isPaused")
+        }
+    }
+}
+
+/**
+ * 手势检测层
+ */
+@Composable
+private fun GestureLayer(
+    onTap: () -> Unit,
+    onDoubleTap: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = { onDoubleTap() },
+                    onTap = { onTap() }
+                )
+            }
+    )
 }
