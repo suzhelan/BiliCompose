@@ -24,7 +24,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,18 +52,9 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
  * 提供类似抖音的竖屏视频流播放体验
  * 采用MVVM架构，纯UI层不包含业务逻辑，所有状态由ViewModel管理
  *
- * ## 功能特性
- * - 竖屏视频流播放
- * - 上下滑动切换视频
- * - 自动播放/暂停管理
- * - 加载状态展示
- * - 错误处理
- *
  * @param initialAid 初始播放的视频aid
  * @param videoJson 初始视频的JSON序列化字符串（可选）
  * @param viewModel 视频ViewModel
- *
- * @author suzhelan
  */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -126,7 +119,8 @@ fun ShortVideoScreen(
                         videos = videoList,
                         initialPage = currentPlayingIndex,
                         onPageChanged = viewModel::updatePlayingIndex,
-                        onLoadMore = viewModel::loadMoreVideos
+                        onLoadMore = viewModel::loadMoreVideos,
+                        viewModel = viewModel
                     )
                 }
             }
@@ -209,7 +203,8 @@ private fun ShortVideoVerticalPager(
     videos: List<ShortVideoItem>,
     initialPage: Int,
     onPageChanged: (Int) -> Unit,
-    onLoadMore: () -> Unit
+    onLoadMore: () -> Unit,
+    viewModel: ShortVideoViewModel
 ) {
     if (videos.isEmpty()) return
 
@@ -302,7 +297,8 @@ private fun ShortVideoVerticalPager(
         ShortVideoPage(
             video = video,
             isCurrentPage = isCurrentPage,
-            playerController = playerController
+            playerController = playerController,
+            viewModel = viewModel
         )
     }
 }
@@ -320,8 +316,17 @@ private fun ShortVideoVerticalPager(
 private fun ShortVideoPage(
     video: ShortVideoItem,
     isCurrentPage: Boolean,
-    playerController: PlayerSyncController
+    playerController: PlayerSyncController,
+    viewModel: ShortVideoViewModel
 ) {
+    // 查询关注状态
+    var followState by remember(video.authorId) { mutableStateOf(0) }
+
+    LaunchedEffect(video.authorId) {
+        val state = viewModel.queryFollowState(video.authorId)
+        followState = state ?: 0
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // 播放器
         ShortVideoPlayer(
@@ -343,6 +348,12 @@ private fun ShortVideoPage(
         // 侧边操作栏
         ShortVideoSideActions(
             video = video,
+            followState = followState,
+            onClickFollow = { authorId, currentState ->
+                viewModel.toggleFollow(authorId, currentState)
+                // 乐观更新UI
+                followState = if (currentState == 0) 2 else 0
+            },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 12.dp, bottom = 80.dp)

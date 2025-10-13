@@ -51,7 +51,9 @@ import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
  *
  * @param video 视频数据
  * @param modifier Modifier
+ * @param followState 关注状态 (0:未关注 2:已关注 6:已互粉)
  * @param onClickAuthor 点击作者回调
+ * @param onClickFollow 点击关注按钮回调
  * @param onClickLike 点击点赞回调
  * @param onClickComment 点击评论回调
  * @param onClickShare 点击分享回调
@@ -63,12 +65,17 @@ import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
 fun ShortVideoSideActions(
     video: ShortVideoItem,
     modifier: Modifier = Modifier,
+    followState: Int = 0,
     onClickAuthor: (Long) -> Unit = {},
+    onClickFollow: (Long, Int) -> Unit = { _, _ -> },
     onClickLike: () -> Unit = {},
     onClickComment: () -> Unit = {},
     onClickShare: () -> Unit = {}
 ) {
     var isLiked by remember { mutableStateOf(false) }
+
+    // 判断是否已关注 (2:已关注 6:已互粉)
+    val isFollowed = followState in listOf(2, 6)
 
     Column(
         modifier = modifier,
@@ -79,7 +86,10 @@ fun ShortVideoSideActions(
         AuthorAvatar(
             avatarUrl = video.authorAvatar,
             authorName = video.author,
-            onClick = { onClickAuthor(video.authorId) }
+            authorId = video.authorId,
+            isFollowed = isFollowed,
+            onClick = { onClickAuthor(video.authorId) },
+            onClickFollow = { onClickFollow(video.authorId, followState) }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -115,13 +125,19 @@ fun ShortVideoSideActions(
  *
  * @param avatarUrl 头像URL
  * @param authorName 作者名称
- * @param onClick 点击回调
+ * @param authorId 作者ID
+ * @param isFollowed 是否已关注
+ * @param onClick 点击头像回调
+ * @param onClickFollow 点击关注按钮回调
  */
 @Composable
 private fun AuthorAvatar(
     avatarUrl: String,
     authorName: String,
-    onClick: () -> Unit
+    authorId: Long,
+    isFollowed: Boolean,
+    onClick: () -> Unit,
+    onClickFollow: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -138,18 +154,21 @@ private fun AuthorAvatar(
             contentScale = ContentScale.Crop
         )
 
-        // 关注按钮
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = "关注",
-            modifier = Modifier
-                .size(18.dp)
-                .align(Alignment.BottomCenter)
-                .offset(y = 8.dp)
-                .background(MaterialTheme.colorScheme.primary, CircleShape)
-                .padding(2.dp),
-            tint = Color.White
-        )
+        // 关注按钮 - 已关注时不显示
+        if (!isFollowed) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "关注",
+                modifier = Modifier
+                    .size(18.dp)
+                    .align(Alignment.BottomCenter)
+                    .offset(y = 8.dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    .padding(2.dp)
+                    .clickable { onClickFollow() },
+                tint = Color.White
+            )
+        }
     }
 }
 

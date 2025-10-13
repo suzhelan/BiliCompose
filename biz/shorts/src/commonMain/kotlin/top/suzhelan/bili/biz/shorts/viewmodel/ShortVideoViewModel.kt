@@ -14,20 +14,10 @@ import top.suzhelan.bili.shared.common.logger.LogUtils
  *
  * 负责管理短视频列表的状态、播放控制和数据加载
  * 采用MVVM架构，通过DataSource层获取数据
- *
- * ## 功能职责
- * - 管理视频列表和播放状态
- * - 控制视频缓存池大小
- * - 处理会话生命周期
- * - 协调数据加载和UI更新
- *
- * @author suzhelan
  */
 class ShortVideoViewModel : BaseViewModel() {
 
     private val dataSource = ShortVideoDataSource()
-
-    // ==================== 状态管理 ====================
 
     /**
      * 视频列表状态
@@ -65,8 +55,6 @@ class ShortVideoViewModel : BaseViewModel() {
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
 
-    // ==================== 私有属性 ====================
-
     /**
      * 视频缓存池大小限制
      */
@@ -82,7 +70,10 @@ class ShortVideoViewModel : BaseViewModel() {
      */
     private val authorAvatarCache = mutableMapOf<Long, String>()
 
-    // ==================== 公共方法 ====================
+    /**
+     * 作者关注状态缓存 - key为authorId, value为关注状态(0:未关注 2:已关注 6:已互粉)
+     */
+    private val followStateCache = mutableMapOf<Long, Int>()
 
     /**
      * 初始化会话
@@ -183,13 +174,67 @@ class ShortVideoViewModel : BaseViewModel() {
     }
 
     /**
+     * 关注/取消关注作者
+     *
+     * @param authorId 作者ID
+     * @param currentFollowState 当前关注状态(0:未关注 2:已关注 6:已互粉)
+     */
+    fun toggleFollow(authorId: Long, currentFollowState: Int) {
+        launchTask {
+            try {
+                // 判断是关注还是取消关注
+                val isFollow = currentFollowState == 0
+
+                LogUtils.d("ShortVideoViewModel: ${if (isFollow) "关注" else "取消关注"} 用户 - authorId=$authorId")
+
+                val result = dataSource.modifyFollow(authorId, isFollow)
+
+                result.onSuccess { message ->
+                    // 更新缓存的关注状态
+                    val newState = if (isFollow) 2 else 0
+                    followStateCache[authorId] = newState
+
+                    // 显示成功消息
+                    showMessageDialog(message = message)
+                    LogUtils.d("ShortVideoViewModel: 关注操作成功 - $message")
+                }.onFailure { e ->
+                    // 显示错误消息
+                    showMessageDialog(message = e.message ?: "操作失败")
+                    LogUtils.e("ShortVideoViewModel: 关注操作失败 - ${e.message}")
+                }
+
+            } catch (e: Exception) {
+                showMessageDialog(message = "操作失败: ${e.message}")
+                LogUtils.e("ShortVideoViewModel: 关注操作异常", e)
+            }
+        }
+    }
+
+    /**
+     * 查询作者关注状态
+     *
+     * @param authorId 作者ID
+     * @return 关注状态 - 0:未关注 2:已关注 6:已互粉，null:查询失败
+     */
+    suspend fun queryFollowState(authorId: Long): Int? {
+        // 先检查缓存
+        followStateCache[authorId]?.let { return it }
+
+        // 从数据源查询
+        val state = dataSource.queryFollowState(authorId)
+
+        // 更新缓存
+        state?.let { followStateCache[authorId] = it }
+
+        return state
+    }
+
+    /**
      * 清除错误信息
      */
     fun clearError() {
         _errorMessage.value = null
     }
-
-    // ==================== 私有方法 ====================
 
     /**
      * 重置状态
