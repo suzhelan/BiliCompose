@@ -107,4 +107,44 @@ class ShortVideoDataSource {
 
         return avatarMap
     }
+
+    /**
+     * 关注/取消关注用户
+     *
+     * @param mid 用户ID
+     * @param isFollow true为关注，false为取消关注
+     * @return 操作结果消息
+     */
+    suspend fun modifyFollow(mid: Long, isFollow: Boolean): Result<String> {
+        return try {
+            val response = api.modifyRelation(mid, isFollow)
+            val message =
+                top.suzhelan.bili.biz.user.util.RelationUtils.getToastByModifyResult(response)
+
+            if (response.code == 0) {
+                Result.success(message)
+            } else {
+                Result.failure(Exception(message))
+            }
+        } catch (e: Exception) {
+            LogUtils.e("ShortVideoDataSource: 关注操作失败", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * 查询用户关注状态
+     *
+     * @param mid 用户ID
+     * @return 关注状态 - 0:未关注 2:已关注 6:已互粉
+     */
+    suspend fun queryFollowState(mid: Long): Int? {
+        return try {
+            val response = api.queryRelation(mid)
+            response.data.attribute
+        } catch (e: Exception) {
+            LogUtils.e("ShortVideoDataSource: 查询关注状态失败", e)
+            null
+        }
+    }
 }
