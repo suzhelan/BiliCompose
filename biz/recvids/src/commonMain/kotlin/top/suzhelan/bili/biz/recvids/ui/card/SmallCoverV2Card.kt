@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import kotlinx.serialization.json.Json.Default.encodeToString
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 import top.suzhelan.bili.shared.common.ui.autoSkeleton
@@ -58,8 +59,8 @@ fun EmptyCard() {
 fun VideoCard(video: SmallCoverV2Item) {
     val navigator = LocalNavigation.currentOrThrow
 
-    // 判断是否为竖屏视频
-    val isVerticalVideo = video.rCmdReasonStyle?.text?.contains("竖屏") == true
+    // 判断是否为竖屏视频 - 使用 goto 字段判断更准确
+    val isVerticalVideo = video.goto == "vertical_av"
 
     //首先就是一个圆角卡片背景
     Card(
@@ -69,7 +70,7 @@ fun VideoCard(video: SmallCoverV2Item) {
             .clickable {
                 if (isVerticalVideo) {
                     // 竖屏视频 - 跳转到短视频播放器，传递完整视频信息
-                    val videoJson = kotlinx.serialization.json.Json.encodeToString(
+                    val videoJson = encodeToString(
                         SmallCoverV2Item.serializer(),
                         video
                     )
