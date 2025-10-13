@@ -42,32 +42,7 @@ include(
     ":biz:user",
     ":biz:login",
     ":biz:recvids",
-    ":biz:comment"
+    ":biz:comment",
+    ":biz:shorts",
 )
 include(":app:android", ":app:desktop")
-
-//判断父目录存不存在mediamp的项目
-File("../mediamp").also { mediampDir ->
-    if (mediampDir.exists()) {
-        println("mediamp project exists,use local mediamp")
-        includeBuild(mediampDir) {
-            //将项目中的远程依赖项替换为项目模块依赖项
-            dependencySubstitution {
-                substitute(module("org.openani.mediamp:mediamp-api"))
-                    .using(project(":mediamp-api"))
-                substitute(module("org.openani.mediamp:mediamp-exoplayer"))
-                    .using(project(":mediamp-exoplayer"))
-                substitute(module("org.openani.mediamp:mediamp-vlc"))
-                    .using(project(":mediamp-vlc"))
-                substitute(module("org.openani.mediamp:mediamp-mpv"))
-                    .using(project(":mediamp-mpv"))
-                substitute(module("org.openani.mediamp:mediamp-source-ktxio"))
-                    .using(project(":mediamp-source-ktxio"))
-                substitute(module("org.openani.mediamp:mediamp-avkit"))
-                    .using(project(":mediamp-avkit"))
-                substitute(module("org.openani.mediamp:mediamp-all"))
-                    .using(project(":mediamp-all"))
-            }
-        }
-    }
-}

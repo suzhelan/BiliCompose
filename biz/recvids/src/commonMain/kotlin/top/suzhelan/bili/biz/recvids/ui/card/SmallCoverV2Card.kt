@@ -57,19 +57,33 @@ fun EmptyCard() {
 @Composable
 fun VideoCard(video: SmallCoverV2Item) {
     val navigator = LocalNavigation.currentOrThrow
-    val videoScreen = SharedScreen.VideoPlayer(
-        PlayerParams(
-            avid = video.playerArgs.aid,
-            cid = video.playerArgs.cid,
-        ).toJson()
-    )
+
+    // 判断是否为竖屏视频
+    val isVerticalVideo = video.rCmdReasonStyle?.text?.contains("竖屏") == true
+
     //首先就是一个圆角卡片背景
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(225.dp)
             .clickable {
-                navigator.push(videoScreen)
+                if (isVerticalVideo) {
+                    // 竖屏视频 - 跳转到短视频播放器，传递完整视频信息
+                    val videoJson = kotlinx.serialization.json.Json.encodeToString(
+                        SmallCoverV2Item.serializer(),
+                        video
+                    )
+                    navigator.push(SharedScreen.ShortVideo(video.playerArgs.aid, videoJson))
+                } else {
+                    // 横屏视频 - 跳转到普通播放器
+                    val videoScreen = SharedScreen.VideoPlayer(
+                        PlayerParams(
+                            avid = video.playerArgs.aid,
+                            cid = video.playerArgs.cid,
+                        ).toJson()
+                    )
+                    navigator.push(videoScreen)
+                }
             }
     ) {
         //上半部分 封面
@@ -197,4 +211,3 @@ private fun VideoInfoBar(video: SmallCoverV2Item) {
         )
     }
 }
-
