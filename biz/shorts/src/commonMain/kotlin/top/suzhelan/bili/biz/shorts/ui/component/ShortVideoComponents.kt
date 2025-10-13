@@ -77,7 +77,7 @@ fun ShortVideoSideActions(
                 .clickable { onClickAuthor(video.authorId) }
         ) {
             AsyncImage(
-                model = video.cover,
+                model = video.authorAvatar,
                 contentDescription = video.author,
                 modifier = Modifier
                     .fillMaxSize()

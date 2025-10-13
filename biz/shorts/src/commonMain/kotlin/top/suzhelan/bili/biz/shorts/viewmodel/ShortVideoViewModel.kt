@@ -12,6 +12,7 @@ import top.suzhelan.bili.biz.recvids.config.BaseCoverSerializer
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 import top.suzhelan.bili.biz.recvids.entity.targetCardType
 import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
+import top.suzhelan.bili.biz.user.api.UserApi
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 import top.suzhelan.bili.shared.common.logger.LogUtils
 
@@ -22,10 +23,14 @@ import top.suzhelan.bili.shared.common.logger.LogUtils
 class ShortVideoViewModel : BaseViewModel() {
 
     private val feedApi = FeedApi()
+    private val userApi = UserApi()
 
     // 视频列表 - 直接在 ViewModel 中管理，不使用全局单例
     private val _videoList = MutableStateFlow<List<ShortVideoItem>>(emptyList())
     val videoList: StateFlow<List<ShortVideoItem>> = _videoList.asStateFlow()
+
+    // 作者头像缓存 - 避免重复请求
+    private val authorAvatarCache = mutableMapOf<Long, String>()
 
     // 当前播放索引
     private val _currentPlayingIndex = MutableStateFlow(0)
@@ -77,6 +82,11 @@ class ShortVideoViewModel : BaseViewModel() {
 
             // 立即加载更多视频
             loadMoreVideos()
+
+            // 异步加载初始视频的作者头像
+            launchTask {
+                fetchAuthorAvatars(listOf(shortVideo))
+            }
         } else {
             // 没有初始视频，直接加载
             loadMoreVideos()
@@ -150,6 +160,58 @@ class ShortVideoViewModel : BaseViewModel() {
     }
 
     /**
+     * 批量获取作者头像
+     */
+    private suspend fun fetchAuthorAvatars(videoList: List<ShortVideoItem>) {
+        // 获取需要加载头像的作者ID
+        val missingAvatars = videoList
+            .filter { it.authorAvatar.isEmpty() && it.authorId != 0L }
+            .map { it.authorId }
+            .distinct()
+            .filter { !authorAvatarCache.containsKey(it) }
+
+        if (missingAvatars.isEmpty()) return
+
+        try {
+            val avatarMap = mutableMapOf<Long, String>()
+
+            // 并发获取头像
+            missingAvatars.chunked(5).forEach { chunk ->
+                val results = chunk.mapNotNull { authorId ->
+                    if (authorId == 0L) return@mapNotNull null
+
+                    val response = userApi.getUserInfo(authorId, isWithPhoto = true)
+                    if (response.isSuccess()) {
+                        authorId to response.getOrThrow().card.face
+                    } else {
+                        LogUtils.w("获取用户头像失败: authorId=$authorId")
+                        null
+                    }
+                }
+                avatarMap.putAll(results)
+            }
+
+            // 更新缓存
+            authorAvatarCache.putAll(avatarMap)
+
+            // 更新视频列表
+            val updatedVideos = _videoList.value.map { video ->
+                if (video.authorAvatar.isEmpty() && avatarMap.containsKey(video.authorId)) {
+                    video.copy(authorAvatar = avatarMap[video.authorId] ?: "")
+                } else {
+                    video
+                }
+            }
+
+            _videoList.value = updatedVideos
+            LogUtils.d("成功获取 ${avatarMap.size} 个作者头像")
+
+        } catch (e: Exception) {
+            LogUtils.e("批量获取作者头像失败", e)
+        }
+    }
+
+    /**
      * 从推荐API加载更多视频
      */
     fun loadMoreVideos() {
@@ -160,7 +222,7 @@ class ShortVideoViewModel : BaseViewModel() {
             _errorMessage.value = null
 
             try {
-                // 只请求一次，不再重试多次
+                // 先加载视频列表
                 val response = feedApi.getFeed()
 
                 if (response.isSuccess()) {
@@ -192,6 +254,9 @@ class ShortVideoViewModel : BaseViewModel() {
                     if (_videoList.value.isEmpty()) {
                         _errorMessage.value = "暂时没有视频，请稍后再试"
                         LogUtils.w("短视频加载完成但没有找到视频")
+                    } else {
+                        // 异步加载作者头像
+                        fetchAuthorAvatars(_videoList.value)
                     }
                 } else {
                     _errorMessage.value = "加载失败: ${response.message}"
