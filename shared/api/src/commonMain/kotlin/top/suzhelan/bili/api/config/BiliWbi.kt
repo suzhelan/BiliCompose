@@ -11,22 +11,13 @@ import kotlin.time.ExperimentalTime
  * 使用了wbi接口的 可以使用这个试试
  */
 object BiliWbi {
-    suspend fun getWRid(params: Map<String, String>): String {
+    suspend fun getEncQuery(params: Map<String, String>): String {
         val biliTicketData = BiliTicket.getBiliTickerData()
         val wbiParams = WbiParams(
             imgKey = extractImgKeyFromUrl(biliTicketData.nav.img),
             subKey = extractImgKeyFromUrl(biliTicketData.nav.sub)
         )
-        return wbiParams.getWRid(params)
-    }
-
-    suspend fun getWTs(): Long {
-        val biliTicketData = BiliTicket.getBiliTickerData()
-        val wbiParams = WbiParams(
-            imgKey = extractImgKeyFromUrl(biliTicketData.nav.img),
-            subKey = extractImgKeyFromUrl(biliTicketData.nav.sub)
-        )
-        return wbiParams.getWTs()
+        return wbiParams.enc(params)
     }
 
     private fun extractImgKeyFromUrl(url: String): String {
@@ -58,18 +49,22 @@ data class WbiParams(
             }
         }
 
-    fun getWRid(params: Map<String, String>): String {
+    @OptIn(ExperimentalTime::class)
+    fun enc(params: Map<String, Any?>): String {
         val sortedList = params.entries.sortedBy { it.key }
-        val sorted: MutableMap<String, String> = mutableMapOf()
+        val sorted = mutableMapOf<String, Any?>()
         for ((key, value) in sortedList) {
             sorted[key] = value
         }
-        return (sorted.toQueryString() + mixinKey).md5()
-    }
-
-    @OptIn(ExperimentalTime::class)
-    fun getWTs(): Long {
-        return Clock.System.now().epochSeconds
+        return buildString {
+            append(sorted.toQueryString())
+            val wts = Clock.System.now().epochSeconds
+            sorted["wts"] = wts
+            append("&wts=")
+            append(wts)
+            append("&w_rid=")
+            append((sorted.toQueryString() + mixinKey).md5())
+        }
     }
 
     private fun Map<String, Any?>.toQueryString() =

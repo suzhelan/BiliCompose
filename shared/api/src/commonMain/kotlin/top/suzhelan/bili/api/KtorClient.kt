@@ -13,10 +13,11 @@ import io.ktor.client.plugins.plugin
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.header
 import io.ktor.client.request.setBody
-import io.ktor.http.HttpHeaders.Cookie
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.URLProtocol
 import io.ktor.http.parameters
+import io.ktor.http.takeFrom
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import top.suzhelan.bili.api.config.BiliWbi
@@ -74,7 +75,7 @@ fun getKtorClient(
             //带cookie请求头
             if (withCookie && LoginMapper.isLogin() && LoginMapper.getCookie().isNotEmpty()) {
                 val cookie = LoginMapper.getCookie()
-                header(Cookie, cookie)
+                header(HttpHeaders.Cookie, cookie)
             }
         }
         //安装日志插件
@@ -95,7 +96,6 @@ fun getKtorClient(
             requestTimeoutMillis = 10000
             connectTimeoutMillis = 10000
             socketTimeoutMillis = 10000
-
         }
     }
     //进行签名和添加常用参数
@@ -117,15 +117,16 @@ fun getKtorClient(
                 rawParamMap["sign"] = sign
                 //添加wbi参数
                 if (withWbi) {
-                    val wbiParams = BiliWbi.getWRid(rawParamMap)
-                    val wts = BiliWbi.getWTs()
-                    rawParamMap["w_rid"] = wbiParams
-                    rawParamMap["wts"] = wts.toString()
-                }
-                //构建新的请求体
-                request.url.parameters.clear()
-                rawParamMap.forEach {
-                    request.url.parameters.append(it.key, it.value)
+                    val newQuery = BiliWbi.getEncQuery(rawParamMap)
+                    //直接替换原请求参数
+                    request.url.parameters.clear()
+                    request.url.takeFrom("${request.url}?$newQuery")
+                } else {
+                    //构建新的请求体
+                    request.url.parameters.clear()
+                    rawParamMap.forEach {
+                        request.url.parameters.append(it.key, it.value)
+                    }
                 }
 
             }
@@ -143,13 +144,6 @@ fun getKtorClient(
                 paramMap["appkey"] = appKeyType.appKey
                 val sign = BiliSignUtils(appKeyType).sign(paramMap)
                 paramMap["sign"] = sign
-                //添加wbi参数
-                if (withWbi) {
-                    val wbiParams = BiliWbi.getWRid(paramMap)
-                    val wts = BiliWbi.getWTs()
-                    paramMap["w_rid"] = wbiParams
-                    paramMap["wts"] = wts.toString()
-                }
                 //构建新的请求体
                 val newBody = FormDataContent(parameters {
                     paramMap.forEach {

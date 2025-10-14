@@ -10,6 +10,8 @@ import top.suzhelan.bili.api.proto.FawkesReq
 import top.suzhelan.bili.api.proto.Locale
 import top.suzhelan.bili.api.proto.LocaleIds
 import top.suzhelan.bili.shared.auth.config.LoginMapper
+import top.suzhelan.bili.shared.common.ext.format
+import top.suzhelan.bili.storage.Storage
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
@@ -22,11 +24,11 @@ val commonHeaders: MutableMap<String, String>
         val result = mutableMapOf(
             "app-key" to "android64",
             "bili-http-engine" to "ignet",
-            "buvid" to BiliHeaders.buvid,
+//            "buvid" to BiliHeaders.buvid,//添加后导致wbi风控校验失败
             "env" to "prod",
             "fp_local" to "c8c083bf5dc97732052c66ff0260851a2024110401353817dd863b003f0a9388",
             "fp_remote" to "c8c083bf5dc97732052c66ff0260851a2024110401353817dd863b003f0a9388",
-//            "guestid" to "23797428340613",
+//            "guestid" to "23797428340613",//未知
             "session_id" to BiliHeaders.sessionId,
             "user-agent" to BiliHeaders.userAgent,
             "x-bili-aurora-eid" to BiliHeaders.auroraEid,
@@ -79,7 +81,6 @@ object BiliHeaders {
         val localBin: String by lazy { genLocalBin() }
         val fawkesReqBin: String by lazy { genFawkesReqBin() }
 
-
         @OptIn(ExperimentalSerializationApi::class)
         private fun genFawkesReqBin(): String {
             val fawkesReq = FawkesReq(
@@ -103,6 +104,7 @@ object BiliHeaders {
             return base64.replace("=", "")
         }
     }
+
 
     //生成随机八位hex
     private fun genSessionId(): String {
@@ -175,10 +177,29 @@ object BiliHeaders {
         }.map(charPool::get).joinToString("")
     }
 
-    private fun generateBuvid(): String {
-        val md5Str = List(32) { random.nextInt(16).toString(16) }.joinToString("").uppercase()
-        return "XY${md5Str[2]}${md5Str[12]}${md5Str[22]}$md5Str"
+
+    fun generateBuvid(fpRaw: String = getDeviceIdByCache()): String {
+        //使用设备的唯一id生成
+        var veriCode = 0
+        val chunked = fpRaw.chunked(2).take(31) // 最多取31组，每组2个字符
+        for (chunk in chunked) {
+            val hexValue = chunk.toIntOrNull(16) ?: 0
+            veriCode += hexValue
+        }
+        return "%02x".format(veriCode % 256)
     }
+
+    private fun getDeviceIdByCache(): String {
+        //使用缓存随便生成一个
+        val cacheKey = "deviceId"
+        val storage = Storage("device")
+        return storage.getStringOrNull(cacheKey) ?: run {
+            val deviceId = genDeviceId()
+            storage.putString(cacheKey, deviceId)
+            deviceId
+        }
+    }
+
 
     @OptIn(ExperimentalTime::class)
     private fun genDeviceId(): String {
