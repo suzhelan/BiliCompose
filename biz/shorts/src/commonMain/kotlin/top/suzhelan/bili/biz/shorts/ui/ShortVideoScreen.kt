@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.serialization.json.Json.Default.decodeFromString
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
 import top.suzhelan.bili.biz.shorts.ui.component.ShortVideoBottomInfo
@@ -76,7 +77,7 @@ fun ShortVideoScreen(
     val initialVideo = remember(videoJson) {
         if (videoJson.isNotEmpty()) {
             try {
-                kotlinx.serialization.json.Json.decodeFromString<SmallCoverV2Item>(videoJson)
+                decodeFromString<SmallCoverV2Item>(videoJson)
             } catch (e: Exception) {
                 LogUtils.e("ShortVideoScreen: 解析初始视频失败", e)
                 null
