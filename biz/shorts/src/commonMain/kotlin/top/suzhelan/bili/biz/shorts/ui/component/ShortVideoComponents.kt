@@ -31,7 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -42,7 +44,7 @@ import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
 import top.suzhelan.bili.biz.shorts.ui.icons.ShortVideoIcons
 
 
-private val IconColor = Color(0xFFBFBFBF) // 白灰色
+private val IconColor = Color(0xfffffcfc) // 白灰色
 private val IconActiveColor = Color(0xFFFF6B9D) // 激活状态的粉色
 
 /**
@@ -234,6 +236,16 @@ private fun AnimatedLikeButton(
                 ) { onLikedClicked() },
             contentAlignment = Alignment.Center
         ) {
+            // 黑色阴影
+            Icon(
+                painter = painterResource(ShortVideoIcons.favorite),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(iconSize)
+                    .offset(x = 1.dp, y = 1.dp),
+                tint = Color.Black.copy(alpha = 0.1f)
+            )
+            // 主图标
             Icon(
                 painter = painterResource(ShortVideoIcons.favorite),
                 contentDescription = "点赞",
@@ -242,11 +254,19 @@ private fun AnimatedLikeButton(
             )
         }
 
-        Text(
-            text = count,
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.White
-        )
+        if (count.isNotEmpty()) {
+            Text(
+                text = count,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.8f),
+                        offset = Offset(1f, 1f),
+                        blurRadius = 4f
+                    )
+                ),
+                color = Color.White
+            )
+        }
     }
 }
 
@@ -269,19 +289,41 @@ private fun SvgActionButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = contentDescription,
-            modifier = Modifier
-                .size(30.dp)
-                .clickable { onClick() },
-            tint = IconColor
-        )
+        Box(
+            modifier = Modifier.size(30.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // 黑色阴影
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(30.dp)
+                    .offset(x = 1.dp, y = 1.dp)
+                    .clickable { onClick() },
+                tint = Color.Black.copy(alpha = 0.1f)
+            )
+            // 主图标
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = contentDescription,
+                modifier = Modifier
+                    .size(30.dp)
+                    .clickable { onClick() },
+                tint = IconColor
+            )
+        }
 
         if (count.isNotEmpty()) {
             Text(
                 text = count,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.8f),
+                        offset = Offset(1f, 1f),
+                        blurRadius = 4f
+                    )
+                ),
                 color = Color.White
             )
         }
