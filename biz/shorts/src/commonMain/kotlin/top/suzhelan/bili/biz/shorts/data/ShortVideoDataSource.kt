@@ -109,6 +109,42 @@ class ShortVideoDataSource {
     }
 
     /**
+     * 批量获取作者粉丝数
+     *
+     * @param authorIds 作者ID列表
+     * @return 作者ID到粉丝数的映射
+     */
+    suspend fun fetchAuthorFollowerCounts(authorIds: List<Long>): Map<Long, Int> {
+        val followerMap = mutableMapOf<Long, Int>()
+
+        try {
+            authorIds.chunked(5).forEach { chunk ->
+                chunk.forEach { authorId ->
+                    if (authorId == 0L) return@forEach
+
+                    try {
+                        val response = api.getUserInfo(authorId)
+                        val followerCount = response.data.follower
+                        followerMap[authorId] = followerCount
+                    } catch (e: Exception) {
+                        LogUtils.e(
+                            "ShortVideoDataSource: 获取用户粉丝数异常 - authorId=$authorId",
+                            e
+                        )
+                    }
+                }
+            }
+
+            LogUtils.d("ShortVideoDataSource: 成功获取 ${followerMap.size} 个作者粉丝数")
+
+        } catch (e: Exception) {
+            LogUtils.e("ShortVideoDataSource: 批量获取作者粉丝数失败", e)
+        }
+
+        return followerMap
+    }
+
+    /**
      * 关注/取消关注用户
      *
      * @param mid 用户ID

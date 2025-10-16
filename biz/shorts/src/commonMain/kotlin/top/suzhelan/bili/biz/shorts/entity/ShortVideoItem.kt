@@ -34,6 +34,7 @@ data class ShortVideoItem(
     val author: String,
     val authorId: Long,
     val authorAvatar: String = "",
+    val followerCount: Int = 0,
     val duration: Int,
     val playCount: String,
     val danmakuCount: String,

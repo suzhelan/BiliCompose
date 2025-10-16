@@ -10,18 +10,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,22 +31,24 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
 import top.suzhelan.bili.biz.shorts.ui.icons.ShortVideoIcons
+import top.suzhelan.bili.shared.common.util.toStringCount
 
 
 private val IconColor = Color(0xfffffcfc) // 白灰色
-private val IconActiveColor = Color(0xFFFF6B9D) // 激活状态的粉色
 
 /**
  * 短视频侧边操作栏组件
  *
- * 提供作者头像、点赞、评论、投币、收藏、分享等交互按钮
+ * 提供点赞、评论、投币、收藏、分享等交互按钮
  * 采用竖向排列，位于屏幕右侧
  *
  * @param video 视频数据
@@ -80,26 +80,11 @@ fun ShortVideoSideActions(
     onClickCollection: () -> Unit = {},
     onClickShare: () -> Unit = {}
 ) {
-    // 判断是否已关注 (2:已关注 6:已互粉)
-    val isFollowed = followState in listOf(2, 6)
-
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // 作者头像
-        AuthorAvatar(
-            avatarUrl = video.authorAvatar,
-            authorName = video.author,
-            authorId = video.authorId,
-            isFollowed = isFollowed,
-            onClick = { onClickAuthor(video.authorId) },
-            onClickFollow = { onClickFollow(video.authorId, followState) }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         // 点赞按钮
         AnimatedLikeButton(
             isLiked = likeState,
@@ -140,58 +125,6 @@ fun ShortVideoSideActions(
             contentDescription = "转发",
             onClick = onClickShare
         )
-    }
-}
-
-/**
- * 作者头像组件
- *
- * @param avatarUrl 头像URL
- * @param authorName 作者名称
- * @param authorId 作者ID
- * @param isFollowed 是否已关注
- * @param onClick 点击头像回调
- * @param onClickFollow 点击关注按钮回调
- */
-@Composable
-private fun AuthorAvatar(
-    avatarUrl: String,
-    authorName: String,
-    authorId: Long,
-    isFollowed: Boolean,
-    onClick: () -> Unit,
-    onClickFollow: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .size(50.dp)
-            .clickable { onClick() }
-    ) {
-        AsyncImage(
-            model = avatarUrl,
-            contentDescription = authorName,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentScale = ContentScale.Crop
-        )
-
-        // 关注按钮 - 已关注时不显示
-        if (!isFollowed) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "关注",
-                modifier = Modifier
-                    .size(18.dp)
-                    .align(Alignment.BottomCenter)
-                    .offset(y = 8.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
-                    .padding(2.dp)
-                    .clickable { onClickFollow() },
-                tint = Color.White
-            )
-        }
     }
 }
 
@@ -247,7 +180,7 @@ private fun AnimatedLikeButton(
                 painter = painterResource(ShortVideoIcons.favorite),
                 contentDescription = "点赞",
                 modifier = Modifier.size(iconSize),
-                tint = if (isLiked) IconActiveColor else IconColor
+                tint = if (isLiked) MaterialTheme.colorScheme.primary else IconColor
             )
         }
 
@@ -330,45 +263,155 @@ private fun SvgActionButton(
 /**
  * 短视频底部信息组件
  *
- * 显示视频标题和作者名称
+ * 显示视频标题、作者头像、作者名称、关注按钮和粉丝数
  * 位于屏幕底部左侧
  *
  * @param video 视频数据
  * @param modifier Modifier
+ * @param followState 关注状态 (0:未关注 2:已关注 6:已互粉)
  * @param onClickAuthor 点击作者回调
+ * @param onClickFollow 点击关注按钮回调
  */
 @Composable
 fun ShortVideoBottomInfo(
     video: ShortVideoItem,
     modifier: Modifier = Modifier,
-    onClickAuthor: (Long) -> Unit = {}
+    followState: Int = 0,
+    onClickAuthor: (Long) -> Unit = {},
+    onClickFollow: (Long, Int) -> Unit = { _, _ -> }
 ) {
+    // 判断是否已关注 (2:已关注 6:已互粉)
+    val isFollowed = followState in listOf(2, 6)
+
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // 作者名称
+        // 作者信息：头像在左边，右边是关注按钮和粉丝数的列
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable { onClickAuthor(video.authorId) }
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "@${video.author}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            // 作者头像
+            AsyncImage(
+                model = video.authorAvatar,
+                contentDescription = video.author,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { onClickAuthor(video.authorId) },
+                contentScale = ContentScale.Crop
             )
+
+            // 右侧区域：关注按钮和粉丝数在上，作者名在下
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // 关注按钮和粉丝数在同一行
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 关注按钮
+                    FollowButton(
+                        isFollowed = isFollowed,
+                        onClick = { onClickFollow(video.authorId, followState) }
+                    )
+
+                    // 粉丝数
+                    if (video.followerCount > 0) {
+                        Text(
+                            text = "${video.followerCount.toStringCount()}粉丝",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = 0.8f),
+                                    offset = Offset(1f, 1f),
+                                    blurRadius = 4f
+                                )
+                            ),
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+
+                // 作者名称
+                Text(
+                    text = "@${video.author}",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        shadow = Shadow(
+                            color = Color.Black.copy(alpha = 0.8f),
+                            offset = Offset(1f, 1f),
+                            blurRadius = 4f
+                        )
+                    ),
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.clickable { onClickAuthor(video.authorId) }
+                )
+            }
         }
 
         // 视频标题
         Text(
             text = video.title,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodySmall.copy(
+                shadow = Shadow(
+                    color = Color.Black.copy(alpha = 0.8f),
+                    offset = Offset(1f, 1f),
+                    blurRadius = 4f
+                )
+            ),
             color = Color.White,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth(0.8f)
+            modifier = Modifier.fillMaxWidth(0.85f)
         )
+    }
+}
+
+/**
+ * 关注按钮
+ *
+ * 未关注时高亮显示"关注"，已关注时灰色显示"已关注"
+ *
+ * @param isFollowed 是否已关注
+ * @param onClick 点击回调
+ */
+@Composable
+private fun FollowButton(
+    isFollowed: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = if (isFollowed) {
+            Color.White.copy(alpha = 0.2f)
+        } else {
+            MaterialTheme.colorScheme.primary
+        },
+        modifier = Modifier.height(28.dp)
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (isFollowed) "已关注" else "关注",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Medium
+                ),
+                color = if (isFollowed) {
+                    Color.White.copy(alpha = 0.7f)
+                } else {
+                    Color.White
+                },
+                fontSize = 12.sp
+            )
+        }
     }
 }

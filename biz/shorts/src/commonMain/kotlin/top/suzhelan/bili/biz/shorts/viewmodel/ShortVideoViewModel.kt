@@ -71,6 +71,11 @@ class ShortVideoViewModel : BaseViewModel() {
     private val authorAvatarCache = mutableMapOf<Long, String>()
 
     /**
+     * 作者粉丝数缓存 - 避免重复请求
+     */
+    private val authorFollowerCountCache = mutableMapOf<Long, Int>()
+
+    /**
      * 作者关注状态缓存 - key为authorId, value为关注状态(0:未关注 2:已关注 6:已互粉)
      */
     private val followStateCache = mutableMapOf<Long, Int>()
@@ -106,9 +111,9 @@ class ShortVideoViewModel : BaseViewModel() {
             // 立即加载更多视频
             loadMoreVideos()
 
-            // 异步加载初始视频的作者头像
+            // 异步加载初始视频的作者信息
             launchTask {
-                fetchAuthorAvatarsForVideos(listOf(shortVideo))
+                fetchAuthorInfoForVideos(listOf(shortVideo))
             }
         } else {
             // 没有初始视频，直接加载
@@ -388,16 +393,58 @@ class ShortVideoViewModel : BaseViewModel() {
      */
     private fun updateVideosWithCachedAvatars() {
         val updatedVideos = videoPoolMap.mapValues { (_, video) ->
+            var updatedVideo = video
+
+            // 更新头像
             if (video.authorAvatar.isEmpty() && authorAvatarCache.containsKey(video.authorId)) {
-                video.copy(authorAvatar = authorAvatarCache[video.authorId] ?: "")
-            } else {
-                video
+                updatedVideo =
+                    updatedVideo.copy(authorAvatar = authorAvatarCache[video.authorId] ?: "")
             }
+
+            // 更新粉丝数
+            if (video.followerCount == 0 && authorFollowerCountCache.containsKey(video.authorId)) {
+                updatedVideo =
+                    updatedVideo.copy(followerCount = authorFollowerCountCache[video.authorId] ?: 0)
+            }
+
+            updatedVideo
         }
 
         videoPoolMap.clear()
         videoPoolMap.putAll(updatedVideos)
         _videoList.value = videoPoolMap.values.toList()
+    }
+
+    /**
+     * 批量获取作者信息（包括头像和粉丝数）
+     *
+     * @param videoList 需要获取信息的视频列表
+     */
+    private suspend fun fetchAuthorInfoForVideos(videoList: List<ShortVideoItem>) {
+        // 获取需要加载信息的作者ID
+        val missingAuthorIds = videoList
+            .filter { it.authorId != 0L }
+            .map { it.authorId }
+            .distinct()
+            .filter {
+                !authorAvatarCache.containsKey(it) || !authorFollowerCountCache.containsKey(it)
+            }
+
+        if (missingAuthorIds.isEmpty()) {
+            updateVideosWithCachedAvatars()
+            return
+        }
+
+        // 从数据源获取头像和粉丝数
+        val avatarMap = dataSource.fetchAuthorAvatars(missingAuthorIds)
+        val followerMap = dataSource.fetchAuthorFollowerCounts(missingAuthorIds)
+
+        // 更新缓存
+        authorAvatarCache.putAll(avatarMap)
+        authorFollowerCountCache.putAll(followerMap)
+
+        // 更新视频列表
+        updateVideosWithCachedAvatars()
     }
 
     /**
