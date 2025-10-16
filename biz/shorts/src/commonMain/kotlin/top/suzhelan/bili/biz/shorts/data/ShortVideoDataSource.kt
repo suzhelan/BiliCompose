@@ -172,4 +172,41 @@ class ShortVideoDataSource {
             null
         }
     }
+
+    /**
+     * 查询视频是否已点赞
+     *
+     * @param aid 视频aid
+     * @return 是否已点赞，null表示查询失败
+     */
+    suspend fun queryLikeState(aid: Long): Boolean? {
+        return try {
+            val response = api.isLike(aid)
+            response.data
+        } catch (e: Exception) {
+            LogUtils.e("ShortVideoDataSource: 查询点赞状态失败 - aid=$aid", e)
+            null
+        }
+    }
+
+    /**
+     * 点赞或取消点赞视频
+     *
+     * @param aid 视频aid
+     * @param isLike true为点赞，false为取消点赞
+     * @return 操作结果
+     */
+    suspend fun toggleLike(aid: Long, isLike: Boolean): Result<String> {
+        return try {
+            val response = api.like(aid, isLike)
+            if (response.code == 0) {
+                Result.success(if (isLike) "点赞成功" else "取消点赞")
+            } else {
+                Result.failure(Exception(response.message))
+            }
+        } catch (e: Exception) {
+            LogUtils.e("ShortVideoDataSource: 点赞操作失败 - aid=$aid", e)
+            Result.failure(e)
+        }
+    }
 }
