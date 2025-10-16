@@ -160,6 +160,9 @@ class ShortVideoViewModel : BaseViewModel() {
                     } else {
                         // 异步加载作者头像
                         fetchAuthorAvatarsForVideos(_videoList.value)
+
+                        // 异步加载视频统计信息
+                        fetchVideoStatsForVideos(_videoList.value)
                     }
                 }
 
@@ -195,16 +198,16 @@ class ShortVideoViewModel : BaseViewModel() {
                     followStateCache[authorId] = newState
 
                     // 显示成功消息
-                    showMessageDialog(message = message)
+                    showMessageDialog(title = "提示", message = message)
                     LogUtils.d("ShortVideoViewModel: 关注操作成功 - $message")
                 }.onFailure { e ->
                     // 显示错误消息
-                    showMessageDialog(message = e.message ?: "操作失败")
+                    showMessageDialog(title = "错误", message = e.message ?: "操作失败")
                     LogUtils.e("ShortVideoViewModel: 关注操作失败 - ${e.message}")
                 }
 
             } catch (e: Exception) {
-                showMessageDialog(message = "操作失败: ${e.message}")
+                showMessageDialog(title = "错误", message = "操作失败: ${e.message}")
                 LogUtils.e("ShortVideoViewModel: 关注操作异常", e)
             }
         }
@@ -336,6 +339,46 @@ class ShortVideoViewModel : BaseViewModel() {
 
         videoPoolMap.clear()
         videoPoolMap.putAll(updatedVideos)
+        _videoList.value = videoPoolMap.values.toList()
+    }
+
+    /**
+     * 批量获取视频统计信息
+     *
+     * @param videoList 需要获取统计信息的视频列表
+     */
+    private suspend fun fetchVideoStatsForVideos(videoList: List<ShortVideoItem>) {
+        // 只获取当前可见及附近几个视频的统计信息，避免一次性请求过多
+        val currentIndex = _currentPlayingIndex.value
+        val startIndex = maxOf(0, currentIndex - 2)
+        val endIndex = minOf(videoList.size - 1, currentIndex + 5)
+
+        val videosToFetch = videoList.subList(startIndex, endIndex + 1)
+            .filter { it.likeCount.isEmpty() } // 只获取还没有统计数据的视频
+
+        videosToFetch.forEach { video ->
+            try {
+                val stats = dataSource.fetchVideoStats(video.aid)
+                stats?.let {
+                    // 更新视频统计信息
+                    val updatedVideo = video.copy(
+                        likeCount = it["like"] ?: "",
+                        coinCount = it["coin"] ?: "",
+                        favoriteCount = it["favorite"] ?: "",
+                        shareCount = it["share"] ?: ""
+                    )
+
+                    // 更新缓存池中的视频
+                    videoPoolMap[video.aid] = updatedVideo
+
+                    LogUtils.d("ShortVideoViewModel: 更新视频统计 - aid=${video.aid}, like=${it["like"]}, coin=${it["coin"]}")
+                }
+            } catch (e: Exception) {
+                LogUtils.e("ShortVideoViewModel: 获取视频统计失败 - aid=${video.aid}", e)
+            }
+        }
+
+        // 更新列表
         _videoList.value = videoPoolMap.values.toList()
     }
 

@@ -19,6 +19,10 @@ import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
  * @property duration 视频时长（秒）
  * @property playCount 播放量显示文本
  * @property danmakuCount 弹幕数显示文本
+ * @property likeCount 点赞数显示文本
+ * @property coinCount 投币数显示文本
+ * @property favoriteCount 收藏数显示文本
+ * @property shareCount 转发数显示文本
  * @property isVertical 是否为竖屏视频
  */
 @Serializable
@@ -33,6 +37,10 @@ data class ShortVideoItem(
     val duration: Int,
     val playCount: String,
     val danmakuCount: String,
+    val likeCount: String = "",
+    val coinCount: String = "",
+    val favoriteCount: String = "",
+    val shareCount: String = "",
     val isVertical: Boolean = true
 ) {
     companion object {
@@ -43,6 +51,12 @@ data class ShortVideoItem(
          * @return 短视频项
          */
         fun fromSmallCoverV2Item(item: SmallCoverV2Item): ShortVideoItem {
+            // 判断是否为竖屏视频
+            // goto字段为 "vertical_av" 表示竖屏视频
+            // 也可以是 "av" 但需要额外判断
+            val isVertical = item.goto == "vertical_av" ||
+                    item.cardGoto == "vertical_av"
+
             return ShortVideoItem(
                 aid = item.playerArgs.aid,
                 cid = item.playerArgs.cid,
@@ -54,7 +68,11 @@ data class ShortVideoItem(
                 duration = item.playerArgs.duration,
                 playCount = item.coverLeftText1,
                 danmakuCount = item.coverLeftText2,
-                isVertical = item.goto == "vertical_av"
+                likeCount = "",
+                coinCount = "",
+                favoriteCount = "",
+                shareCount = "",
+                isVertical = isVertical
             )
         }
     }
