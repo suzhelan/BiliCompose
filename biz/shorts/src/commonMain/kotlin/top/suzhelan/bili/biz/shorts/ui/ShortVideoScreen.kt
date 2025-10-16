@@ -131,7 +131,7 @@ fun ShortVideoScreen(
         IconButton(
             onClick = { navigator.pop() },
             modifier = Modifier
-                .padding(16.dp)
+                .padding(start = 16.dp, top = 48.dp)
                 .align(Alignment.TopStart)
         ) {
             Icon(
