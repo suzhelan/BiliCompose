@@ -147,4 +147,29 @@ class ShortVideoDataSource {
             null
         }
     }
+
+    /**
+     * 获取视频统计信息
+     *
+     * 包含点赞数、投币数、收藏数、转发数等
+     *
+     * @param aid 视频aid
+     * @return 视频统计信息的Map，key为统计类型，value为格式化后的数字字符串
+     */
+    suspend fun fetchVideoStats(aid: Long): Map<String, String>? {
+        return try {
+            val response = api.getVideoDetails(aid)
+            val stat = response.data.stat
+
+            mapOf(
+                "like" to stat.like.toString(),
+                "coin" to stat.coin.toString(),
+                "favorite" to stat.favorite.toString(),
+                "share" to stat.share.toString()
+            )
+        } catch (e: Exception) {
+            LogUtils.e("ShortVideoDataSource: 获取视频统计信息失败 - aid=$aid", e)
+            null
+        }
+    }
 }

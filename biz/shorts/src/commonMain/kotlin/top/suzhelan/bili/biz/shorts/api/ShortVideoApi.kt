@@ -1,6 +1,8 @@
 package top.suzhelan.bili.biz.shorts.api
 
 import top.suzhelan.bili.api.BiliResponse
+import top.suzhelan.bili.biz.biliplayer.api.VideoInfoApi
+import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.recvids.api.FeedApi
 import top.suzhelan.bili.biz.recvids.entity.ShortVideoData
 import top.suzhelan.bili.biz.user.api.RelationApi
@@ -16,6 +18,7 @@ class ShortVideoApi {
     private val feedApi = FeedApi()
     private val userApi = UserApi()
     private val relationApi = RelationApi()
+    private val videoInfoApi = VideoInfoApi()
 
     /**
      * 获取推荐视频流
@@ -56,5 +59,17 @@ class ShortVideoApi {
      */
     suspend fun queryRelation(mid: Long): BiliResponse.Success<Relation> {
         return relationApi.queryRelation(mid)
+    }
+
+    /**
+     * 获取视频详细信息
+     *
+     * 包含点赞数、投币数、收藏数、转发数等统计数据
+     *
+     * @param aid 视频aid
+     * @return 视频详细信息
+     */
+    suspend fun getVideoDetails(aid: Long): BiliResponse.Success<VideoInfo> {
+        return videoInfoApi.getVideoDetails(aid = aid)
     }
 }

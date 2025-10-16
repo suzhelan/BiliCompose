@@ -103,7 +103,7 @@ fun ShortVideoSideActions(
         // 点赞按钮
         AnimatedLikeButton(
             isLiked = isLiked,
-            count = video.playCount,
+            count = video.likeCount.ifEmpty { video.playCount },
             onLikedClicked = {
                 isLiked = !isLiked
                 onClickLike()
@@ -121,7 +121,7 @@ fun ShortVideoSideActions(
         // 投币按钮
         SvgActionButton(
             icon = ShortVideoIcons.coin,
-            count = "",
+            count = video.coinCount,
             contentDescription = "投币",
             onClick = onClickCoin
         )
@@ -129,7 +129,7 @@ fun ShortVideoSideActions(
         // 收藏按钮
         SvgActionButton(
             icon = ShortVideoIcons.collection,
-            count = "",
+            count = video.favoriteCount,
             contentDescription = "收藏",
             onClick = onClickCollection
         )
@@ -137,7 +137,7 @@ fun ShortVideoSideActions(
         // 转发按钮
         SvgActionButton(
             icon = ShortVideoIcons.forward,
-            count = "",
+            count = video.shareCount,
             contentDescription = "转发",
             onClick = onClickShare
         )
