@@ -348,6 +348,15 @@ private fun ShortVideoPage(
         // 底部信息
         ShortVideoBottomInfo(
             video = video,
+            followState = followState,
+            onClickAuthor = { authorId ->
+                // TODO: 导航到用户页面
+            },
+            onClickFollow = { authorId, currentState ->
+                viewModel.toggleFollow(authorId, currentState)
+                // 乐观更新UI
+                followState = if (currentState == 0) 2 else 0
+            },
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 16.dp, bottom = 80.dp)
