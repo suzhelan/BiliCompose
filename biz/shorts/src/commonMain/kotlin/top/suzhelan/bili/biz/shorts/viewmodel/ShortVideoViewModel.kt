@@ -76,6 +76,11 @@ class ShortVideoViewModel : BaseViewModel() {
     private val followStateCache = mutableMapOf<Long, Int>()
 
     /**
+     * 视频点赞状态缓存 - key为aid, value为是否已点赞
+     */
+    private val likeStateCache = mutableMapOf<Long, Boolean>()
+
+    /**
      * 初始化会话
      *
      * 每次进入Screen时调用，重置所有状态并开始新的播放会话
@@ -230,6 +235,59 @@ class ShortVideoViewModel : BaseViewModel() {
         state?.let { followStateCache[authorId] = it }
 
         return state
+    }
+
+    /**
+     * 查询视频点赞状态
+     *
+     * @param aid 视频aid
+     * @return 是否已点赞，null:查询失败
+     */
+    suspend fun queryLikeState(aid: Long): Boolean? {
+        // 先检查缓存
+        likeStateCache[aid]?.let { return it }
+
+        // 从数据源查询
+        val state = dataSource.queryLikeState(aid)
+
+        // 更新缓存
+        state?.let { likeStateCache[aid] = it }
+
+        return state
+    }
+
+    /**
+     * 点赞或取消点赞视频
+     *
+     * @param aid 视频aid
+     * @param currentLikeState 当前点赞状态
+     */
+    fun toggleLike(aid: Long, currentLikeState: Boolean) {
+        launchTask {
+            try {
+                // 新的点赞状态
+                val newLikeState = !currentLikeState
+
+                LogUtils.d("ShortVideoViewModel: ${if (newLikeState) "点赞" else "取消点赞"} 视频 - aid=$aid")
+
+                val result = dataSource.toggleLike(aid, newLikeState)
+
+                result.onSuccess { message ->
+                    // 更新缓存的点赞状态
+                    likeStateCache[aid] = newLikeState
+
+                    LogUtils.d("ShortVideoViewModel: 点赞操作成功 - $message")
+                }.onFailure { e ->
+                    // 显示错误消息
+                    showMessageDialog(title = "错误", message = e.message ?: "操作失败")
+                    LogUtils.e("ShortVideoViewModel: 点赞操作失败 - ${e.message}")
+                }
+
+            } catch (e: Exception) {
+                showMessageDialog(title = "错误", message = "操作失败: ${e.message}")
+                LogUtils.e("ShortVideoViewModel: 点赞操作异常", e)
+            }
+        }
     }
 
     /**

@@ -72,4 +72,25 @@ class ShortVideoApi {
     suspend fun getVideoDetails(aid: Long): BiliResponse.Success<VideoInfo> {
         return videoInfoApi.getVideoDetails(aid = aid)
     }
+
+    /**
+     * 查询视频是否已点赞
+     *
+     * @param aid 视频aid
+     * @return 是否已点赞
+     */
+    suspend fun isLike(aid: Long): BiliResponse.Success<Boolean> {
+        return videoInfoApi.isLike(aid = aid)
+    }
+
+    /**
+     * 点赞或取消点赞视频
+     *
+     * @param aid 视频aid
+     * @param isLike true为点赞，false为取消点赞
+     * @return 操作结果
+     */
+    suspend fun like(aid: Long, isLike: Boolean): BiliResponse.Success<String> {
+        return videoInfoApi.like(aid = aid, isLike = isLike)
+    }
 }

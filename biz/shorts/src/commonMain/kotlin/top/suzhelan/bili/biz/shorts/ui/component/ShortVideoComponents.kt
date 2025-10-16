@@ -25,9 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +54,7 @@ private val IconActiveColor = Color(0xFFFF6B9D) // 激活状态的粉色
  * @param video 视频数据
  * @param modifier Modifier
  * @param followState 关注状态 (0:未关注 2:已关注 6:已互粉)
+ * @param likeState 点赞状态 (true:已点赞 false:未点赞)
  * @param onClickAuthor 点击作者回调
  * @param onClickFollow 点击关注按钮回调
  * @param onClickLike 点击点赞回调
@@ -72,16 +71,15 @@ fun ShortVideoSideActions(
     video: ShortVideoItem,
     modifier: Modifier = Modifier,
     followState: Int = 0,
+    likeState: Boolean = false,
     onClickAuthor: (Long) -> Unit = {},
     onClickFollow: (Long, Int) -> Unit = { _, _ -> },
-    onClickLike: () -> Unit = {},
+    onClickLike: (Long, Boolean) -> Unit = { _, _ -> },
     onClickComment: () -> Unit = {},
     onClickCoin: () -> Unit = {},
     onClickCollection: () -> Unit = {},
     onClickShare: () -> Unit = {}
 ) {
-    var isLiked by remember { mutableStateOf(false) }
-
     // 判断是否已关注 (2:已关注 6:已互粉)
     val isFollowed = followState in listOf(2, 6)
 
@@ -104,11 +102,10 @@ fun ShortVideoSideActions(
 
         // 点赞按钮
         AnimatedLikeButton(
-            isLiked = isLiked,
+            isLiked = likeState,
             count = video.likeCount.ifEmpty { video.playCount },
             onLikedClicked = {
-                isLiked = !isLiked
-                onClickLike()
+                onClickLike(video.aid, likeState)
             }
         )
 

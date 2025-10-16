@@ -328,6 +328,14 @@ private fun ShortVideoPage(
         followState = state ?: 0
     }
 
+    // 查询点赞状态
+    var likeState by remember(video.aid) { mutableStateOf(false) }
+
+    LaunchedEffect(video.aid) {
+        val state = viewModel.queryLikeState(video.aid)
+        likeState = state ?: false
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // 播放器
         ShortVideoPlayer(
@@ -350,10 +358,16 @@ private fun ShortVideoPage(
         ShortVideoSideActions(
             video = video,
             followState = followState,
+            likeState = likeState,
             onClickFollow = { authorId, currentState ->
                 viewModel.toggleFollow(authorId, currentState)
                 // 乐观更新UI
                 followState = if (currentState == 0) 2 else 0
+            },
+            onClickLike = { aid, currentLikeState ->
+                viewModel.toggleLike(aid, currentLikeState)
+                // 乐观更新UI
+                likeState = !currentLikeState
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
