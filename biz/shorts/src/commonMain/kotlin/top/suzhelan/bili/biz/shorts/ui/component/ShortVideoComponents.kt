@@ -20,10 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Comment
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,17 +32,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
+import top.suzhelan.bili.biz.shorts.ui.icons.ShortVideoIcons
+
+
+private val IconColor = Color(0xFFBFBFBF) // 白灰色
+private val IconActiveColor = Color(0xFFFF6B9D) // 激活状态的粉色
 
 /**
  * 短视频侧边操作栏组件
  *
- * 提供作者头像、点赞、评论、分享等交互按钮
+ * 提供作者头像、点赞、评论、投币、收藏、分享等交互按钮
  * 采用竖向排列，位于屏幕右侧
  *
  * @param video 视频数据
@@ -56,6 +58,8 @@ import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
  * @param onClickFollow 点击关注按钮回调
  * @param onClickLike 点击点赞回调
  * @param onClickComment 点击评论回调
+ * @param onClickCoin 点击投币回调
+ * @param onClickCollection 点击收藏回调
  * @param onClickShare 点击分享回调
  *
  * @author suzhelan
@@ -70,6 +74,8 @@ fun ShortVideoSideActions(
     onClickFollow: (Long, Int) -> Unit = { _, _ -> },
     onClickLike: () -> Unit = {},
     onClickComment: () -> Unit = {},
+    onClickCoin: () -> Unit = {},
+    onClickCollection: () -> Unit = {},
     onClickShare: () -> Unit = {}
 ) {
     var isLiked by remember { mutableStateOf(false) }
@@ -105,16 +111,34 @@ fun ShortVideoSideActions(
         )
 
         // 评论按钮
-        ActionButton(
-            icon = Icons.Default.Comment,
+        SvgActionButton(
+            icon = ShortVideoIcons.comment,
             count = video.danmakuCount,
+            contentDescription = "评论",
             onClick = onClickComment
         )
 
-        // 分享按钮
-        ActionButton(
-            icon = Icons.Default.Share,
+        // 投币按钮
+        SvgActionButton(
+            icon = ShortVideoIcons.coin,
             count = "",
+            contentDescription = "投币",
+            onClick = onClickCoin
+        )
+
+        // 收藏按钮
+        SvgActionButton(
+            icon = ShortVideoIcons.collection,
+            count = "",
+            contentDescription = "收藏",
+            onClick = onClickCollection
+        )
+
+        // 转发按钮
+        SvgActionButton(
+            icon = ShortVideoIcons.forward,
+            count = "",
+            contentDescription = "转发",
             onClick = onClickShare
         )
     }
@@ -211,10 +235,10 @@ private fun AnimatedLikeButton(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                painter = painterResource(ShortVideoIcons.favorite),
                 contentDescription = "点赞",
                 modifier = Modifier.size(iconSize),
-                tint = if (isLiked) Color.Red else Color.White
+                tint = if (isLiked) IconActiveColor else IconColor
             )
         }
 
@@ -227,16 +251,18 @@ private fun AnimatedLikeButton(
 }
 
 /**
- * 通用操作按钮
+ * SVG图标操作按钮
  *
- * @param icon 图标
+ * @param icon SVG图标资源
  * @param count 数量文本
+ * @param contentDescription 内容描述
  * @param onClick 点击回调
  */
 @Composable
-private fun ActionButton(
-    icon: ImageVector,
+private fun SvgActionButton(
+    icon: DrawableResource,
     count: String,
+    contentDescription: String,
     onClick: () -> Unit
 ) {
     Column(
@@ -244,12 +270,12 @@ private fun ActionButton(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Icon(
-            imageVector = icon,
-            contentDescription = null,
+            painter = painterResource(icon),
+            contentDescription = contentDescription,
             modifier = Modifier
                 .size(30.dp)
                 .clickable { onClick() },
-            tint = Color.White
+            tint = IconColor
         )
 
         if (count.isNotEmpty()) {
@@ -271,8 +297,6 @@ private fun ActionButton(
  * @param video 视频数据
  * @param modifier Modifier
  * @param onClickAuthor 点击作者回调
- *
- * @author suzhelan
  */
 @Composable
 fun ShortVideoBottomInfo(
