@@ -19,12 +19,19 @@ fun CommentContent(oid: String, type: CommentSourceType) {
     val lazyPagingItems = viewModel.getCommentList(oid, type).collectAsLazyPagingItems()
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(lazyPagingItems.itemCount) { index ->
-            CommentCard(lazyPagingItems[index]!!)
+        items(
+            count = lazyPagingItems.itemCount,
+            key = { index ->
+                lazyPagingItems[index]?.rpid ?: index
+            }
+        ) { index ->
+            val item = lazyPagingItems[index]
+            if (item != null) {
+                CommentCard(item)
+            }
         }
         item {
             PagerBottomIndicator(lazyPagingItems)
         }
     }
 }
-
