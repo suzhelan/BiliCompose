@@ -58,7 +58,7 @@ private fun VideoLoadingIndicator(
 ) {
     when (state) {
         PlaybackState.ERROR -> {
-            Indicator(
+            VideoLoadingIndicator(
                 modifier,
                 showProgress = false,
                 text = {
@@ -67,7 +67,7 @@ private fun VideoLoadingIndicator(
         }
 
         else -> {
-            Indicator(
+            VideoLoadingIndicator(
                 modifier,
                 showProgress = true,
                 text = {
@@ -81,7 +81,7 @@ private fun VideoLoadingIndicator(
  * 缓冲指示器
  */
 @Composable
-private fun Indicator(
+fun VideoLoadingIndicator(
     modifier: Modifier = Modifier,
     showProgress: Boolean = true,
     color: Color = PlayerColor.primary,

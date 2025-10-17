@@ -76,7 +76,7 @@ fun VolumeIndicator(
     modifier: Modifier = Modifier,
     progress: () -> Float
 ) {
-    Indicator(
+    VideoLoadingIndicator(
         modifier = modifier,
         icon = Icons.AutoMirrored.Outlined.VolumeUp,
         progress = {
@@ -93,7 +93,7 @@ fun BrightnessIndicator(
     modifier: Modifier = Modifier,
     progress: () -> Float
 ) {
-    Indicator(
+    VideoLoadingIndicator(
         modifier = modifier,
         icon = Icons.Outlined.WbSunny,
         progress = {
@@ -103,7 +103,7 @@ fun BrightnessIndicator(
 }
 
 @Composable
-private fun Indicator(
+private fun VideoLoadingIndicator(
     modifier: Modifier = Modifier,
     icon: ImageVector,
     progress: () -> Float

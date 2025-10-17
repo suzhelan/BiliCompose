@@ -1,5 +1,7 @@
 package top.suzhelan.bili.biz.biliplayer.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +15,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -25,13 +29,14 @@ import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.ui.VideoPlayer
+import top.suzhelan.bili.player.ui.indicator.VideoLoadingIndicator
 import top.suzhelan.bili.shared.navigation.BiliBackHandler
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
 @Composable
-fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel,modifier: Modifier = Modifier) {
+fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel, modifier: Modifier = Modifier) {
     val navigator = LocalNavigation.currentOrThrow
     val videoUrlData by vm.videoUrlData.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
@@ -44,20 +49,34 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel,modifier: Modif
             qn = playerParams.qn
         )
     }
-
+    //获取质量最好的音频
+    val playerController = rememberPlayerController(vm)
+    val isFullScreen = playerController.isFullScreen
+    val isFillMaxSize = playerController.isFillMaxSize
+    playerController.onBack = {
+        if (isFullScreen) {
+            playerController.reversalFullScreen()
+        } else {
+            navigator.pop()
+        }
+    }
     videoUrlData.registerStatusListener {
-        onSuccess { video ->
-            //获取质量最好的音频
-            val playerController = rememberPlayerController(vm)
-            val isFullScreen = playerController.isFullScreen
-            val isFillMaxSize = playerController.isFillMaxSize
-            playerController.onBack = {
-                if (isFullScreen) {
-                    playerController.reversalFullScreen()
-                } else {
-                    navigator.pop()
-                }
+        onLoading {
+            //加载中
+            Box(
+                modifier = if (isFullScreen || isFillMaxSize) modifier.fillMaxSize()
+                else modifier.fillMaxWidth().aspectRatio(16f / 9f)
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center
+            ) {
+                VideoLoadingIndicator(
+                    text = {
+                        Text(text = "获取视频信息...")
+                    }
+                )
             }
+        }
+        onSuccess { video ->
             vm.doPlayer(playerController)
             VideoPlayer(
                 controller = playerController,
