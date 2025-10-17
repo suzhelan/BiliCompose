@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -63,7 +64,10 @@ fun VideoCard(video: SmallCoverV2Item) {
     val isVerticalVideo = video.goto == "vertical_av"
 
     //首先就是一个圆角卡片背景
-    Card(
+    ElevatedCard(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .height(225.dp)
@@ -189,7 +193,7 @@ private fun VideoInfoBar(video: SmallCoverV2Item) {
                 text = cmdReasonStyle.text,
                 fontSize = 12.sp,
                 modifier = Modifier.background(
-                    shape = RoundedCornerShape(2.dp),
+                    shape = RoundedCornerShape(5.dp),
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ).padding(vertical = 1.dp, horizontal = 3.dp)
             )
