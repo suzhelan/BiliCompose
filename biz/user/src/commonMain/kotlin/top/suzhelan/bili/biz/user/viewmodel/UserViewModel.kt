@@ -13,7 +13,7 @@ import top.suzhelan.bili.biz.user.entity.UserCard
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 
 class UserViewModel : BaseViewModel() {
-    private val _userCard = MutableStateFlow<BiliResponse<UserCard>>(BiliResponse.Wait)
+    private val _userCard = MutableStateFlow<BiliResponse<UserCard>>(BiliResponse.Loading)
     val userCard = _userCard.asStateFlow()
     fun getUserInfo(mid: Long) = viewModelScope.launch {
         val api = UserApi()

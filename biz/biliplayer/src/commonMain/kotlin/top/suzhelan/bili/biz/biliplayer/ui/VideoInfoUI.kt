@@ -412,6 +412,7 @@ private fun AuthorItemUI(
         modifier = Modifier.fillMaxWidth()
             .height(80.dp)
             .padding(10.dp)
+            .shimmerEffect(userCardResponse.isLoading())
             .clickable {
                 if (userCardResponse.isSuccess()) {
                     //跳转到用户主页
