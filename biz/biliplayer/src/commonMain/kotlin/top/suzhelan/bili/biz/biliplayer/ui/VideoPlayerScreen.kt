@@ -20,7 +20,7 @@ import top.suzhelan.bili.shared.common.ui.isPhone
 @Composable
 fun VideoPlayerScreen(body: String) {
     CommonComposeUI<DefaultViewModel>(
-        viewModel = { DefaultViewModel() }
+        viewModel = DefaultViewModel()
     ) { _ ->
         val context = BiliLocalContext.current
         val vm = viewModel {

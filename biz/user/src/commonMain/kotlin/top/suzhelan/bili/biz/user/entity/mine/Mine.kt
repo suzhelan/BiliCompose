@@ -27,7 +27,7 @@ data class Mine(
     @SerialName("in_reg_audit") val inRegAudit: Int, // 注册审核状态
     @SerialName("level") val level: Int, // 用户等级
 //    @SerialName("mall_home") val mallHome: MallHome, // 商城首页
-    @SerialName("mid") val mid: Int, // 用户ID
+    @SerialName("mid") val mid: Long, // 用户ID
 //    @SerialName("modular_vip_section") val modularVipSection: ModularVipSection, // VIP模块
     @SerialName("name") val name: String, // 用户昵称
 //    @SerialName("name_render") val nameRender: Unknown?, // 昵称渲染

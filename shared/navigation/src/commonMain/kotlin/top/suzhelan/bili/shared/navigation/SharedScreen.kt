@@ -24,4 +24,7 @@ sealed class SharedScreen(val path: String) : BiliScreenProvider {
 
     @Serializable
     data class WebView(val url: String) : SharedScreen("/webView")
+
+    @Serializable
+    data class UserProfile(val mid: Long) : SharedScreen("/userProfile")
 }

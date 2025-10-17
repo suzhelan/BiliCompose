@@ -123,7 +123,7 @@ private fun ColumnScope.ToolBar() {
         //logout
         IconButton(onClick = {
             LoginMapper.clear()
-        }){
+        }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.Logout,
                 contentDescription = "Logout",
@@ -147,8 +147,10 @@ private fun ColumnScope.ToolBar() {
 private fun ColumnScope.HeaderUserCard(
     mine: Mine
 ) {
-
-    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+    val navigation = LocalNavigation.currentOrThrow
+    ConstraintLayout(modifier = Modifier.fillMaxWidth().clickable {
+        navigation.push(SharedScreen.UserProfile(mine.mid))
+    }) {
         val (avatar, nickname, level, entry, identity, bCoin, coin) = createRefs()
         //头像
         AsyncImage(

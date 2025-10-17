@@ -41,11 +41,14 @@ import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
 import top.suzhelan.bili.shared.common.ui.theme.TextColor
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.toStringCount
+import top.suzhelan.bili.shared.navigation.LocalNavigation
+import top.suzhelan.bili.shared.navigation.SharedScreen
+import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
 @Composable
 fun CommentCard(comment: Comment) {
-
+    val navigation = LocalNavigation.currentOrThrow
     //构成 头像,头像框背景
     //昵称 等级 评论背景
     //评论内容
@@ -70,10 +73,15 @@ fun CommentCard(comment: Comment) {
         )
 
         //头像
-        Avatar(member = comment.member, modifier = Modifier.constrainAs(avatar) {
-            top.linkTo(parent.top, 8.dp)
-            start.linkTo(parent.start, 8.dp)
-        })
+        Avatar(
+            member = comment.member, modifier = Modifier
+                .clickable {
+                    navigation.push(SharedScreen.UserProfile(mid = comment.member.mid))
+                }
+                .constrainAs(avatar) {
+                    top.linkTo(parent.top, 8.dp)
+                    start.linkTo(parent.start, 8.dp)
+                })
 
         //昵称
         Text(
@@ -241,7 +249,7 @@ private fun RepliedPreview(comment: Comment, modifier: Modifier) = Column(
         .background(TipColor.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
         .padding(6.dp)
 ) {
-    val replied = comment.replies?: emptyList()
+    val replied = comment.replies ?: emptyList()
     replied.forEach {
         SimpleReplyCard(it)
     }
@@ -259,7 +267,7 @@ private fun RepliedPreview(comment: Comment, modifier: Modifier) = Column(
 private fun SimpleReplyCard(comment: Comment) {
     CompoundEmojiMessage(
         content = CompoundEmojiMessageModel.MessageContent(
-            "${comment.member.uname}: "+comment.content.message,
+            "${comment.member.uname}: " + comment.content.message,
             comment.content.emote
         ),
         size = 13,

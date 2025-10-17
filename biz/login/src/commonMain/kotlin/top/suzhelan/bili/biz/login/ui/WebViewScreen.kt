@@ -49,7 +49,7 @@ fun WebViewScreen(
         }
     }
     CommonComposeUI<DefaultViewModel>(
-        viewModel = { DefaultViewModel() },
+        viewModel = DefaultViewModel(),
         topBar = {
             TitleUI(state.pageTitle ?: "") {
                 navigation.pop()

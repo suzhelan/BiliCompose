@@ -57,6 +57,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import top.suzhelan.bili.api.BiliResponse
+import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.api.isLoading
 import top.suzhelan.bili.api.isSuccess
 import top.suzhelan.bili.api.registerStatusListener
@@ -67,8 +68,8 @@ import top.suzhelan.bili.biz.biliplayer.ui.item.SimpleVideoCard
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.biz.user.entity.UserCard
 import top.suzhelan.bili.biz.user.viewmodel.UserViewModel
-import top.suzhelan.bili.comment.ui.CommentContent
 import top.suzhelan.bili.comment.entity.CommentSourceType
+import top.suzhelan.bili.comment.ui.CommentContent
 import top.suzhelan.bili.shared.common.ext.dismiss
 import top.suzhelan.bili.shared.common.ext.show
 import top.suzhelan.bili.shared.common.ui.ProvideContentColor
@@ -85,7 +86,11 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
 @Composable
-fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel,modifier: Modifier = Modifier) = Column(modifier = modifier) {
+fun VideoInfoUI(
+    playerParams: PlayerParams,
+    viewModel: VideoPlayerViewModel,
+    modifier: Modifier = Modifier
+) = Column(modifier = modifier) {
     val vmVideoInfo by viewModel.videoDetailsInfo.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.getVideoDetailsInfo(
@@ -105,8 +110,10 @@ fun VideoInfoUI(playerParams: PlayerParams, viewModel: VideoPlayerViewModel,modi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TabPage(videoInfo: VideoInfo,
-                    viewModel: VideoPlayerViewModel) {
+private fun TabPage(
+    videoInfo: VideoInfo,
+    viewModel: VideoPlayerViewModel
+) {
     val tabs = listOf(
         "简介",
         "评论",
@@ -133,6 +140,7 @@ private fun TabPage(videoInfo: VideoInfo,
             0 -> {
                 VideoDetailsUI(videoInfo = videoInfo, viewModel = viewModel)
             }
+
             1 -> {
                 CommentContent(oid = videoInfo.aid.toString(), type = CommentSourceType.Video)
             }
@@ -149,7 +157,7 @@ private fun VideoDetailsUI(
     userViewModel: UserViewModel = viewModel {
         UserViewModel()
     },
-) = Column( modifier = Modifier.fillMaxWidth()) {
+) = Column(modifier = Modifier.fillMaxWidth()) {
     val userCard by userViewModel.userCard.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         userViewModel.getUserInfo(mid = videoInfo.owner.mid)
@@ -398,93 +406,99 @@ private fun RowScope.OperateItemUI(
 private fun AuthorItemUI(
     userCardResponse: BiliResponse<UserCard>,
     viewModel: UserViewModel
-) = ConstraintLayout(
-    modifier = Modifier.fillMaxWidth()
-        .height(80.dp)
-        .padding(10.dp)
-        .clickable {
-            //跳转到用户主页
-        }
 ) {
-
-    if (!userCardResponse.isSuccess()) {
-        return@ConstraintLayout
-    }
-    val actionState by viewModel.actionState.collectAsStateWithLifecycle()
-    val userCard = (userCardResponse as BiliResponse.Success).data
-    val (avatar, name, sign, concern) = createRefs()
-    AsyncImage(
-        model = userCard.card.face,
-        contentDescription = null,
-        modifier = Modifier.size(40.dp)
-            .clip(RoundedCornerShape(50.dp))
-            .constrainAs(avatar) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                start.linkTo(parent.start)
-            }
-    )
-    //名字
-    Text(
-        text = userCard.card.name,
-        fontSize = 15.sp,
-        modifier = Modifier.constrainAs(name) {
-            top.linkTo(avatar.top)
-            start.linkTo(avatar.end, 10.dp)
-        }
-    )
-    //粉丝数量 视频数量
-    Text(
-        text = "${userCard.follower.toStringCount()}粉丝 ${userCard.archiveCount}视频",
-        fontSize = 12.sp,
-        modifier = Modifier.constrainAs(sign) {
-            top.linkTo(name.bottom, (-5).dp)
-            start.linkTo(name.start)
-        }
-    )
-    if (actionState.isLoading()) {
-        CircularProgressIndicator(modifier = Modifier.size(20.dp).constrainAs(concern) {
-            top.linkTo(avatar.top)
-            end.linkTo(parent.end)
-            bottom.linkTo(avatar.bottom)
-        })
-    } else if (userCard.following) {
-        //最右边添加一个点击关注的按钮
-        FilledTonalButton(
-            onClick = {
-                viewModel.unfollow(userCard.card.mid.toLong())
-            },
-            contentPadding = PaddingValues(vertical = 5.dp, horizontal = 5.dp),
-            modifier = Modifier
-                .size(
-                    height = 30.dp,
-                    width = 75.dp
-                ).constrainAs(concern) {
-                    top.linkTo(avatar.top)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(avatar.bottom)
-                }) {
-            Icon(imageVector = Icons.Outlined.Menu, contentDescription = "unfollow")
-            Text(text = "已关注", fontSize = 12.sp)
-        }
-    } else {
-        OutlinedButton(
-            onClick = {
-                viewModel.follow(userCard.card.mid.toLong())
-            },
-            contentPadding = PaddingValues(vertical = 5.dp, horizontal = 5.dp),
-            modifier = Modifier
-                .size(
-                    height = 30.dp,
-                    width = 75.dp
-                ).constrainAs(concern) {
-                    top.linkTo(avatar.top)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(avatar.bottom)
+    val navigation = LocalNavigation.currentOrThrow
+    ConstraintLayout(
+        modifier = Modifier.fillMaxWidth()
+            .height(80.dp)
+            .padding(10.dp)
+            .clickable {
+                if (userCardResponse.isSuccess()) {
+                    //跳转到用户主页
+                    navigation.push(SharedScreen.UserProfile(userCardResponse.getOrThrow().card.mid.toLong()))
                 }
-        ) {
-            Icon(imageVector = Icons.Outlined.Add, contentDescription = "addFollow")
-            Text(text = "关注", fontSize = 12.sp)
+            }
+    ) {
+
+        if (!userCardResponse.isSuccess()) {
+            return@ConstraintLayout
+        }
+        val actionState by viewModel.actionState.collectAsStateWithLifecycle()
+        val userCard = (userCardResponse as BiliResponse.Success).data
+        val (avatar, name, sign, concern) = createRefs()
+        AsyncImage(
+            model = userCard.card.face,
+            contentDescription = null,
+            modifier = Modifier.size(40.dp)
+                .clip(RoundedCornerShape(50.dp))
+                .constrainAs(avatar) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                }
+        )
+        //名字
+        Text(
+            text = userCard.card.name,
+            fontSize = 15.sp,
+            modifier = Modifier.constrainAs(name) {
+                top.linkTo(avatar.top)
+                start.linkTo(avatar.end, 10.dp)
+            }
+        )
+        //粉丝数量 视频数量
+        Text(
+            text = "${userCard.follower.toStringCount()}粉丝 ${userCard.archiveCount}视频",
+            fontSize = 12.sp,
+            modifier = Modifier.constrainAs(sign) {
+                top.linkTo(name.bottom, (-5).dp)
+                start.linkTo(name.start)
+            }
+        )
+        if (actionState.isLoading()) {
+            CircularProgressIndicator(modifier = Modifier.size(20.dp).constrainAs(concern) {
+                top.linkTo(avatar.top)
+                end.linkTo(parent.end)
+                bottom.linkTo(avatar.bottom)
+            })
+        } else if (userCard.following) {
+            //最右边添加一个点击关注的按钮
+            FilledTonalButton(
+                onClick = {
+                    viewModel.unfollow(userCard.card.mid.toLong())
+                },
+                contentPadding = PaddingValues(vertical = 5.dp, horizontal = 5.dp),
+                modifier = Modifier
+                    .size(
+                        height = 30.dp,
+                        width = 75.dp
+                    ).constrainAs(concern) {
+                        top.linkTo(avatar.top)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(avatar.bottom)
+                    }) {
+                Icon(imageVector = Icons.Outlined.Menu, contentDescription = "unfollow")
+                Text(text = "已关注", fontSize = 12.sp)
+            }
+        } else {
+            OutlinedButton(
+                onClick = {
+                    viewModel.follow(userCard.card.mid.toLong())
+                },
+                contentPadding = PaddingValues(vertical = 5.dp, horizontal = 5.dp),
+                modifier = Modifier
+                    .size(
+                        height = 30.dp,
+                        width = 75.dp
+                    ).constrainAs(concern) {
+                        top.linkTo(avatar.top)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(avatar.bottom)
+                    }
+            ) {
+                Icon(imageVector = Icons.Outlined.Add, contentDescription = "addFollow")
+                Text(text = "关注", fontSize = 12.sp)
+            }
         }
     }
 }
