@@ -2,6 +2,7 @@ package top.suzhelan.bili.biz.biliplayer.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,6 +32,7 @@ import androidx.compose.material.icons.outlined.Subtitles
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.icons.outlined.Toll
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -73,6 +76,7 @@ import top.suzhelan.bili.comment.ui.CommentContent
 import top.suzhelan.bili.shared.common.ext.dismiss
 import top.suzhelan.bili.shared.common.ext.show
 import top.suzhelan.bili.shared.common.ui.ProvideContentColor
+import top.suzhelan.bili.shared.common.ui.autoSkeleton
 import top.suzhelan.bili.shared.common.ui.card.Expandable
 import top.suzhelan.bili.shared.common.ui.shimmerEffect
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
@@ -85,6 +89,7 @@ import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoInfoUI(
     playerParams: PlayerParams,
@@ -98,22 +103,6 @@ fun VideoInfoUI(
             bvid = playerParams.bvid,
         )
     }
-    vmVideoInfo.registerStatusListener {
-        onLoading {
-            Text(text = "加载中...", modifier = Modifier.fillMaxWidth().shimmerEffect())
-        }
-        onSuccess { data ->
-            TabPage(videoInfo = data, viewModel = viewModel)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TabPage(
-    videoInfo: VideoInfo,
-    viewModel: VideoPlayerViewModel
-) {
     val tabs = listOf(
         "简介",
         "评论",
@@ -133,6 +122,40 @@ private fun TabPage(
             )
         }
     }
+    vmVideoInfo.registerStatusListener {
+        onLoading {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(40.dp)
+                        .autoSkeleton(
+                            true,
+                            CardDefaults.shape
+                        )
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(80.dp)
+                        .autoSkeleton(
+                            true,
+                            CardDefaults.shape
+                        )
+                )
+            }
+        }
+        onSuccess { data ->
+            TabPage(videoInfo = data, viewModel = viewModel, pagerState = pagerState)
+        }
+    }
+}
+
+@Composable
+private fun TabPage(
+    videoInfo: VideoInfo,
+    pagerState: PagerState,
+    viewModel: VideoPlayerViewModel
+) {
     HorizontalPager(
         state = pagerState,
     ) { page ->
