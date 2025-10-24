@@ -1,10 +1,10 @@
- [versions]
+[versions]
 agp = "8.13.0"
 androidx-activityCompose = "1.11.0"
-androidx-lifecycle = "2.9.4"
+androidx-lifecycle = "2.9.5"
 
 coil = "3.3.0"
-compose-multiplatform = "1.9.0"
+compose-multiplatform = "1.9.1"
 composeWebviewMultiplatform = "2.0.3"
 constraintlayoutComposeMultiplatform = "0.6.1"
 fastkv = "3.0.1"
@@ -16,10 +16,10 @@ mediamp = "0.0.29"
 multiplatformSettings = "1.3.0"
 napier = "2.7.1"
 
- ktor = "3.3.1"
-logback = "1.5.19"
-navigationCompose = "2.9.0"
- okio = "3.16.1"
+ktor = "3.3.1"
+logback = "1.5.20"
+navigationCompose = "2.9.1"
+okio = "3.16.2"
 paging = "3.4.0-alpha04"
 qrKit = "3.1.3"
 sonner = "0.3.8"
