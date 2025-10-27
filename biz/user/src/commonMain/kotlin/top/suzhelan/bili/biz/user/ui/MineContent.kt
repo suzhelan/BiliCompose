@@ -40,7 +40,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.user.generated.resources.Res
 import bilicompose.biz.user.generated.resources.b_coin
+import bilicompose.biz.user.generated.resources.b_coin_int
 import bilicompose.biz.user.generated.resources.coin
+import bilicompose.biz.user.generated.resources.coin_int
 import bilicompose.biz.user.generated.resources.dynamic
 import bilicompose.biz.user.generated.resources.fans
 import bilicompose.biz.user.generated.resources.follow
@@ -218,9 +220,20 @@ private fun ColumnScope.HeaderUserCard(
                 )
                 .padding(horizontal = 2.dp, vertical = 0.dp)
         )
+        //根据是否整数格式化合适的字符串类型
+        val coinText = if (mine.coin.rem(1.0) == 0.0) {
+            stringResource(Res.string.coin_int, mine.coin.toInt())
+        } else {
+            stringResource(Res.string.coin, mine.coin)
+        }
+        val bCoinText = if (mine.bcoin.rem(1.0) == 0.0) {
+            stringResource(Res.string.b_coin_int, mine.bcoin.toInt())
+        } else {
+            stringResource(Res.string.b_coin, mine.bcoin)
+        }
         //b币
         Text(
-            text = stringResource(Res.string.b_coin, mine.bcoin),
+            text = coinText,
             fontSize = 12.sp,
             style = TextStyle(color = TipColor),
             modifier = Modifier.constrainAs(bCoin) {
@@ -230,7 +243,7 @@ private fun ColumnScope.HeaderUserCard(
 
         //硬币
         Text(
-            text = stringResource(Res.string.coin, mine.coin),
+            text = bCoinText,
             fontSize = 12.sp,
             style = TextStyle(color = TipColor),
             modifier = Modifier.constrainAs(coin) {
