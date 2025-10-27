@@ -1,6 +1,7 @@
 package top.suzhelan.bili.biz.user.ui
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -11,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,7 +54,7 @@ fun UserProfileScreen(mid: Long) {
 @Composable
 private fun UserProfile(userSpace: UserSpace) =
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-        val (cover, avatar) = createRefs()
+        val (cover, avatar, header1) = createRefs()
         //典型的资料卡布局
         //先放一个封面图当底图
         AsyncImage(
@@ -63,7 +65,14 @@ private fun UserProfile(userSpace: UserSpace) =
                 centerHorizontallyTo(parent)
             }
         )
-        //穿插在封面之间
+        //昵称和一些资料 我这里不一比一复刻哔哩了
+        Row(modifier = Modifier.constrainAs(header1) {
+            top.linkTo(cover.bottom, 10.dp)
+            start.linkTo(avatar.end, 20.dp)
+        }) {
+            UserHeader(userSpace)
+        }
+        //头像穿插在封面之间
         AsyncImage(
             model = userSpace.card.face,
             contentDescription = null,
@@ -77,4 +86,16 @@ private fun UserProfile(userSpace: UserSpace) =
                 }
         )
 
+
     }
+
+/**
+ * 不包含头像的那一片头部信息
+ */
+@Composable
+private fun UserHeader(userSpace: UserSpace) {
+    Text(
+        text = userSpace.card.name,
+        fontSize = 20.sp,
+    )
+}
