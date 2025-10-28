@@ -13,7 +13,17 @@ import androidx.compose.ui.text.TextStyle
  */
 val ColorPrimary: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.primary
 val ColorPrimaryContainer: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.primaryContainer
+
+/**
+ * 标准背景色
+ * 常态为白，深色模式为深色
+ */
 val ColorSurface @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.surface
+
+/**
+ * 次要背景色
+ */
+val ColorSecondaryContainer: Color @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.secondaryContainer
 
 /**
  * 标准字体颜色

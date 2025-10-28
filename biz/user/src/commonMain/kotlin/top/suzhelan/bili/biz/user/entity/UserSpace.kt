@@ -481,13 +481,13 @@ data class UserSpace(
             @SerialName("themeType")
             val themeType: Int, // 0
             @SerialName("vipDueDate")
-            val vipDueDate: Long, // 1664726400000
+            val vipDueDate: Long, // 1664726400000 到期时间 时间戳 毫秒
             @SerialName("vipStatus")
-            val vipStatus: Int, // 0
+            val vipStatus: Int, // 0：无<br />1：有
             @SerialName("vipStatusWarn")
             val vipStatusWarn: String,
             @SerialName("vipType")
-            val vipType: Int // 1
+            val vipType: Int // 0：无<br />1：月度大会员<br />2：年度以上大会员
         ) {
             @Serializable
             data class Label(
