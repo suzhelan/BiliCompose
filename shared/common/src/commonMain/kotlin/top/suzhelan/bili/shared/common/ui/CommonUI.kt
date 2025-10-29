@@ -29,6 +29,7 @@ class DefaultViewModel : BaseViewModel()
 inline fun <reified VM : BaseViewModel> CommonComposeUI(
     isNeedLoading: Boolean = false,
     viewModel: VM,
+    modifier: Modifier = Modifier,
     crossinline initAction: (vm: VM) -> Unit = {},
     crossinline topBar: @Composable (vm: VM) -> Unit = {},
     crossinline bottomBar: @Composable (vm: VM) -> Unit = {},
@@ -44,7 +45,7 @@ inline fun <reified VM : BaseViewModel> CommonComposeUI(
     }
     //脚手架布局
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         topBar = { topBar(vm) },
         bottomBar = { bottomBar(vm) },
         floatingActionButton = { floatActionButton(vm) },
