@@ -18,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,8 +45,6 @@ import top.suzhelan.bili.shared.common.ui.theme.ColorSurface
 import top.suzhelan.bili.shared.common.ui.theme.TextColor
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.toStringCount
-import top.suzhelan.bili.shared.navigation.LocalNavigation
-import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 /**
  * 用户详情页
@@ -56,11 +52,9 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(mid: Long) {
-    LocalNavigation.currentOrThrow
     val vm: UserProfileViewModel = viewModel {
         UserProfileViewModel()
     }
-    TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     val userSpaceRes by vm.userSpace.collectAsStateWithLifecycle(initialValue = BiliResponse.Loading)
     LaunchedEffect(mid) {
@@ -68,7 +62,6 @@ fun UserProfileScreen(mid: Long) {
     }
     CommonComposeUI(
         viewModel = vm,
-//        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             if (userSpaceRes is BiliResponse.Success) {
                 val userSpace = userSpaceRes.getOrThrow()
