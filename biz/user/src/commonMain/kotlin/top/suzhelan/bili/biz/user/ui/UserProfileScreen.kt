@@ -3,45 +3,55 @@ package top.suzhelan.bili.biz.user.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.biz.user.viewmodel.UserProfileViewModel
-import top.suzhelan.bili.shared.common.ui.CommonComposeUI
+import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.icons.LevelIcons
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimaryContainer
 import top.suzhelan.bili.shared.common.ui.theme.ColorSurface
+import top.suzhelan.bili.shared.common.ui.theme.ErrorColor
 import top.suzhelan.bili.shared.common.ui.theme.TextColor
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.toStringCount
@@ -60,21 +70,31 @@ fun UserProfileScreen(mid: Long) {
     LaunchedEffect(mid) {
         vm.getUserSpace(mid)
     }
-    CommonComposeUI(
-        viewModel = vm,
-        topBar = {
-            if (userSpaceRes is BiliResponse.Success) {
-                val userSpace = userSpaceRes.getOrThrow()
-                UserProfile(userSpace)
-            }
-        }) { vm ->
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
-                .background(TipColor),
-        ) {
-            items(100) {
-                Text(text = "Item $it")
-            }
+    when (userSpaceRes) {
+        is BiliResponse.Error -> {
+            //错误处理
+            Text(
+                text = "加载失败:\n\n" + (userSpaceRes as BiliResponse.Error).cause,
+                color = ErrorColor.error,
+                modifier = Modifier.fillMaxSize(),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        is BiliResponse.Loading -> {
+            //加载中
+            LoadingIndicator()
+        }
+
+        is BiliResponse.Success -> {
+            val userSpace = userSpaceRes.getOrThrow()
+            UserProfile(userSpace)
+        }
+
+        else -> {
+            //其他情况
         }
     }
 
@@ -140,6 +160,8 @@ private fun UserProfile(userSpace: UserSpace) =
         ) {
             //简介
             CardHeader(userSpace)
+            //RowTab
+            ContentTab()
         }
 
     }
@@ -205,7 +227,7 @@ private fun ColumnScope.NicknameUI(userSpace: UserSpace) = Row(
 private fun ColumnScope.CardHeader(userSpace: UserSpace) {
     //统计信息 粉丝 关注 获赞
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         //获赞数
         Text(
@@ -254,6 +276,26 @@ private fun ColumnScope.CardHeader(userSpace: UserSpace) {
         color = TextColor,
         modifier = Modifier.padding(start = 10.dp, top = 15.dp)
     )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        //ip归属地,添加学校信息等uri
+        for (ip in userSpace.card.spaceTag) {
+            AsyncImage(
+                model = ip.icon,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.height(12.dp)
+                    .padding(start = 10.dp)
+            )
+            Text(
+                text = ip.title,
+                fontSize = 10.sp,
+                modifier = Modifier.padding(start = 5.dp),
+                color = TipColor
+            )
+        }
+    }
 }
 
 /**
@@ -283,6 +325,53 @@ private fun LevelProgressIndicator(
                 fontSize = 12.sp,
                 color = Color.White.copy(alpha = 0.8f),
             )
+        }
+    }
+}
+
+@Composable
+private fun ContentTab() {
+    val scope = rememberCoroutineScope()
+    val tabItems = listOf(
+        "主页",
+        "动态",
+        "投稿",
+        "收藏",
+        "追番"
+    )
+    val pageState = rememberPagerState(
+        initialPage = 0,
+        pageCount = {
+            tabItems.size
+        }
+    )
+    //横向Tab
+    PrimaryTabRow(
+        selectedTabIndex = pageState.currentPage,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        tabItems.forEachIndexed { index, item ->
+            Tab(
+                selected = index == 0,
+                onClick = {
+                    scope.launch {
+                        pageState.animateScrollToPage(index)
+                    }
+                },
+                text = {
+                    Text(text = item)
+                }
+            )
+        }
+    }
+    HorizontalPager(
+        state = pageState,
+        modifier = Modifier.fillMaxSize()
+            .padding(5.dp)
+    ) {
+        val text = tabItems[it]
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text(text = text)
         }
     }
 }

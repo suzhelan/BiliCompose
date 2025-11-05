@@ -15,6 +15,12 @@ import top.suzhelan.bili.shared.common.ui.dialog.DialogState
  */
 abstract class BaseViewModel : ViewModel() {
 
+    private val _initLoading = MutableStateFlow(false)
+    val initLoading = _initLoading.asStateFlow()
+    fun setLoading(isLoading: Boolean) {
+        _initLoading.value = isLoading
+    }
+
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throwable.error()
     }

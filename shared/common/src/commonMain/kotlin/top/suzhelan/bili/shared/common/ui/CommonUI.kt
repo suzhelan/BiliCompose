@@ -15,12 +15,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 
 
 class DefaultViewModel : BaseViewModel()
+
 /**
  * 常规脚手架布局
  * @param viewModel 传入 YourViewModel()
@@ -39,6 +42,8 @@ inline fun <reified VM : BaseViewModel> CommonComposeUI(
     val vm: VM = viewModel {
         viewModel
     }
+    vm.setLoading(isNeedLoading)
+    val isLoading by vm.initLoading.collectAsState()
     //初始化动作 其中操作要在viewmodel执行
     LaunchedEffect(Unit) {
         initAction(vm)
@@ -55,7 +60,12 @@ inline fun <reified VM : BaseViewModel> CommonComposeUI(
         ) {
             content(vm)
         }
+        //如果正在加载
+        if (isLoading) {
+            LoadingIndicator()
+        }
     }
+
 }
 
 /**

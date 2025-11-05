@@ -23,5 +23,7 @@ class UserProfileViewModel : BaseViewModel() {
     val userSpace = _userSpace.asSharedFlow()
     fun getUserSpace(mid: Long) = launchTask {
         _userSpace.value = userApi.getUserSpace(mid)
+    }.invokeOnCompletion {
+        setLoading(false)
     }
 }
