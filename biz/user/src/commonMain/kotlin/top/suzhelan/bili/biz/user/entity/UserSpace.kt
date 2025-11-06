@@ -13,7 +13,7 @@ data class UserSpace(
     @SerialName("ad_source_content_v2")
     val adSourceContentV2: AdSourceContentV2,
     @SerialName("archive")
-    val archive: Archive,
+    val archive: Archive,//最近发布的视频
     @SerialName("article")
     val article: Article,
     @SerialName("audios")
@@ -23,21 +23,19 @@ data class UserSpace(
     @SerialName("cheese")
     val cheese: Cheese,
     @SerialName("coin_archive")
-    val coinArchive: CoinArchive,
+    val coinArchive: CoinArchive,//最近投币的视频
     @SerialName("comic")
     val comic: Comic,
     @SerialName("default_tab")
     val defaultTab: String, // home
-    @SerialName("fans_effect")
-    val fansEffect: FansEffect,
     @SerialName("favourite2")
-    val favourite2: Favourite2,
+    val favourite2: Favourite2,//收藏夹列表
     @SerialName("guest_relation")
     val guestRelation: Int, // -999
     @SerialName("images")
     val images: Images,
     @SerialName("like_archive")
-    val likeArchive: LikeArchive,
+    val likeArchive: LikeArchive,//最近点赞的问题
     @SerialName("live")
     val live: Live,
     @SerialName("play_game")
@@ -428,7 +426,7 @@ data class UserSpace(
             @SerialName("image_enhance_frame")
             val imageEnhanceFrame: String,
             @SerialName("n_pid")
-            val nPid: Int, // 0
+            val nPid: Long, // 0
             @SerialName("name")
             val name: String,
             @SerialName("pid")
@@ -613,9 +611,6 @@ data class UserSpace(
         val item: List<JsonObject?>//估计是漫画相关业务
     )
 
-
-    @Serializable
-    class FansEffect
 
     @Serializable
     data class Favourite2(

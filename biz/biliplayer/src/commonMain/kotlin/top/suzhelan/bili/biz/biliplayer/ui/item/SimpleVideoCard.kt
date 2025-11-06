@@ -59,7 +59,7 @@ fun SimpleVideoCard(
         )
         // 视频时长
         Text(
-            text = TimeUtils.formatMinutesToTime(item.duration),
+            text = TimeUtils.formatSecondToTime(item.duration),
             style = MaterialTheme.typography.labelSmall,
             fontSize = 10.sp,
             color = Color.White,

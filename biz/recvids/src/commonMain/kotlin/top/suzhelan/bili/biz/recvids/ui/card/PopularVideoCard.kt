@@ -78,7 +78,7 @@ fun PopularCoverCard(popularItem: PopularItem) {
         )
         // 视频时长
         Text(
-            text = TimeUtils.formatMinutesToTime(popularItem.duration),
+            text = TimeUtils.formatSecondToTime(popularItem.duration),
             style = MaterialTheme.typography.labelSmall,
             fontSize = 10.sp,
             color = Color.White,

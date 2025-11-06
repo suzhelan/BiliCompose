@@ -9,7 +9,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 object TimeUtils {
-    fun formatMinutesToTime(seconds: Int): String {
+    fun formatSecondToTime(seconds: Int): String {
         // 修复方案2（模板表达式，推荐）：
         val minutes = seconds / 60
         val remainingSeconds = seconds % 60

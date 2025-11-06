@@ -3,7 +3,6 @@ package top.suzhelan.bili.biz.user.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -45,6 +44,8 @@ import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.biz.user.entity.UserSpace
+import top.suzhelan.bili.biz.user.ui.profile.ProfileVideoPreView
+import top.suzhelan.bili.biz.user.ui.profile.VideoPreViewCard
 import top.suzhelan.bili.biz.user.viewmodel.UserProfileViewModel
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.icons.LevelIcons
@@ -153,7 +154,7 @@ private fun UserProfile(userSpace: UserSpace) =
                     ColorSurface,
                     RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp)
                 )
-                .padding(start = 10.dp, top = 20.dp)
+                .padding(horizontal = 10.dp, vertical = 20.dp)
                 .constrainAs(header1) {
                     top.linkTo(cover.bottom, (-10).dp)
                 }
@@ -161,7 +162,7 @@ private fun UserProfile(userSpace: UserSpace) =
             //简介
             CardHeader(userSpace)
             //RowTab
-            ContentTab()
+            ContentTab(userSpace)
         }
 
     }
@@ -330,7 +331,7 @@ private fun LevelProgressIndicator(
 }
 
 @Composable
-private fun ContentTab() {
+private fun ContentTab(userSpace: UserSpace) {
     val scope = rememberCoroutineScope()
     val tabItems = listOf(
         "主页",
@@ -367,11 +368,26 @@ private fun ContentTab() {
     HorizontalPager(
         state = pageState,
         modifier = Modifier.fillMaxSize()
-            .padding(5.dp)
+            .padding(
+                top = 10.dp
+            )
     ) {
-        val text = tabItems[it]
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(text = text)
+        when (it) {
+            0 -> {
+                //主页
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    ProfileVideoPreView(
+                        title = "视频",
+                        items = userSpace.archive.item.take(4),//最多只展示四条
+                    ) { item ->
+                        //视频卡片
+                        VideoPreViewCard(item)
+                    }
+                }
+            }
         }
+
     }
 }
