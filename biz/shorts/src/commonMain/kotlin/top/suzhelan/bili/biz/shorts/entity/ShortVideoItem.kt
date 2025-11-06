@@ -20,6 +20,7 @@ import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
  * @property playCount 播放量显示文本
  * @property danmakuCount 弹幕数显示文本
  * @property likeCount 点赞数显示文本
+ * @property commentCount 评论数显示文本
  * @property coinCount 投币数显示文本
  * @property favoriteCount 收藏数显示文本
  * @property shareCount 转发数显示文本
@@ -37,11 +38,13 @@ data class ShortVideoItem(
     val followerCount: Int = 0,
     val duration: Int,
     val playCount: String,
-    val danmakuCount: String,
-    val likeCount: String = "",
-    val coinCount: String = "",
-    val favoriteCount: String = "",
-    val shareCount: String = "",
+    val hasCount: Boolean = false,
+    val likeCount: String = "点赞",
+    val commentCount: String = "评论",
+    val danmakuCount: String = "弹幕(无需展示)",
+    val coinCount: String = "投币",
+    val favoriteCount: String = "收藏",
+    val shareCount: String = "分享",
     val isVertical: Boolean = true
 ) {
     companion object {
@@ -68,11 +71,6 @@ data class ShortVideoItem(
                 authorAvatar = "",
                 duration = item.playerArgs.duration,
                 playCount = item.coverLeftText1,
-                danmakuCount = item.coverLeftText2,
-                likeCount = "",
-                coinCount = "",
-                favoriteCount = "",
-                shareCount = "",
                 isVertical = isVertical
             )
         }

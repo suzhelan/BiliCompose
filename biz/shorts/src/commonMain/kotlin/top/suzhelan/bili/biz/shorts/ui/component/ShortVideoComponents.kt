@@ -88,7 +88,7 @@ fun ShortVideoSideActions(
         // 点赞按钮
         AnimatedLikeButton(
             isLiked = likeState,
-            count = video.likeCount.ifEmpty { video.playCount },
+            count = video.likeCount,
             onLikedClicked = {
                 onClickLike(video.aid, likeState)
             }
@@ -97,7 +97,7 @@ fun ShortVideoSideActions(
         // 评论按钮
         SvgActionButton(
             icon = ShortVideoIcons.comment,
-            count = video.danmakuCount,
+            count = video.commentCount,
             contentDescription = "评论",
             onClick = onClickComment
         )

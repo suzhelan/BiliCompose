@@ -2,6 +2,7 @@ package top.suzhelan.bili.biz.shorts.data
 
 import kotlinx.serialization.json.jsonPrimitive
 import top.suzhelan.bili.api.HttpJsonDecoder
+import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.recvids.config.BaseCoverSerializer
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 import top.suzhelan.bili.biz.recvids.entity.targetCardType
@@ -192,21 +193,9 @@ class ShortVideoDataSource {
      * @param aid 视频aid
      * @return 视频统计信息的Map，key为统计类型，value为格式化后的数字字符串
      */
-    suspend fun fetchVideoStats(aid: Long): Map<String, String>? {
-        return try {
-            val response = api.getVideoDetails(aid)
-            val stat = response.data.stat
-
-            mapOf(
-                "like" to stat.like.toString(),
-                "coin" to stat.coin.toString(),
-                "favorite" to stat.favorite.toString(),
-                "share" to stat.share.toString()
-            )
-        } catch (e: Exception) {
-            LogUtils.e("ShortVideoDataSource: 获取视频统计信息失败 - aid=$aid", e)
-            null
-        }
+    suspend fun fetchVideoStats(aid: Long): VideoInfo {
+        val response = api.getVideoDetails(aid)
+        return response.data
     }
 
     /**

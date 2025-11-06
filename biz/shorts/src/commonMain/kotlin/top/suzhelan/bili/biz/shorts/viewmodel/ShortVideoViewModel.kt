@@ -8,6 +8,7 @@ import top.suzhelan.bili.biz.shorts.data.ShortVideoDataSource
 import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 import top.suzhelan.bili.shared.common.logger.LogUtils
+import top.suzhelan.bili.shared.common.util.toStringCount
 
 /**
  * 短视频ViewModel
@@ -459,24 +460,24 @@ class ShortVideoViewModel : BaseViewModel() {
         val endIndex = minOf(videoList.size - 1, currentIndex + 5)
 
         val videosToFetch = videoList.subList(startIndex, endIndex + 1)
-            .filter { it.likeCount.isEmpty() } // 只获取还没有统计数据的视频
+            .filter { !it.hasCount } // 只获取还没有统计数据的视频
 
         videosToFetch.forEach { video ->
             try {
                 val stats = dataSource.fetchVideoStats(video.aid)
-                stats?.let {
+                stats.let { info ->
                     // 更新视频统计信息
                     val updatedVideo = video.copy(
-                        likeCount = it["like"] ?: "",
-                        coinCount = it["coin"] ?: "",
-                        favoriteCount = it["favorite"] ?: "",
-                        shareCount = it["share"] ?: ""
+                        likeCount = info.stat.like.toStringCount(),
+                        coinCount = info.stat.coin.toStringCount(),
+                        favoriteCount = info.stat.favorite.toStringCount(),
+                        shareCount = info.stat.share.toStringCount(),
+                        commentCount = info.stat.reply.toStringCount(),
+                        danmakuCount = info.stat.danmaku.toStringCount(),
+                        hasCount = true
                     )
-
                     // 更新缓存池中的视频
                     videoPoolMap[video.aid] = updatedVideo
-
-                    LogUtils.d("ShortVideoViewModel: 更新视频统计 - aid=${video.aid}, like=${it["like"]}, coin=${it["coin"]}")
                 }
             } catch (e: Exception) {
                 LogUtils.e("ShortVideoViewModel: 获取视频统计失败 - aid=${video.aid}", e)
