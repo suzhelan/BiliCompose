@@ -39,12 +39,12 @@ data class ShortVideoItem(
     val duration: Int,
     val playCount: String,
     val hasCount: Boolean = false,
-    val likeCount: String = "点赞",
-    val commentCount: String = "评论",
-    val danmakuCount: String = "弹幕(无需展示)",
-    val coinCount: String = "投币",
-    val favoriteCount: String = "收藏",
-    val shareCount: String = "分享",
+    val likeCount: Int? = null,
+    val commentCount: Int? = null,
+    val danmakuCount: Int? = null,
+    val coinCount: Int? = null,
+    val favoriteCount: Int? = null,
+    val shareCount: Int? = null,
     val isVertical: Boolean = true
 ) {
     companion object {

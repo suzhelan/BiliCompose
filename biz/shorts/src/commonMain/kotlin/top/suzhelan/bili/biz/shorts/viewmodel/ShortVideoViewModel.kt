@@ -8,7 +8,6 @@ import top.suzhelan.bili.biz.shorts.data.ShortVideoDataSource
 import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 import top.suzhelan.bili.shared.common.logger.LogUtils
-import top.suzhelan.bili.shared.common.util.toStringCount
 
 /**
  * 短视频ViewModel
@@ -273,16 +272,15 @@ class ShortVideoViewModel : BaseViewModel() {
             try {
                 // 新的点赞状态
                 val newLikeState = !currentLikeState
-
-                LogUtils.d("ShortVideoViewModel: ${if (newLikeState) "点赞" else "取消点赞"} 视频 - aid=$aid")
-
                 val result = dataSource.toggleLike(aid, newLikeState)
-
                 result.onSuccess { message ->
                     // 更新缓存的点赞状态
                     likeStateCache[aid] = newLikeState
-
-                    LogUtils.d("ShortVideoViewModel: 点赞操作成功 - $message")
+                    //获取当前点赞数并进行加或减操作
+                    val likeCount = videoPoolMap[aid]!!.likeCount!!
+                    val newLikeCount = if (newLikeState) likeCount + 1 else likeCount - 1
+                    videoPoolMap[aid] = videoPoolMap[aid]!!.copy(likeCount = newLikeCount)
+                    _videoList.value = videoPoolMap.values.toList()
                 }.onFailure { e ->
                     // 显示错误消息
                     showMessageDialog(title = "错误", message = e.message ?: "操作失败")
@@ -468,12 +466,12 @@ class ShortVideoViewModel : BaseViewModel() {
                 stats.let { info ->
                     // 更新视频统计信息
                     val updatedVideo = video.copy(
-                        likeCount = info.stat.like.toStringCount(),
-                        coinCount = info.stat.coin.toStringCount(),
-                        favoriteCount = info.stat.favorite.toStringCount(),
-                        shareCount = info.stat.share.toStringCount(),
-                        commentCount = info.stat.reply.toStringCount(),
-                        danmakuCount = info.stat.danmaku.toStringCount(),
+                        likeCount = info.stat.like,
+                        coinCount = info.stat.coin,
+                        favoriteCount = info.stat.favorite,
+                        shareCount = info.stat.share,
+                        commentCount = info.stat.reply,
+                        danmakuCount = info.stat.danmaku,
                         hasCount = true
                     )
                     // 更新缓存池中的视频
