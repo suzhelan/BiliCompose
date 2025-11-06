@@ -476,14 +476,15 @@ class ShortVideoViewModel : BaseViewModel() {
                     )
                     // 更新缓存池中的视频
                     videoPoolMap[video.aid] = updatedVideo
+                    // 更新列表
+                    _videoList.value = videoPoolMap.values.toList()
                 }
             } catch (e: Exception) {
                 LogUtils.e("ShortVideoViewModel: 获取视频统计失败 - aid=${video.aid}", e)
             }
         }
 
-        // 更新列表
-        _videoList.value = videoPoolMap.values.toList()
+
     }
 
     /**
