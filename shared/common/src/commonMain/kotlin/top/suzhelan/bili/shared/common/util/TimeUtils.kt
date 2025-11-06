@@ -9,6 +9,12 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 object TimeUtils {
+
+    /**
+     * 秒级时间戳转换为时间
+     * 通常用于视频时长转换
+     * @return xx:xx
+     */
     fun formatSecondToTime(seconds: Int): String {
         // 修复方案2（模板表达式，推荐）：
         val minutes = seconds / 60
@@ -16,6 +22,14 @@ object TimeUtils {
         return "$minutes:${remainingSeconds.toString().padStart(2, '0')}"
     }
 
+    /**
+     * 秒级时间戳转换为时间
+     * @return :
+     * xx分钟前
+     * xx小时前
+     * xx天前
+     * xx-xx-xx
+     */
     @OptIn(ExperimentalTime::class)
     fun formatTimeAgo(seconds: Long): String {
         val currentTime = Clock.System.now().epochSeconds
@@ -41,8 +55,8 @@ object TimeUtils {
     }
 
     /**
-     * 秒级时间戳转换为时间
-     * yyyy年MM月dd日 HH:mm
+     * 秒级时间戳转换为日期
+     * @return yyyy年MM月dd日 HH:mm
      */
     @OptIn(ExperimentalTime::class)
     fun formatTime(seconds: Long): String {
