@@ -44,6 +44,7 @@ import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.biz.user.entity.UserSpace
+import top.suzhelan.bili.biz.user.ui.profile.FavouritePreviewCard
 import top.suzhelan.bili.biz.user.ui.profile.ProfileVideoPreView
 import top.suzhelan.bili.biz.user.ui.profile.VideoPreViewCard
 import top.suzhelan.bili.biz.user.viewmodel.UserProfileViewModel
@@ -379,11 +380,20 @@ private fun ContentTab(userSpace: UserSpace) {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     ProfileVideoPreView(
-                        title = "视频",
+                        title = "视频 - ${userSpace.archive.count}条",
                         items = userSpace.archive.item.take(4),//最多只展示四条
                     ) { item ->
                         //视频卡片
                         VideoPreViewCard(item)
+                    }
+                    if (userSpace.favourite2.count > 0) {
+                        ProfileVideoPreView(
+                            title = "收藏 - ${userSpace.favourite2.count}条",
+                            items = userSpace.favourite2.item.take(4),
+                        ) { item ->
+                            //收藏卡片
+                            FavouritePreviewCard(item)
+                        }
                     }
                 }
             }

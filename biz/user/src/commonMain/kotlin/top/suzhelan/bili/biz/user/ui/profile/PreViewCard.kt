@@ -27,14 +27,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintLayoutScope
 import coil3.compose.AsyncImage
 import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.TimeUtils
 
+/**
+ * 基础预览卡片布局
+ */
 @Composable
-fun VideoPreViewCard(
-    item: UserSpace.Archive.Item
+private fun PreViewCard(
+    content: @Composable ConstraintLayoutScope.() -> Unit
 ) = ElevatedCard(
     modifier = Modifier.wrapContentSize()
         .padding(5.dp),
@@ -46,61 +50,43 @@ fun VideoPreViewCard(
         modifier = Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
     ) {
-        //视频封面
-        val (cover, quota, title, time, mask) = createRefs()
-        AsyncImage(
-            model = item.cover,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .constrainAs(cover) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-        )
-        //用来做底部渐黑的效果
-        Box(
-            modifier = Modifier.fillMaxWidth()
-                .height(30.dp)
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.Transparent,
-                        1f to Color.Black.copy(alpha = 0.4f)
-                    )
-                ).constrainAs(mask) {
-                    bottom.linkTo(cover.bottom)
-                    start.linkTo(cover.start)
-                    end.linkTo(cover.end)
-                }
-        )
-        //播放数 弹幕数
-        Text(
-            text = "播放:${item.play} 弹幕:${item.danmaku}",
-            modifier = Modifier
-                .padding(2.dp)
-                .constrainAs(quota) {
-                    bottom.linkTo(cover.bottom)
-                    start.linkTo(cover.start)
-                },
-            color = Color.White,
-            fontSize = 10.sp
-        )
-        //视频时长
-        Text(
-            text = TimeUtils.formatSecondToTime(item.duration),
-            fontSize = 10.sp,
-            color = Color.White,
-            modifier = Modifier
-                .padding(2.dp)
-                .constrainAs(time) {
-                    bottom.linkTo(cover.bottom)
-                    end.linkTo(cover.end)
-                }
-        )
-        //标题栏 最多只展示一行
+        content()
+    }
+}
+
+/**
+ * 收藏夹卡片
+ */
+@Composable
+fun FavouritePreviewCard(
+    item: UserSpace.Favourite2.Item
+) = PreViewCard {
+    //封面
+    val (cover, title) = createRefs()
+    AsyncImage(
+        model = item.cover,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .constrainAs(cover) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            }
+    )
+    //标题
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .padding(5.dp)
+            .constrainAs(title) {
+                top.linkTo(cover.bottom)
+                start.linkTo(cover.start)
+                end.linkTo(cover.end)
+            }
+    ) {
+        //标题
         Text(
             text = item.title,
             maxLines = 1,
@@ -108,14 +94,94 @@ fun VideoPreViewCard(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp)
-                .constrainAs(title) {
-                    top.linkTo(cover.bottom)
-                    start.linkTo(cover.start)
-                }
+        )
+        //提示信息
+        Text(
+            text = "${item.count}个收藏 - ${if (item.isPublic == 1) "公开" else "私密"}",
+            fontSize = 10.sp,
+            color = TipColor,
         )
     }
 }
+
+
+/**
+ * 收藏卡片
+ */
+@Composable
+fun VideoPreViewCard(
+    item: UserSpace.Archive.Item
+) = PreViewCard {
+    //视频封面
+    val (cover, quota, title, time, mask) = createRefs()
+    AsyncImage(
+        model = item.cover,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .constrainAs(cover) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            }
+    )
+    //用来做底部渐黑的效果
+    Box(
+        modifier = Modifier.fillMaxWidth()
+            .height(30.dp)
+            .background(
+                Brush.verticalGradient(
+                    0f to Color.Transparent,
+                    1f to Color.Black.copy(alpha = 0.4f)
+                )
+            ).constrainAs(mask) {
+                bottom.linkTo(cover.bottom)
+                start.linkTo(cover.start)
+                end.linkTo(cover.end)
+            }
+    )
+    //播放数 弹幕数
+    Text(
+        text = "播放:${item.play} 弹幕:${item.danmaku}",
+        modifier = Modifier
+            .padding(2.dp)
+            .constrainAs(quota) {
+                bottom.linkTo(cover.bottom)
+                start.linkTo(cover.start)
+            },
+        color = Color.White,
+        fontSize = 10.sp
+    )
+    //视频时长
+    Text(
+        text = TimeUtils.formatSecondToTime(item.duration),
+        fontSize = 10.sp,
+        color = Color.White,
+        modifier = Modifier
+            .padding(2.dp)
+            .constrainAs(time) {
+                bottom.linkTo(cover.bottom)
+                end.linkTo(cover.end)
+            }
+    )
+    //标题栏 最多只展示一行
+    Text(
+        text = item.title,
+        maxLines = 1,
+        fontSize = 12.sp,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+            .constrainAs(title) {
+                top.linkTo(cover.bottom)
+                start.linkTo(cover.start)
+            }
+    )
+}
+
 
 @Composable
 fun <T> ProfileVideoPreView(
@@ -125,6 +191,7 @@ fun <T> ProfileVideoPreView(
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
+            .padding(vertical = 10.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(
