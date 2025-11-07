@@ -32,6 +32,7 @@ import coil3.compose.AsyncImage
 import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.TimeUtils
+import top.suzhelan.bili.shared.common.util.toStringCount
 
 /**
  * 基础预览卡片布局
@@ -104,24 +105,33 @@ fun FavouritePreviewCard(
     }
 }
 
-
 /**
- * 收藏卡片
+ * 视频卡片
+ * @param cover 封面
+ * @param title 标题
+ * @param playCount 播放数
+ * @param duration 时长
+ * @param danmaku 弹幕数
+ *
  */
 @Composable
 fun VideoPreViewCard(
-    item: UserSpace.Archive.Item
+    cover: String,
+    title: String,
+    playCount: Int,
+    duration: Int,
+    danmaku: Int,
 ) = PreViewCard {
     //视频封面
-    val (cover, quota, title, time, mask) = createRefs()
+    val (coverRef, quota, titleRef, durationRef, mask) = createRefs()
     AsyncImage(
-        model = item.cover,
+        model = cover,
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
-            .constrainAs(cover) {
+            .constrainAs(coverRef) {
                 top.linkTo(parent.top)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
@@ -137,47 +147,47 @@ fun VideoPreViewCard(
                     1f to Color.Black.copy(alpha = 0.4f)
                 )
             ).constrainAs(mask) {
-                bottom.linkTo(cover.bottom)
-                start.linkTo(cover.start)
-                end.linkTo(cover.end)
+                bottom.linkTo(coverRef.bottom)
+                start.linkTo(coverRef.start)
+                end.linkTo(coverRef.end)
             }
     )
     //播放数 弹幕数
     Text(
-        text = "播放:${item.play} 弹幕:${item.danmaku}",
+        text = "播放:${playCount.toStringCount()} 弹幕:${danmaku.toStringCount()}",
         modifier = Modifier
             .padding(2.dp)
             .constrainAs(quota) {
-                bottom.linkTo(cover.bottom)
-                start.linkTo(cover.start)
+                bottom.linkTo(coverRef.bottom)
+                start.linkTo(coverRef.start)
             },
         color = Color.White,
         fontSize = 10.sp
     )
     //视频时长
     Text(
-        text = TimeUtils.formatSecondToTime(item.duration),
+        text = TimeUtils.formatSecondToTime(duration),
         fontSize = 10.sp,
         color = Color.White,
         modifier = Modifier
             .padding(2.dp)
-            .constrainAs(time) {
-                bottom.linkTo(cover.bottom)
-                end.linkTo(cover.end)
+            .constrainAs(durationRef) {
+                bottom.linkTo(coverRef.bottom)
+                end.linkTo(coverRef.end)
             }
     )
     //标题栏 最多只展示一行
     Text(
-        text = item.title,
+        text = title,
         maxLines = 1,
         fontSize = 12.sp,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp)
-            .constrainAs(title) {
-                top.linkTo(cover.bottom)
-                start.linkTo(cover.start)
+            .constrainAs(titleRef) {
+                top.linkTo(coverRef.bottom)
+                start.linkTo(coverRef.start)
             }
     )
 }

@@ -104,7 +104,9 @@ fun UserProfileScreen(mid: Long) {
 
 @Composable
 private fun UserProfile(userSpace: UserSpace) =
-    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+    ConstraintLayout(
+        modifier = Modifier.fillMaxWidth()
+    ) {
         val (cover, avatar, nickname, header1) = createRefs()
         //典型的资料卡布局
         //先放一个封面图当底图
@@ -384,15 +386,37 @@ private fun ContentTab(userSpace: UserSpace) {
                         items = userSpace.archive.item.take(4),//最多只展示四条
                     ) { item ->
                         //视频卡片
-                        VideoPreViewCard(item)
+                        VideoPreViewCard(
+                            cover = item.cover,
+                            title = item.title,
+                            playCount = item.play,
+                            duration = item.duration,
+                            danmaku = item.danmaku
+                        )
                     }
                     if (userSpace.favourite2.count > 0) {
                         ProfileVideoPreView(
-                            title = "收藏 - ${userSpace.favourite2.count}条",
+                            title = "收藏 - ${userSpace.favourite2.count}个",
                             items = userSpace.favourite2.item.take(4),
                         ) { item ->
                             //收藏卡片
                             FavouritePreviewCard(item)
+                        }
+                    }
+                    //最近点赞的视频
+                    if (userSpace.likeArchive.count > 0) {
+                        ProfileVideoPreView(
+                            title = "最近点赞 - ${userSpace.likeArchive.count}个",
+                            items = userSpace.likeArchive.item.take(4),
+                        ) { item ->
+                            //最近点赞的视频卡片
+                            VideoPreViewCard(
+                                cover = item.cover,
+                                title = item.title,
+                                playCount = item.play,
+                                duration = item.duration,
+                                danmaku = item.danmaku
+                            )
                         }
                     }
                 }
