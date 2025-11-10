@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.PrimaryTabRow
@@ -104,6 +106,7 @@ fun UserProfileScreen(mid: Long) {
 
 @Composable
 private fun UserProfile(userSpace: UserSpace) =
+
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -380,6 +383,7 @@ private fun ContentTab(userSpace: UserSpace) {
                 //主页
                 Column(
                     modifier = Modifier.fillMaxSize()
+                        .verticalScroll(rememberScrollState())
                 ) {
                     ProfileVideoPreView(
                         title = "视频 - ${userSpace.archive.count}条",

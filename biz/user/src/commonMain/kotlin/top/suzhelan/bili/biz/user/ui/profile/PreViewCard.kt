@@ -8,10 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -38,7 +39,7 @@ import top.suzhelan.bili.shared.common.util.toStringCount
  * 基础预览卡片布局
  */
 @Composable
-private fun PreViewCard(
+private fun PreViewConstraintCard(
     content: @Composable ConstraintLayoutScope.() -> Unit
 ) = ElevatedCard(
     modifier = Modifier.wrapContentSize()
@@ -61,7 +62,7 @@ private fun PreViewCard(
 @Composable
 fun FavouritePreviewCard(
     item: UserSpace.Favourite2.Item
-) = PreViewCard {
+) = PreViewConstraintCard {
     //封面
     val (cover, title) = createRefs()
     AsyncImage(
@@ -121,7 +122,7 @@ fun VideoPreViewCard(
     playCount: Int,
     duration: Int,
     danmaku: Int,
-) = PreViewCard {
+) = PreViewConstraintCard {
     //视频封面
     val (coverRef, quota, titleRef, durationRef, mask) = createRefs()
     AsyncImage(
@@ -217,16 +218,15 @@ fun <T> ProfileVideoPreView(
             Text(text = "查看更多 >", color = TipColor)
         }
         Spacer(modifier = Modifier.height(5.dp))
-        //网格布局
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 130.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
+        LazyVerticalStaggeredGrid(
+            modifier = Modifier.fillMaxWidth().heightIn(max = (160 * 2).dp),
+            userScrollEnabled = false,
+            columns = StaggeredGridCells.Adaptive(minSize = 130.dp),
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             items(items.size) { index ->
                 itemContent(items[index])
             }
         }
-
     }
 }
