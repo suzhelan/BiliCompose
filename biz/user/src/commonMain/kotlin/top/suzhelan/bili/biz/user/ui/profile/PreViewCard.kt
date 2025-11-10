@@ -219,7 +219,7 @@ fun <T> ProfileVideoPreView(
         }
         Spacer(modifier = Modifier.height(5.dp))
         LazyVerticalStaggeredGrid(
-            modifier = Modifier.fillMaxWidth().heightIn(max = (160 * 2).dp),
+            modifier = Modifier.fillMaxWidth().heightIn(max = (180 * 2).dp),
             userScrollEnabled = false,
             columns = StaggeredGridCells.Adaptive(minSize = 130.dp),
             horizontalArrangement = Arrangement.spacedBy(5.dp)

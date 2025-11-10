@@ -109,6 +109,7 @@ private fun UserProfile(userSpace: UserSpace) =
 
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth()
+            .verticalScroll(rememberScrollState())
     ) {
         val (cover, avatar, nickname, header1) = createRefs()
         //典型的资料卡布局
@@ -116,7 +117,9 @@ private fun UserProfile(userSpace: UserSpace) =
         AsyncImage(
             model = userSpace.images.imgUrl,
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth().constrainAs(cover) {
+            modifier = Modifier.fillMaxWidth()
+                .height(200.dp)
+                .constrainAs(cover) {
                 top.linkTo(parent.top)
                 centerHorizontallyTo(parent)
             }
@@ -383,7 +386,6 @@ private fun ContentTab(userSpace: UserSpace) {
                 //主页
                 Column(
                     modifier = Modifier.fillMaxSize()
-                        .verticalScroll(rememberScrollState())
                 ) {
                     ProfileVideoPreView(
                         title = "视频 - ${userSpace.archive.count}条",
