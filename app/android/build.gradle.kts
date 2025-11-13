@@ -12,7 +12,11 @@ android {
         minSdk = BuildVersionConfig.MIN_SDK
         targetSdk = BuildVersionConfig.TARGET_SDK
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
+        ndk {
+            //只开放arm64 v8a,其他的等正式发布了再管
+            abiFilters.add("arm64-v8a")
+        }
     }
     buildFeatures {
         compose = true // 必须启用
@@ -22,19 +26,12 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    signingConfigs {
-        create("release") {
-            enableV1Signing = true
-            enableV2Signing = true
-            enableV3Signing = true
-            enableV4Signing = true
-        }
-    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
-            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            signingConfig = signingConfigs.getByName("debug")
         }
         debug {
             isMinifyEnabled = false
@@ -50,10 +47,28 @@ android {
     }
 }
 
+fun getGitCommitVersion(): String {
+    return try {
+        val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD").start()
+        process.inputStream.bufferedReader().use { it.readText().trim() }
+    } catch (e: Exception) {
+        "unknown"
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach {
+            val output =
+                it as? com.android.build.api.variant.impl.VariantOutputImpl ?: return@forEach
+            output.outputFileName.set("BiliCompose_${output.versionName.get()}-${getGitCommitVersion()}-${variant.buildType}.apk")
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.compose.material3)
     implementation(projects.bili)
-    implementation(projects.shared.storage)
 }

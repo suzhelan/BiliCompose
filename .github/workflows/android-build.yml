@@ -1,0 +1,41 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    #在什么系统运行
+    runs-on: ubuntu-latest
+
+    steps:
+      #签出代码
+      - uses: actions/checkout@v5
+      #配置jdk
+      - name: Setup Java JDK
+        uses: actions/setup-java@v5.0.0
+        with:
+          java-version: 17
+          distribution: temurin
+      #配置gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      #授权
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      #构建apk 不带签名
+      - name: Build APK
+        run: |
+          ./gradlew :app:android:assembleRelease
+      #上传apk到action
+      - name: Upload APK
+        uses: actions/upload-artifact@v5
+        with:
+          name: QStory-Signed.apk
+          path: ./app/android/build/outputs/apk/release/*.apk
+          retention-days: 30
