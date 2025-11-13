@@ -32,10 +32,18 @@ jobs:
       - name: Build APK
         run: |
           ./gradlew :app:android:assembleRelease
+
+      #上传前获取文件原名
+      - name: Prepare artifact
+        run: |
+          fileName=$(ls ./app/android/build/outputs/apk/release/*.apk | head -n 1)
+          echo "fileName=$(basename $fileName)" >> $GITHUB_ENV
+        shell: bash
+
       #上传apk到action
       - name: Upload APK
         uses: actions/upload-artifact@v5
         with:
-          name: QStory-Signed.apk
+          name: ${{ env.fileName }}
           path: ./app/android/build/outputs/apk/release/*.apk
           retention-days: 30
