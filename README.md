@@ -4,6 +4,8 @@
 
 当前进度,更多内容可在您自行构建运行后查看,等待将来完成常用功能后会发布release,这或许不会很久
 
+在这之前 你可以通过Action中的自动构建来查阅每夜版本(Android)
+
 在手机(Android)
 <img width="1166" height="632" alt="IMG_20250920_202709" src="https://github.com/user-attachments/assets/3adb910d-13ea-41ce-b9d5-2e5197312e1a" />
 
