@@ -90,7 +90,7 @@
  - 网络请求[api](./shared/api)
  - 播放器[player](./shared/player)
 
- 3.composeAPP
+ 3.bili模块
  - 核心本体模块,负责收拢所有导航路由和Screen,定义AppTheme等
 
 ### 项目风格
