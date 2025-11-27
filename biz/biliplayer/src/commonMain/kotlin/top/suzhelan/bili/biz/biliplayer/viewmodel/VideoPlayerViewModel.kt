@@ -7,9 +7,11 @@ import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.ext.apiCall
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.api.isSuccess
+import top.suzhelan.bili.biz.base.util.PlayerUtils
 import top.suzhelan.bili.biz.biliplayer.api.VideoInfoApi
 import top.suzhelan.bili.biz.biliplayer.api.VideoPlayerApi
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
+import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoTag
@@ -31,6 +33,16 @@ class VideoPlayerViewModel(
     override fun onCleared() {
         super.onCleared()
         controller.close() // 释放播放器资源
+    }
+
+    suspend fun getFixPlayerParam(playerParams: PlayerParams) : PlayerParams {
+        //检查是否有cid
+        if (playerParams.cid != null) {
+            return playerParams
+        }
+        //没有则根据aid/bvid获取cid
+        val cid = PlayerUtils.getCidByAidOrBvid(playerParams.aid, playerParams.bvid)
+        return playerParams.copy(cid = cid)
     }
 
     fun getPlayerUrl(

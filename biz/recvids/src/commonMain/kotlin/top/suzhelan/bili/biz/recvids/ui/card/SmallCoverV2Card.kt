@@ -83,7 +83,7 @@ fun VideoCard(video: SmallCoverV2Item) {
                     // 横屏视频 - 跳转到普通播放器
                     val videoScreen = SharedScreen.VideoPlayer(
                         PlayerParams(
-                            avid = video.playerArgs.aid,
+                            aid = video.playerArgs.aid,
                             cid = video.playerArgs.cid,
                         ).toJson()
                     )

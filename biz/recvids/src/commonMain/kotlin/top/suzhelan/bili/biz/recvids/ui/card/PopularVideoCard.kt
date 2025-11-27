@@ -53,7 +53,7 @@ fun PopularCoverCard(popularItem: PopularItem) {
             .clickable {
                 val videoScreen = SharedScreen.VideoPlayer(
                     PlayerParams(
-                        avid = popularItem.aid,
+                        aid = popularItem.aid,
                         bvid = popularItem.bvid,
                         cid = popularItem.cid
                     ).toJson()

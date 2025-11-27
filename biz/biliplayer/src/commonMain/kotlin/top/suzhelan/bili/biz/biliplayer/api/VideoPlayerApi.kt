@@ -7,7 +7,6 @@ import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getKtorClient
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
-import top.suzhelan.bili.biz.biliplayer.entity.VideoPageItem
 
 /**
  * 获取视频信息
@@ -18,29 +17,6 @@ class VideoPlayerApi {
         baseUrl = AppConfig.API_BASE_URL,
         withCookie = true
     )
-
-
-    /**
-     * 获取视频分P列表(buid/aid转cid)
-     */
-    suspend fun getVideoPageList(
-        aid: Long? = null,
-        bvid: String? = null,
-    ): BiliResponse.Success<List<VideoPageItem>> {
-        return client.get(
-            "/x/player/pagelist"
-        ) {
-            url {
-                if (aid != null) {
-                    parameter("aid", aid)
-                }
-                if (bvid != null) {
-                    parameter("bvid", bvid)
-                }
-            }
-        }.body()
-    }
-
 
     /**
      * 获取视频流信息

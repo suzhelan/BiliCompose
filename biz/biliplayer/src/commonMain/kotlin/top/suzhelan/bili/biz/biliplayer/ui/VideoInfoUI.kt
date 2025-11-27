@@ -99,7 +99,7 @@ fun VideoInfoUI(
     val vmVideoInfo by viewModel.videoDetailsInfo.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.getVideoDetailsInfo(
-            avid = playerParams.avid,
+            avid = playerParams.aid,
             bvid = playerParams.bvid,
         )
     }
@@ -547,7 +547,7 @@ private fun RecommendedVideoUI(
                 navigator.push(
                     SharedScreen.VideoPlayer(
                         PlayerParams(
-                            avid = it.playerArgs.aid,
+                            aid = it.playerArgs.aid,
                             cid = it.playerArgs.cid,
                         ).toJson()
                     )

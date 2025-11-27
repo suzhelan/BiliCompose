@@ -410,7 +410,6 @@ private fun ContentTab(userSpace: UserSpace) {
                                         HttpJsonDecoder.encodeToString(
                                             mapOf(
                                                 "aid" to item.param.toLong(),
-                                                "cid" to 0L
                                             )
                                         )
                                     )
@@ -447,7 +446,6 @@ private fun ContentTab(userSpace: UserSpace) {
                                             HttpJsonDecoder.encodeToString(
                                                 mapOf(
                                                     "aid" to item.param.toLong(),
-                                                    "cid" to 0L
                                                 )
                                             )
                                         )

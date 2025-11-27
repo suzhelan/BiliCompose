@@ -6,11 +6,11 @@ import kotlinx.serialization.json.Json
 //状态类型为稳定
 @Serializable
 data class PlayerParams(
-    val avid: Long? = null,
+    val aid: Long? = null,
     val bvid: String? = null,
     val epid: String? = null,
     val seasonId: String? = null,
-    val cid: Long,
+    val cid: Long? = null,
     val qn: Int = 80
 ) {
 

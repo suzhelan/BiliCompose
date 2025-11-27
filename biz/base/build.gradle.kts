@@ -7,7 +7,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.paging.compose)
             implementation(libs.coil.network.ktor3)
             implementation(libs.coil.compose)
             implementation(libs.ktor.client.core)
@@ -15,17 +14,11 @@ kotlin {
             implementation(libs.lifecycle.runtime.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.kotlinx.serialization.json)
-            //尽可能只使用公共模块
-            implementation(projects.biz.base)
-            implementation(projects.biz.user)
-            implementation(projects.biz.comment)
+
             implementation(projects.shared.api)
-            implementation(projects.shared.player)
+            implementation(projects.shared.storage)
             implementation(projects.shared.common)
-            implementation(projects.shared.navigation)
         }
     }
 
 }
-
-

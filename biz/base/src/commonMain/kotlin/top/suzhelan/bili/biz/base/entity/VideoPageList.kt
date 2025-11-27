@@ -1,4 +1,4 @@
-package top.suzhelan.bili.biz.biliplayer.entity
+package top.suzhelan.bili.biz.base.entity
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

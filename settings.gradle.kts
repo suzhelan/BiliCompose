@@ -36,6 +36,7 @@ include(
     ":shared:player",
 )
 include(
+    ":biz:base",
     ":biz:home",
     ":biz:biliplayer",
     ":biz:user",

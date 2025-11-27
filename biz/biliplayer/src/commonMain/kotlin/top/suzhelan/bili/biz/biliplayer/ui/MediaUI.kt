@@ -41,11 +41,11 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel, modifier: Modi
     val videoUrlData by vm.videoUrlData.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         vm.getPlayerUrl(
-            avid = playerParams.avid,
+            avid = playerParams.aid,
             bvid = playerParams.bvid,
             epid = playerParams.epid,
             seasonId = playerParams.seasonId,
-            cid = playerParams.cid,
+            cid = playerParams.cid!!,
             qn = playerParams.qn
         )
     }
@@ -164,8 +164,8 @@ private fun ProgressReport(
         //至少观看1秒才上报,不然会把上次观看记录直接顶掉
         if (currentPositionSeconds > 0) {
             vm.reportViewingProgress(
-                aid = playerParams.avid!!,
-                cid = playerParams.cid,
+                aid = playerParams.aid!!,
+                cid = playerParams.cid!!,
                 seconds = currentPositionSeconds
             )
         }
