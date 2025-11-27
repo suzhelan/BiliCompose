@@ -44,6 +44,7 @@ import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.api.BiliResponse
+import top.suzhelan.bili.api.HttpJsonDecoder
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.biz.user.ui.profile.FavouritePreviewCard
@@ -59,6 +60,9 @@ import top.suzhelan.bili.shared.common.ui.theme.ErrorColor
 import top.suzhelan.bili.shared.common.ui.theme.TextColor
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.toStringCount
+import top.suzhelan.bili.shared.navigation.LocalNavigation
+import top.suzhelan.bili.shared.navigation.SharedScreen
+import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 /**
  * 用户详情页
@@ -120,9 +124,9 @@ private fun UserProfile(userSpace: UserSpace) =
             modifier = Modifier.fillMaxWidth()
                 .height(200.dp)
                 .constrainAs(cover) {
-                top.linkTo(parent.top)
-                centerHorizontallyTo(parent)
-            }
+                    top.linkTo(parent.top)
+                    centerHorizontallyTo(parent)
+                }
         )
         //头像位于封面左下角
         AsyncImage(
@@ -341,6 +345,7 @@ private fun LevelProgressIndicator(
 
 @Composable
 private fun ContentTab(userSpace: UserSpace) {
+    val navigator = LocalNavigation.currentOrThrow
     val scope = rememberCoroutineScope()
     val tabItems = listOf(
         "主页",
@@ -397,7 +402,20 @@ private fun ContentTab(userSpace: UserSpace) {
                             title = item.title,
                             playCount = item.play,
                             duration = item.duration,
-                            danmaku = item.danmaku
+                            danmaku = item.danmaku,
+                            onClick = {
+                                //跳转视频详情
+                                navigator.push(
+                                    SharedScreen.VideoPlayer(
+                                        HttpJsonDecoder.encodeToString(
+                                            mapOf(
+                                                "aid" to item.param.toLong(),
+                                                "cid" to 0L
+                                            )
+                                        )
+                                    )
+                                )
+                            }
                         )
                     }
                     if (userSpace.favourite2.count > 0) {
@@ -421,7 +439,20 @@ private fun ContentTab(userSpace: UserSpace) {
                                 title = item.title,
                                 playCount = item.play,
                                 duration = item.duration,
-                                danmaku = item.danmaku
+                                danmaku = item.danmaku,
+                                onClick = {
+                                    //跳转视频详情
+                                    navigator.push(
+                                        SharedScreen.VideoPlayer(
+                                            HttpJsonDecoder.encodeToString(
+                                                mapOf(
+                                                    "aid" to item.param.toLong(),
+                                                    "cid" to 0L
+                                                )
+                                            )
+                                        )
+                                    )
+                                }
                             )
                         }
                     }

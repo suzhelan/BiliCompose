@@ -1,6 +1,7 @@
 package top.suzhelan.bili.biz.user.ui.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,9 +41,10 @@ import top.suzhelan.bili.shared.common.util.toStringCount
  */
 @Composable
 private fun PreViewConstraintCard(
+    modifier: Modifier = Modifier,
     content: @Composable ConstraintLayoutScope.() -> Unit
 ) = ElevatedCard(
-    modifier = Modifier.wrapContentSize()
+    modifier = modifier.wrapContentSize()
         .padding(5.dp),
     elevation = CardDefaults.cardElevation(
         defaultElevation = 5.dp
@@ -122,7 +124,13 @@ fun VideoPreViewCard(
     playCount: Int,
     duration: Int,
     danmaku: Int,
-) = PreViewConstraintCard {
+    onClick: () -> Unit
+) = PreViewConstraintCard(
+    modifier = Modifier
+        .clickable {
+            onClick()
+        }
+) {
     //视频封面
     val (coverRef, quota, titleRef, durationRef, mask) = createRefs()
     AsyncImage(
