@@ -28,7 +28,6 @@ import bilicompose.biz.recvids.generated.resources.Res
 import bilicompose.biz.recvids.generated.resources.more
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.stringResource
-import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.recvids.entity.PopularItem
 import top.suzhelan.bili.shared.common.ui.shimmerEffect
 import top.suzhelan.bili.shared.common.util.TimeUtils
@@ -52,11 +51,9 @@ fun PopularCoverCard(popularItem: PopularItem) {
             .padding(vertical = 6.dp, horizontal = 12.dp)
             .clickable {
                 val videoScreen = SharedScreen.VideoPlayer(
-                    PlayerParams(
-                        aid = popularItem.aid,
-                        bvid = popularItem.bvid,
-                        cid = popularItem.cid
-                    ).toJson()
+                    aid = popularItem.aid,
+                    bvid = popularItem.bvid,
+                    cid = popularItem.cid
                 )
                 navigation.push(videoScreen)
             }

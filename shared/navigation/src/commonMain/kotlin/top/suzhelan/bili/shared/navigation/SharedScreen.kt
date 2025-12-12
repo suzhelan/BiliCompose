@@ -2,6 +2,9 @@ package top.suzhelan.bili.shared.navigation
 
 import kotlinx.serialization.Serializable
 
+/**
+ * 当做是intent就行
+ */
 @Serializable
 sealed class SharedScreen(val path: String) : BiliScreenProvider {
     @Serializable
@@ -14,7 +17,14 @@ sealed class SharedScreen(val path: String) : BiliScreenProvider {
     data object FollowList : SharedScreen("/followList")
 
     @Serializable
-    data class VideoPlayer(val body: String) : SharedScreen("/video")
+    data class VideoPlayer(
+        val aid: Long? = null,
+        val bvid: String? = null,
+        val epid: String? = null,
+        val seasonId: String? = null,
+        val cid: Long? = null,
+        val qn: Int = 80
+    ) : SharedScreen("/video")
 
     @Serializable
     data class ShortVideo(val aid: Long, val videoJson: String = "") : SharedScreen("/shorts")
@@ -28,3 +38,4 @@ sealed class SharedScreen(val path: String) : BiliScreenProvider {
     @Serializable
     data class UserProfile(val mid: Long) : SharedScreen("/userProfile")
 }
+

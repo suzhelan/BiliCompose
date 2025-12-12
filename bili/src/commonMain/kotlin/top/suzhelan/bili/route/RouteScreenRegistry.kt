@@ -3,6 +3,7 @@ package top.suzhelan.bili.route
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.ui.VideoPlayerScreen
 import top.suzhelan.bili.biz.home.HomeScreen
 import top.suzhelan.bili.biz.login.ui.LoginScreen
@@ -27,7 +28,15 @@ fun NavGraphBuilder.routingScreenRegistration() {
     }
     composable<SharedScreen.VideoPlayer> { backStackEntry ->
         val param = backStackEntry.toRoute<SharedScreen.VideoPlayer>()
-        VideoPlayerScreen(param.body)
+        VideoPlayerScreen(
+            playerParams = PlayerParams(
+                aid = param.aid,
+                bvid = param.bvid,
+                epid = param.epid,
+                seasonId = param.seasonId,
+                cid = param.cid
+            )
+        )
     }
     composable<SharedScreen.ShortVideo> { backStackEntry ->
         val param = backStackEntry.toRoute<SharedScreen.ShortVideo>()

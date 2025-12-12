@@ -24,7 +24,9 @@ import top.suzhelan.bili.shared.common.ui.isPhone
 
 
 @Composable
-fun VideoPlayerScreen(body: String) {
+fun VideoPlayerScreen(
+  playerParams: PlayerParams
+) {
     CommonComposeUI<DefaultViewModel>(
         viewModel = DefaultViewModel()
     ) { _ ->
@@ -34,7 +36,7 @@ fun VideoPlayerScreen(body: String) {
         }
         DialogHandler(vm)
         PlayerUI(
-            playerParams = PlayerParams.fromJson(body),
+            playerParams = playerParams,
             viewModel = vm
         )
     }
@@ -50,7 +52,7 @@ private fun PlayerUI(
         mutableStateOf(playerParams)
     }
     if (fixParam.cid == null) {
-        LaunchedEffect(Unit){
+        LaunchedEffect(Unit) {
             fixParam = viewModel.getFixPlayerParam(fixParam)
         }
     }
@@ -81,5 +83,3 @@ private fun PlayerUI(
 
 
 }
-
-

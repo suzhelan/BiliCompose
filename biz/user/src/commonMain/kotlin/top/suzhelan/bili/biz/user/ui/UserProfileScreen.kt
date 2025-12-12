@@ -44,7 +44,6 @@ import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.api.BiliResponse
-import top.suzhelan.bili.api.HttpJsonDecoder
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.biz.user.ui.profile.FavouritePreviewCard
@@ -407,11 +406,7 @@ private fun ContentTab(userSpace: UserSpace) {
                                 //跳转视频详情
                                 navigator.push(
                                     SharedScreen.VideoPlayer(
-                                        HttpJsonDecoder.encodeToString(
-                                            mapOf(
-                                                "aid" to item.param.toLong(),
-                                            )
-                                        )
+                                        aid = item.param.toLong(),
                                     )
                                 )
                             }
@@ -443,11 +438,7 @@ private fun ContentTab(userSpace: UserSpace) {
                                     //跳转视频详情
                                     navigator.push(
                                         SharedScreen.VideoPlayer(
-                                            HttpJsonDecoder.encodeToString(
-                                                mapOf(
-                                                    "aid" to item.param.toLong(),
-                                                )
-                                            )
+                                            aid = item.param.toLong(),
                                         )
                                     )
                                 }

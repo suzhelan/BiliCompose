@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import kotlinx.serialization.json.Json.Default.encodeToString
-import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 import top.suzhelan.bili.shared.common.ui.autoSkeleton
 import top.suzhelan.bili.shared.navigation.LocalNavigation
@@ -82,10 +81,8 @@ fun VideoCard(video: SmallCoverV2Item) {
                 } else {
                     // 横屏视频 - 跳转到普通播放器
                     val videoScreen = SharedScreen.VideoPlayer(
-                        PlayerParams(
-                            aid = video.playerArgs.aid,
-                            cid = video.playerArgs.cid,
-                        ).toJson()
+                        aid = video.playerArgs.aid,
+                        cid = video.playerArgs.cid,
                     )
                     navigator.push(videoScreen)
                 }

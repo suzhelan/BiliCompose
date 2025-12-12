@@ -546,10 +546,8 @@ private fun RecommendedVideoUI(
             SimpleVideoCard(it) {
                 navigator.push(
                     SharedScreen.VideoPlayer(
-                        PlayerParams(
-                            aid = it.playerArgs.aid,
-                            cid = it.playerArgs.cid,
-                        ).toJson()
+                        aid = it.playerArgs.aid,
+                        cid = it.playerArgs.cid,
                     )
                 )
             }
