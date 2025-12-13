@@ -10,13 +10,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.player.platform.BiliLocalContext
 import top.suzhelan.bili.shared.common.ui.CommonComposeUI
-import top.suzhelan.bili.shared.common.ui.DefaultViewModel
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.ScreenSizeCalculation
 import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
@@ -25,15 +23,12 @@ import top.suzhelan.bili.shared.common.ui.isPhone
 
 @Composable
 fun VideoPlayerScreen(
-  playerParams: PlayerParams
+    playerParams: PlayerParams
 ) {
-    CommonComposeUI<DefaultViewModel>(
-        viewModel = DefaultViewModel()
-    ) { _ ->
-        val context = BiliLocalContext.current
-        val vm = viewModel {
-            VideoPlayerViewModel(context)
-        }
+    val context = BiliLocalContext.current
+    CommonComposeUI<VideoPlayerViewModel>(
+        viewModel = VideoPlayerViewModel(context)
+    ) { vm ->
         DialogHandler(vm)
         PlayerUI(
             playerParams = playerParams,

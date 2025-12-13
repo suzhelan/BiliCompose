@@ -3,6 +3,7 @@ package top.suzhelan.bili.biz.user.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -19,7 +20,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
@@ -114,7 +118,8 @@ private fun UserProfile(userSpace: UserSpace) =
         modifier = Modifier.fillMaxWidth()
             .verticalScroll(rememberScrollState())
     ) {
-        val (cover, avatar, nickname, header1) = createRefs()
+        val navigation = LocalNavigation.currentOrThrow
+        val (cover, avatar, nickname, header1, back) = createRefs()
         //典型的资料卡布局
         //先放一个封面图当底图
         AsyncImage(
@@ -125,6 +130,24 @@ private fun UserProfile(userSpace: UserSpace) =
                 .constrainAs(cover) {
                     top.linkTo(parent.top)
                     centerHorizontallyTo(parent)
+                }
+        )
+        //返回图标 原型黑色半透明背景
+        Icon(
+            imageVector = Icons.Rounded.ArrowBackIosNew,
+            contentDescription = "Back",
+            tint = Color.White,
+            modifier = Modifier
+                .size(45.dp)
+                .padding(5.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.5f))
+                .padding(5.dp)
+                .constrainAs(back) {
+                    top.linkTo(parent.top, 50.dp)
+                    start.linkTo(parent.start, 20.dp)
+                }.clickable {
+                    navigation.pop()
                 }
         )
         //头像位于封面左下角
