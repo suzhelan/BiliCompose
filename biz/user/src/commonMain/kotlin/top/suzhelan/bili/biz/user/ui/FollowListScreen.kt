@@ -159,10 +159,7 @@ private fun PagerScope.FollowListPage(vm: FollowListViewModel, tagId: Int) {
                 it.mid
             }
         ) { index ->
-            val relationUser = lazyPagingItems[index]
-            if (relationUser == null) {
-                return@items
-            }
+            val relationUser = lazyPagingItems[index] ?: return@items
             UserItemUI(vm, relationUser)
         }
         when (lazyPagingItems.loadState.append) {
@@ -268,8 +265,6 @@ private fun LazyItemScope.UserItemUI(
         ) {
             userState = userState.copy(attribute = it)
         }
-
-
     }
 }
 

@@ -3,6 +3,7 @@ package top.suzhelan.bili.biz.shorts.viewmodel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 import top.suzhelan.bili.biz.shorts.data.ShortVideoDataSource
 import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
@@ -277,10 +278,12 @@ class ShortVideoViewModel : BaseViewModel() {
                     // 更新缓存的点赞状态
                     likeStateCache[aid] = newLikeState
                     //获取当前点赞数并进行加或减操作
-                    val likeCount = videoPoolMap[aid]!!.likeCount!!
-                    val newLikeCount = if (newLikeState) likeCount + 1 else likeCount - 1
-                    videoPoolMap[aid] = videoPoolMap[aid]!!.copy(likeCount = newLikeCount)
-                    _videoList.value = videoPoolMap.values.toList()
+                    videoPoolMap[aid]?.let { video ->
+                        val likeCount = video.likeCount ?: 0
+                        val newLikeCount = if (newLikeState) likeCount + 1 else likeCount - 1
+                        videoPoolMap[aid] = video.copy(likeCount = newLikeCount)
+                        _videoList.value = videoPoolMap.values.toList()
+                    }
                 }.onFailure { e ->
                     // 显示错误消息
                     showMessageDialog(title = "错误", message = e.message ?: "操作失败")
@@ -483,8 +486,6 @@ class ShortVideoViewModel : BaseViewModel() {
                 LogUtils.e("ShortVideoViewModel: 获取视频统计失败 - aid=${video.aid}", e)
             }
         }
-
-
     }
 
     /**
