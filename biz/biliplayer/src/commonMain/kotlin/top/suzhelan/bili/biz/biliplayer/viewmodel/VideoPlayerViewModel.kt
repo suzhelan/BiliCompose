@@ -15,27 +15,41 @@ import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoTag
+import top.suzhelan.bili.biz.biliplayer.ui.controller.PlayerPool
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.platform.BiliContext
 import top.suzhelan.bili.shared.common.base.BaseViewModel
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class VideoPlayerViewModel(
-    context: BiliContext
+    private val context: BiliContext
 ) : BaseViewModel() {
+
+    //生成时间戳构建的随机数
+    @OptIn(ExperimentalTime::class)
+    private val playerId: String = Clock.System.now().epochSeconds.toString()
 
     private val playerApi = VideoPlayerApi()
     private val api = VideoInfoApi()
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
     val videoUrlData = _videoUrlData.asStateFlow()
 
-    val controller: PlayerSyncController = PlayerSyncController(context)
+    val controller: PlayerSyncController
+        get() {
+            if (!PlayerPool.has(playerId)) {
+                PlayerPool.create(playerId, context)
+            }
+            return PlayerPool.get(playerId)
+        }
 
     override fun onCleared() {
         super.onCleared()
+        PlayerPool.remove(playerId)
         controller.close() // 释放播放器资源
     }
 
-    suspend fun getFixPlayerParam(playerParams: PlayerParams) : PlayerParams {
+    suspend fun getFixPlayerParam(playerParams: PlayerParams): PlayerParams {
         //检查是否有cid
         if (playerParams.cid != null) {
             return playerParams
