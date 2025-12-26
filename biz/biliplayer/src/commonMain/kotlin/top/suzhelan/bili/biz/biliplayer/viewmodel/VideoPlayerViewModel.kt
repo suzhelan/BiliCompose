@@ -83,7 +83,7 @@ class VideoPlayerViewModel(
     }
 
     fun doPlayer(controller: PlayerSyncController) {
-        if (controller.isPlaying) {
+        if (controller.isStarted) {
             return
         }
         val video = _videoUrlData.value.getOrThrow()

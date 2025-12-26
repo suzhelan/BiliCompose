@@ -45,9 +45,14 @@ class PlayerSyncController(
         private set
 
     // 视频宽高比
-    val videoAspectRatio: Float get() = if (videoWidth > 0 && videoHeight > 0) {
-        videoWidth.toFloat() / videoHeight.toFloat()
-    } else 0f
+    val videoAspectRatio: Float
+        get() = if (videoWidth > 0 && videoHeight > 0) {
+            videoWidth.toFloat() / videoHeight.toFloat()
+        } else 0f
+
+    //是否已开始
+    var isStarted by mutableStateOf(false)
+        private set
 
     // 判断是否为竖屏视频（宽高比小于1）
     val isPortraitVideo: Boolean get() = videoAspectRatio < 1f
@@ -95,6 +100,7 @@ class PlayerSyncController(
                 updateVideoSize(width, height)
             }
         )
+        this.isStarted = true
     }
 
     /**
