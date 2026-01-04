@@ -6,6 +6,7 @@ import io.ktor.client.request.parameter
 import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getKtorClient
+import top.suzhelan.bili.biz.user.entity.LikeVideoList
 import top.suzhelan.bili.biz.user.entity.UserCard
 import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.biz.user.entity.UserSpaceInfo
@@ -48,6 +49,19 @@ class UserApi {
         return client.get("/x/v2/space") {
             url {
                 parameter("vmid", mid)
+            }
+        }.body()
+    }
+
+    suspend fun getUserLikeVideoList(mid: Long, page: Int,pageSize : Int): BiliResponse.Success<LikeVideoList> {
+        val appClient = getKtorClient(
+            baseUrl = AppConfig.APP_BASE_URL,
+        )
+        return appClient.get("/x/v2/space/likearc") {
+            url {
+                parameter("vmid", mid)
+                parameter("pn", page)
+                parameter("ps", pageSize)
             }
         }.body()
     }
