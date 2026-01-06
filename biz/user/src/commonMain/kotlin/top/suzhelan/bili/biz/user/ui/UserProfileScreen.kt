@@ -449,6 +449,10 @@ private fun ContentTab(userSpace: UserSpace) {
                         ProfileVideoPreView(
                             title = "最近点赞 - ${userSpace.likeArchive.count}个",
                             items = userSpace.likeArchive.item.take(4),
+                            moreClick = {
+                                val intent = SharedScreen.MoreLikeVideos(mid = userSpace.card.mid.toLong())
+                                navigator.push(intent)
+                            }
                         ) { item ->
                             //最近点赞的视频卡片
                             VideoPreViewCard(

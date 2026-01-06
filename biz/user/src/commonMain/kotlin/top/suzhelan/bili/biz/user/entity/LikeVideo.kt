@@ -4,6 +4,7 @@ package top.suzhelan.bili.biz.user.entity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Serializable
 data class LikeVideoList(
     @SerialName("count")
     val count: Int,

@@ -37,5 +37,8 @@ sealed class SharedScreen(val path: String) : BiliScreenProvider {
 
     @Serializable
     data class UserProfile(val mid: Long) : SharedScreen("/userProfile")
+
+    @Serializable
+    data class MoreLikeVideos(val mid: Long) : SharedScreen("/moreLikeVideos")
 }
 

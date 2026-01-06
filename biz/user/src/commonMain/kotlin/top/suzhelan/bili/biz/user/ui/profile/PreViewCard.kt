@@ -206,6 +206,7 @@ fun VideoPreViewCard(
 fun <T> ProfileVideoPreView(
     title: String = "视频",
     items: List<T>,
+    moreClick : () -> Unit = {},
     itemContent: @Composable (item: T) -> Unit
 ) {
     Column(
@@ -223,7 +224,9 @@ fun <T> ProfileVideoPreView(
             Spacer(
                 modifier = Modifier.weight(1f)
             )
-            Text(text = "查看更多 >", color = TipColor)
+            Text(text = "查看更多 >", color = TipColor, modifier = Modifier.clickable {
+                moreClick()
+            })
         }
         Spacer(modifier = Modifier.height(5.dp))
         LazyVerticalStaggeredGrid(
