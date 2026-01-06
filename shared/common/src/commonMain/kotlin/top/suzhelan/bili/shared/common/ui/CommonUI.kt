@@ -84,7 +84,6 @@ fun TitleUI(
         navigationIcon = {
             IconButton(
                 onClick = {
-                    onClickBack()
                 }
             ) {
                 Icon(imageVector = Icons.Outlined.ArrowBackIosNew, contentDescription = "Back")
