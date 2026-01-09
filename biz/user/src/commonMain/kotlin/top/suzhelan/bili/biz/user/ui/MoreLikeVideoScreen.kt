@@ -134,11 +134,8 @@ private fun LikeVideoItem(video: LikeVideo) {
             )
             .clickable {
                 // 跳转到视频播放页面
-                // 从uri中提取aid参数
-                val aid = extractAidFromUri(video.uri)
-                if (aid != null) {
-                    navigator.push(SharedScreen.VideoPlayer(aid = aid, cid = 0))
-                }
+                val aid = video.param.toLong()
+                navigator.push(SharedScreen.VideoPlayer(aid = aid))
             }
     ) {
         Row(
@@ -228,13 +225,4 @@ private fun LikeVideoItem(video: LikeVideo) {
         }
 
     }
-}
-
-
-private fun extractAidFromUri(uri: String): Long? {
-    // 从URI中提取aid参数
-    // URI格式类似: bilibili://video/624351941?player_width=1080&player_height=1920&player_rotate=0
-    val regex = Regex("bilibili://video/(\\d+)")
-    val matchResult = regex.find(uri)
-    return matchResult?.groupValues?.get(1)?.toLongOrNull()
 }
