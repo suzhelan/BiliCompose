@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -57,6 +56,8 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import top.suzhelan.bili.api.BiliResponse
@@ -75,6 +76,7 @@ import top.suzhelan.bili.comment.entity.CommentSourceType
 import top.suzhelan.bili.comment.ui.CommentContent
 import top.suzhelan.bili.shared.common.ext.dismiss
 import top.suzhelan.bili.shared.common.ext.show
+import top.suzhelan.bili.shared.common.ui.PagerBottomIndicator
 import top.suzhelan.bili.shared.common.ui.ProvideContentColor
 import top.suzhelan.bili.shared.common.ui.autoSkeleton
 import top.suzhelan.bili.shared.common.ui.card.Expandable
@@ -533,24 +535,32 @@ private fun RecommendedVideoUI(
     viewModel: VideoPlayerViewModel
 ) {
     val navigator = LocalNavigation.currentOrThrow
-    val recommendedVideo = viewModel.recommendedVideo
-    LaunchedEffect(Unit) {
-        viewModel.getRecommendedVideoByVideo(aid)
-    }
+    val recommendedVideoFlow = viewModel.getRecommendedVideoFlow(aid)
+    val recommendedVideo = recommendedVideoFlow.collectAsLazyPagingItems()
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        items(recommendedVideo) {
-            SimpleVideoCard(it) {
-                navigator.push(
-                    SharedScreen.VideoPlayer(
-                        aid = it.playerArgs.aid,
-                        cid = it.playerArgs.cid,
+        items(
+            count = recommendedVideo.itemCount,
+            key = recommendedVideo.itemKey { it.param }
+        ) { index ->
+            val item = recommendedVideo[index]
+            if (item != null) {
+                SimpleVideoCard(item) {
+                    navigator.push(
+                        SharedScreen.VideoPlayer(
+                            aid = item.playerArgs.aid,
+                            cid = item.playerArgs.cid,
+                        )
                     )
-                )
+                }
             }
+        }
+        item {
+            PagerBottomIndicator(recommendedVideo)
         }
     }
 }

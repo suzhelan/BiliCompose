@@ -1,6 +1,9 @@
 package top.suzhelan.bili.biz.biliplayer.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import top.suzhelan.bili.api.BiliResponse
@@ -10,9 +13,9 @@ import top.suzhelan.bili.api.isSuccess
 import top.suzhelan.bili.biz.base.util.PlayerUtils
 import top.suzhelan.bili.biz.biliplayer.api.VideoInfoApi
 import top.suzhelan.bili.biz.biliplayer.api.VideoPlayerApi
+import top.suzhelan.bili.biz.biliplayer.data.RecommendedVideoPagingSource
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
-import top.suzhelan.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoTag
 import top.suzhelan.bili.biz.biliplayer.ui.controller.PlayerPool
@@ -154,23 +157,19 @@ class VideoPlayerViewModel(
         ).data
     }
 
-    private val _recommendedVideo: MutableList<RecommendedVideoByVideo.Item> = mutableStateListOf()
-    val recommendedVideo: List<RecommendedVideoByVideo.Item> = _recommendedVideo
-
     /**
-     * 获取推荐的视频列表
+     * 获取推荐视频的分页数据流
      */
-    fun getRecommendedVideoByVideo(
-        aid: Long
-    ) = launchTask {
-        if (_recommendedVideo.isNotEmpty()) {
-            return@launchTask
+    fun getRecommendedVideoFlow(aid: Long) = Pager(
+        config = PagingConfig(
+            pageSize = 20,
+            prefetchDistance = 5,
+            enablePlaceholders = true
+        ),
+        pagingSourceFactory = {
+            RecommendedVideoPagingSource(aid)
         }
-        while (_recommendedVideo.size < 50) {
-            val result = api.getRecommendedVideosByVideo(aid)
-            _recommendedVideo.addAll(result.data.items)
-        }
-    }
+    ).flow.cachedIn(viewModelScope)
 
     val operationState = MutableStateFlow<ActionState>(ActionState.None)
 
