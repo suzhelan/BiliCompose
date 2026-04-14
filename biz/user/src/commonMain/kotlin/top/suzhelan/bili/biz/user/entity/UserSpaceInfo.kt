@@ -364,7 +364,7 @@ data class UserSpaceInfo(
     @Serializable
     data class UserHonourInfo(
         /** 0 */
-        @SerialName("mid") val mid: Int = 0, // 示例: 0
+        @SerialName("mid") val mid: Long = 0, // 示例: 0
 
         /** null */
         @SerialName("colour") val colour: String? = null, // 示例: null

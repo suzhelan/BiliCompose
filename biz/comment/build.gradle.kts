@@ -19,6 +19,7 @@ kotlin {
             implementation(projects.shared.api)
             implementation(projects.shared.common)
             implementation(projects.shared.navigation)
+            implementation(projects.shared.auth)
         }
     }
 

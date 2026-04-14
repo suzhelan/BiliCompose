@@ -91,8 +91,13 @@ object LoginMapper {
         _isLoginState.value = false
     }
 
-    fun getMid(): Int {
+    fun getMid(): Long {
         return getUniversalLoginInfo().tokenInfo.mid
+    }
+
+    fun getCsrfToken(): String {
+        return getUniversalLoginInfo().cookieInfo.cookies.find { it.name == "bili_jct" }?.value 
+            ?: throw IllegalStateException("未找到CSRF Token")
     }
 
 }

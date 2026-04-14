@@ -1,13 +1,21 @@
 package top.suzhelan.bili.comment.api
 
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.http.parameters
+import kotlinx.serialization.json.JsonObject
 import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getKtorClient
 import top.suzhelan.bili.comment.entity.CommentPage
 import top.suzhelan.bili.comment.entity.CommentSourceType
+import top.suzhelan.bili.shared.auth.config.LoginMapper
 
 class CommentApi {
     private val client = getKtorClient(baseUrl = AppConfig.API_BASE_URL)
@@ -40,6 +48,41 @@ pn	num	页码	非必要	默认为1
                 parameter("ps", pageSize)
                 parameter("pn", page)
             }
+        }.body()
+    }
+
+    /**
+     * 发表评论
+     * @param oid 视频ID
+     * @param type 评论类型(视频为CommentSourceType.Video)
+     * @param message 评论内容
+     * @param root 根评论ID(回复评论时使用,一级评论传null)
+     * @param parent 父评论ID(回复子评论时使用,一级评论传null)
+     */
+    suspend fun addComment(
+        oid: Long,
+        type: CommentSourceType,
+        message: String,
+        root: Long? = null,
+        parent: Long? = null
+    ): BiliResponse.Success<JsonObject> {
+        val csrf = LoginMapper.getCsrfToken()
+        
+        return client.post("/x/v2/reply/add") {
+            contentType(ContentType.Application.FormUrlEncoded)
+            setBody(FormDataContent(parameters {
+                append("oid", oid.toString())
+                append("type", type.type.toString())
+                append("message", message)
+                append("plat", "1")
+                append("csrf", csrf)
+                if (root != null) {
+                    append("root", root.toString())
+                }
+                if (parent != null) {
+                    append("parent", parent.toString())
+                }
+            }))
         }.body()
     }
 }

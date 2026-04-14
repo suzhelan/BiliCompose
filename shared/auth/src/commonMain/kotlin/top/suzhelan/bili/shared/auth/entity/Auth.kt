@@ -20,7 +20,7 @@ data class UniversalLoginResult(
     // 处理字段层级差异
     @SerialName("access_token") val accessToken: String? = null,    // TvLoginResult根节点
     @SerialName("refresh_token") val refreshToken: String? = null,  // TvLoginResult根节点
-    @SerialName("mid") val mid: Int? = null                         // TvLoginResult根节点
+    @SerialName("mid") val mid: Long? = null                         // TvLoginResult根节点
 ) {
 
     @Serializable
@@ -33,7 +33,7 @@ data class UniversalLoginResult(
     data class TokenInfo(
         @SerialName("access_token") val accessToken: String = "",
         @SerialName("expires_in") val expiresIn: Int = 0,
-        @SerialName("mid") val mid: Int = 0,
+        @SerialName("mid") val mid: Long = 0,
         @SerialName("refresh_token") val refreshToken: String = "",
         @SerialName("region") val region: String = "",
         @SerialName("fast_login_token") val fastLoginToken: String = ""
@@ -73,7 +73,7 @@ data class LoginResult(
         @SerialName("access_token") val accessToken: String,
         @SerialName("expires_in") val expiresIn: Int,
         @SerialName("fast_login_token") val fastLoginToken: String,
-        @SerialName("mid") val mid: Int,
+        @SerialName("mid") val mid: Long,
         @SerialName("refresh_token") val refreshToken: String,
         @SerialName("region") val region: String
     )
@@ -103,7 +103,7 @@ data class TvLoginResult(
     @SerialName("is_new")
     val isNew: Boolean, // false
     @SerialName("mid")
-    val mid: Int, // 479396940
+    val mid: Long, // 479396940
     @SerialName("refresh_token")
     val refreshToken: String, // fe3c92b83a3a5d4ab99430dd8b702282
     @SerialName("sso")
@@ -126,7 +126,7 @@ data class TvLoginResult(
         @SerialName("expires_in")
         val expiresIn: Int, // 15552000
         @SerialName("mid")
-        val mid: Int, // 479396940
+        val mid: Long, // 479396940
         @SerialName("refresh_token")
         val refreshToken: String, // fe3c92b83a3a5d4ab99430dd8b702282
         @SerialName("region")

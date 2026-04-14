@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AccountInfo(
-    @SerialName("mid") val mid: Int, // 用户mid
+    @SerialName("mid") val mid: Long, // 用户mid
     @SerialName("name") val name: String, // 名字
     @SerialName("sign") val sign: String, // 签名
     @SerialName("coins") val coins: Double, // 
