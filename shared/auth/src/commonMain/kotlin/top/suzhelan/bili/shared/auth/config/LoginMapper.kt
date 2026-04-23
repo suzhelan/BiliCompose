@@ -91,7 +91,7 @@ object LoginMapper {
         _isLoginState.value = false
     }
 
-    fun getMid(): Int {
+    fun getMid(): Long {
         return getUniversalLoginInfo().tokenInfo.mid
     }
 
