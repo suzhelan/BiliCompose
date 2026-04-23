@@ -40,14 +40,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bilicompose.biz.user.generated.resources.Res
 import bilicompose.biz.user.generated.resources.b_coin
-import bilicompose.biz.user.generated.resources.b_coin_int
 import bilicompose.biz.user.generated.resources.coin
-import bilicompose.biz.user.generated.resources.coin_int
 import bilicompose.biz.user.generated.resources.dynamic
 import bilicompose.biz.user.generated.resources.fans
 import bilicompose.biz.user.generated.resources.follow
-
 import coil3.compose.AsyncImage
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import top.suzhelan.bili.api.getOrThrow
@@ -56,14 +54,15 @@ import top.suzhelan.bili.biz.login.ui.content.NotLoggedInContent
 import top.suzhelan.bili.biz.user.entity.mine.Mine
 import top.suzhelan.bili.biz.user.viewmodel.MineViewModel
 import top.suzhelan.bili.shared.auth.config.LoginMapper
+import top.suzhelan.bili.shared.common.ext.format
 import top.suzhelan.bili.shared.common.ui.icons.LevelIcons
-
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimaryContainer
 import top.suzhelan.bili.shared.common.ui.theme.DividingLineColor
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
+import kotlin.math.abs
 
 
 /**
@@ -88,7 +87,7 @@ fun MineContent() {
 @Composable
 private fun UserProfile(
     modifier: Modifier = Modifier,
-    mineViewModel: MineViewModel = viewModel { MineViewModel() }
+    mineViewModel: MineViewModel = viewModel { MineViewModel() },
 ) {
     LaunchedEffect(Unit) {
         mineViewModel.updateMine()
@@ -147,7 +146,7 @@ private fun ColumnScope.ToolBar() {
  */
 @Composable
 private fun ColumnScope.HeaderUserCard(
-    mine: Mine
+    mine: Mine,
 ) {
     val navigation = LocalNavigation.currentOrThrow
     ConstraintLayout(modifier = Modifier.fillMaxWidth().clickable {
@@ -221,16 +220,15 @@ private fun ColumnScope.HeaderUserCard(
                 .padding(horizontal = 2.dp, vertical = 0.dp)
         )
         //根据是否整数格式化合适的字符串类型
-        val coinText = if (mine.coin.rem(1.0) == 0.0) {
-            stringResource(Res.string.coin_int, mine.coin.toInt())
-        } else {
-            stringResource(Res.string.coin, mine.coin)
-        }
-        val bCoinText = if (mine.bcoin.rem(1.0) == 0.0) {
-            stringResource(Res.string.b_coin_int, mine.bcoin.toInt())
-        } else {
-            stringResource(Res.string.b_coin, mine.bcoin)
-        }
+        val coinText = getCoinText(
+            value = mine.coin,
+            res = Res.string.coin
+        )
+
+        val bCoinText = getCoinText(
+            value = mine.bcoin,
+            res = Res.string.b_coin
+        )
         //b币
         Text(
             text = coinText,
@@ -259,7 +257,7 @@ private fun ColumnScope.HeaderUserCard(
  */
 @Composable
 private fun ColumnScope.UserAmount(
-    mine: Mine
+    mine: Mine,
 ) {
     val navigate = LocalNavigation.currentOrThrow
     // 聚合数据列表
@@ -315,5 +313,22 @@ private fun ColumnScope.UserAmount(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun getCoinText(
+    value: Double,
+    res: StringResource,
+): String {
+    val displayValue = if (abs(value - value.toLong()) < 0.000001) {
+        value.toLong().toString()
+    } else {
+        val fixed = (value * 100).toLong() / 100.0
+        "%.2f".format(fixed)
+    }
+    return buildString {
+        append(stringResource(res))
+        append(displayValue)
     }
 }
