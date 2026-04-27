@@ -9,8 +9,8 @@ import top.suzhelan.bili.biz.biliplayer.api.VideoPlayerApi
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.entity.VerticalVideoWrap
-import top.suzhelan.bili.biz.biliplayer.ui.controller.PlayerPool
 import top.suzhelan.bili.player.controller.PlayerSyncController
+import top.suzhelan.bili.player.platform.BiliContext
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 
 
@@ -18,7 +18,38 @@ class VerticalVideoViewModel : BaseViewModel() {
     private val playerApi = VideoPlayerApi()
     private val infoApi = VideoInfoApi()
 
-    val controllerList = mutableListOf<PlayerSyncController>()
+    val controllerList = mutableMapOf<Int, PlayerSyncController>()
+
+    override fun onCleared() {
+        super.onCleared()
+        controllerList.values.forEach { it.close() }
+        controllerList.clear()
+    }
+
+    fun getController(page: Int, context: BiliContext): PlayerSyncController = controllerList.getOrPut(page) { PlayerSyncController(context) }
+
+    fun updateActivePage(activePage: Int?) {
+        controllerList.forEach { (page, controller) ->
+            if (page == activePage) {
+                if (controller.isStarted) {
+                    controller.resume()
+                }
+            } else {
+                controller.pause()
+            }
+        }
+    }
+
+    fun updatePagePlayback(controller: PlayerSyncController, isActivePage: Boolean) {
+        if (isActivePage) {
+            if (controller.isStarted) {
+                controller.resume()
+            }
+        } else {
+            controller.pause()
+        }
+    }
+
     /**
      * 播放视频链接
      */

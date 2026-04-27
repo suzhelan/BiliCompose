@@ -7,15 +7,15 @@ import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VerticalVideoViewModel
 import top.suzhelan.bili.player.controller.PlayerSyncController
-import top.suzhelan.bili.player.controller.rememberPlayerSyncController
+import top.suzhelan.bili.player.platform.BiliLocalContext
 import top.suzhelan.bili.player.ui.VerticalPlayerUI
 import top.suzhelan.bili.shared.common.ui.CommonComposeUI
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
@@ -25,6 +25,7 @@ import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 fun NewVerticaScreen(intent: PlayerParams) {
     //使用PlayerViewModel
     CommonComposeUI(viewModel = VerticalVideoViewModel()) { vm ->
+        val context = BiliLocalContext.current
         val videoUrlList by vm.videoUrlList.collectAsStateWithLifecycle()
         LaunchedEffect(Unit) {
             //初始化数据
@@ -41,23 +42,47 @@ fun NewVerticaScreen(intent: PlayerParams) {
                 videoUrlList.size
             }
         )
+
+        val activePage by remember(pagerState, videoUrlList.size) {
+            derivedStateOf {
+                if (pagerState.isScrollInProgress) {
+                    null
+                } else {
+                    pagerState.settledPage.takeIf { it in videoUrlList.indices }
+                }
+            }
+        }
+
+        LaunchedEffect(activePage, videoUrlList.size) {
+            vm.updateActivePage(activePage)
+        }
+
         VerticalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            beyondViewportPageCount = 1,
+            key = { page -> page }
         ) { page ->
             val item = videoUrlList[page]
-            val controller = rememberPlayerSyncController()
-            LaunchedEffect(Unit) {
-                vm.controllerList.add(controller)
-                vm.doPlayer(item, controller)
+            val controller = remember(page, context) {
+                vm.getController(page, context)
             }
-            VideoContentItem(item = item, controller = controller)
+            val isActivePage = activePage == page
+
+            LaunchedEffect(item, controller, isActivePage) {
+                vm.doPlayer(item, controller)
+                vm.updatePagePlayback(controller, isActivePage)
+            }
+
+            VideoContentItem(controller = controller)
         }
     }
 }
 
 @Composable
-private fun PagerScope.VideoContentItem(item: PlayerArgsItem, controller: PlayerSyncController) =
+private fun PagerScope.VideoContentItem(
+    controller: PlayerSyncController,
+) =
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
