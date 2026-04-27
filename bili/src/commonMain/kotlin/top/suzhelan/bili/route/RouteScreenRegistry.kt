@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
+import top.suzhelan.bili.biz.biliplayer.ui.NewVerticaScreen
 import top.suzhelan.bili.biz.biliplayer.ui.VideoPlayerScreen
 import top.suzhelan.bili.biz.home.HomeScreen
 import top.suzhelan.bili.biz.login.ui.LoginScreen
@@ -31,6 +32,18 @@ fun NavGraphBuilder.routingScreenRegistration() {
         val param = backStackEntry.toRoute<SharedScreen.VideoPlayer>()
         VideoPlayerScreen(
             playerParams = PlayerParams(
+                aid = param.aid,
+                bvid = param.bvid,
+                epid = param.epid,
+                seasonId = param.seasonId,
+                cid = param.cid
+            )
+        )
+    }
+    composable<SharedScreen.NewVertical> { backStackEntry ->
+        val param = backStackEntry.toRoute<SharedScreen.NewVertical>()
+        NewVerticaScreen(
+            intent = PlayerParams(
                 aid = param.aid,
                 bvid = param.bvid,
                 epid = param.epid,

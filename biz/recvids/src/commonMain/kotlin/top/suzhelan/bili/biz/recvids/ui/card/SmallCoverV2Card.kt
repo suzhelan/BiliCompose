@@ -36,7 +36,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import kotlinx.serialization.json.Json.Default.encodeToString
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 import top.suzhelan.bili.shared.common.ui.autoSkeleton
 import top.suzhelan.bili.shared.navigation.LocalNavigation
@@ -73,11 +72,11 @@ fun VideoCard(video: SmallCoverV2Item) {
             .clickable {
                 if (isVerticalVideo) {
                     // 竖屏视频 - 跳转到短视频播放器，传递完整视频信息
-                    val videoJson = encodeToString(
-                        SmallCoverV2Item.serializer(),
-                        video
+                    val videoScreen = SharedScreen.NewVertical(
+                        aid = video.playerArgs.aid,
+                        cid = video.playerArgs.cid,
                     )
-                    navigator.push(SharedScreen.ShortVideo(video.playerArgs.aid, videoJson))
+                    navigator.push(videoScreen)
                 } else {
                     // 横屏视频 - 跳转到普通播放器
                     val videoScreen = SharedScreen.VideoPlayer(

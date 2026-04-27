@@ -27,6 +27,9 @@ import top.suzhelan.bili.player.ui.topbar.PlayerTopBar
 import top.suzhelan.bili.player.ui.video.VideoScaffold
 
 
+/**
+ * 普通横屏播放器
+ */
 @Composable
 fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier) {
     // 总时长

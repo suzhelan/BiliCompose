@@ -23,8 +23,18 @@ sealed class SharedScreen(val path: String) : BiliScreenProvider {
         val epid: String? = null,
         val seasonId: String? = null,
         val cid: Long? = null,
-        val qn: Int = 80
+        val qn: Int = 80,
     ) : SharedScreen("/video")
+
+    @Serializable
+    data class NewVertical(
+        val aid: Long? = null,
+        val bvid: String? = null,
+        val epid: String? = null,
+        val seasonId: String? = null,
+        val cid: Long? = null,
+        val qn: Int = 80,
+    ) : SharedScreen("/vertical")
 
     @Serializable
     data class ShortVideo(val aid: Long, val videoJson: String = "") : SharedScreen("/shorts")
