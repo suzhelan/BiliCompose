@@ -1,6 +1,7 @@
 package top.suzhelan.bili.biz.biliplayer.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.VerticalPager
@@ -9,15 +10,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
+import top.suzhelan.bili.biz.biliplayer.ui.vertical.ProgressPreview
+import top.suzhelan.bili.biz.biliplayer.ui.vertical.VerticalBottomProgressArea
+import top.suzhelan.bili.biz.biliplayer.ui.vertical.VerticalBottomReservedHeight
 import top.suzhelan.bili.biz.biliplayer.ui.vertical.VerticalVideoOverlay
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VerticalVideoViewModel
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.platform.BiliLocalContext
 import top.suzhelan.bili.player.ui.VerticalPlayerUI
+import top.suzhelan.bili.player.ui.indicator.OnPreviewIndicator
 import top.suzhelan.bili.shared.common.ui.CommonComposeUI
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.navigation.LocalNavigation
@@ -27,7 +35,10 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 @Composable
 fun NewVerticaScreen(intent: PlayerParams) {
     //使用PlayerViewModel
-    CommonComposeUI(viewModel = VerticalVideoViewModel()) { vm ->
+    CommonComposeUI(
+        viewModel = VerticalVideoViewModel(),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { vm ->
         val context = BiliLocalContext.current
         val navigation = LocalNavigation.currentOrThrow
         val videoUrlList by vm.videoUrlList.collectAsStateWithLifecycle()
@@ -98,13 +109,36 @@ private fun PagerScope.VideoContentItem(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
+        var previewIndicator by remember { mutableStateOf<ProgressPreview?>(null) }
+
         VerticalPlayerUI(
-            controller = controller
+            controller = controller,
+            showProgressIndicator = false
         )
         VerticalVideoOverlay(
             page = page,
             videoPoolData = viewModel.videoPoolData,
             viewModel = viewModel,
-            onBack = onBack
+            onBack = onBack,
+            bottomReservedHeight = VerticalBottomReservedHeight
         )
+        VerticalBottomProgressArea(
+            controller = controller,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            onPreview = { positionMillis, totalDurationMillis ->
+                previewIndicator = ProgressPreview(positionMillis, totalDurationMillis)
+            },
+            onPreviewFinished = {
+                previewIndicator = null
+            }
+        )
+        previewIndicator?.let { preview ->
+            OnPreviewIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                progress = preview.positionMillis,
+                total = preview.totalDurationMillis
+            )
+        }
     }
+
+

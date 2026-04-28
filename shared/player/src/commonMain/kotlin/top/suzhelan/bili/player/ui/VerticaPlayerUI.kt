@@ -34,7 +34,10 @@ import top.suzhelan.bili.player.ui.video.VideoScaffold
  * 和业务ui高度贴合的，所以需要考虑自定义嵌入而不是播放器提供控件
  */
 @Composable
-fun VerticalPlayerUI(controller: PlayerSyncController) {
+fun VerticalPlayerUI(
+    controller: PlayerSyncController,
+    showProgressIndicator: Boolean = true,
+) {
     // 总时长
     val totalDurationMillis by controller.totalDurationMillis.collectAsStateWithLifecycle()
     // 当前播放进度
@@ -89,13 +92,15 @@ fun VerticalPlayerUI(controller: PlayerSyncController) {
         },
         bottomBar = {},
         progressIndicator = {
-            //进度条
-            PlayerProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
-                state = progressSliderState,
-            )
+            if (showProgressIndicator) {
+                //进度条
+                PlayerProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    state = progressSliderState,
+                )
+            }
         },
         gesture = {
             //手势几乎不怎么需要处理

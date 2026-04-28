@@ -2,6 +2,7 @@ package top.suzhelan.bili.shared.common.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -11,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -33,6 +35,7 @@ inline fun <reified VM : BaseViewModel> CommonComposeUI(
     isNeedLoading: Boolean = false,
     viewModel: VM,
     modifier: Modifier = Modifier,
+    contentWindowInsets: WindowInsets? = null,
     crossinline initAction: (vm: VM) -> Unit = {},
     crossinline topBar: @Composable (vm: VM) -> Unit = {},
     crossinline bottomBar: @Composable (vm: VM) -> Unit = {},
@@ -54,6 +57,7 @@ inline fun <reified VM : BaseViewModel> CommonComposeUI(
         topBar = { topBar(vm) },
         bottomBar = { bottomBar(vm) },
         floatingActionButton = { floatActionButton(vm) },
+        contentWindowInsets = contentWindowInsets ?: ScaffoldDefaults.contentWindowInsets,
     ) { padding ->
         Box(
             modifier = Modifier.fillMaxSize().padding(padding)
