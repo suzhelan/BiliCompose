@@ -13,12 +13,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
+import top.suzhelan.bili.biz.biliplayer.ui.vertical.VerticalVideoOverlay
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VerticalVideoViewModel
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.platform.BiliLocalContext
 import top.suzhelan.bili.player.ui.VerticalPlayerUI
 import top.suzhelan.bili.shared.common.ui.CommonComposeUI
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
+import top.suzhelan.bili.shared.navigation.LocalNavigation
+import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
 @Composable
@@ -26,6 +29,7 @@ fun NewVerticaScreen(intent: PlayerParams) {
     //使用PlayerViewModel
     CommonComposeUI(viewModel = VerticalVideoViewModel()) { vm ->
         val context = BiliLocalContext.current
+        val navigation = LocalNavigation.currentOrThrow
         val videoUrlList by vm.videoUrlList.collectAsStateWithLifecycle()
         LaunchedEffect(Unit) {
             //初始化数据
@@ -74,19 +78,33 @@ fun NewVerticaScreen(intent: PlayerParams) {
                 vm.updatePagePlayback(controller, isActivePage)
             }
 
-            VideoContentItem(controller = controller)
+            VideoContentItem(
+                page = page,
+                controller = controller,
+                viewModel = vm,
+                onBack = { navigation.pop() }
+            )
         }
     }
 }
 
 @Composable
 private fun PagerScope.VideoContentItem(
+    page: Int,
     controller: PlayerSyncController,
+    viewModel: VerticalVideoViewModel,
+    onBack: () -> Unit,
 ) =
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
         VerticalPlayerUI(
             controller = controller
+        )
+        VerticalVideoOverlay(
+            page = page,
+            videoPoolData = viewModel.videoPoolData,
+            viewModel = viewModel,
+            onBack = onBack
         )
     }
