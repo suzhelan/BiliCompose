@@ -28,6 +28,7 @@ import top.suzhelan.bili.player.ui.VerticalPlayerUI
 import top.suzhelan.bili.player.ui.indicator.OnPreviewIndicator
 import top.suzhelan.bili.shared.common.ui.CommonComposeUI
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
+import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.currentOrThrow
 
@@ -51,6 +52,7 @@ fun NewVerticaScreen(intent: PlayerParams) {
             LoadingIndicator(text = "加载中...")
             return@CommonComposeUI
         }
+        DialogHandler(vm)
         val pagerState = rememberPagerState(
             initialPage = 0,
             pageCount = {
