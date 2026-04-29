@@ -16,19 +16,26 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import top.suzhelan.bili.api.HttpJsonDecoder
 import top.suzhelan.bili.comment.entity.Comment
+import top.suzhelan.bili.comment.entity.CommentLazyPage.CommentLazy
 
 
 object CompoundEmojiMessageModel {
     data class MessageContent(
         val message: String,
-        val emote: Map<String, Comment.Content.Emote>
+        val emote: Map<String, MessageEmote>
+    )
+
+    data class MessageEmote(
+        val text: String,
+        val url: String,
+        val size: Int,
     )
 
     sealed class MessagePart {
         data class Text(val content: String) : MessagePart()
         data class Emote(
             val key: String,
-            val data: Comment.Content.Emote
+            val data: MessageEmote
         ) : MessagePart()
     }
 
@@ -84,10 +91,10 @@ fun CompoundEmojiMessage(
             .forEach { emote ->
                 val key = "emote_${emote.key.hashCode()}"
                 //计算高度，小表情要比文本高一点，大表情正常算
-                val emotionSize = if (emote.data.meta.size == 1) {
+                val emotionSize = if (emote.data.size == 1) {
                     size * 1.3f
                 } else {
-                    emote.data.meta.size.toFloat()
+                    emote.data.size.toFloat()
                 }
                 put(
                     key, InlineTextContent(
@@ -178,8 +185,20 @@ fun DemoView(
     CompoundEmojiMessage(
         content = CompoundEmojiMessageModel.MessageContent(
             message = content.message,
-            emote = content.emote,
+            emote = content.emote.mapValues { (_, emote) ->
+                CompoundEmojiMessageModel.MessageEmote(
+                    text = emote.text,
+                    url = emote.url,
+                    size = emote.meta.size,
+                )
+            },
         ), modifier = modifier
     )
 }
+
+fun CommentLazy.Content.Emote.toMessageEmote() = CompoundEmojiMessageModel.MessageEmote(
+    text = text,
+    url = url,
+    size = meta.size,
+)
 

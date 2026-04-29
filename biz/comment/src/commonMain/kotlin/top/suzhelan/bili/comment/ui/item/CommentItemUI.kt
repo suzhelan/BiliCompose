@@ -33,9 +33,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
-import top.suzhelan.bili.comment.entity.Comment
+import top.suzhelan.bili.comment.entity.CommentLazyPage.CommentLazy
 import top.suzhelan.bili.comment.ui.text.CompoundEmojiMessage
 import top.suzhelan.bili.comment.ui.text.CompoundEmojiMessageModel
+import top.suzhelan.bili.comment.ui.text.toMessageEmote
 import top.suzhelan.bili.shared.common.ui.icons.LevelIcons
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
 import top.suzhelan.bili.shared.common.ui.theme.TextColor
@@ -47,7 +48,7 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
 @Composable
-fun CommentCard(comment: Comment) {
+fun CommentCard(comment: CommentLazy) {
     val navigation = LocalNavigation.currentOrThrow
     //构成 头像,头像框背景
     //昵称 等级 评论背景
@@ -112,7 +113,7 @@ fun CommentCard(comment: Comment) {
         CompoundEmojiMessage(
             content = CompoundEmojiMessageModel.MessageContent(
                 comment.content.message,
-                comment.content.emote
+                comment.content.emote.mapValues { (_, emote) -> emote.toMessageEmote() }
             ),
             modifier = Modifier.constrainAs(content) {
                 top.linkTo(nickname.bottom)
@@ -147,7 +148,7 @@ fun CommentCard(comment: Comment) {
 }
 
 @Composable
-private fun Avatar(member: Comment.Member, modifier: Modifier) =
+private fun Avatar(member: CommentLazy.Member, modifier: Modifier) =
     Box(modifier = modifier.size(60.dp)) {
         //头像框边距 大概是父布局也就是80dp的1/4
         AsyncImage(
@@ -168,8 +169,8 @@ private fun Avatar(member: Comment.Member, modifier: Modifier) =
 
 @Composable
 private fun InfoLineRow(
-    comment: Comment,
-    modifier: Modifier
+    comment: CommentLazy,
+    modifier: Modifier,
 ) {
     val action = comment.action
     //时间 ip ‘回复’ 点赞 点踩 更多操作
@@ -244,7 +245,7 @@ private fun InfoLineRow(
 }
 
 @Composable
-private fun RepliedPreview(comment: Comment, modifier: Modifier) = Column(
+private fun RepliedPreview(comment: CommentLazy, modifier: Modifier) = Column(
     modifier = modifier.fillMaxWidth()
         .background(TipColor.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
         .padding(6.dp)
@@ -264,11 +265,11 @@ private fun RepliedPreview(comment: Comment, modifier: Modifier) = Column(
 }
 
 @Composable
-private fun SimpleReplyCard(comment: Comment) {
+private fun SimpleReplyCard(comment: CommentLazy) {
     CompoundEmojiMessage(
         content = CompoundEmojiMessageModel.MessageContent(
             "${comment.member.uname}: " + comment.content.message,
-            comment.content.emote
+            comment.content.emote.mapValues { (_, emote) -> emote.toMessageEmote() }
         ),
         size = 13,
         modifier = Modifier.padding(vertical = 2.dp)

@@ -3,35 +3,61 @@ package top.suzhelan.bili.comment.source
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import top.suzhelan.bili.comment.api.CommentApi
-import top.suzhelan.bili.comment.entity.Comment
+import top.suzhelan.bili.comment.entity.CommentLazyPage
 import top.suzhelan.bili.comment.entity.CommentSourceType
 
+class CommentApiException(code: Int, message: String) : Exception(
+    "评论加载失败：code=$code, message=$message"
+)
 
 class CommentDataSource(
     private val oid: String,
-    private val type: CommentSourceType
-) : PagingSource<Int, Comment>() {
+    private val type: CommentSourceType,
+) : PagingSource<Int, CommentLazyPage.CommentLazy>() {
 
     private val firstPageIndex = 1
+    private val pageOffsetMap = mutableMapOf<Int, String?>(firstPageIndex to null)
 
     private val api = CommentApi()
-    override fun getRefreshKey(state: PagingState<Int, Comment>): Int? {
-        return state.anchorPosition?.let { anchorPosition ->
-            val anchorPage = state.closestPageToPosition(anchorPosition)
-            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
-        }
+    override fun getRefreshKey(state: PagingState<Int, CommentLazyPage.CommentLazy>): Int? {
+        return null
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Comment> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CommentLazyPage.CommentLazy> {
         return try {
             val currentKey = params.key ?: firstPageIndex
-            val response = api.getCommentList(oid, type, currentKey)
-            val popularListItem = response.data
-            val items: List<Comment> = popularListItem.replies ?: emptyList()
+            val currentOffset = pageOffsetMap[currentKey]
+            val response = api.getCommentLazyList(oid, type, currentOffset)
+            if (response.code != 0) {
+                return LoadResult.Error(
+                    CommentApiException(
+                        response.code,
+                        response.message
+                    )
+                )
+            }
+            val commentPage = response.data ?: return LoadResult.Error(
+                CommentApiException(
+                    response.code,
+                    response.message
+                )
+            )
+            val items: List<CommentLazyPage.CommentLazy> = commentPage.replies ?: emptyList()
+            val nextOffset = commentPage.cursor.paginationReply
+                ?.nextOffset
+                ?.takeIf { nextOffset ->
+                    !commentPage.cursor.isEnd &&
+                            items.isNotEmpty() &&
+                            nextOffset.isNotBlank() &&
+                            nextOffset != currentOffset
+                }
+            val nextKey = nextOffset?.let {
+                (currentKey + 1).also { pageOffsetMap[it] = nextOffset }
+            }
             LoadResult.Page(
                 data = items,
                 prevKey = null,
-                nextKey = if (items.isEmpty()) null else currentKey + 1
+                nextKey = nextKey
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

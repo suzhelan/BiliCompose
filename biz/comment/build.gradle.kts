@@ -7,6 +7,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.paging.common)
             implementation(libs.paging.compose)
             implementation(libs.coil.network.ktor3)
             implementation(libs.coil.compose)
