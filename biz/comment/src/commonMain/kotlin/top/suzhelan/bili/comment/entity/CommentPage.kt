@@ -14,9 +14,9 @@ data class CommentPage(
     @SerialName("page")
     val page: Page,//页码信息
     @SerialName("replies")
-    val replies: List<Comment>? =  null,//评论列表
+    val replies: List<NewComment>? = null,//评论列表
     @SerialName("hots")
-    val hots: List<Comment>? =  null,//热门评论
+    val hots: List<NewComment>? = null,//热门评论
     @SerialName("upper")
     val upper: Upper,//置顶信息
     @SerialName("notice")
@@ -67,7 +67,7 @@ data class CommentPage(
         @SerialName("mid")
         val mid: Long, // 378491392
         @SerialName("top")
-        val top: Comment?,//置顶评论
+        val top: NewComment?,//置顶评论
         @SerialName("vote")
         val vote: JsonObject?,//投票评论
     )

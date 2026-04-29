@@ -14,9 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import top.suzhelan.bili.api.HttpJsonDecoder
-import top.suzhelan.bili.comment.entity.Comment
-import top.suzhelan.bili.comment.entity.CommentLazyPage.CommentLazy
+import top.suzhelan.bili.comment.entity.NewComment
 
 
 object CompoundEmojiMessageModel {
@@ -135,68 +133,8 @@ fun CompoundEmojiMessage(
     )
 }
 
-@Composable
-fun DemoView(
-    modifier: Modifier = Modifier
-) {
-    val data = """
-        {
-          "message": "[希丝奈cisne-表情包_打call]你好你好[希丝奈cisne-表情包_打call][我没发表情哦]嘿嘿嘿[希丝奈cisne-表情包_抱抱][希丝奈cisne-表情包_抱抱][希丝奈cisne-表情包_抱抱]",
-          "members": [],
-          "emote": {
-            "[希丝奈cisne-表情包_打call]": {
-              "id": 81786,
-              "package_id": 5578,
-              "state": 0,
-              "type": 3,
-              "attr": 0,
-              "text": "[希丝奈cisne-表情包_打call]",
-              "url": "https://i0.hdslb.com/bfs/garb/3a1b16df55bdd5c196ec61c25aefb0e6388b0fbb.png",
-              "meta": {
-                "size": 2
-              },
-              "mtime": 1723003260,
-              "jump_url": "https://www.bilibili.com/h5/mall/digital-card/home?act_id=103074&from=emoji&f_source=garb&-Abrowser=live&hybrid_set_header=2&navhide=1&anchor_task=1",
-              "jump_title": "打call"
-            },
-            "[希丝奈cisne-表情包_抱抱]": {
-              "id": 81790,
-              "package_id": 5578,
-              "state": 0,
-              "type": 3,
-              "attr": 0,
-              "text": "[希丝奈cisne-表情包_抱抱]",
-              "url": "https://i0.hdslb.com/bfs/garb/b7e5a3389fc9e50832784ae3d8f373fc03fda60b.png",
-              "meta": {
-                "size": 2
-              },
-              "mtime": 1723003260,
-              "jump_url": "https://www.bilibili.com/h5/mall/digital-card/home?act_id=103074&from=emoji&f_source=garb&-Abrowser=live&hybrid_set_header=2&navhide=1&anchor_task=1",
-              "jump_title": "抱抱"
-            }
-          },
-          "jump_url": {
 
-          },
-          "max_line": 6
-        }
-    """.trimIndent()
-    val content = HttpJsonDecoder.decodeFromString(Comment.Content.serializer(), data)
-    CompoundEmojiMessage(
-        content = CompoundEmojiMessageModel.MessageContent(
-            message = content.message,
-            emote = content.emote.mapValues { (_, emote) ->
-                CompoundEmojiMessageModel.MessageEmote(
-                    text = emote.text,
-                    url = emote.url,
-                    size = emote.meta.size,
-                )
-            },
-        ), modifier = modifier
-    )
-}
-
-fun CommentLazy.Content.Emote.toMessageEmote() = CompoundEmojiMessageModel.MessageEmote(
+fun NewComment.Content.Emote.toMessageEmote() = CompoundEmojiMessageModel.MessageEmote(
     text = text,
     url = url,
     size = meta.size,

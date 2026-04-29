@@ -3,8 +3,8 @@ package top.suzhelan.bili.comment.source
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import top.suzhelan.bili.comment.api.CommentApi
-import top.suzhelan.bili.comment.entity.CommentLazyPage
 import top.suzhelan.bili.comment.entity.CommentSourceType
+import top.suzhelan.bili.comment.entity.NewComment
 
 class CommentApiException(code: Int, message: String) : Exception(
     "评论加载失败：code=$code, message=$message"
@@ -13,17 +13,17 @@ class CommentApiException(code: Int, message: String) : Exception(
 class CommentDataSource(
     private val oid: String,
     private val type: CommentSourceType,
-) : PagingSource<Int, CommentLazyPage.CommentLazy>() {
+) : PagingSource<Int, NewComment>() {
 
     private val firstPageIndex = 1
     private val pageOffsetMap = mutableMapOf<Int, String?>(firstPageIndex to null)
 
     private val api = CommentApi()
-    override fun getRefreshKey(state: PagingState<Int, CommentLazyPage.CommentLazy>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, NewComment>): Int? {
         return null
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CommentLazyPage.CommentLazy> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, NewComment> {
         return try {
             val currentKey = params.key ?: firstPageIndex
             val currentOffset = pageOffsetMap[currentKey]
@@ -42,7 +42,7 @@ class CommentDataSource(
                     response.message
                 )
             )
-            val items: List<CommentLazyPage.CommentLazy> = commentPage.replies ?: emptyList()
+            val items: List<NewComment> = commentPage.replies ?: emptyList()
             val nextOffset = commentPage.cursor.paginationReply
                 ?.nextOffset
                 ?.takeIf { nextOffset ->

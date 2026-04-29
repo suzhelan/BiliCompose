@@ -9,14 +9,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import top.suzhelan.bili.comment.entity.CommentSourceType
+import top.suzhelan.bili.comment.ui.dialog.CommentReplyDetailDialog
 import top.suzhelan.bili.comment.ui.item.CommentCard
 import top.suzhelan.bili.comment.viewmodel.CommentViewModel
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
@@ -28,6 +31,7 @@ fun CommentContent(oid: String, type: CommentSourceType) {
     val viewModel = viewModel { CommentViewModel() }
     val lazyPagingItems = viewModel.getCommentList(oid, type).collectAsLazyPagingItems()
 
+    CommentReplyDetailDialog(oid, type, viewModel)
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(
             count = lazyPagingItems.itemCount,
@@ -37,7 +41,12 @@ fun CommentContent(oid: String, type: CommentSourceType) {
         ) { index ->
             val item = lazyPagingItems[index]
             if (item != null) {
-                CommentCard(item)
+                CommentCard(
+                    comment = item,
+                    onClick = { comment ->
+                        viewModel.openReplyDetail(oid, type, comment)
+                    }
+                )
             }
         }
         when (lazyPagingItems.loadState.append) {
@@ -70,6 +79,32 @@ fun CommentContent(oid: String, type: CommentSourceType) {
                 }
             }
         }
+    }
+}
+
+/**
+ * 回复详情
+ **/
+@Composable
+private fun CommentReplyDetailDialog(
+    oid: String,
+    type: CommentSourceType,
+    viewModel: CommentViewModel,
+) {
+    val selectedComment by viewModel.selectedComment.collectAsStateWithLifecycle()
+    val replyDetail by viewModel.replyDetail.collectAsStateWithLifecycle()
+
+    selectedComment?.let { comment ->
+        CommentReplyDetailDialog(
+            selectedComment = comment,
+            replyDetail = replyDetail,
+            onRetry = {
+                viewModel.openReplyDetail(oid, type, comment)
+            },
+            onDismissRequest = {
+                viewModel.closeReplyDetail()
+            }
+        )
     }
 }
 

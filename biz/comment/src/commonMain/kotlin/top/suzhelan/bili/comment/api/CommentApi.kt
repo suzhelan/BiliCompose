@@ -10,6 +10,7 @@ import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getKtorClient
 import top.suzhelan.bili.comment.entity.CommentLazyPage
 import top.suzhelan.bili.comment.entity.CommentPage
+import top.suzhelan.bili.comment.entity.CommentReplyPage
 import top.suzhelan.bili.comment.entity.CommentSourceType
 
 class CommentApi {
@@ -95,6 +96,33 @@ class CommentApi {
                 } else {
                     parameter("seek_rpid", "")
                 }
+            }
+        }.body()
+    }
+
+    /**
+     * 获取指定主评论的回复详情。
+     *
+     * 接口：`GET https://api.bilibili.com/x/v2/reply/reply`
+     *
+     * 返回值里 `data.root` 是主评论，`data.replies` 是回复这条主评论的二级评论。
+     * 当前 BottomDialog 只需要第一页即可快速展示详情；后续如果需要完整分页，
+     * 可以继续把 `pn` 暴露给 PagingSource。
+     */
+    suspend fun getCommentReplies(
+        oid: String,
+        type: CommentSourceType,
+        root: Long,
+        page: Int = 1,
+        pageSize: Int = 20,
+    ): BiliResponse.SuccessOrNull<CommentReplyPage> {
+        return client.get("x/v2/reply/reply") {
+            url {
+                parameter("type", type.type)
+                parameter("oid", oid)
+                parameter("root", root)
+                parameter("ps", pageSize)
+                parameter("pn", page)
             }
         }.body()
     }
