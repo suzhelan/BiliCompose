@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
-    kotlin("android")
 }
 
 android {
@@ -30,6 +29,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -41,9 +41,6 @@ android {
     compileOptions {
         sourceCompatibility = BuildVersionConfig.JAVA_VERSION
         targetCompatibility = BuildVersionConfig.JAVA_VERSION
-    }
-    kotlin {
-        jvmToolchain(BuildVersionConfig.KOTLIN.toInt())
     }
 }
 
