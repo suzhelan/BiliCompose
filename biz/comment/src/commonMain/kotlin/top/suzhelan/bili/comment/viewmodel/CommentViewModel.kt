@@ -3,7 +3,9 @@ package top.suzhelan.bili.comment.viewmodel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import top.suzhelan.bili.api.BiliResponse
@@ -17,6 +19,11 @@ import top.suzhelan.bili.shared.common.base.BaseViewModel
 
 class CommentViewModel : BaseViewModel() {
 
+    private data class CommentListKey(
+        val oid: String,
+        val type: CommentSourceType,
+    )
+
     private val api = CommentApi()
     private val _selectedComment = MutableStateFlow<NewComment?>(null)
     val selectedComment = _selectedComment.asStateFlow()
@@ -24,16 +31,21 @@ class CommentViewModel : BaseViewModel() {
     private val _replyDetail = MutableStateFlow<BiliResponse<CommentReplyPage>>(BiliResponse.Wait)
     val replyDetail = _replyDetail.asStateFlow()
 
-    fun getCommentList(oid: String, type: CommentSourceType) = Pager(
-        config = PagingConfig(
-            pageSize = 10,
-            prefetchDistance = 3,//提前多少页开始预加载
-            enablePlaceholders = false
-        ),
-        pagingSourceFactory = {
-            CommentDataSource(oid, type)
+    private val commentListFlows = mutableMapOf<CommentListKey, Flow<PagingData<NewComment>>>()
+
+    fun getCommentList(oid: String, type: CommentSourceType): Flow<PagingData<NewComment>> =
+        commentListFlows.getOrPut(CommentListKey(oid, type)) {
+            Pager(
+                config = PagingConfig(
+                    pageSize = 10,
+                    prefetchDistance = 3,//提前多少页开始预加载
+                    enablePlaceholders = false
+                ),
+                pagingSourceFactory = {
+                    CommentDataSource(oid, type)
+                }
+            ).flow.cachedIn(viewModelScope)
         }
-    ).flow.cachedIn(viewModelScope)
 
     /**
      * 打开回复详情弹窗时加载第一页二级回复。

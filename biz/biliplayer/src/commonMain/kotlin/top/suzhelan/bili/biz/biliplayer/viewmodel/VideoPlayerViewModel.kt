@@ -3,7 +3,9 @@ package top.suzhelan.bili.biz.biliplayer.viewmodel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import top.suzhelan.bili.api.BiliResponse
@@ -16,6 +18,7 @@ import top.suzhelan.bili.biz.biliplayer.api.VideoPlayerApi
 import top.suzhelan.bili.biz.biliplayer.data.RecommendedVideoPagingSource
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
+import top.suzhelan.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoTag
 import top.suzhelan.bili.biz.biliplayer.ui.controller.PlayerPool
@@ -26,7 +29,7 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 class VideoPlayerViewModel(
-    private val context: BiliContext
+    private val context: BiliContext,
 ) : BaseViewModel() {
 
     //生成时间戳构建的随机数
@@ -68,7 +71,7 @@ class VideoPlayerViewModel(
         epid: String? = null,
         seasonId: String? = null,
         cid: Long,
-        qn: Int = 80
+        qn: Int = 80,
     ) = launchTask {
         if (_videoUrlData.value is BiliResponse.Success) {
             return@launchTask
@@ -124,7 +127,7 @@ class VideoPlayerViewModel(
      */
     fun getVideoOnlineCountText(
         aid: Long,
-        cid: Long
+        cid: Long,
     ) = launchTask {
         if (_onlineCountText.value.isNotEmpty()) {
             return@launchTask
@@ -157,19 +160,25 @@ class VideoPlayerViewModel(
         ).data
     }
 
-    /**
-     * 获取推荐视频的分页数据流
-     */
-    fun getRecommendedVideoFlow(aid: Long) = Pager(
-        config = PagingConfig(
-            pageSize = 20,
-            prefetchDistance = 5,
-            enablePlaceholders = true
-        ),
-        pagingSourceFactory = {
-            RecommendedVideoPagingSource(aid)
+    private val recommendedVideoFlowMap =
+        mutableMapOf<Long, Flow<PagingData<RecommendedVideoByVideo.Item>>>()
+
+    fun getRecommendedVideoFlow(
+        aid: Long,
+    ): Flow<PagingData<RecommendedVideoByVideo.Item>> {
+        return recommendedVideoFlowMap.getOrPut(aid) {
+            Pager(
+                config = PagingConfig(
+                    pageSize = 20,
+                    prefetchDistance = 5,
+                    enablePlaceholders = false
+                ),
+                pagingSourceFactory = {
+                    RecommendedVideoPagingSource(aid)
+                }
+            ).flow.cachedIn(viewModelScope)
         }
-    ).flow.cachedIn(viewModelScope)
+    }
 
     val operationState = MutableStateFlow<ActionState>(ActionState.None)
 
@@ -208,7 +217,7 @@ class VideoPlayerViewModel(
 
     fun like(
         aid: Long,
-        like: Boolean
+        like: Boolean,
     ) = launchTask {
         if (operationState.value == ActionState.Like) {
             return@launchTask
@@ -227,7 +236,7 @@ class VideoPlayerViewModel(
     fun addCoin(
         aid: Long,
         multiply: Int,
-        selectLike: Boolean = false
+        selectLike: Boolean = false,
     ) = launchTask {
         if (operationState.value == ActionState.Coin) {
             return@launchTask
@@ -249,7 +258,7 @@ class VideoPlayerViewModel(
     fun reportViewingProgress(
         aid: Long,
         cid: Long,
-        seconds: Long
+        seconds: Long,
     ) = launchTask {
         api.reportViewingProgress(aid = aid, cid = cid, seconds = seconds)
     }
