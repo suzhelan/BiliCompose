@@ -8,8 +8,8 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.animation)
-            implementation(compose.animationGraphics)
+            implementation(libs.jetbrains.animation)
+            implementation(libs.jetbrains.animation.graphics)
             implementation(libs.paging.compose)
             implementation(libs.constraintlayout.compose.multiplatform)
             implementation(libs.lifecycle.viewmodel.compose)

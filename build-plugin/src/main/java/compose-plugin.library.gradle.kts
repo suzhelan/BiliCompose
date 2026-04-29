@@ -39,23 +39,18 @@ kotlin {
         }
     }
     jvm("desktop")
-
     sourceSets {
+        //noinspection UseTomlInstead
         commonMain.dependencies {
             // 添加常用依赖
             // Compose
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            //动画
-            implementation(compose.animation)
-            //UI
-            implementation(compose.ui)
-            //material3主题系列控件 m3.material.io
-            implementation(compose.material3)
-            //图标拓展 可在https://fonts.google.com/icons找到许多图标
-            implementation(compose.materialIconsExtended)
-            //res
-            implementation(compose.components.resources)
+            implementation("org.jetbrains.compose.runtime:runtime:1.10.3")
+            implementation("org.jetbrains.compose.foundation:foundation:1.10.3")
+            implementation("org.jetbrains.compose.animation:animation:1.10.3")
+            implementation("org.jetbrains.compose.ui:ui:1.10.3")
+            implementation("org.jetbrains.compose.material3:material3:1.9.0")
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+            implementation("org.jetbrains.compose.components:components-resources:1.10.3")
         }
     }
 }

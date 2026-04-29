@@ -1,6 +1,7 @@
 [versions]
 agp = "9.2.0"
 androidx-activityCompose = "1.13.0"
+animation = "1.10.3"
 jetbrains-lifecycle = "2.10.0"
 androidx-lifecycle = "2.10.0"
 
@@ -14,6 +15,7 @@ kotlinx-coroutines = "1.10.2"
 kotlinxDatetime = "0.7.1"
 krypto = "4.0.10"
 #noinspection NewerVersionAvailable
+material3AdaptiveNavigationSuite = "1.9.0"
 mediamp = "0.0.30"
 multiplatformSettings = "1.3.0"
 napier = "2.7.1"
@@ -52,6 +54,9 @@ coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.r
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 #viewmodel
 # JetBrains Compose Multiplatform
+material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
+jetbrains-animation = { module = "org.jetbrains.compose.animation:animation", version.ref = "animation" }
+jetbrains-animation-graphics = { module = "org.jetbrains.compose.animation:animation-graphics", version.ref = "animation" }
 lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
 lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "jetbrains-lifecycle" }
 

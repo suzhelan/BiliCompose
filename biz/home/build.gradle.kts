@@ -7,7 +7,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.material3AdaptiveNavigationSuite)
+            implementation(libs.material3.adaptive.navigation.suite)
             implementation(projects.biz.login)
             implementation(projects.biz.user)
             implementation(projects.biz.recvids)
