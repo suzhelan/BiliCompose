@@ -37,8 +37,9 @@ class CommentViewModel : BaseViewModel() {
         commentListFlows.getOrPut(CommentListKey(oid, type)) {
             Pager(
                 config = PagingConfig(
-                    pageSize = 10,
-                    prefetchDistance = 3,//提前多少页开始预加载
+                    pageSize = 20,
+                    prefetchDistance = 1, // 到最后一条才加载下一页
+                    initialLoadSize = 20, // 避免首次默认加载 pageSize * 3
                     enablePlaceholders = false
                 ),
                 pagingSourceFactory = {
