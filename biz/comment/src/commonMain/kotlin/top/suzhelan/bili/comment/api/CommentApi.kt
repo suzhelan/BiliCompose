@@ -1,8 +1,12 @@
 package top.suzhelan.bili.comment.api
 
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.parameters
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import top.suzhelan.bili.api.AppConfig
@@ -12,9 +16,15 @@ import top.suzhelan.bili.comment.entity.CommentLazyPage
 import top.suzhelan.bili.comment.entity.CommentPage
 import top.suzhelan.bili.comment.entity.CommentReplyPage
 import top.suzhelan.bili.comment.entity.CommentSourceType
+import top.suzhelan.bili.comment.entity.PublishCommentResult
+
 
 class CommentApi {
     private val client = getKtorClient(baseUrl = AppConfig.API_BASE_URL)
+    private val actionClient = getKtorClient(
+        baseUrl = AppConfig.API_BASE_URL,
+        withCookie = true
+    )
     private val wbiClient = getKtorClient(
         baseUrl = AppConfig.API_BASE_URL,
         withCookie = true,
@@ -124,6 +134,38 @@ class CommentApi {
                 parameter("ps", pageSize)
                 parameter("pn", page)
             }
+        }.body()
+    }
+
+    /**
+     * 发布评论。
+     *
+     * - 根评论：不传 [root] 和 [parent]。
+     * - 回复评论：传根评论 rpid 到 [root]，传被回复评论 rpid 到 [parent]。
+     *
+     * 调用方必须先完成登录校验，并传入明确的认证参数。这样 API 层只负责发请求，
+     * 不再重复读取登录状态，也避免未登录时误触发网络调用。
+     */
+    suspend fun publishComment(
+        oid: String,
+        type: CommentSourceType,
+        message: String,
+        root: Long? = null,
+        parent: Long? = null,
+    ): BiliResponse.SuccessOrNull<PublishCommentResult> {
+        return actionClient.post("x/v2/reply/add") {
+            setBody(FormDataContent(parameters {
+                append("type", type.type.toString())
+                append("oid", oid)
+                append("message", message)
+                append("plat", "2")
+                if (root != null) {
+                    append("root", root.toString())
+                }
+                if (parent != null) {
+                    append("parent", parent.toString())
+                }
+            }))
         }.body()
     }
 }

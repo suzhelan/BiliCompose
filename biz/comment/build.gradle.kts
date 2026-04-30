@@ -17,6 +17,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             //尽可能只使用公共模块
             implementation(projects.shared.api)
+            implementation(projects.shared.auth)
             implementation(projects.shared.common)
             implementation(projects.shared.navigation)
         }

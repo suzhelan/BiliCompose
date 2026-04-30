@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
@@ -15,6 +17,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.comment.entity.CommentReplyPage
 import top.suzhelan.bili.comment.entity.NewComment
+import top.suzhelan.bili.comment.ui.CommentInputBar
 import top.suzhelan.bili.comment.ui.item.CommentCard
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
@@ -39,10 +47,36 @@ import top.suzhelan.bili.shared.common.ui.theme.TipColor
 fun CommentReplyDetailDialog(
     selectedComment: NewComment,
     replyDetail: BiliResponse<CommentReplyPage>,
+    publishedReplies: List<NewComment>,
+    isPublishingReply: Boolean,
+    publishError: String?,
     onRetry: () -> Unit,
     onDismissRequest: () -> Unit,
+    onInputChanged: () -> Unit,
+    onPublishReply: (
+        root: NewComment,
+        parent: NewComment,
+        message: String,
+        onSuccess: () -> Unit,
+    ) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val replyListState = rememberLazyListState()
+    var replyMessage by remember(selectedComment.rpid) { mutableStateOf("") }
+    var replyTarget by remember(selectedComment.rpid) { mutableStateOf(selectedComment) }
+    val uiData = replyDetail.toReplyDetailUiData(selectedComment)
+    val replies = mergeReplies(
+        baseReplies = uiData.replies,
+        publishedReplies = publishedReplies
+    )
+    val totalCount = uiData.totalCount + countNewReplies(uiData.replies, publishedReplies)
+    val lastPublishedReplyId = publishedReplies.lastOrNull()?.rpid
+
+    LaunchedEffect(lastPublishedReplyId) {
+        if (lastPublishedReplyId != null && replies.isNotEmpty()) {
+            replyListState.animateScrollToItem(2 + replies.lastIndex)
+        }
+    }
 
     ModalBottomSheet(
         sheetState = sheetState,
@@ -60,83 +94,78 @@ fun CommentReplyDetailDialog(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            when (replyDetail) {
-                is BiliResponse.SuccessOrNull -> {
-                    val detail = replyDetail.data
-                    if (detail == null) {
-                        DetailError(message = "回复详情为空", onRetry = onRetry)
-                    } else {
-                        ReplyDetailList(
-                            root = detail.root,
-                            replies = detail.replies.orEmpty(),
-                            totalCount = detail.page.count,
-                        )
+            ReplyDetailList(
+                root = uiData.root,
+                replies = replies,
+                totalCount = totalCount,
+                listState = replyListState,
+                modifier = Modifier.weight(1f),
+                onReplyClick = { comment ->
+                    replyTarget = comment
+                },
+                footer = buildReplyDetailFooter(
+                    uiData = uiData,
+                    onRetry = onRetry
+                )
+            )
+
+            CommentInputBar(
+                value = replyMessage,
+                onValueChange = { value ->
+                    replyMessage = value
+                    onInputChanged()
+                },
+                placeholder = "回复 @${replyTarget.member.uname.ifBlank { "评论" }}",
+                replyTargetText = "回复 @${replyTarget.member.uname.ifBlank { "评论" }}",
+                onCancelReplyTarget = if (replyTarget.rpid == uiData.root.rpid) {
+                    null
+                } else {
+                    { replyTarget = uiData.root }
+                },
+                isSending = isPublishingReply,
+                errorMessage = publishError,
+                onSend = {
+                    onPublishReply(uiData.root, replyTarget, replyMessage) {
+                        replyMessage = ""
+                        replyTarget = uiData.root
                     }
                 }
-
-                is BiliResponse.Success -> {
-                    ReplyDetailList(
-                        root = replyDetail.data.root,
-                        replies = replyDetail.data.replies.orEmpty(),
-                        totalCount = replyDetail.data.page.count,
-                    )
-                }
-
-                is BiliResponse.Loading -> {
-                    ReplyDetailList(
-                        root = selectedComment,
-                        replies = selectedComment.replies.orEmpty(),
-                        totalCount = selectedComment.rcount,
-                        footer = {
-                            LoadingIndicator(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                                text = "加载回复中..."
-                            )
-                        }
-                    )
-                }
-
-                is BiliResponse.Error -> {
-                    ReplyDetailList(
-                        root = selectedComment,
-                        replies = selectedComment.replies.orEmpty(),
-                        totalCount = selectedComment.rcount,
-                        footer = {
-                            DetailError(
-                                message = replyDetail.msg.ifBlank { "回复详情加载失败" },
-                                onRetry = onRetry
-                            )
-                        }
-                    )
-                }
-
-                is BiliResponse.Wait -> {
-                    ReplyDetailList(
-                        root = selectedComment,
-                        replies = selectedComment.replies.orEmpty(),
-                        totalCount = selectedComment.rcount,
-                    )
-                }
-            }
+            )
         }
     }
 }
+
+private data class ReplyDetailUiData(
+    val root: NewComment,
+    val replies: List<NewComment>,
+    val totalCount: Int,
+    val loadingText: String? = null,
+    val errorMessage: String? = null,
+)
 
 @Composable
 private fun ReplyDetailList(
     root: NewComment,
     replies: List<NewComment>,
     totalCount: Int,
+    listState: LazyListState,
+    modifier: Modifier = Modifier,
+    onReplyClick: (NewComment) -> Unit,
     footer: @Composable (() -> Unit)? = null,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        state = listState,
+        modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         item(key = "root-${root.rpid}") {
             // 主评论使用完整评论卡片，让发布者信息、内容和操作信息保持主详情视图。
-            CommentCard(comment = root, showReplyPreview = false)
+            CommentCard(
+                comment = root,
+                showReplyPreview = false,
+                onReplyClick = onReplyClick
+            )
         }
 
         item(key = "divider") {
@@ -154,7 +183,11 @@ private fun ReplyDetailList(
             key = { reply -> reply.rpid }
         ) { reply ->
             // 二级回复在主评论下方顺序排列；点击行为留给后续对话树能力扩展。
-            CommentCard(comment = reply, showReplyPreview = false)
+            CommentCard(
+                comment = reply,
+                showReplyPreview = false,
+                onReplyClick = onReplyClick
+            )
         }
 
         if (footer != null) {
@@ -163,6 +196,104 @@ private fun ReplyDetailList(
             }
         }
     }
+}
+
+private fun BiliResponse<CommentReplyPage>.toReplyDetailUiData(
+    selectedComment: NewComment,
+): ReplyDetailUiData {
+    return when (this) {
+        is BiliResponse.SuccessOrNull -> {
+            val detail = data
+            if (detail == null) {
+                ReplyDetailUiData(
+                    root = selectedComment,
+                    replies = selectedComment.replies.orEmpty(),
+                    totalCount = selectedComment.rcount,
+                    errorMessage = "回复详情为空"
+                )
+            } else {
+                ReplyDetailUiData(
+                    root = detail.root,
+                    replies = detail.replies.orEmpty(),
+                    totalCount = detail.page.count
+                )
+            }
+        }
+
+        is BiliResponse.Success -> {
+            ReplyDetailUiData(
+                root = data.root,
+                replies = data.replies.orEmpty(),
+                totalCount = data.page.count
+            )
+        }
+
+        is BiliResponse.Loading -> {
+            ReplyDetailUiData(
+                root = selectedComment,
+                replies = selectedComment.replies.orEmpty(),
+                totalCount = selectedComment.rcount,
+                loadingText = "加载回复中..."
+            )
+        }
+
+        is BiliResponse.Error -> {
+            ReplyDetailUiData(
+                root = selectedComment,
+                replies = selectedComment.replies.orEmpty(),
+                totalCount = selectedComment.rcount,
+                errorMessage = msg.ifBlank { "回复详情加载失败" }
+            )
+        }
+
+        is BiliResponse.Wait -> {
+            ReplyDetailUiData(
+                root = selectedComment,
+                replies = selectedComment.replies.orEmpty(),
+                totalCount = selectedComment.rcount
+            )
+        }
+    }
+}
+
+private fun mergeReplies(
+    baseReplies: List<NewComment>,
+    publishedReplies: List<NewComment>,
+): List<NewComment> {
+    return (baseReplies + publishedReplies).distinctBy { reply -> reply.rpid }
+}
+
+private fun countNewReplies(
+    baseReplies: List<NewComment>,
+    publishedReplies: List<NewComment>,
+): Int {
+    return publishedReplies.count { published ->
+        baseReplies.none { base -> base.rpid == published.rpid }
+    }
+}
+
+@Composable
+private fun buildReplyDetailFooter(
+    uiData: ReplyDetailUiData,
+    onRetry: () -> Unit,
+): (@Composable () -> Unit)? {
+    uiData.loadingText?.let { loadingText ->
+        return {
+            LoadingIndicator(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                text = loadingText
+            )
+        }
+    }
+    uiData.errorMessage?.let { errorMessage ->
+        return {
+            DetailError(
+                message = errorMessage,
+                onRetry = onRetry
+            )
+        }
+    }
+    return null
 }
 
 @Composable

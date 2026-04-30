@@ -51,6 +51,7 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 fun CommentCard(
     comment: NewComment,
     onClick: (NewComment) -> Unit = {},
+    onReplyClick: (NewComment) -> Unit = {},
     showReplyPreview: Boolean = true,
 ) {
     val navigation = LocalNavigation.currentOrThrow
@@ -142,7 +143,9 @@ fun CommentCard(
                     start.linkTo(content.start)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
-                })
+                },
+            onReplyClick = onReplyClick
+        )
 
         if (showReplyPreview && comment.rcount > 0) {
             //被回复预览
@@ -180,6 +183,7 @@ private fun Avatar(member: NewComment.Member, modifier: Modifier) =
 private fun InfoLineRow(
     comment: NewComment,
     modifier: Modifier,
+    onReplyClick: (NewComment) -> Unit,
 ) {
     val action = comment.action
     //时间 ip ‘回复’ 点赞 点踩 更多操作
@@ -201,6 +205,9 @@ private fun InfoLineRow(
             text = " 回复",
             color = TextColor,
             fontSize = 12.sp,
+            modifier = Modifier.clickable {
+                onReplyClick(comment)
+            }
         )
         Spacer(modifier = Modifier.weight(1f))
 
