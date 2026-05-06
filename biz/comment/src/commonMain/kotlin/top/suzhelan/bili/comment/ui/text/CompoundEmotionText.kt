@@ -88,11 +88,11 @@ fun CompoundEmojiMessage(
         messageParts.filterIsInstance<CompoundEmojiMessageModel.MessagePart.Emote>()
             .forEach { emote ->
                 val key = "emote_${emote.key.hashCode()}"
-                //计算高度，小表情要比文本高一点，大表情正常算
-                val emotionSize = if (emote.data.size == 1) {
-                    size * 1.3f
-                } else {
-                    emote.data.size.toFloat()
+                // B 站 meta.size 是表情档位，不是实际 sp。size=2 直接当 2sp 会导致大表情几乎不可见。
+                val emotionSize = when {
+                    emote.data.size <= 1 -> size * 1.3f
+                    emote.data.size <= 4 -> size * emote.data.size.toFloat()
+                    else -> emote.data.size.toFloat()
                 }
                 put(
                     key, InlineTextContent(

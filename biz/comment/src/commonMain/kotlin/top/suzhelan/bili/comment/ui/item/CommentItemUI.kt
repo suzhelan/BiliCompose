@@ -3,7 +3,9 @@ package top.suzhelan.bili.comment.ui.item
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -120,11 +123,8 @@ fun CommentCard(
         )
 
         //复合消息卡片
-        CompoundEmojiMessage(
-            content = CompoundEmojiMessageModel.MessageContent(
-                comment.content.message,
-                comment.content.emote.mapValues { (_, emote) -> emote.toMessageEmote() }
-            ),
+        CommentRichContent(
+            comment = comment,
             modifier = Modifier.constrainAs(content) {
                 top.linkTo(nickname.bottom)
                 start.linkTo(nickname.start)
@@ -156,6 +156,118 @@ fun CommentCard(
                 width = Dimension.fillToConstraints
             })
         }
+    }
+}
+
+@Composable
+private fun CommentRichContent(
+    comment: NewComment,
+    modifier: Modifier = Modifier,
+    size: Int = 14,
+) = Column(modifier = modifier) {
+    if (comment.content.message.isNotBlank() || comment.content.emote.isNotEmpty()) {
+        CompoundEmojiMessage(
+            content = CompoundEmojiMessageModel.MessageContent(
+                comment.content.message,
+                comment.content.emote.mapValues { (_, emote) -> emote.toMessageEmote() }
+            ),
+            size = size
+        )
+    }
+
+    CommentPictureGrid(pictures = comment.content.pictures)
+}
+
+@Composable
+private fun CommentPictureGrid(
+    pictures: List<NewComment.Content.Picture>,
+    modifier: Modifier = Modifier,
+) {
+    val validPictures = pictures.filter { picture -> picture.imgSrc.isNotBlank() }
+    if (validPictures.isEmpty()) {
+        return
+    }
+
+    if (validPictures.size == 1) {
+        SingleCommentPicture(
+            picture = validPictures.first(),
+            modifier = modifier.padding(top = 6.dp)
+        )
+    } else {
+        MultiCommentPictures(
+            pictures = validPictures,
+            modifier = modifier.padding(top = 6.dp)
+        )
+    }
+}
+
+@Composable
+private fun SingleCommentPicture(
+    picture: NewComment.Content.Picture,
+    modifier: Modifier = Modifier,
+) = BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+    val aspectRatio = pictureAspectRatio(picture)
+    val maxImageHeight = 260.dp
+    val maxImageWidth = if (aspectRatio >= 1f) {
+        maxWidth.coerceAtMost(240.dp)
+    } else {
+        maxWidth.coerceAtMost(180.dp)
+    }
+    val wantedHeight = maxImageWidth / aspectRatio
+    val imageHeight = wantedHeight.coerceAtMost(maxImageHeight)
+    val imageWidth = if (wantedHeight > maxImageHeight) {
+        imageHeight * aspectRatio
+    } else {
+        maxImageWidth
+    }
+
+    AsyncImage(
+        model = picture.imgSrc,
+        contentDescription = "评论图片",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .width(imageWidth)
+            .height(imageHeight)
+            .clip(RoundedCornerShape(4.dp))
+            .background(TipColor.copy(alpha = 0.08f))
+    )
+}
+
+@Composable
+private fun MultiCommentPictures(
+    pictures: List<NewComment.Content.Picture>,
+    modifier: Modifier = Modifier,
+) = BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+    val columnCount = if (pictures.size == 2) 2 else 3
+    val gap = 4.dp
+    val maxGridWidth = maxWidth.coerceAtMost(300.dp)
+    val itemSize = ((maxGridWidth - gap * (columnCount - 1)) / columnCount.toFloat())
+        .coerceAtMost(96.dp)
+
+    Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+        pictures.chunked(columnCount).forEach { rowPictures ->
+            Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                rowPictures.forEach { picture ->
+                    AsyncImage(
+                        model = picture.imgSrc,
+                        contentDescription = "评论图片",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(itemSize)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(TipColor.copy(alpha = 0.08f))
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun pictureAspectRatio(picture: NewComment.Content.Picture): Float {
+    return if (picture.imgWidth > 0 && picture.imgHeight > 0) {
+        (picture.imgWidth.toFloat() / picture.imgHeight.toFloat()).coerceIn(0.45f, 2.4f)
+    } else {
+        1f
     }
 }
 
@@ -282,9 +394,16 @@ private fun RepliedPreview(comment: NewComment, modifier: Modifier) = Column(
 
 @Composable
 private fun SimpleReplyCard(comment: NewComment) {
+    val message = comment.content.message.ifBlank {
+        if (comment.content.pictures.isNotEmpty()) {
+            "[图片]"
+        } else {
+            ""
+        }
+    }
     CompoundEmojiMessage(
         content = CompoundEmojiMessageModel.MessageContent(
-            "${comment.member.uname}: " + comment.content.message,
+            "${comment.member.uname}: $message",
             comment.content.emote.mapValues { (_, emote) -> emote.toMessageEmote() }
         ),
         size = 13,
