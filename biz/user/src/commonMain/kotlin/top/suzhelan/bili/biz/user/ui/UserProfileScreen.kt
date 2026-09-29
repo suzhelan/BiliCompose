@@ -416,7 +416,7 @@ private fun ContentTab(userSpace: UserSpace) {
                 ) {
                     ProfileVideoPreView(
                         title = "视频 - ${userSpace.archive.count}条",
-                        items = userSpace.archive.item.take(4),//最多只展示四条
+                        items = userSpace.archive.item,
                     ) { item ->
                         //视频卡片
                         VideoPreViewCard(
@@ -438,7 +438,7 @@ private fun ContentTab(userSpace: UserSpace) {
                     if (userSpace.favourite2.count > 0) {
                         ProfileVideoPreView(
                             title = "收藏 - ${userSpace.favourite2.count}个",
-                            items = userSpace.favourite2.item.take(4),
+                            items = userSpace.favourite2.item,
                         ) { item ->
                             //收藏卡片
                             FavouritePreviewCard(item)
@@ -448,7 +448,7 @@ private fun ContentTab(userSpace: UserSpace) {
                     if (userSpace.likeArchive.count > 0) {
                         ProfileVideoPreView(
                             title = "最近点赞 - ${userSpace.likeArchive.count}个",
-                            items = userSpace.likeArchive.item.take(4),
+                            items = userSpace.likeArchive.item,
                             moreClick = {
                                 val intent = SharedScreen.MoreLikeVideos(mid = userSpace.card.mid.toLong())
                                 navigator.push(intent)

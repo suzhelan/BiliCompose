@@ -4,16 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -44,7 +41,7 @@ private fun PreViewConstraintCard(
     modifier: Modifier = Modifier,
     content: @Composable ConstraintLayoutScope.() -> Unit
 ) = ElevatedCard(
-    modifier = modifier.wrapContentSize()
+    modifier = modifier.fillMaxWidth()
         .padding(5.dp),
     elevation = CardDefaults.cardElevation(
         defaultElevation = 5.dp
@@ -229,14 +226,32 @@ fun <T> ProfileVideoPreView(
             })
         }
         Spacer(modifier = Modifier.height(5.dp))
-        LazyVerticalStaggeredGrid(
-            modifier = Modifier.fillMaxWidth().heightIn(max = (180 * 2).dp),
-            userScrollEnabled = false,
-            columns = StaggeredGridCells.Adaptive(minSize = 130.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            items(items.size) { index ->
-                itemContent(items[index])
+        /*
+         * This preview is hosted by the profile page's vertical scroll
+         * container. A regular Column/Row grid has an intrinsic height, so the
+         * page remains the only vertical scroll owner.
+         */
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val columnCount = if (maxWidth >= 520.dp) 3 else 2
+            val previewItems = items.take(columnCount * 2)
+
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                previewItems.chunked(columnCount).forEach { rowItems ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        rowItems.forEach { item ->
+                            Box(modifier = Modifier.weight(1f)) {
+                                itemContent(item)
+                            }
+                        }
+                        // Preserve the grid alignment for an incomplete last row.
+                        repeat(columnCount - rowItems.size) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
             }
         }
     }
