@@ -10,6 +10,7 @@ import top.suzhelan.bili.biz.user.entity.LikeVideoList
 import top.suzhelan.bili.biz.user.entity.UserCard
 import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.biz.user.entity.UserSpaceInfo
+import top.suzhelan.bili.biz.user.entity.WatchHistoryPage
 
 class UserApi {
     private val client = getKtorClient(
@@ -61,6 +62,24 @@ class UserApi {
             url {
                 parameter("vmid", mid)
                 parameter("pn", page)
+                parameter("ps", pageSize)
+            }
+        }.body()
+    }
+
+    /** 获取当前登录用户的观看历史，分页参数由接口返回的 cursor 续传。 */
+    suspend fun getWatchHistory(
+        max: Long? = null,
+        business: String? = null,
+        viewAt: Long? = null,
+        pageSize: Int = 30,
+    ): BiliResponse.Success<WatchHistoryPage> {
+        return client.get("/x/web-interface/history/cursor") {
+            url {
+                max?.let { parameter("max", it) }
+                business?.takeIf { it.isNotBlank() }?.let { parameter("business", it) }
+                viewAt?.let { parameter("view_at", it) }
+                parameter("type", "all")
                 parameter("ps", pageSize)
             }
         }.body()

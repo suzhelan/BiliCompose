@@ -14,6 +14,7 @@ import top.suzhelan.bili.biz.shorts.ui.ShortVideoScreen
 import top.suzhelan.bili.biz.user.ui.FollowListScreen
 import top.suzhelan.bili.biz.user.ui.MoreLikeVideoScreen
 import top.suzhelan.bili.biz.user.ui.UserProfileScreen
+import top.suzhelan.bili.biz.user.ui.WatchHistoryScreen
 import top.suzhelan.bili.shared.navigation.SharedScreen
 
 
@@ -72,5 +73,8 @@ fun NavGraphBuilder.routingScreenRegistration() {
         MoreLikeVideoScreen(
             param.mid
         )
+    }
+    composable<SharedScreen.WatchHistory> {
+        WatchHistoryScreen()
     }
 }

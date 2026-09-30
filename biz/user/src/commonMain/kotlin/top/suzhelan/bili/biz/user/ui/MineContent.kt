@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,8 +17,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.QrCodeScanner
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -31,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -102,6 +110,8 @@ private fun UserProfile(
         HeaderUserCard(mine)
         Spacer(modifier = Modifier.height(20.dp))
         UserAmount(mine)
+        Spacer(modifier = Modifier.height(24.dp))
+        UserFeatureEntries()
     }
 }
 
@@ -330,5 +340,83 @@ private fun getCoinText(
     return buildString {
         append(stringResource(res))
         append(displayValue)
+    }
+}
+
+/** 我的页的常用功能入口。历史记录接入应用内实际数据页，其余入口预留给对应功能模块。 */
+@Composable
+private fun ColumnScope.UserFeatureEntries() {
+    val navigation = LocalNavigation.currentOrThrow
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            UserFeatureCard(
+                title = "离线缓存",
+                description = "缓存的视频",
+                icon = Icons.Outlined.Download,
+                modifier = Modifier.weight(1f),
+            )
+            UserFeatureCard(
+                title = "历史记录",
+                description = "继续观看",
+                icon = Icons.Outlined.History,
+                modifier = Modifier.weight(1f),
+                onClick = { navigation.push(SharedScreen.WatchHistory) },
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            UserFeatureCard(
+                title = "我的收藏",
+                description = "收藏的内容",
+                icon = Icons.Outlined.FavoriteBorder,
+                modifier = Modifier.weight(1f),
+            )
+            UserFeatureCard(
+                title = "稍后再看",
+                description = "待看的视频",
+                icon = Icons.Outlined.Schedule,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun UserFeatureCard(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+) {
+    ElevatedCard(
+        modifier = modifier.height(80.dp).let { cardModifier ->
+            if (onClick != null) cardModifier.clickable(onClick = onClick) else cardModifier
+        },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = ColorPrimaryContainer,
+                modifier = Modifier.size(26.dp),
+            )
+            Spacer(modifier = Modifier.size(10.dp))
+            Column {
+                Text(text = title, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(text = description, fontSize = 11.sp, color = TipColor)
+            }
+        }
     }
 }
