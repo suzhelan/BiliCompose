@@ -1,8 +1,12 @@
 package top.suzhelan.bili.biz.user.api
 
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.parameters
 import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getKtorClient
@@ -11,6 +15,7 @@ import top.suzhelan.bili.biz.user.entity.UserCard
 import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.biz.user.entity.UserSpaceInfo
 import top.suzhelan.bili.biz.user.entity.WatchHistoryPage
+import top.suzhelan.bili.shared.auth.config.LoginMapper
 
 class UserApi {
     private val client = getKtorClient(
@@ -82,6 +87,20 @@ class UserApi {
                 parameter("type", "all")
                 parameter("ps", pageSize)
             }
+        }.body()
+    }
+
+    /** 删除一条历史记录；接口的 kid 格式为 `{business}_{kid}`。 */
+    suspend fun deleteWatchHistory(kid: String): BiliResponse.SuccessOrNull<Nothing> {
+        val csrf = LoginMapper.getUniversalLoginInfo().cookieInfo.cookies
+            .firstOrNull { it.name == "bili_jct" }
+            ?.value
+            ?: error("登录信息中缺少 bili_jct，无法删除历史记录")
+        return client.post("/x/v2/history/delete") {
+            setBody(FormDataContent(parameters {
+                append("kid", kid)
+                append("csrf", csrf)
+            }))
         }.body()
     }
 }

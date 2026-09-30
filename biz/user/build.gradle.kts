@@ -14,6 +14,7 @@ kotlin {
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.runtime.compose)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.constraintlayout.compose.multiplatform)
             //尽可能只引用公共模块，避免引用不必要的模块
             implementation(projects.biz.base)

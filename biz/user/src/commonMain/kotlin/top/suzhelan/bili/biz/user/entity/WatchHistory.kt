@@ -26,6 +26,7 @@ data class WatchHistoryPage(
         val progress: Int = 0,
         val duration: Int = 0,
         @SerialName("show_title") val showTitle: String = "",
+        val kid: Long = 0,
         val history: Detail = Detail(),
     )
 
