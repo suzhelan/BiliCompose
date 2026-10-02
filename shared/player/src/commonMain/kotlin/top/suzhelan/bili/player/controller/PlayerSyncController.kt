@@ -29,6 +29,7 @@ class PlayerSyncController(
     val context: BiliContext
 ) {
     val videoPlayer: MediampPlayer = MediampPlayer(context)
+    private val playerStateScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     var visibility by mutableStateOf(PlayerToolBarVisibility.Visible)
         private set
 
@@ -68,10 +69,17 @@ class PlayerSyncController(
      * 总时长 没有获取到视频时长时为0L
      */
     val totalDurationMillis: StateFlow<Long> = MutableStateFlow(0L).apply {
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-        scope.launch {
+        playerStateScope.launch {
             videoPlayer.mediaProperties.collect {
                 value = (it?.durationMillis ?: 0)
+            }
+        }
+    }
+
+    val playbackFinished: StateFlow<Boolean> = MutableStateFlow(false).apply {
+        playerStateScope.launch {
+            videoPlayer.playbackState.collect {
+                value = it == PlaybackState.FINISHED
             }
         }
     }

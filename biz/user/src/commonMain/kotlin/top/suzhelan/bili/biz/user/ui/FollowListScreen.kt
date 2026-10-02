@@ -44,6 +44,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
@@ -69,11 +70,12 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
  */
 @Composable
 fun FollowListScreen() {
+    val viewModel = viewModel { FollowListViewModel() }
     CommonComposeUI<FollowListViewModel>(
         initAction = { vm ->
             vm.queryTags()
         },
-        viewModel = FollowListViewModel(),
+        viewModel = viewModel,
         topBar = {
             val navigate = LocalNavigation.currentOrThrow
             TitleUI(title = "关注列表", onClickBack = {

@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.ui.vertical.ProgressPreview
 import top.suzhelan.bili.biz.biliplayer.ui.vertical.VerticalBottomProgressArea
@@ -35,9 +36,10 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 @Composable
 fun NewVerticaScreen(intent: PlayerParams) {
+    val viewModel = viewModel { VerticalVideoViewModel() }
     //使用PlayerViewModel
     CommonComposeUI(
-        viewModel = VerticalVideoViewModel(),
+        viewModel = viewModel,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { vm ->
         val context = BiliLocalContext.current
@@ -85,10 +87,35 @@ fun NewVerticaScreen(intent: PlayerParams) {
                 vm.getController(page, context)
             }
             val isActivePage = activePage == page
+            val currentPositionMillis by controller.currentPositionMillis.collectAsStateWithLifecycle()
+            val totalDurationMillis by controller.totalDurationMillis.collectAsStateWithLifecycle()
+            val playbackFinished by controller.playbackFinished.collectAsStateWithLifecycle()
+            var hasRestartedAfterFinish by remember(controller) { mutableStateOf(false) }
 
             LaunchedEffect(item, controller, isActivePage) {
                 vm.doPlayer(item, controller)
                 vm.updatePagePlayback(controller, isActivePage)
+            }
+
+            LaunchedEffect(
+                controller,
+                isActivePage,
+                playbackFinished,
+                currentPositionMillis,
+                totalDurationMillis,
+            ) {
+                if (!isActivePage) {
+                    return@LaunchedEffect
+                }
+                val reachedEnd =
+                    totalDurationMillis > 0 && currentPositionMillis >= totalDurationMillis
+                if ((playbackFinished || reachedEnd) && !hasRestartedAfterFinish) {
+                    hasRestartedAfterFinish = true
+                    controller.seekTo(0)
+                    controller.resume()
+                } else if (!playbackFinished && !reachedEnd) {
+                    hasRestartedAfterFinish = false
+                }
             }
 
             VideoContentItem(

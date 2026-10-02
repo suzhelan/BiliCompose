@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.multiplatform.webview.cookie.Cookie
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
@@ -48,8 +49,9 @@ fun WebViewScreen(
             }
         }
     }
+    val viewModel = viewModel { DefaultViewModel() }
     CommonComposeUI<DefaultViewModel>(
-        viewModel = DefaultViewModel(),
+        viewModel = viewModel,
         topBar = {
             TitleUI(state.pageTitle ?: "") {
                 navigation.pop()

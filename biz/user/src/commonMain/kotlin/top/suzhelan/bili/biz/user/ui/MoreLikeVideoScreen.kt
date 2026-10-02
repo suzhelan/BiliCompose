@@ -55,15 +55,14 @@ fun MoreLikeVideoScreen(
     mid: Long
 ) {
     val navigator = LocalNavigation.currentOrThrow
+    val viewModel = viewModel { MoreLikeViewModel() }
     CommonComposeUI(
         topBar = {
             TitleUI("最近点赞") {
                 navigator.pop()
             }
         },
-        viewModel = viewModel {
-            MoreLikeViewModel()
-        }
+        viewModel = viewModel
     ) {
         MoreLikeVideoContent(mid)
     }

@@ -20,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 
 
@@ -42,27 +41,24 @@ inline fun <reified VM : BaseViewModel> CommonComposeUI(
     crossinline floatActionButton: @Composable (vm: VM) -> Unit = {},
     crossinline content: @Composable BoxScope.(vm: VM) -> Unit
 ) {
-    val vm: VM = viewModel {
-        viewModel
-    }
-    vm.setLoading(isNeedLoading)
-    val isLoading by vm.initLoading.collectAsState()
+    viewModel.setLoading(isNeedLoading)
+    val isLoading by viewModel.initLoading.collectAsState()
     //初始化动作 其中操作要在viewmodel执行
     LaunchedEffect(Unit) {
-        initAction(vm)
+        initAction(viewModel)
     }
     //脚手架布局
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { topBar(vm) },
-        bottomBar = { bottomBar(vm) },
-        floatingActionButton = { floatActionButton(vm) },
+        topBar = { topBar(viewModel) },
+        bottomBar = { bottomBar(viewModel) },
+        floatingActionButton = { floatActionButton(viewModel) },
         contentWindowInsets = contentWindowInsets ?: ScaffoldDefaults.contentWindowInsets,
     ) { padding ->
         Box(
             modifier = Modifier.fillMaxSize().padding(padding)
         ) {
-            content(vm)
+            content(viewModel)
         }
         //如果正在加载
         if (isLoading) {

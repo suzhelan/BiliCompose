@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
@@ -26,8 +27,9 @@ fun VideoPlayerScreen(
     playerParams: PlayerParams
 ) {
     val context = BiliLocalContext.current
+    val viewModel = viewModel { VideoPlayerViewModel(context) }
     CommonComposeUI<VideoPlayerViewModel>(
-        viewModel = VideoPlayerViewModel(context)
+        viewModel = viewModel
     ) { vm ->
         DialogHandler(vm)
         PlayerUI(
