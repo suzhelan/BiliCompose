@@ -10,8 +10,8 @@ object BuildVersionConfig {
     val JVM_TARGET = JvmTarget.JVM_17
     val JAVA_VERSION = JavaVersion.VERSION_17
     const val KOTLIN = "17"
-    const val COMPILE_SDK = 36
-    const val TARGET_SDK = 36
+    const val COMPILE_SDK = 37
+    const val TARGET_SDK = 37
     const val MIN_SDK = 26
     const val ENABLE_IOS = true
 }
