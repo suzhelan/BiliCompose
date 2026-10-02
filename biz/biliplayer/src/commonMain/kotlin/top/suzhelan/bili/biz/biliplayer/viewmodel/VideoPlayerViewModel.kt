@@ -227,6 +227,18 @@ class VideoPlayerViewModel(
         val response = api.like(aid = aid, isLike = like)
         if (response.isSuccess()) {
             isLike.value = like
+            val currentDetails = _videoDetailsInfo.value
+            if (currentDetails is BiliResponse.Success) {
+                val videoInfo = currentDetails.data
+                val likeDelta = if (like) 1 else -1
+                _videoDetailsInfo.value = currentDetails.copy(
+                    data = videoInfo.copy(
+                        stat = videoInfo.stat.copy(
+                            like = maxOf(0, videoInfo.stat.like + likeDelta)
+                        )
+                    )
+                )
+            }
         }
         operationState.value = ActionState.None
     }
