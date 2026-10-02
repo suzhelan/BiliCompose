@@ -16,53 +16,38 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import top.suzhelan.bili.shared.common.base.BaseViewModel
-
-
-class DefaultViewModel : BaseViewModel()
 
 /**
- * 常规脚手架布局
- * @param viewModel 传入 YourViewModel()
+ * 页面通用骨架。
+ *
+ * 这个组件只负责布局和渲染，不持有或修改 ViewModel。页面负责收集自己的
+ * `UiState`，并把需要展示的加载状态传入，避免重组时意外覆盖 ViewModel 状态。
  */
 @Composable
-inline fun <reified VM : BaseViewModel> CommonComposeUI(
-    isNeedLoading: Boolean = false,
-    viewModel: VM,
+fun AppScaffold(
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier,
-    contentWindowInsets: WindowInsets? = null,
-    crossinline initAction: (vm: VM) -> Unit = {},
-    crossinline topBar: @Composable (vm: VM) -> Unit = {},
-    crossinline bottomBar: @Composable (vm: VM) -> Unit = {},
-    crossinline floatActionButton: @Composable (vm: VM) -> Unit = {},
-    crossinline content: @Composable BoxScope.(vm: VM) -> Unit
+    contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
+    topBar: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
+    floatingActionButton: @Composable () -> Unit = {},
+    content: @Composable BoxScope.() -> Unit,
 ) {
-    viewModel.setLoading(isNeedLoading)
-    val isLoading by viewModel.initLoading.collectAsState()
-    //初始化动作 其中操作要在viewmodel执行
-    LaunchedEffect(Unit) {
-        initAction(viewModel)
-    }
-    //脚手架布局
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { topBar(viewModel) },
-        bottomBar = { bottomBar(viewModel) },
-        floatingActionButton = { floatActionButton(viewModel) },
-        contentWindowInsets = contentWindowInsets ?: ScaffoldDefaults.contentWindowInsets,
+        topBar = topBar,
+        bottomBar = bottomBar,
+        floatingActionButton = floatingActionButton,
+        contentWindowInsets = contentWindowInsets,
     ) { padding ->
         Box(
             modifier = Modifier.fillMaxSize().padding(padding)
         ) {
-            content(viewModel)
-        }
-        //如果正在加载
-        if (isLoading) {
-            LoadingIndicator()
+            content()
+            if (isLoading) {
+                LoadingIndicator()
+            }
         }
     }
 
@@ -84,6 +69,7 @@ fun TitleUI(
         navigationIcon = {
             IconButton(
                 onClick = {
+                    onClickBack()
                 }
             ) {
                 Icon(imageVector = Icons.Outlined.ArrowBackIosNew, contentDescription = "Back")

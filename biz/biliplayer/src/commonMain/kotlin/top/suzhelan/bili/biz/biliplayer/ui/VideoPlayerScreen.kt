@@ -15,7 +15,7 @@ import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.player.platform.BiliLocalContext
-import top.suzhelan.bili.shared.common.ui.CommonComposeUI
+import top.suzhelan.bili.shared.common.ui.AppScaffold
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.ScreenSizeCalculation
 import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
@@ -28,13 +28,11 @@ fun VideoPlayerScreen(
 ) {
     val context = BiliLocalContext.current
     val viewModel = viewModel { VideoPlayerViewModel(context) }
-    CommonComposeUI<VideoPlayerViewModel>(
-        viewModel = viewModel
-    ) { vm ->
-        DialogHandler(vm)
+    AppScaffold {
+        DialogHandler(viewModel)
         PlayerUI(
             playerParams = playerParams,
-            viewModel = vm
+            viewModel = viewModel
         )
     }
 }

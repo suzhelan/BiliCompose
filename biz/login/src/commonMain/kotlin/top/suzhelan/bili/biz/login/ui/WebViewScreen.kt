@@ -4,15 +4,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.multiplatform.webview.cookie.Cookie
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewState
 import top.suzhelan.bili.api.config.commonHeaders
 import top.suzhelan.bili.shared.auth.config.LoginMapper
-import top.suzhelan.bili.shared.common.ui.CommonComposeUI
-import top.suzhelan.bili.shared.common.ui.DefaultViewModel
+import top.suzhelan.bili.shared.common.ui.AppScaffold
 import top.suzhelan.bili.shared.common.ui.TitleUI
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.currentOrThrow
@@ -49,9 +47,7 @@ fun WebViewScreen(
             }
         }
     }
-    val viewModel = viewModel { DefaultViewModel() }
-    CommonComposeUI<DefaultViewModel>(
-        viewModel = viewModel,
+    AppScaffold(
         topBar = {
             TitleUI(state.pageTitle ?: "") {
                 navigation.pop()

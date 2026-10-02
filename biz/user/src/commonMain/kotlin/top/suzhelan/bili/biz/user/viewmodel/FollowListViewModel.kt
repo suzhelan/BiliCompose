@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.ext.apiCall
@@ -13,12 +15,14 @@ import top.suzhelan.bili.api.isSuccess
 import top.suzhelan.bili.biz.user.api.RelationApi
 import top.suzhelan.bili.biz.user.data.FollowListDataSource
 import top.suzhelan.bili.biz.user.entity.RelationTags
+import top.suzhelan.bili.biz.user.entity.RelationUser
 import top.suzhelan.bili.biz.user.util.RelationUtils
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 
 class FollowListViewModel : BaseViewModel() {
 
     private val api = RelationApi()
+    private val followListFlows = mutableMapOf<Int, Flow<PagingData<RelationUser>>>()
 
     private val _tags = mutableStateListOf<RelationTags>()
     val tags: List<RelationTags> = _tags
@@ -77,16 +81,19 @@ class FollowListViewModel : BaseViewModel() {
         followList[mid] = result
     }
 
-    fun getFollowListFlow(tagId: Int) = Pager(
-        config = PagingConfig(
-            pageSize = 10,
-            prefetchDistance = 5,//提前多少页开始预加载
-            enablePlaceholders = true
-        ),
-        pagingSourceFactory = {
-            FollowListDataSource(tagId)
+    fun getFollowListFlow(tagId: Int): Flow<PagingData<RelationUser>> =
+        followListFlows.getOrPut(tagId) {
+            Pager(
+                config = PagingConfig(
+                    pageSize = 10,
+                    prefetchDistance = 5,//提前多少页开始预加载
+                    enablePlaceholders = true
+                ),
+                pagingSourceFactory = {
+                    FollowListDataSource(tagId)
+                }
+            ).flow.cachedIn(viewModelScope)
         }
-    ).flow.cachedIn(viewModelScope)
 
 
     //是否展示设置分组的对话框

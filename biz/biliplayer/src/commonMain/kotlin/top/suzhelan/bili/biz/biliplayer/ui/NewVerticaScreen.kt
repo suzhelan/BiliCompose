@@ -27,7 +27,7 @@ import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.platform.BiliLocalContext
 import top.suzhelan.bili.player.ui.VerticalPlayerUI
 import top.suzhelan.bili.player.ui.indicator.OnPreviewIndicator
-import top.suzhelan.bili.shared.common.ui.CommonComposeUI
+import top.suzhelan.bili.shared.common.ui.AppScaffold
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
 import top.suzhelan.bili.shared.navigation.LocalNavigation
@@ -38,23 +38,22 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 fun NewVerticaScreen(intent: PlayerParams) {
     val viewModel = viewModel { VerticalVideoViewModel() }
     //使用PlayerViewModel
-    CommonComposeUI(
-        viewModel = viewModel,
+    AppScaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
-    ) { vm ->
+    ) {
         val context = BiliLocalContext.current
         val navigation = LocalNavigation.currentOrThrow
-        val videoUrlList by vm.videoUrlList.collectAsStateWithLifecycle()
+        val videoUrlList by viewModel.videoUrlList.collectAsStateWithLifecycle()
         LaunchedEffect(Unit) {
             //初始化数据
-            vm.initData(intent)
+            viewModel.initData(intent)
         }
         //初始状态加载中
         if (videoUrlList.isEmpty()) {
             LoadingIndicator(text = "加载中...")
-            return@CommonComposeUI
+            return@AppScaffold
         }
-        DialogHandler(vm)
+        DialogHandler(viewModel)
         val pagerState = rememberPagerState(
             initialPage = 0,
             pageCount = {
@@ -73,7 +72,7 @@ fun NewVerticaScreen(intent: PlayerParams) {
         }
 
         LaunchedEffect(activePage, videoUrlList.size) {
-            vm.updateActivePage(activePage)
+            viewModel.updateActivePage(activePage)
         }
 
         VerticalPager(
@@ -84,7 +83,7 @@ fun NewVerticaScreen(intent: PlayerParams) {
         ) { page ->
             val item = videoUrlList[page]
             val controller = remember(page, context) {
-                vm.getController(page, context)
+                viewModel.getController(page, context)
             }
             val isActivePage = activePage == page
             val currentPositionMillis by controller.currentPositionMillis.collectAsStateWithLifecycle()
@@ -93,8 +92,8 @@ fun NewVerticaScreen(intent: PlayerParams) {
             var hasRestartedAfterFinish by remember(controller) { mutableStateOf(false) }
 
             LaunchedEffect(item, controller, isActivePage) {
-                vm.doPlayer(item, controller)
-                vm.updatePagePlayback(controller, isActivePage)
+                viewModel.doPlayer(item, controller)
+                viewModel.updatePagePlayback(controller, isActivePage)
             }
 
             LaunchedEffect(
@@ -121,7 +120,7 @@ fun NewVerticaScreen(intent: PlayerParams) {
             VideoContentItem(
                 page = page,
                 controller = controller,
-                viewModel = vm,
+                viewModel = viewModel,
                 onBack = { navigation.pop() }
             )
         }

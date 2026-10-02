@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,7 +57,7 @@ import top.suzhelan.bili.biz.user.ui.dialog.TagsDialog
 import top.suzhelan.bili.biz.user.viewmodel.FollowListViewModel
 import top.suzhelan.bili.shared.common.ext.isInvisible
 import top.suzhelan.bili.shared.common.ext.toFalse
-import top.suzhelan.bili.shared.common.ui.CommonComposeUI
+import top.suzhelan.bili.shared.common.ui.AppScaffold
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.TitleUI
 import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
@@ -71,24 +72,23 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 @Composable
 fun FollowListScreen() {
     val viewModel = viewModel { FollowListViewModel() }
-    CommonComposeUI<FollowListViewModel>(
-        initAction = { vm ->
-            vm.queryTags()
-        },
-        viewModel = viewModel,
+    LaunchedEffect(viewModel) {
+        viewModel.queryTags()
+    }
+    AppScaffold(
         topBar = {
             val navigate = LocalNavigation.currentOrThrow
             TitleUI(title = "关注列表", onClickBack = {
                 navigate.pop()
             })
         }
-    ) { vm ->
-        DialogHandler(vm)
-        Dialogs(vm)
+    ) {
+        DialogHandler(viewModel)
+        Dialogs(viewModel)
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            TabPageUI(vm)
+            TabPageUI(viewModel)
         }
     }
 }

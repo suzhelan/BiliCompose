@@ -56,7 +56,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import top.suzhelan.bili.biz.user.entity.WatchHistoryPage
 import top.suzhelan.bili.biz.user.viewmodel.WatchHistoryViewModel
-import top.suzhelan.bili.shared.common.ui.CommonComposeUI
+import top.suzhelan.bili.shared.common.ui.AppScaffold
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
@@ -80,8 +80,7 @@ fun WatchHistoryScreen() {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val visibleItems = historyItems.itemSnapshotList.items.filter { it.matches(searchQuery) }
 
-    CommonComposeUI(
-        viewModel = viewModel,
+    AppScaffold(
         topBar = {
             WatchHistoryTopBar(
                 mode = mode,

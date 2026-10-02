@@ -40,7 +40,7 @@ import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
 import top.suzhelan.bili.biz.user.entity.LikeVideo
 import top.suzhelan.bili.biz.user.viewmodel.MoreLikeViewModel
-import top.suzhelan.bili.shared.common.ui.CommonComposeUI
+import top.suzhelan.bili.shared.common.ui.AppScaffold
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.TitleUI
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
@@ -56,15 +56,14 @@ fun MoreLikeVideoScreen(
 ) {
     val navigator = LocalNavigation.currentOrThrow
     val viewModel = viewModel { MoreLikeViewModel() }
-    CommonComposeUI(
+    AppScaffold(
         topBar = {
             TitleUI("最近点赞") {
                 navigator.pop()
             }
         },
-        viewModel = viewModel
     ) {
-        MoreLikeVideoContent(mid)
+        MoreLikeVideoContent(mid, viewModel)
     }
 }
 
@@ -73,11 +72,9 @@ fun MoreLikeVideoScreen(
  */
 @Composable
 fun MoreLikeVideoContent(
-    mid: Long
+    mid: Long,
+    viewModel: MoreLikeViewModel,
 ) {
-    val viewModel = viewModel {
-        MoreLikeViewModel()
-    }
     val lazyPagingItems = viewModel.getMoreLikeVideoFlow(mid).collectAsLazyPagingItems()
     LazyColumn(
         modifier = Modifier.fillMaxSize()
