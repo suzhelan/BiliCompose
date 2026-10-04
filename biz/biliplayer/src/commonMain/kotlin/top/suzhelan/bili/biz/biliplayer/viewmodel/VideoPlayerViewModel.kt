@@ -190,6 +190,7 @@ class VideoPlayerViewModel(
 
     //是否收藏
     val isFavorite = MutableStateFlow(false)
+    val isShowFavoriteDialog = MutableStateFlow(false)
     fun updateUserActionState(
         aid: Long,
     ) = launchTask {
@@ -241,6 +242,24 @@ class VideoPlayerViewModel(
             }
         }
         operationState.value = ActionState.None
+    }
+
+    fun favoriteChanged(favored: Boolean) {
+        val wasFavored = isFavorite.value
+        isFavorite.value = favored
+        if (wasFavored == favored) return
+        val current = _videoDetailsInfo.value
+        if (current is BiliResponse.Success) {
+            current.data.let { video ->
+                _videoDetailsInfo.value = current.copy(
+                    data = video.copy(
+                        stat = video.stat.copy(
+                            favorite = maxOf(0, video.stat.favorite + if (favored) 1 else -1)
+                        )
+                    )
+                )
+            }
+        }
     }
 
     val isShowAddCoinDialog = MutableStateFlow(false)

@@ -60,8 +60,9 @@ private fun PreViewConstraintCard(
  */
 @Composable
 fun FavouritePreviewCard(
-    item: UserSpace.Favourite2.Item
-) = PreViewConstraintCard {
+    item: UserSpace.Favourite2.Item,
+    onClick: () -> Unit = {},
+) = PreViewConstraintCard(modifier = Modifier.clickable(onClick = onClick)) {
     //封面
     val (cover, title) = createRefs()
     AsyncImage(

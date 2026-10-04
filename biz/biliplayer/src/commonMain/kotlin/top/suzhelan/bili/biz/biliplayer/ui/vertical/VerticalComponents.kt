@@ -28,8 +28,12 @@ import kotlinx.coroutines.flow.StateFlow
 import top.suzhelan.bili.biz.biliplayer.entity.VerticalVideoWrap
 import top.suzhelan.bili.biz.biliplayer.ui.dialog.SelectCoinCountDialog
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VerticalVideoViewModel
+import top.suzhelan.bili.biz.user.ui.FavoriteVideoDialog
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.ui.progress.rememberPlayerProgressSliderState
+import top.suzhelan.bili.shared.navigation.LocalNavigation
+import top.suzhelan.bili.shared.navigation.SharedScreen
+import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 /**
  * 短视频播放器覆盖层。
@@ -50,6 +54,8 @@ fun VerticalVideoOverlay(
     val video = videoPool.getOrNull(page) ?: VerticalVideoWrap.empty()
     var sheetTab by remember(video.id) { mutableStateOf<VerticalSheetTab?>(null) }
     var showCoinDialog by remember(video.id) { mutableStateOf(false) }
+    var showFavoriteDialog by remember(video.id) { mutableStateOf(false) }
+    val navigator = LocalNavigation.currentOrThrow
 
     if (showCoinDialog) {
         SelectCoinCountDialog(
@@ -59,6 +65,13 @@ fun VerticalVideoOverlay(
             onDismissRequest = { showCoinDialog = false }
         )
     }
+    FavoriteVideoDialog(
+        aid = video.detailsInfo.aid,
+        visible = showFavoriteDialog && video.detailsInfo.aid != 0L,
+        onDismiss = { showFavoriteDialog = false },
+        onSaved = { favored -> viewModel.favoriteChanged(video.id, favored) },
+        onRequestLogin = { navigator.push(SharedScreen.Login) },
+    )
 
     Box(modifier = modifier.fillMaxSize()) {
         VerticalTopBar(
@@ -85,6 +98,7 @@ fun VerticalVideoOverlay(
                     showCoinDialog = true
                 }
             },
+            onFavoriteClick = { showFavoriteDialog = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .navigationBarsPadding()

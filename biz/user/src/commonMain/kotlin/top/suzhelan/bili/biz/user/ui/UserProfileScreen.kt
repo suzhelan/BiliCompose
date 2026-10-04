@@ -35,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +46,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.api.BiliResponse
@@ -389,7 +391,7 @@ private fun ContentTab(userSpace: UserSpace) {
     ) {
         tabItems.forEachIndexed { index, item ->
             Tab(
-                selected = index == 0,
+                selected = pageState.currentPage == index,
                 onClick = {
                     scope.launch {
                         pageState.animateScrollToPage(index)
@@ -441,7 +443,9 @@ private fun ContentTab(userSpace: UserSpace) {
                             items = userSpace.favourite2.item,
                         ) { item ->
                             //收藏卡片
-                            FavouritePreviewCard(item)
+                            FavouritePreviewCard(item) {
+                                navigator.push(SharedScreen.FavoriteDetail(item.mediaId))
+                            }
                         }
                     }
                     //最近点赞的视频
@@ -474,6 +478,8 @@ private fun ContentTab(userSpace: UserSpace) {
                     }
                 }
             }
+
+            3 -> FavoriteFoldersProfileContent(userSpace.card.mid.toLong())
         }
 
     }

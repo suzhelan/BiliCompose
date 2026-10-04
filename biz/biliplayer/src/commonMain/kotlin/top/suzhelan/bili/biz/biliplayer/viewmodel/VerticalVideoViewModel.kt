@@ -223,6 +223,21 @@ class VerticalVideoViewModel : BaseViewModel() {
         }
     }
 
+    fun favoriteChanged(videoId: String, favored: Boolean) {
+        updateVideoWrap(videoId) { item ->
+            if (item.isFavorite == favored) return@updateVideoWrap item
+            val stat = item.detailsInfo.stat
+            item.copy(
+                isFavorite = favored,
+                detailsInfo = item.detailsInfo.copy(
+                    stat = stat.copy(
+                        favorite = max(0, stat.favorite + if (favored) 1 else -1)
+                    )
+                )
+            )
+        }
+    }
+
     fun addCoin(videoId: String, aid: Long, multiply: Int, selectLike: Boolean = false) = launchTask {
         if (aid == 0L) {
             return@launchTask

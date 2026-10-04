@@ -372,6 +372,7 @@ private fun ColumnScope.UserFeatureEntries() {
                 description = "收藏的内容",
                 icon = Icons.Outlined.FavoriteBorder,
                 modifier = Modifier.weight(1f),
+                onClick = { navigation.push(SharedScreen.FavoriteFolders(LoginMapper.getMid())) },
             )
             UserFeatureCard(
                 title = "稍后再看",

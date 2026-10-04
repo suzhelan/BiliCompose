@@ -37,6 +37,7 @@ internal fun VerticalActionBar(
     onLikeClick: () -> Unit,
     onCommentClick: () -> Unit,
     onCoinClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -65,7 +66,7 @@ internal fun VerticalActionBar(
             icon = Icons.Outlined.StarOutline,
             countText = video.detailsInfo.stat.favorite.countTextOrBlank(),
             isSelected = video.isFavorite,
-            onClick = {}
+            onClick = onFavoriteClick
         )
         VerticalActionItem(
             icon = Icons.Outlined.Share,

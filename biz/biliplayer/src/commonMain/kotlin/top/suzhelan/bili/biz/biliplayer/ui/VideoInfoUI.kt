@@ -48,6 +48,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,10 +56,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.launch
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getOrThrow
@@ -71,6 +72,7 @@ import top.suzhelan.bili.biz.biliplayer.ui.dialog.SelectCoinCountDialog
 import top.suzhelan.bili.biz.biliplayer.ui.item.SimpleVideoCard
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.biz.user.entity.UserCard
+import top.suzhelan.bili.biz.user.ui.FavoriteVideoDialog
 import top.suzhelan.bili.biz.user.viewmodel.UserViewModel
 import top.suzhelan.bili.comment.entity.CommentSourceType
 import top.suzhelan.bili.comment.ui.CommentContent
@@ -201,7 +203,9 @@ private fun VideoDetailsUI(
 
 @Composable
 private fun Dialogs(aid: Long, viewModel: VideoPlayerViewModel) {
+    val navigator = LocalNavigation.currentOrThrow
     val isShowAddCoinDialog by viewModel.isShowAddCoinDialog.collectAsStateWithLifecycle()
+    val isShowFavoriteDialog by viewModel.isShowFavoriteDialog.collectAsStateWithLifecycle()
     val coinQuotationCount by viewModel.coinQuotationCount.collectAsStateWithLifecycle()
     if (isShowAddCoinDialog) {
         if (coinQuotationCount >= 2) {
@@ -221,6 +225,13 @@ private fun Dialogs(aid: Long, viewModel: VideoPlayerViewModel) {
             )
         }
     }
+    FavoriteVideoDialog(
+        aid = aid,
+        visible = isShowFavoriteDialog,
+        onDismiss = { viewModel.isShowFavoriteDialog.dismiss() },
+        onSaved = viewModel::favoriteChanged,
+        onRequestLogin = { navigator.push(SharedScreen.Login) },
+    )
 }
 
 /**
@@ -391,7 +402,7 @@ private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
             icon = Icons.Outlined.StarOutline,
             isSelected = isFavorite,
             text = if (videoInfo.stat.favorite > 0) videoInfo.stat.favorite.toStringCount() else "收藏",
-            onClick = {})
+            onClick = { viewModel.isShowFavoriteDialog.show() })
         //分享
         OperateItemUI(
             icon = Icons.Outlined.Share,
