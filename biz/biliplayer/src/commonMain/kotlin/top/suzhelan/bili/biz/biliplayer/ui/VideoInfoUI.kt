@@ -48,7 +48,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,10 +55,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.launch
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getOrThrow
@@ -98,7 +97,7 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 fun VideoInfoUI(
     playerParams: PlayerParams,
     viewModel: VideoPlayerViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) = Column(modifier = modifier) {
     val vmVideoInfo by viewModel.videoDetailsInfo.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
@@ -158,14 +157,14 @@ fun VideoInfoUI(
 private fun TabPage(
     videoInfo: VideoInfo,
     pagerState: PagerState,
-    viewModel: VideoPlayerViewModel
+    viewModel: VideoPlayerViewModel,
 ) {
     HorizontalPager(
         state = pagerState,
     ) { page ->
         when (page) {
             0 -> {
-                VideoDetailsUI(videoInfo = videoInfo, viewModel = viewModel)
+                VideoDetailsUI(videoInfo = videoInfo, playerViewModel = viewModel)
             }
 
             1 -> {
@@ -180,7 +179,7 @@ private fun TabPage(
 @Composable
 private fun VideoDetailsUI(
     videoInfo: VideoInfo,
-    viewModel: VideoPlayerViewModel,
+    playerViewModel: VideoPlayerViewModel,
     userViewModel: UserViewModel = viewModel {
         UserViewModel()
     },
@@ -190,15 +189,15 @@ private fun VideoDetailsUI(
         userViewModel.getUserInfo(mid = videoInfo.owner.mid)
     }
     //Dialog
-    Dialogs(aid = videoInfo.aid, viewModel = viewModel)
+    Dialogs(aid = videoInfo.aid, viewModel = playerViewModel)
     //作者卡片在最上方
     AuthorItemUI(userCard, userViewModel)
     //然后是一个可以展开的视频基本信息,包含标题,播放量,弹幕数量,发布时间,n人正在看
-    VideoBasicInfoUI(videoInfo, viewModel)
+    VideoBasicInfoUI(videoInfo, playerViewModel)
     //然后是点赞 播放量 评论量等信息
-    BasicIndicatorsUI(videoInfo, viewModel)
+    BasicIndicatorsUI(videoInfo, playerViewModel)
     //最后是推荐视频
-    RecommendedVideoUI(videoInfo.aid, viewModel)
+    RecommendedVideoUI(videoInfo.aid, playerViewModel)
 }
 
 @Composable
@@ -416,7 +415,7 @@ private fun RowScope.OperateItemUI(
     icon: ImageVector,
     isSelected: Boolean = false,
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier.weight(1f).clickable {
@@ -441,7 +440,7 @@ private fun RowScope.OperateItemUI(
 @Composable
 private fun AuthorItemUI(
     userCardResponse: BiliResponse<UserCard>,
-    viewModel: UserViewModel
+    viewModel: UserViewModel,
 ) {
     val navigation = LocalNavigation.currentOrThrow
     ConstraintLayout(
@@ -543,7 +542,7 @@ private fun AuthorItemUI(
 @Composable
 private fun RecommendedVideoUI(
     aid: Long,
-    viewModel: VideoPlayerViewModel
+    viewModel: VideoPlayerViewModel,
 ) {
     val navigator = LocalNavigation.currentOrThrow
     val recommendedVideoFlow = viewModel.getRecommendedVideoFlow(aid)
