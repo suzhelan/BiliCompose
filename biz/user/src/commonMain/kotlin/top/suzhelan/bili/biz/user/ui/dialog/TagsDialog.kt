@@ -1,6 +1,6 @@
 package top.suzhelan.bili.biz.user.ui.dialog
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -18,38 +16,32 @@ import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import top.suzhelan.bili.api.registerStatusListener
 import top.suzhelan.bili.biz.user.entity.RelationTags
@@ -59,7 +51,6 @@ import top.suzhelan.bili.shared.common.ext.show
 import top.suzhelan.bili.shared.common.ext.toFalse
 import top.suzhelan.bili.shared.common.ext.toTrue
 import top.suzhelan.bili.shared.common.ui.dialog.WarnDialog
-import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 
 
@@ -178,11 +169,10 @@ fun TagsDialog(
                     ) {
                         item {
                             Text(
-                                text = "向右滑动项可重命名,向左滑动可删除",
+                                text = "点击分组右侧的更多按钮可重命名或删除",
                                 modifier = Modifier.fillMaxWidth().padding(8.dp),
                                 color = TipColor,
                                 fontSize = 12.sp,
-                                maxLines = 1,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -190,9 +180,22 @@ fun TagsDialog(
                             items = allTags,
                             key = { tag -> tag.tagid }
                         ) { tag ->
-                            TodoListItemWithAnimation(
+                            TagItem(
                                 tag = tag,
-                                vm = vm,
+                                isChecked = vm.tagsCheckedMap[tag.tagid] ?: false,
+                                onChecked = { checked ->
+                                    vm.updateTagsCheckedMap(tag.tagid, checked)
+                                },
+                                onRename = { vm.showRenameTagDialog(tag) },
+                                onDelete = {
+                                    vm.hasUserInTag(tag.tagid) { hasUser ->
+                                        if (hasUser) {
+                                            vm.isShowDeleteTagDialog.show()
+                                        } else {
+                                            vm.deleteTag(tag.tagid)
+                                        }
+                                    }
+                                }
                             )
                             Spacer(modifier = Modifier.size(8.dp))
                         }
@@ -204,168 +207,81 @@ fun TagsDialog(
 }
 
 /**
- * 可左右滑的列表项
- *
+ * 点击卡片选择分组，通过更多菜单管理分组。
  */
 @Composable
-private fun TodoListItemWithAnimation(
+private fun TagItem(
     tag: RelationTags,
-    vm: FollowListViewModel,
-    modifier: Modifier = Modifier,
+    isChecked: Boolean,
+    onChecked: (Boolean) -> Unit,
+    onRename: () -> Unit,
+    onDelete: () -> Unit,
 ) {
-    //选中的状态
-    val tagsCheckedMap: Map<Int, Boolean> = vm.tagsCheckedMap
-    // 监听删除确认对话框状态，在对话框关闭时（取消删除）重置滑动状态
-    val isShowDeleteTagDialog by vm.isShowDeleteTagDialog.collectAsStateWithLifecycle()
-    //监听拖动状态
-    val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart && tag.tagid != -10) {
-                //删除
-                vm.hasUserInTag(tag.tagid) { haUser ->
-                    //有用户的话展示一下dialog
-                    if (haUser) {
-                        vm.isShowDeleteTagDialog.show()
-                    } else {
-                        //没有用户则直接删除
-                        vm.deleteTag(tag.tagid)
-                    }
-                }
-            }
-            if (it == SwipeToDismissBoxValue.StartToEnd && tag.tagid != -10) {
-                vm.showRenameTagDialog(tag)
-            }
-            when {
-                tag.tagid == -10 -> false
-                it == SwipeToDismissBoxValue.EndToStart && !isShowDeleteTagDialog -> true
-                else -> false
-            }
-        },
-        positionalThreshold = { fullSize ->
-            fullSize.times(0.5f)
-        },
-    )
-
-    LaunchedEffect(isShowDeleteTagDialog) {
-        if (!isShowDeleteTagDialog) {
-            // 对话框关闭时重置滑动状态
-            swipeToDismissBoxState.reset()
-        }
-    }
-
-    SwipeToDismissBox(
-        state = swipeToDismissBoxState,
-        modifier = modifier.fillMaxWidth()
-            .wrapContentHeight()
-            .clip(CardDefaults.shape),
-        backgroundContent = {
-            if (tag.tagid != -10) {
-                when (swipeToDismissBoxState.dismissDirection) {
-                    //从左到右
-                    SwipeToDismissBoxValue.StartToEnd -> {
-                        //重命名
-                        Icon(
-                            imageVector = Icons.Outlined.Edit,
-                            contentDescription = "Remove item",
-                            modifier = Modifier.fillMaxSize()
-                                .background(
-                                    lerp(
-                                        Color.LightGray,
-                                        ColorPrimary,
-                                        swipeToDismissBoxState.progress
-                                    )
-                                )
-                                .wrapContentSize(Alignment.CenterStart)
-                                .padding(12.dp),
-                            tint = Color.White
-                        )
-                    }
-                    //从右到左
-                    SwipeToDismissBoxValue.EndToStart -> {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Remove item",
-                            modifier = Modifier.fillMaxSize()
-                                .background(
-                                    lerp(
-                                        Color.LightGray,
-                                        Color.Red,
-                                        swipeToDismissBoxState.progress
-                                    )
-                                )
-                                .wrapContentSize(Alignment.CenterEnd)
-                                .padding(12.dp),
-                            tint = Color.White
-                        )
-                    }
-
-                    SwipeToDismissBoxValue.Settled -> {}
-                }
-            }
-        }
-    ) {
-        TagItem(
-            tag = tag,
-            isChecked = tagsCheckedMap[tag.tagid] ?: false,
-            onChecked = { checked ->
-                vm.updateTagsCheckedMap(tag.tagid, checked)
-            }
-        )
-    }
-}
-
-/**
- * 实际显示分组的ItemUI
- */
-@Composable
-private fun TagItem(tag: RelationTags, isChecked: Boolean, onChecked: (Boolean) -> Unit) {
+    var menuExpanded by remember(tag.tagid) { mutableStateOf(false) }
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = {
             onChecked(!isChecked)
         }
     ) {
-        ConstraintLayout(
+        Row(
             modifier = Modifier.fillMaxWidth()
-                .padding(8.dp)
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val (checkboxRef, nameRef, tipRef) = createRefs()
-            Text(
-                text = tag.name,
-                fontSize = 16.sp,
-                //太长则省略
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.constrainAs(nameRef) {
-                    start.linkTo(parent.start, 8.dp)
-                    top.linkTo(parent.top)
-                }
-            )
-
-            Text(
-                text = tag.tip,
-                fontSize = 12.sp,
-                color = TipColor,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.constrainAs(tipRef) {
-                    start.linkTo(nameRef.start)
-                    top.linkTo(nameRef.bottom)
-                    end.linkTo(checkboxRef.start, 20.dp)
-                    width = Dimension.fillToConstraints
-                }
-            )
-
+            Column(modifier = Modifier.weight(1f).padding(start = 8.dp, end = 8.dp)) {
+                Text(
+                    text = tag.name,
+                    fontSize = 16.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = tag.tip,
+                    fontSize = 12.sp,
+                    color = TipColor,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             Checkbox(
                 checked = isChecked,
-                onCheckedChange = {
-                    onChecked(it)
-                },
-                modifier = Modifier.constrainAs(checkboxRef) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    end.linkTo(parent.end)
-                }
+                onCheckedChange = onChecked
             )
+            if (tag.tagid != -10) {
+                Box {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.MoreVert,
+                            contentDescription = "管理分组：${tag.name}"
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("重命名") },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.Edit, contentDescription = null)
+                            },
+                            onClick = {
+                                menuExpanded = false
+                                onRename()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("删除") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Delete, contentDescription = null)
+                            },
+                            onClick = {
+                                menuExpanded = false
+                                onDelete()
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }
