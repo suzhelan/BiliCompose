@@ -121,7 +121,9 @@ fun WatchLaterScreen() {
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            if (state.isLoading) item { LoadingIndicator() }
+            if (state.isLoading || (!state.hasLoaded && state.error == null)) {
+                item { LoadingIndicator() }
+            }
             state.error?.let { message ->
                 item {
                     Column(
@@ -135,7 +137,7 @@ fun WatchLaterScreen() {
                     }
                 }
             }
-            if (!state.isLoading && state.error == null && state.videos.isEmpty()) {
+            if (state.hasLoaded && !state.isLoading && state.error == null && state.videos.isEmpty()) {
                 item {
                     Column(
                         Modifier.fillMaxWidth().padding(36.dp),

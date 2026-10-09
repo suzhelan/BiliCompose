@@ -10,6 +10,7 @@ import top.suzhelan.bili.shared.common.base.BaseViewModel
 data class WatchLaterUiState(
     val videos: List<WatchLaterVideo> = emptyList(),
     val isLoading: Boolean = false,
+    val hasLoaded: Boolean = false,
     val removingAid: Long? = null,
     val error: String? = null,
 )
@@ -26,7 +27,7 @@ class WatchLaterViewModel : BaseViewModel() {
             val response = api.getList()
             if (response.code != 0) error(response.message)
             val data = response.data ?: error("稍后再看列表数据为空")
-            _state.value = _state.value.copy(videos = data.list.orEmpty())
+            _state.value = _state.value.copy(videos = data.list.orEmpty(), hasLoaded = true)
         } catch (exception: CancellationException) {
             throw exception
         } catch (exception: Exception) {
