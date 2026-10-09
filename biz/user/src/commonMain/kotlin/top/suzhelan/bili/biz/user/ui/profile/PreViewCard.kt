@@ -99,7 +99,7 @@ fun FavouritePreviewCard(
         )
         //提示信息
         Text(
-            text = "${item.count}个收藏 - ${if (item.isPublic == 1) "公开" else "私密"}",
+            text = "${item.count}个收藏 - ${if (item.isPrivate) "私密" else "公开"}",
             fontSize = 10.sp,
             color = TipColor,
         )

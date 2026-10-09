@@ -630,7 +630,7 @@ data class UserSpace(
             @SerialName("id")
             val id: Int, // 7512743
             @SerialName("is_public")
-            val isPublic: Int, // 0
+            val isPublic: Int, // 空间接口实际返回隐私标记：0 公开，1 私密
             @SerialName("media_id")
             val mediaId: Long, // 3368321940
             @SerialName("mid")
@@ -641,7 +641,9 @@ data class UserSpace(
             val title: String, // 默认收藏夹
             @SerialName("type")
             val type: Int // 2
-        )
+        ) {
+            val isPrivate: Boolean get() = isPublic == 1
+        }
     }
 
     @Serializable
