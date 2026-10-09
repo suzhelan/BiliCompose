@@ -71,12 +71,14 @@ fun FavoriteDetailScreen(mediaId: Long) {
     var showEdit by remember { mutableStateOf(false) }
     var showDelete by remember { mutableStateOf(false) }
     var showClean by remember { mutableStateOf(false) }
+    var resourceToDelete by remember(mediaId) { mutableStateOf<FavoriteResource?>(null) }
     var query by remember { mutableStateOf("") }
     LaunchedEffect(mediaId) { vm.load(mediaId) }
 
     val isOwner = state.folder?.mid?.let { owner ->
         LoginMapper.isLogin() && runCatching { LoginMapper.getMid() }.getOrNull() == owner
     } == true
+    val isBusy = state.isLoading || state.isLoadingMore || state.isMutating
 
     AppScaffold(
         topBar = {
@@ -89,17 +91,17 @@ fun FavoriteDetailScreen(mediaId: Long) {
                 },
                 actions = {
                     if (isOwner) {
-                        IconButton(enabled = !state.isMutating, onClick = { showClean = true }) {
+                        IconButton(enabled = !isBusy, onClick = { showClean = true }) {
                             Icon(
                                 Icons.Outlined.CleaningServices,
                                 contentDescription = "清除失效内容"
                             )
                         }
-                        IconButton(enabled = !state.isMutating, onClick = { showEdit = true }) {
+                        IconButton(enabled = !isBusy, onClick = { showEdit = true }) {
                             Icon(Icons.Outlined.Edit, contentDescription = "编辑收藏夹")
                         }
                         IconButton(
-                            enabled = !state.isMutating && state.folder?.isDefault == false,
+                            enabled = !isBusy && state.folder?.isDefault == false,
                             onClick = { showDelete = true },
                         ) { Icon(Icons.Outlined.DeleteOutline, contentDescription = "删除收藏夹") }
                     }
@@ -135,7 +137,9 @@ fun FavoriteDetailScreen(mediaId: Long) {
                             singleLine = true,
                             modifier = Modifier.weight(1f),
                         )
-                        IconButton(onClick = { vm.load(mediaId, query = query) }) {
+                        IconButton(
+                            enabled = !isBusy,
+                            onClick = { vm.load(mediaId, query = query) }) {
                             Icon(Icons.Outlined.Search, contentDescription = "搜索")
                         }
                     }
@@ -152,6 +156,7 @@ fun FavoriteDetailScreen(mediaId: Long) {
                         ).forEach { (value, label) ->
                             FilterChip(
                                 selected = state.order == value,
+                                enabled = !isBusy,
                                 onClick = { vm.load(mediaId, query = state.query, order = value) },
                                 label = { Text(label) },
                             )
@@ -161,10 +166,17 @@ fun FavoriteDetailScreen(mediaId: Long) {
                 if (state.resources.isEmpty() && !state.isLoading) {
                     item { FavoriteDetailMessage(if (state.query.isBlank()) "收藏夹还是空的" else "没有匹配的视频") }
                 }
-                items(state.resources, key = { "${it.type}-${it.id}" }) { FavoriteResourceCard(it) }
+                items(state.resources, key = { "${it.type}-${it.id}" }) { resource ->
+                    FavoriteResourceCard(
+                        resource = resource,
+                        canRemove = isOwner,
+                        removingEnabled = !isBusy,
+                        onRemove = { resourceToDelete = resource },
+                    )
+                }
                 if (state.hasMore) item {
                     Button(
-                        enabled = !state.isLoadingMore,
+                        enabled = !isBusy,
                         onClick = vm::loadMore,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                     ) { Text(if (state.isLoadingMore) "加载中…" else "加载更多") }
@@ -198,6 +210,8 @@ fun FavoriteDetailScreen(mediaId: Long) {
         title = "清除失效内容",
         message = "确定一键移除该收藏夹内所有已失效内容吗？此操作无法撤销。",
         confirm = "清除",
+        saving = isBusy,
+        error = state.error,
         onDismiss = { showClean = false },
         onConfirm = { vm.cleanInvalid { showClean = false } },
     )
@@ -205,9 +219,22 @@ fun FavoriteDetailScreen(mediaId: Long) {
         title = "删除收藏夹",
         message = "确定删除这个收藏夹吗？其中的收藏记录将无法恢复。",
         confirm = "删除",
+        saving = isBusy,
+        error = state.error,
         onDismiss = { showDelete = false },
         onConfirm = { vm.delete { showDelete = false; navigator.pop() } },
     )
+    resourceToDelete?.let { resource ->
+        ConfirmFavoriteAction(
+            title = "删除收藏",
+            message = "确定从当前收藏夹移除「${resource.title}」吗？",
+            confirm = "删除",
+            saving = isBusy,
+            error = state.error,
+            onDismiss = { resourceToDelete = null },
+            onConfirm = { vm.removeResource(resource) { resourceToDelete = null } },
+        )
+    }
 }
 
 @Composable
@@ -239,7 +266,12 @@ private fun FavoriteFolderHeader(folder: FavoriteFolder) {
 }
 
 @Composable
-private fun FavoriteResourceCard(resource: FavoriteResource) {
+private fun FavoriteResourceCard(
+    resource: FavoriteResource,
+    canRemove: Boolean,
+    removingEnabled: Boolean,
+    onRemove: () -> Unit,
+) {
     val navigator = LocalNavigation.currentOrThrow
     Card(
         modifier = Modifier.fillMaxWidth().height(116.dp)
@@ -279,6 +311,11 @@ private fun FavoriteResourceCard(resource: FavoriteResource) {
                     }",
                     color = TipColor,
                 )
+            }
+            if (canRemove) {
+                IconButton(enabled = removingEnabled, onClick = onRemove) {
+                    Icon(Icons.Outlined.DeleteOutline, contentDescription = "删除收藏")
+                }
             }
         }
     }
@@ -326,14 +363,25 @@ private fun ConfirmFavoriteAction(
     title: String,
     message: String,
     confirm: String,
+    saving: Boolean,
+    error: String?,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) = AlertDialog(
-    onDismissRequest = onDismiss,
+    onDismissRequest = { if (!saving) onDismiss() },
     title = { Text(title) },
-    text = { Text(message) },
-    confirmButton = { TextButton(onClick = onConfirm) { Text(confirm) } },
-    dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+    text = {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(message)
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        }
+    },
+    confirmButton = {
+        TextButton(enabled = !saving, onClick = onConfirm) {
+            Text(if (saving) "处理中…" else confirm)
+        }
+    },
+    dismissButton = { TextButton(enabled = !saving, onClick = onDismiss) { Text("取消") } },
 )
 
 @Composable

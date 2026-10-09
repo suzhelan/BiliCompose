@@ -35,7 +35,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -46,7 +45,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.api.BiliResponse
@@ -441,6 +439,9 @@ private fun ContentTab(userSpace: UserSpace) {
                         ProfileVideoPreView(
                             title = "收藏 - ${userSpace.favourite2.count}个",
                             items = userSpace.favourite2.item,
+                            moreClick = {
+                                scope.launch { pageState.animateScrollToPage(3) }
+                            },
                         ) { item ->
                             //收藏卡片
                             FavouritePreviewCard(item) {

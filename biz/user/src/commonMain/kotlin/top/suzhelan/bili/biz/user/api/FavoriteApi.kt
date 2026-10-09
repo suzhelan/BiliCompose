@@ -102,6 +102,19 @@ class FavoriteApi {
             setBody(formData { append("media_id", mediaId.toString()) })
         }.body()
 
+    suspend fun removeResource(
+        mediaId: Long,
+        resourceId: Long,
+        resourceType: Int,
+    ): BiliResponse.SuccessOrNull<JsonElement> = client.post("/x/v3/fav/resource/batch-del") {
+        header(HttpHeaders.Referrer, "https://www.bilibili.com/")
+        setBody(formData {
+            append("media_id", mediaId.toString())
+            append("resources", "$resourceId:$resourceType")
+            append("platform", "web")
+        })
+    }.body()
+
     suspend fun updateVideoFolders(
         aid: Long,
         addMediaIds: Collection<Long>,

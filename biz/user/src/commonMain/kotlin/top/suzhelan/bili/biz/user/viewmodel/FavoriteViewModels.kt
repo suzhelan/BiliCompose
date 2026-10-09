@@ -112,6 +112,7 @@ class FavoriteDetailViewModel : BaseViewModel() {
         query: String = _state.value.query,
         order: String = _state.value.order,
     ) = launchTask {
+        if (_state.value.isMutating || _state.value.isLoading || _state.value.isLoadingMore) return@launchTask
         reloadResources(mediaId, query, order)
     }
 
@@ -132,7 +133,7 @@ class FavoriteDetailViewModel : BaseViewModel() {
             val containsStaleResources =
                 serverResources.any { resourceKey(it) in hiddenResourceKeys }
             _state.value = FavoriteDetailUiState(
-                // 清理接口与列表接口短时间内可能不同步，不能让旧响应重新插回已移除项。
+                // 删除、清理接口与列表接口短时间内可能不同步，不能让旧响应重新插回已移除项。
                 folder = if (containsStaleResources) {
                     response.data.info.copy(
                         mediaCount = previous.folder?.mediaCount ?: response.data.info.mediaCount
@@ -158,7 +159,7 @@ class FavoriteDetailViewModel : BaseViewModel() {
 
     fun loadMore() = launchTask {
         val current = _state.value
-        if (!current.hasMore || current.isLoadingMore || mediaId == 0L) return@launchTask
+        if (!current.hasMore || current.isLoading || current.isLoadingMore || current.isMutating || mediaId == 0L) return@launchTask
         _state.value = current.copy(isLoadingMore = true)
         try {
             val next = current.page + 1
@@ -194,14 +195,24 @@ class FavoriteDetailViewModel : BaseViewModel() {
     fun cleanInvalid(onSuccess: () -> Unit) = mutate {
         val response = api.cleanInvalidResources(mediaId)
         if (response.code != 0) error(response.message)
+        refreshAfterRemoving(_state.value.resources.filter { it.isInvalid })
+        onSuccess()
+    }
 
-        // 先移除当前页失效项，让界面立即反映成功的清理操作。
+    fun removeResource(resource: FavoriteResource, onSuccess: () -> Unit) = mutate {
+        val response = api.removeResource(mediaId, resource.id, resource.type)
+        if (response.code != 0) error(response.message)
+        refreshAfterRemoving(listOf(resource))
+        onSuccess()
+    }
+
+    private suspend fun refreshAfterRemoving(removedResources: List<FavoriteResource>) {
+        // 接口成功后先移除当前列表中的对应项，再刷新服务端数据及分页状态。
         val current = _state.value
-        val removedResources = current.resources.filter { it.isInvalid }
         val removedResourceKeys = removedResources.mapTo(mutableSetOf()) { resourceKey(it) }
-        val removedCount = removedResources.size
+        val removedCount = current.resources.count { resourceKey(it) in removedResourceKeys }
         _state.value = current.copy(
-            resources = current.resources.filterNot { it.isInvalid },
+            resources = current.resources.filterNot { resourceKey(it) in removedResourceKeys },
             folder = current.folder?.copy(
                 mediaCount = (current.folder.mediaCount - removedCount).coerceAtLeast(0),
             ),
@@ -217,7 +228,6 @@ class FavoriteDetailViewModel : BaseViewModel() {
             delay(800)
             reloadResources(mediaId, current.query, current.order, removedResourceKeys)
         }
-        onSuccess()
     }
 
     private fun resourceKey(resource: FavoriteResource): String = "${resource.type}-${resource.id}"
@@ -230,7 +240,8 @@ class FavoriteDetailViewModel : BaseViewModel() {
     }
 
     private fun mutate(block: suspend () -> Unit) = launchTask {
-        if (_state.value.isMutating) return@launchTask
+        val current = _state.value
+        if (mediaId == 0L || current.isMutating || current.isLoading || current.isLoadingMore) return@launchTask
         _state.value = _state.value.copy(isMutating = true, error = null)
         try {
             block()
