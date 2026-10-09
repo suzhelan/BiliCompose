@@ -19,18 +19,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
-import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,6 +66,7 @@ fun WatchLaterScreen() {
     val navigator = LocalNavigation.currentOrThrow
     val viewModel = viewModel { WatchLaterViewModel() }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var videoToRemove by remember { mutableStateOf<WatchLaterVideo?>(null) }
     // 从播放器返回后重新读取观看进度和列表。
     LifecycleResumeEffect(Unit) {
         viewModel.load()
@@ -86,6 +93,29 @@ fun WatchLaterScreen() {
         },
     ) {
         DialogHandler(viewModel)
+        videoToRemove?.let { video ->
+            AlertDialog(
+                onDismissRequest = { videoToRemove = null },
+                title = { Text("移除稍后再看") },
+                text = { Text("确定将“${video.title.ifBlank { "视频已失效" }}”从稍后再看中移除吗？") },
+                confirmButton = {
+                    TextButton(
+                        enabled = !state.isLoading && state.removingAid == null,
+                        onClick = {
+                            videoToRemove = null
+                            viewModel.remove(video.aid)
+                        },
+                    ) {
+                        Text("删除")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { videoToRemove = null }) {
+                        Text("取消")
+                    }
+                },
+            )
+        }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
@@ -125,7 +155,7 @@ fun WatchLaterScreen() {
                     video = video,
                     isRemoving = state.removingAid == video.aid,
                     canRemove = !state.isLoading && state.removingAid == null,
-                    onRemove = { viewModel.remove(video.aid) },
+                    onRemove = { videoToRemove = video },
                     onPlay = {
                         navigator.push(
                             SharedScreen.VideoPlayer(
@@ -201,11 +231,17 @@ private fun WatchLaterVideoCard(
                     )
                 }
             }
-            IconButton(enabled = canRemove, onClick = onRemove) {
+            IconButton(
+                enabled = canRemove,
+                onClick = onRemove,
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                ),
+            ) {
                 if (isRemoving) {
                     CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
-                    Icon(Icons.Outlined.Close, contentDescription = "移除稍后再看：${video.title}")
+                    Icon(Icons.Outlined.Delete, contentDescription = "移除稍后再看：${video.title}")
                 }
             }
         }

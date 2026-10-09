@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.CleaningServices
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -314,7 +315,11 @@ private fun FavoriteResourceCard(
             }
             if (canRemove) {
                 IconButton(enabled = removingEnabled, onClick = onRemove) {
-                    Icon(Icons.Outlined.DeleteOutline, contentDescription = "删除收藏")
+                    Icon(
+                        Icons.Rounded.DeleteOutline,
+                        tint = MaterialTheme.colorScheme.error,
+                        contentDescription = "删除收藏"
+                    )
                 }
             }
         }
