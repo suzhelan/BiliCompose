@@ -343,7 +343,7 @@ private fun getCoinText(
     }
 }
 
-/** 我的页的常用功能入口。历史记录接入应用内实际数据页，其余入口预留给对应功能模块。 */
+/** 我的页的常用功能入口。 */
 @Composable
 private fun ColumnScope.UserFeatureEntries() {
     val navigation = LocalNavigation.currentOrThrow
@@ -379,6 +379,7 @@ private fun ColumnScope.UserFeatureEntries() {
                 description = "待看的视频",
                 icon = Icons.Outlined.Schedule,
                 modifier = Modifier.weight(1f),
+                onClick = { navigation.push(SharedScreen.WatchLater) },
             )
         }
     }

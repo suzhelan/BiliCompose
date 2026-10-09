@@ -5,6 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,8 +23,10 @@ import top.suzhelan.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoTag
 import top.suzhelan.bili.biz.biliplayer.ui.controller.PlayerPool
+import top.suzhelan.bili.biz.user.api.WatchLaterApi
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.platform.BiliContext
+import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -38,6 +41,7 @@ class VideoPlayerViewModel(
 
     private val playerApi = VideoPlayerApi()
     private val api = VideoInfoApi()
+    private val watchLaterApi = WatchLaterApi()
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
     val videoUrlData = _videoUrlData.asStateFlow()
 
@@ -191,6 +195,65 @@ class VideoPlayerViewModel(
     //是否收藏
     val isFavorite = MutableStateFlow(false)
     val isShowFavoriteDialog = MutableStateFlow(false)
+
+    private val _isInWatchLater = MutableStateFlow<Boolean?>(null)
+    val isInWatchLater = _isInWatchLater.asStateFlow()
+    private val _isWatchLaterBusy = MutableStateFlow(false)
+    val isWatchLaterBusy = _isWatchLaterBusy.asStateFlow()
+
+    fun updateWatchLaterState(aid: Long) = launchTask {
+        if (_isWatchLaterBusy.value) return@launchTask
+        _isInWatchLater.value = null
+        if (!LoginMapper.isLogin()) return@launchTask
+        _isWatchLaterBusy.value = true
+        try {
+            _isInWatchLater.value = queryWatchLaterState(aid)
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            showMessageDialog(message = exception.message ?: "稍后再看状态加载失败，请点击按钮重试")
+        } finally {
+            _isWatchLaterBusy.value = false
+        }
+    }
+
+    fun toggleWatchLater(aid: Long) = launchTask {
+        if (_isWatchLaterBusy.value) return@launchTask
+        if (!LoginMapper.isLogin()) {
+            showMessageDialog(message = "请先登录后使用稍后再看")
+            return@launchTask
+        }
+        _isWatchLaterBusy.value = true
+        try {
+            // 初始化失败时先重查，避免将已有的视频错误地当作新增。
+            val wasAdded = _isInWatchLater.value ?: queryWatchLaterState(aid)
+            val response = if (wasAdded) watchLaterApi.remove(aid) else watchLaterApi.add(aid)
+            if (response.code != 0) {
+                error(
+                    when (response.code) {
+                        90001 -> "稍后再看列表已满，请先移除部分视频"
+                        90003 -> "视频已被删除，无法添加到稍后再看"
+                        else -> response.message
+                    }
+                )
+            }
+            _isInWatchLater.value = !wasAdded
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            showMessageDialog(message = exception.message ?: "稍后再看操作失败，请重试")
+        } finally {
+            _isWatchLaterBusy.value = false
+        }
+    }
+
+    private suspend fun queryWatchLaterState(aid: Long): Boolean {
+        val response = watchLaterApi.getList()
+        if (response.code != 0) error(response.message)
+        val data = response.data ?: error("稍后再看列表数据为空")
+        return data.list.orEmpty().any { it.aid == aid }
+    }
+
     fun updateUserActionState(
         aid: Long,
     ) = launchTask {

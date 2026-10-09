@@ -55,6 +55,9 @@ sealed class SharedScreen(val path: String) : BiliScreenProvider {
     data object WatchHistory : SharedScreen("/watchHistory")
 
     @Serializable
+    data object WatchLater : SharedScreen("/watchLater")
+
+    @Serializable
     data class FavoriteFolders(val mid: Long) : SharedScreen("/favoriteFolders")
 
     @Serializable

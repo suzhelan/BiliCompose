@@ -20,6 +20,7 @@ kotlin {
             implementation(projects.biz.user)
             implementation(projects.biz.comment)
             implementation(projects.shared.api)
+            implementation(projects.shared.auth)
             implementation(projects.shared.player)
             implementation(projects.shared.common)
             implementation(projects.shared.navigation)

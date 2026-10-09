@@ -24,11 +24,11 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardControlKey
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.Subtitles
-import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.icons.outlined.Toll
 import androidx.compose.material3.CardDefaults
@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -75,6 +76,7 @@ import top.suzhelan.bili.biz.user.ui.FavoriteVideoDialog
 import top.suzhelan.bili.biz.user.viewmodel.UserViewModel
 import top.suzhelan.bili.comment.entity.CommentSourceType
 import top.suzhelan.bili.comment.ui.CommentContent
+import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.ext.dismiss
 import top.suzhelan.bili.shared.common.ext.show
 import top.suzhelan.bili.shared.common.ui.PagerBottomIndicator
@@ -371,6 +373,14 @@ private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
     val isLike by viewModel.isLike.collectAsStateWithLifecycle()
     val coinQuotation by viewModel.coinQuotationCount.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
+    val isInWatchLater by viewModel.isInWatchLater.collectAsStateWithLifecycle()
+    val isWatchLaterBusy by viewModel.isWatchLaterBusy.collectAsStateWithLifecycle()
+    val isLogin by LoginMapper.isLoginState
+
+    LifecycleResumeEffect(videoInfo.aid, isLogin) {
+        viewModel.updateWatchLaterState(videoInfo.aid)
+        onPauseOrDispose { }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.updateUserActionState(videoInfo.aid)
@@ -386,8 +396,18 @@ private fun BasicIndicatorsUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
             onClick = {
                 viewModel.like(videoInfo.aid, !isLike)
             })
-        //点踩
-        OperateItemUI(icon = Icons.Outlined.ThumbDown, text = "不喜欢", onClick = {})
+        //稍后再看
+        OperateItemUI(
+            icon = Icons.Outlined.Schedule,
+            text = when {
+                isWatchLaterBusy -> "处理中"
+                isInWatchLater == true -> "已添加"
+                else -> "稍后再看"
+            },
+            isSelected = isInWatchLater == true,
+            enabled = !isWatchLaterBusy,
+            onClick = { viewModel.toggleWatchLater(videoInfo.aid) },
+        )
         //投币
         OperateItemUI(
             icon = Icons.Outlined.Toll,
@@ -415,10 +435,11 @@ private fun RowScope.OperateItemUI(
     icon: ImageVector,
     isSelected: Boolean = false,
     text: String,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.weight(1f).clickable {
+        modifier = Modifier.weight(1f).clickable(enabled = enabled) {
             onClick()
         },
         verticalArrangement = Arrangement.Center,
@@ -426,7 +447,7 @@ private fun RowScope.OperateItemUI(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = text,
             tint = if (isSelected) ColorPrimary.copy(alpha = 0.8f) else TextColor.copy(alpha = 0.5f)
         )
         Text(

@@ -25,3 +25,6 @@ captures
 /composeApp/release
 /composeApp/windows
 /composeApp/debug
+
+release
+debug
