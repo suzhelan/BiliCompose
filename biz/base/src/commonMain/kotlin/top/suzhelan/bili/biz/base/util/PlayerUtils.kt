@@ -1,8 +1,6 @@
 package top.suzhelan.bili.biz.base.util
 
-import androidx.compose.ui.util.fastFirst
 import top.suzhelan.bili.biz.base.api.PrivatePlayerApi
-import top.suzhelan.bili.biz.base.entity.VideoPageItem
 
 
 /**
@@ -16,35 +14,19 @@ object PlayerUtils {
     suspend fun getCidByAidOrBvid(
         aid: Long? = null,
         bvid: String? = null,
-        page : Int = 1
+        page: Int = 1,
     ): Long {
         val api = PrivatePlayerApi()
         //检查aid和bvid至少一项不为空
-        if (aid == null && bvid == null) {
-            throw RuntimeException("aid和bvid都为空")
-        }
+        require(aid != null || !bvid.isNullOrBlank()) { "aid和bvid都为空" }
+        require(page > 0) { "分P编号必须大于0" }
         val videoPageList = api.getVideoPageList(
             aid = aid,
             bvid = bvid
         ).data
-        check(videoPageList.isNotEmpty())
-        return videoPageList.fastFirst {
-            it.page == page
-        }.cid
+        return videoPageList.firstOrNull { it.page == page }?.cid
+            ?: throw IllegalStateException("未找到第${page}分P的视频信息")
     }
 
 
-    /**
-     * 获取视频分P列表
-     */
-    suspend fun getVideoPageList(
-        aid: Long? = null,
-        bvid: String? = null,
-    ): List<VideoPageItem> {
-        val api = PrivatePlayerApi()
-        return api.getVideoPageList(
-            aid = aid,
-            bvid = bvid
-        ).data
-    }
 }

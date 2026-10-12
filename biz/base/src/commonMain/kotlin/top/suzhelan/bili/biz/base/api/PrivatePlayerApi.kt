@@ -1,10 +1,10 @@
 package top.suzhelan.bili.biz.base.api
 
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
+import top.suzhelan.bili.api.bodyBiliSuccess
 import top.suzhelan.bili.api.getKtorClient
 import top.suzhelan.bili.biz.base.entity.VideoPageItem
 
@@ -31,6 +31,6 @@ class PrivatePlayerApi {
                     parameter("bvid", bvid)
                 }
             }
-        }.body()
+        }.bodyBiliSuccess<List<VideoPageItem>>()
     }
 }

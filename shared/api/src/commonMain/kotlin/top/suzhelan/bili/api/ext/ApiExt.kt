@@ -1,5 +1,6 @@
 package top.suzhelan.bili.api.ext
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -15,7 +16,9 @@ suspend inline fun <T> apiCall(crossinline call: suspend CoroutineScope.() -> Bi
     return withContext(Dispatchers.IO) {
         try {
             return@withContext call()
-        } catch (e: Throwable) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
             LogUtils.e("ApiCall", e)
             return@withContext ApiException.build(e).toResponse()
         }

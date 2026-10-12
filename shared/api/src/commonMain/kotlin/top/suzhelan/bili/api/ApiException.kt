@@ -7,6 +7,7 @@ class ApiException(val code: Int, override val message: String, override val cau
     : RuntimeException(message, cause) {
     companion object {
         fun build(e: Throwable): ApiException {
+            if (e is ApiException) return e
             val clientException = e as? ClientRequestException ?: return ApiException(
                 code = -1,
                 message = e.message ?: "未知异常",

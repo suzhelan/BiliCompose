@@ -49,7 +49,7 @@ data class RecommendedVideoByVideo(
     @Serializable
     data class Item(
         @SerialName("bvid")
-        val bvid: String, // BV1patxzvEm3
+        val bvid: String? = null, // 可通过 player_args.aid 加载视频
         @SerialName("card_goto")
         val cardGoto: String, // vertical_av
         @SerialName("copyright")
@@ -61,13 +61,13 @@ data class RecommendedVideoByVideo(
         @SerialName("dimension")
         val dimension: Dimension,
         @SerialName("dl_subtitle")
-        val dlSubtitle: String, // 第一次发视频，尽然是因为事故
+        val dlSubtitle: String? = null, // 第一次发视频，尽然是因为事故
         @SerialName("dl_title")
-        val dlTitle: String, // 视频已缓存完成
+        val dlTitle: String? = null, // 视频已缓存完成
         @SerialName("duration")
         val duration: Int, // 44
         @SerialName("ff_cover")
-        val ffCover: String, // http://i2.hdslb.com/bfs/storyff/n250809sa2ya5fsr9zm63n2pc0fvgbar_firsti.jpg
+        val ffCover: String? = null, // http://i2.hdslb.com/bfs/storyff/n250809sa2ya5fsr9zm63n2pc0fvgbar_firsti.jpg
         @SerialName("goto")
         val goto: String, // vertical_av
         @SerialName("idx")
@@ -85,9 +85,9 @@ data class RecommendedVideoByVideo(
         @SerialName("report_flow_data")
         val reportFlowData: String, // {"flow_card_type":"vertical_av"}
         @SerialName("rights")
-        val rights: Rights,
+        val rights: Rights? = null,
         @SerialName("short_link")
-        val shortLink: String, // https://b23.tv/BV1patxzvEm3
+        val shortLink: String? = null, // https://b23.tv/BV1patxzvEm3
         @SerialName("show_report")
         val showReport: ShowReport,
         @SerialName("stat")
@@ -131,11 +131,11 @@ data class RecommendedVideoByVideo(
         @SerialName("name")
         val name: String, // 大鹏無
         @SerialName("official_verify")
-        val officialVerify: OfficialVerify,
+        val officialVerify: OfficialVerify? = null,
         @SerialName("relation")
         val relation: Relation,
         @SerialName("sub_avatar")
-        val subAvatar: SubAvatar
+        val subAvatar: SubAvatar? = null,
     )
 
     @Serializable

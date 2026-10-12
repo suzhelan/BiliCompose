@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,6 +46,22 @@ class VideoPlayerViewModel(
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
     val videoUrlData = _videoUrlData.asStateFlow()
 
+    private val _preparedPlayerParams =
+        MutableStateFlow<BiliResponse<PlayerParams>>(BiliResponse.Wait)
+    val preparedPlayerParams = _preparedPlayerParams.asStateFlow()
+    private var preparePlayerJob: Job? = null
+
+    fun preparePlayer(params: PlayerParams) {
+        // 重试或切换视频时取消旧请求，避免旧结果覆盖当前状态。
+        preparePlayerJob?.cancel()
+        _preparedPlayerParams.value = BiliResponse.Loading
+        preparePlayerJob = launchTask {
+            _preparedPlayerParams.value = apiCall {
+                BiliResponse.buildSuccess(getFixPlayerParam(params))
+            }
+        }
+    }
+
     val controller: PlayerSyncController
         get() {
             if (!PlayerPool.has(playerId)) {
@@ -56,7 +73,6 @@ class VideoPlayerViewModel(
     override fun onCleared() {
         super.onCleared()
         PlayerPool.remove(playerId)
-        controller.close() // 释放播放器资源
     }
 
     suspend fun getFixPlayerParam(playerParams: PlayerParams): PlayerParams {

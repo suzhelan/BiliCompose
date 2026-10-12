@@ -1,8 +1,13 @@
 package top.suzhelan.bili.biz.biliplayer.viewmodel
 
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import top.suzhelan.bili.api.ApiException
+import top.suzhelan.bili.api.BiliResponse
+import top.suzhelan.bili.api.ext.apiCall
+import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.api.isSuccess
 import top.suzhelan.bili.biz.base.util.PlayerUtils
 import top.suzhelan.bili.biz.biliplayer.api.VideoInfoApi
@@ -59,8 +64,11 @@ class VerticalVideoViewModel : BaseViewModel() {
     /**
      * 播放视频链接
      */
-    private val _videoUrlList = MutableStateFlow<List<PlayerArgsItem>>(emptyList())
-    val videoUrlList: StateFlow<List<PlayerArgsItem>> = _videoUrlList.asStateFlow()
+    private val _videoUrlList = MutableStateFlow<List<BiliResponse<PlayerArgsItem>>>(emptyList())
+    val videoUrlList: StateFlow<List<BiliResponse<PlayerArgsItem>>> = _videoUrlList.asStateFlow()
+    private val playerParams = mutableListOf<PlayerParams>()
+    private val prepareVideoJobs = mutableMapOf<Int, Job>()
+    private var isLoadingMore = false
 
     /**
      * 视频信息缓存 把信息和链接缓存 避免状态更新导致范围大影响播放器
@@ -73,37 +81,79 @@ class VerticalVideoViewModel : BaseViewModel() {
      */
     private val _currentIndex = MutableStateFlow(0)
 
-    fun initData(param: PlayerParams) = launchTask {
-        //校验数据是否完整 不完整走fix流程补全
-        var fixParam = param
-        if (fixParam.cid == null) {
-            val cid = PlayerUtils.getCidByAidOrBvid(param.aid, param.bvid)
-            fixParam = param.copy(cid = cid)
-        }
-        //然后可以获取初始的视频数据了
-        val playerArgs = playerApi.getPlayerInfo(
-            avid = fixParam.aid,
-            bvid = fixParam.bvid,
-            epid = fixParam.epid,
-            seasonId = fixParam.seasonId,
-            cid = fixParam.cid!!,
-            qn = fixParam.qn
-        )
-        //直接添加到url数据列表,让ui立刻开始播放视频
-        _videoUrlList.value += playerArgs.data
-        loadVideoInfo(fixParam.aid, fixParam.bvid, fixParam.cid)
+    fun initData(param: PlayerParams) {
+        if (_videoUrlList.value.isNotEmpty()) return
+        appendVideo(param)
+        // 推荐列表独立加载，首个视频补全参数或获取链接失败也能继续滑动。
+        loadMoreData(param.aid ?: 0L)
+    }
 
-        //初始获取更多视频
-        loadMoreData(fixParam.aid ?: 0L)
+    private fun appendVideo(param: PlayerParams) {
+        val page = playerParams.size
+        playerParams += param
+        // 每一页先占位，错误和重试不会改变页码或造成详情与播放链接错位。
+        _videoPool.value += VerticalVideoWrap.empty("${page}_${param.aid}_${param.bvid}_${param.cid}")
+        _videoUrlList.value += BiliResponse.Loading
+        prepareVideo(page)
+    }
+
+    fun retryVideo(page: Int) {
+        prepareVideo(page)
+        if (_videoUrlList.value.size - _currentIndex.value <= 5) {
+            loadMoreData()
+        }
+    }
+
+    private fun prepareVideo(page: Int) {
+        val param = playerParams.getOrNull(page) ?: return
+        prepareVideoJobs[page]?.cancel()
+        updateVideoUrl(page, BiliResponse.Loading)
+        prepareVideoJobs[page] = launchTask {
+            val preparedParams = apiCall {
+                val cid = param.cid ?: PlayerUtils.getCidByAidOrBvid(param.aid, param.bvid)
+                BiliResponse.buildSuccess(param.copy(cid = cid))
+            }
+            if (preparedParams is BiliResponse.Error) {
+                updateVideoUrl(page, preparedParams)
+                return@launchTask
+            }
+            val fixParam = preparedParams.getOrThrow()
+            loadVideoInfo(_videoPool.value[page].id, fixParam.aid, fixParam.bvid, fixParam.cid)
+            val playerArgs = apiCall {
+                val response = playerApi.getPlayerInfo(
+                    avid = fixParam.aid,
+                    bvid = fixParam.bvid,
+                    epid = fixParam.epid,
+                    seasonId = fixParam.seasonId,
+                    cid = requireNotNull(fixParam.cid),
+                    qn = fixParam.qn
+                )
+                if (!response.isSuccess()) {
+                    throw ApiException(
+                        response.code,
+                        response.message,
+                        IllegalStateException("获取视频链接失败")
+                    )
+                }
+                check(response.data.dash.video.any { it.baseUrl.isNotBlank() }) { "暂无可播放的视频链接" }
+                response
+            }
+            updateVideoUrl(page, playerArgs)
+        }
+    }
+
+    private fun updateVideoUrl(page: Int, state: BiliResponse<PlayerArgsItem>) {
+        _videoUrlList.value = _videoUrlList.value.mapIndexed { index, item ->
+            if (index == page) state else item
+        }
     }
 
     private fun loadVideoInfo(
+        id: String,
         aid: Long? = null,
         bvid: String? = null,
         cid: Long? = null,
     ) {
-        val id = "${aid}_${bvid}_${cid}"
-        ensureVideoWrap(id)
         launchTask {
             val videoInfo = infoApi.getVideoDetails(
                 aid = aid,
@@ -155,13 +205,6 @@ class VerticalVideoViewModel : BaseViewModel() {
         }
     }
 
-    private fun ensureVideoWrap(id: String) {
-        if (_videoPool.value.any { it.id == id }) {
-            return
-        }
-        _videoPool.value = _videoPool.value + VerticalVideoWrap.empty(id)
-    }
-
     private fun updateVideoWrap(
         id: String,
         update: (VerticalVideoWrap) -> VerticalVideoWrap,
@@ -196,8 +239,9 @@ class VerticalVideoViewModel : BaseViewModel() {
         }
         val allVideo = videoUrl.dash.video
         val audio = videoUrl.dash.audio
-        val maxVideoUrl = allVideo.maxBy { it.id }
-        val maxAudioUrl = audio?.maxBy { it.id }
+        val maxVideoUrl =
+            allVideo.filter { it.baseUrl.isNotBlank() }.maxByOrNull { it.id } ?: return
+        val maxAudioUrl = audio?.maxByOrNull { it.id }
         controller.play(maxVideoUrl.baseUrl, maxAudioUrl?.baseUrl ?: "")
     }
 
@@ -288,28 +332,33 @@ class VerticalVideoViewModel : BaseViewModel() {
 
     fun onUpdate(index: Int) {
         _currentIndex.value = index
-        loadMoreData()
+        if (_videoUrlList.value.size - index <= 5) {
+            loadMoreData()
+        }
     }
 
     private fun loadMoreData(
         aid: Long = 0L,
-    ) = launchTask {
-        //当前剩余大于五条
-        val feed = infoApi.getRecommendedVideosByVideo(aid = aid)
-        val items = feed.data.items
-        for (item in items) {
-            //先获取视频链接
-            val playerArgs = playerApi.getPlayerInfo(
-                avid = item.playerArgs.aid,
-                cid = item.playerArgs.cid
-            )
-            _videoUrlList.value += playerArgs.data
-            //然后获取视频信息
-            loadVideoInfo(
-                aid = item.playerArgs.aid,
-                bvid = item.bvid,
-                cid = item.playerArgs.cid
-            )
+    ) {
+        if (isLoadingMore) return
+        isLoadingMore = true
+        launchTask {
+            try {
+                val feed = apiCall { infoApi.getRecommendedVideosByVideo(aid = aid) }
+                if (feed !is BiliResponse.Success || !feed.isSuccess()) return@launchTask
+                for (item in feed.data.items) {
+                    // 每条视频独立准备，一条失败不会中断后续视频加载。
+                    appendVideo(
+                        PlayerParams(
+                            aid = item.playerArgs.aid,
+                            bvid = item.bvid,
+                            cid = item.playerArgs.cid
+                        )
+                    )
+                }
+            } finally {
+                isLoadingMore = false
+            }
         }
     }
 }
