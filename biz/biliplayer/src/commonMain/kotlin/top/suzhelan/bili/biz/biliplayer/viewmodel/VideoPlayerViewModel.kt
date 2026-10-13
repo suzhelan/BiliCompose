@@ -16,7 +16,6 @@ import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.ext.apiCall
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.api.isSuccess
-import top.suzhelan.bili.biz.base.util.PlayerUtils
 import top.suzhelan.bili.biz.biliplayer.api.VideoInfoApi
 import top.suzhelan.bili.biz.biliplayer.api.VideoPlayerApi
 import top.suzhelan.bili.biz.biliplayer.data.RecommendedVideoPagingSource
@@ -26,6 +25,7 @@ import top.suzhelan.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoTag
 import top.suzhelan.bili.biz.biliplayer.ui.controller.PlayerPool
+import top.suzhelan.bili.biz.common.util.PlayerUtils
 import top.suzhelan.bili.biz.user.api.WatchLaterApi
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.platform.BiliContext

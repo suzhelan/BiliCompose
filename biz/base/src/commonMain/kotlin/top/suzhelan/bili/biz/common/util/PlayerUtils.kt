@@ -1,6 +1,6 @@
-package top.suzhelan.bili.biz.base.util
+package top.suzhelan.bili.biz.common.util
 
-import top.suzhelan.bili.biz.base.api.PrivatePlayerApi
+import top.suzhelan.bili.biz.common.api.PrivatePlayerApi
 
 
 /**

@@ -9,12 +9,12 @@ import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.ext.apiCall
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.api.isSuccess
-import top.suzhelan.bili.biz.base.util.PlayerUtils
 import top.suzhelan.bili.biz.biliplayer.api.VideoInfoApi
 import top.suzhelan.bili.biz.biliplayer.api.VideoPlayerApi
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.entity.VerticalVideoWrap
+import top.suzhelan.bili.biz.common.util.PlayerUtils
 import top.suzhelan.bili.biz.user.api.RelationApi
 import top.suzhelan.bili.biz.user.api.UserApi
 import top.suzhelan.bili.player.controller.PlayerSyncController

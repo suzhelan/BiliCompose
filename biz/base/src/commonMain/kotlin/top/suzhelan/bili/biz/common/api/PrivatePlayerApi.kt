@@ -1,4 +1,4 @@
-package top.suzhelan.bili.biz.base.api
+package top.suzhelan.bili.biz.common.api
 
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -6,7 +6,7 @@ import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.bodyBiliSuccess
 import top.suzhelan.bili.api.getKtorClient
-import top.suzhelan.bili.biz.base.entity.VideoPageItem
+import top.suzhelan.bili.biz.common.entity.VideoPageItem
 
 class PrivatePlayerApi {
     private val client = getKtorClient(
