@@ -10,6 +10,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.ext.apiCall
 import top.suzhelan.bili.api.getOrThrow
@@ -43,6 +45,41 @@ class VideoPlayerViewModel(
     private val playerApi = VideoPlayerApi()
     private val api = VideoInfoApi()
     private val watchLaterApi = WatchLaterApi()
+    private val collectionProgressRequests = Semaphore(2)
+    private val collectionProgressCache = mutableMapOf<Triple<Long, Long, Long>, Long?>()
+
+    fun refreshCollectionWatchProgress() {
+        collectionProgressCache.clear()
+    }
+
+    /** 仅在列表项可见时读取进度，按账号和分P缓存，并限制并发请求。 */
+    suspend fun getCollectionWatchProgress(aid: Long, cid: Long): Long? {
+        if (!LoginMapper.isLogin() || aid <= 0 || cid <= 0) return null
+        val accountId = LoginMapper.getMid()
+        val key = Triple(accountId, aid, cid)
+        return collectionProgressRequests.withPermit {
+            if (!LoginMapper.isLogin() || LoginMapper.getMid() != accountId) return@withPermit null
+            if (collectionProgressCache.containsKey(key)) {
+                return@withPermit collectionProgressCache[key]
+            }
+            try {
+                val progress = api.getWatchProgress(aid, cid)
+                if (!LoginMapper.isLogin() || LoginMapper.getMid() != accountId) return@withPermit null
+                // 上次播放可能来自另一分P，不能把它的时间绘制在当前封面上。
+                val position = progress.lastPlayTime.takeIf {
+                    progress.lastPlayCid == cid && it != 0L
+                }
+                collectionProgressCache[key] = position
+                position
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (_: Exception) {
+                // 进度为可选信息，失败时保留视频列表，重新打开可重试。
+                null
+            }
+        }
+    }
+
     private val _videoUrlData = MutableStateFlow<BiliResponse<PlayerArgsItem>>(BiliResponse.Loading)
     val videoUrlData = _videoUrlData.asStateFlow()
 

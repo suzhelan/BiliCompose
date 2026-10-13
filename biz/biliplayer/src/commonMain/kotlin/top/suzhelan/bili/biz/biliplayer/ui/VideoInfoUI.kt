@@ -44,7 +44,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,8 +71,11 @@ import top.suzhelan.bili.api.isSuccess
 import top.suzhelan.bili.api.registerStatusListener
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
+import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
 import top.suzhelan.bili.biz.biliplayer.ui.dialog.SelectCoinCountDialog
+import top.suzhelan.bili.biz.biliplayer.ui.dialog.VideoCollectionDialog
 import top.suzhelan.bili.biz.biliplayer.ui.item.SimpleVideoCard
+import top.suzhelan.bili.biz.biliplayer.ui.item.VideoCollectionCard
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.biz.user.entity.UserCard
 import top.suzhelan.bili.biz.user.ui.FavoriteVideoDialog
@@ -198,8 +204,52 @@ private fun VideoDetailsUI(
     VideoBasicInfoUI(videoInfo, playerViewModel)
     //然后是点赞 播放量 评论量等信息
     BasicIndicatorsUI(videoInfo, playerViewModel)
+    //信息区域底部的合集入口
+    VideoCollectionUI(videoInfo, playerViewModel)
     //最后是推荐视频
     RecommendedVideoUI(videoInfo.aid, playerViewModel)
+}
+
+@Composable
+private fun VideoCollectionUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel) {
+    val collection = videoInfo.ugcSeason ?: return
+    val navigator = LocalNavigation.currentOrThrow
+    val controller = rememberPlayerController(viewModel)
+    val isPlaying by controller.isPlayingState.collectAsStateWithLifecycle()
+    val isLogin by LoginMapper.isLoginState
+    val accountId = if (isLogin) LoginMapper.getMid() else null
+    var showCollection by remember(videoInfo.aid, collection.id) { mutableStateOf(false) }
+    VideoCollectionCard(
+        collection = collection,
+        currentAid = videoInfo.aid,
+        isPlaying = isPlaying,
+        onClick = {
+            viewModel.refreshCollectionWatchProgress()
+            showCollection = true
+        },
+    )
+    if (showCollection) {
+        VideoCollectionDialog(
+            collection = collection,
+            currentAid = videoInfo.aid,
+            currentPositionMillis = controller.currentPositionMillis,
+            accountId = accountId,
+            loadWatchProgress = viewModel::getCollectionWatchProgress,
+            onDismissRequest = { showCollection = false },
+            onVideoClick = { episode ->
+                showCollection = false
+                if (episode.aid != videoInfo.aid) {
+                    navigator.push(
+                        SharedScreen.VideoPlayer(
+                            aid = episode.aid.takeIf { it > 0 },
+                            bvid = episode.bvid.takeIf { it.isNotBlank() },
+                            cid = episode.cid.takeIf { it > 0 },
+                        )
+                    )
+                }
+            },
+        )
+    }
 }
 
 @Composable

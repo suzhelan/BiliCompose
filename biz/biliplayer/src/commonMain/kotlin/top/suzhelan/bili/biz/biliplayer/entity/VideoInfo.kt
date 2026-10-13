@@ -125,6 +125,10 @@ data class VideoInfo(
     @SerialName("pages")
     val pages: List<Page> = listOf(),
 
+    /** 所属合集；普通视频可能没有此字段 */
+    @SerialName("ugc_season")
+    val ugcSeason: VideoCollection? = null,
+
     /** 视频封面图片URL */
     @SerialName("pic")
     val pic: String = "",
@@ -187,7 +191,7 @@ data class VideoInfo(
 
     /** VT显示信息 */
     @SerialName("vt_display")
-    val vtDisplay: String = ""
+    val vtDisplay: String = "",
 ) {
     @Serializable
     data class ArgueInfo(

@@ -182,7 +182,15 @@ private fun LikeVideoItem(video: LikeVideo) {
                 )
                 //空隙填充
                 Spacer(modifier = Modifier.weight(1f))
-
+                //视频发布时间
+                Text(
+                    text = TimeUtils.formatTimeAgo(video.ctime.toLong()),
+                    color = TipColor,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     //水平对齐

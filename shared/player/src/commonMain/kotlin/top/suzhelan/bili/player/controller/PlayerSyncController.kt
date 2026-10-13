@@ -11,7 +11,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState
@@ -61,6 +64,10 @@ class PlayerSyncController(
     val playbackState: StateFlow<PlaybackState> get() = videoPlayer.playbackState
 
     val isPlaying: Boolean get() = videoPlayer.playbackState.value.isPlaying
+
+    val isPlayingState: StateFlow<Boolean> = videoPlayer.playbackState
+        .map { it.isPlaying }
+        .stateIn(playerStateScope, SharingStarted.Eagerly, false)
 
     //当前播放时长
     val currentPositionMillis: StateFlow<Long> get() = videoPlayer.currentPositionMillis

@@ -3,24 +3,41 @@ package top.suzhelan.bili.biz.biliplayer.api
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.http.HttpHeaders
 import io.ktor.http.parameters
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonPrimitive
 import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
+import top.suzhelan.bili.api.bodyBiliSuccess
 import top.suzhelan.bili.api.getKtorClient
 import top.suzhelan.bili.biz.biliplayer.entity.OnlineCount
 import top.suzhelan.bili.biz.biliplayer.entity.RecommendedVideoByVideo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoTag
+import top.suzhelan.bili.biz.biliplayer.entity.VideoWatchProgress
+import top.suzhelan.bili.shared.auth.config.LoginMapper
 
 class VideoInfoApi {
     private val apiClient = getKtorClient(AppConfig.API_BASE_URL)
     private val appClient = getKtorClient(AppConfig.APP_BASE_URL)
+    private val historyClient by lazy {
+        getKtorClient(AppConfig.API_BASE_URL)
+    }
+
+    suspend fun getWatchProgress(aid: Long, cid: Long): VideoWatchProgress {
+        return historyClient.get("/x/player/v2") {
+            // 每次请求读取当前账号，避免切换账号后复用旧 Cookie。
+            header(HttpHeaders.Cookie, LoginMapper.getCookie())
+            parameter("aid", aid)
+            parameter("cid", cid)
+        }.bodyBiliSuccess<VideoWatchProgress>().data
+    }
 
     /**
      * 获取视频详细信息
