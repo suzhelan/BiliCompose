@@ -16,12 +16,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FeaturedPlayList
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.MoreHoriz
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.SmartDisplay
+import androidx.compose.material.icons.outlined.ThumbUpOffAlt
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -33,11 +48,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.flow.collectLatest
 import top.suzhelan.bili.biz.user.entity.LikeVideo
 import top.suzhelan.bili.biz.user.viewmodel.MoreLikeViewModel
 import top.suzhelan.bili.shared.common.ui.AppScaffold
@@ -52,7 +69,7 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 @Composable
 fun MoreLikeVideoScreen(
-    mid: Long
+    mid: Long,
 ) {
     val navigator = LocalNavigation.currentOrThrow
     val viewModel = viewModel { MoreLikeViewModel() }
@@ -76,44 +93,75 @@ fun MoreLikeVideoContent(
     viewModel: MoreLikeViewModel,
 ) {
     val lazyPagingItems = viewModel.getMoreLikeVideoFlow(mid).collectAsLazyPagingItems()
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(
-            count = lazyPagingItems.itemCount,
-            key = lazyPagingItems.itemKey {
-                it.uri
-            }
-        ) { index ->
-            val likeVideo = lazyPagingItems[index] ?: return@items
-            LikeVideoItem(likeVideo)
+    val isActionBusy by viewModel.isActionBusy.collectAsStateWithLifecycle()
+    var selectedVideo by remember(mid) { mutableStateOf<LikeVideo?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(viewModel) {
+        viewModel.messages.collectLatest { message ->
+            selectedVideo = null
+            snackbarHostState.showSnackbar(message)
         }
-        when (lazyPagingItems.loadState.append) {
-            is LoadState.Loading -> {
-                item {
-                    LoadingIndicator()
+    }
+    selectedVideo?.let { video ->
+        LikeVideoBottomDialog(
+            video = video,
+            isActionBusy = isActionBusy,
+            onDismissRequest = { selectedVideo = null },
+            onCancelLike = {
+                viewModel.cancelLike(video) {
+                    selectedVideo = null
+                    lazyPagingItems.refresh()
+                }
+            },
+            onAddToWatchLater = {
+                viewModel.addToWatchLater(video) { selectedVideo = null }
+            },
+        )
+    }
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(
+                count = lazyPagingItems.itemCount,
+                key = lazyPagingItems.itemKey {
+                    it.param
+                }
+            ) { index ->
+                val likeVideo = lazyPagingItems[index] ?: return@items
+                LikeVideoItem(likeVideo, moreEnabled = !isActionBusy) { selectedVideo = likeVideo }
+            }
+            when (lazyPagingItems.loadState.append) {
+                is LoadState.Loading -> {
+                    item {
+                        LoadingIndicator()
+                    }
+                }
+
+                is LoadState.NotLoading -> {
+                    item {
+                        Text(
+                            text = "没有更多了",
+                            modifier = Modifier.fillMaxWidth().padding(10.dp),
+                            textAlign = TextAlign.Center,
+                            color = TipColor
+                        )
+                    }
+                }
+
+                else -> {
                 }
             }
-
-            is LoadState.NotLoading -> {
-                item {
-                    Text(
-                        text = "没有更多了",
-                        modifier = Modifier.fillMaxWidth().padding(10.dp),
-                        textAlign = TextAlign.Center,
-                        color = TipColor
-                    )
-                }
-            }
-
-            else -> {
-            }
         }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }
 
 @Composable
-private fun LikeVideoItem(video: LikeVideo) {
+private fun LikeVideoItem(video: LikeVideo, moreEnabled: Boolean, onMoreClick: () -> Unit) {
     val navigator = LocalNavigation.currentOrThrow
 
     // 首先就是一个圆角卡片背景
@@ -123,14 +171,14 @@ private fun LikeVideoItem(video: LikeVideo) {
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(110.dp)
             .padding(
                 horizontal = 10.dp,
                 vertical = 5.dp
             )
-            .clickable {
+            .clickable(enabled = video.state) {
                 // 跳转到视频播放页面
-                val aid = video.param.toLong()
+                val aid = video.param.toLongOrNull()?.takeIf { it > 0 } ?: return@clickable
                 navigator.push(SharedScreen.VideoPlayer(aid = aid))
             }
     ) {
@@ -162,7 +210,10 @@ private fun LikeVideoItem(video: LikeVideo) {
                     text = TimeUtils.formatSecondToTime(video.duration),
                     fontSize = 11.sp,
                     style = TextStyle(color = Color.White),
-                    modifier = Modifier.align(Alignment.BottomEnd)
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(
+                        end = 4.dp,
+                        bottom = 4.dp
+                    )
                 )
             }
             //右部分
@@ -198,7 +249,7 @@ private fun LikeVideoItem(video: LikeVideo) {
                 ) {
                     // 播放数
                     Icon(
-                        imageVector = Icons.Default.PlayArrow,
+                        imageVector = Icons.Outlined.SmartDisplay,
                         contentDescription = null,
                         modifier = Modifier.size(15.dp),
                         tint = TipColor
@@ -224,9 +275,65 @@ private fun LikeVideoItem(video: LikeVideo) {
                         fontSize = 11.sp,
                         color = TipColor
                     )
+                    Spacer(Modifier.weight(1f))
+                    Icon(
+                        imageVector = Icons.Outlined.MoreHoriz,
+                        contentDescription = "更多操作",
+                        modifier = Modifier
+                            .clickable(enabled = moreEnabled, onClick = onMoreClick)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .size(20.dp),
+                        tint = TipColor,
+                    )
                 }
             }
         }
 
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LikeVideoBottomDialog(
+    video: LikeVideo,
+    isActionBusy: Boolean,
+    onDismissRequest: () -> Unit,
+    onCancelLike: () -> Unit,
+    onAddToWatchLater: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
+        Text(
+            text = video.title,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+        ListItem(
+            headlineContent = { Text("取消点赞") },
+            leadingContent = { Icon(Icons.Outlined.ThumbUpOffAlt, contentDescription = null) },
+            modifier = Modifier.clickable(enabled = !isActionBusy, onClick = onCancelLike),
+        )
+        if (video.state) {
+            ListItem(
+                headlineContent = { Text("添加至稍后再看") },
+                leadingContent = { Icon(Icons.Outlined.Schedule, contentDescription = null) },
+                modifier = Modifier.clickable(enabled = !isActionBusy, onClick = onAddToWatchLater),
+            )
+        }
+        if (isActionBusy) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(12.dp))
+                Text("处理中", color = TipColor)
+            }
+        }
+        Spacer(Modifier.height(16.dp))
     }
 }

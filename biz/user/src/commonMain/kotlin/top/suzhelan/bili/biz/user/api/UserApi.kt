@@ -7,6 +7,7 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.parameters
+import kotlinx.serialization.json.JsonElement
 import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getKtorClient
@@ -18,6 +19,7 @@ import top.suzhelan.bili.biz.user.entity.WatchHistoryPage
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 
 class UserApi {
+    private val appClient by lazy { getKtorClient(AppConfig.APP_BASE_URL) }
     private val client = getKtorClient(
         baseUrl = AppConfig.API_BASE_URL,
         withCookie = true
@@ -69,6 +71,16 @@ class UserApi {
                 parameter("pn", page)
                 parameter("ps", pageSize)
             }
+        }.body()
+    }
+
+    /** 与播放页一致，App 点赞接口的 like=1 表示取消点赞。 */
+    suspend fun cancelLike(aid: Long): BiliResponse.SuccessOrNull<JsonElement> {
+        return appClient.post("/x/v2/view/like") {
+            setBody(FormDataContent(parameters {
+                append("aid", aid.toString())
+                append("like", "1")
+            }))
         }.body()
     }
 
