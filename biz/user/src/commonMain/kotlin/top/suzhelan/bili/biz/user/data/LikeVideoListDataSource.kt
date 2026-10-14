@@ -2,8 +2,10 @@ package top.suzhelan.bili.biz.user.data
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import top.suzhelan.bili.biz.user.api.UserApi
+import kotlinx.coroutines.CancellationException
+import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.biz.user.entity.LikeVideo
+import top.suzhelan.bili.biz.user.entity.LikeVideoList
 import top.suzhelan.bili.shared.common.logger.error
 
 
@@ -12,23 +14,22 @@ import top.suzhelan.bili.shared.common.logger.error
  */
 class LikeVideoListDataSource(
     private val mid: Long,
+    private val loadPage: suspend (Long, Int, Int) -> BiliResponse.Success<LikeVideoList>,
 ) : PagingSource<Int, LikeVideo>() {
 
     private val firstPageIndex = 1
 
-    private val api = UserApi()
-    override fun getRefreshKey(state: PagingState<Int, LikeVideo>): Int? {
-        return state.anchorPosition?.let { anchorPosition ->
-            val anchorPage = state.closestPageToPosition(anchorPosition)
-            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
-        }
-    }
+    var hasCompletedRefresh = false
+        private set
+
+    // 新点赞在第一页，返回页面、切换 Tab 和下拉刷新都从第一页重新读取。
+    override fun getRefreshKey(state: PagingState<Int, LikeVideo>): Int? = null
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, LikeVideo> {
         return try {
             val currentKey = params.key ?: firstPageIndex
-            //关注关注列表
-            val response = api.getUserLikeVideoList(mid, params.key ?: 1, 20)
+            val response = loadPage(mid, currentKey, PAGE_SIZE)
+            check(response.code == 0) { response.message }
             val items: List<LikeVideo> = response.data.item
             if (items.isEmpty()) {
                 return LoadResult.Page(
@@ -41,11 +42,19 @@ class LikeVideoListDataSource(
             LoadResult.Page(
                 data = items,
                 prevKey = if (currentKey > firstPageIndex) currentKey - 1 else null,
-                nextKey = if (items.isNotEmpty()) currentKey + 1 else null
+                nextKey = currentKey + 1
             )
+        } catch (exception: CancellationException) {
+            throw exception
         } catch (e: Exception) {
             e.error()
             LoadResult.Error(e)
+        } finally {
+            if (params is LoadParams.Refresh) hasCompletedRefresh = true
         }
+    }
+
+    companion object {
+        const val PAGE_SIZE = 20
     }
 }

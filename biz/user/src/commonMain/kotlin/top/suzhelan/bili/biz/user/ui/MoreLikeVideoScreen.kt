@@ -3,6 +3,7 @@ package top.suzhelan.bili.biz.user.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FeaturedPlayList
 import androidx.compose.material.icons.outlined.MoreHoriz
@@ -30,12 +33,17 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,13 +56,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import top.suzhelan.bili.biz.user.entity.LikeVideo
 import top.suzhelan.bili.biz.user.viewmodel.MoreLikeViewModel
 import top.suzhelan.bili.shared.common.ui.AppScaffold
@@ -72,15 +83,17 @@ fun MoreLikeVideoScreen(
     mid: Long,
 ) {
     val navigator = LocalNavigation.currentOrThrow
-    val viewModel = viewModel { MoreLikeViewModel() }
-    AppScaffold(
-        topBar = {
-            TitleUI("最近点赞") {
-                navigator.pop()
-            }
-        },
-    ) {
-        MoreLikeVideoContent(mid, viewModel)
+    key(mid) {
+        val viewModel = viewModel { MoreLikeViewModel() }
+        AppScaffold(
+            topBar = {
+                TitleUI("最近点赞") {
+                    navigator.pop()
+                }
+            },
+        ) {
+            MoreLikeVideoContent(mid, viewModel)
+        }
     }
 }
 
@@ -88,11 +101,46 @@ fun MoreLikeVideoScreen(
  * 更多点赞的视频
  */
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun MoreLikeVideoContent(
     mid: Long,
     viewModel: MoreLikeViewModel,
+    listState: LazyListState = rememberLazyListState(),
+    isActive: Boolean = true,
+    refreshOnResume: Boolean = true,
+    enablePullToRefresh: Boolean = true,
+    onRefreshingChanged: (Boolean) -> Unit = {},
 ) {
+    // 进入组合时记录缓存状态，首次加载完成后的重组不额外发起刷新。
+    val hadCachedData = remember(viewModel, mid) { viewModel.hasLoadedData(mid) }
+    var hasProcessedVisibility by remember(viewModel, mid) { mutableStateOf(false) }
+    var hasResumed by remember(viewModel, mid) { mutableStateOf(false) }
+    val currentlyActive by rememberUpdatedState(isActive)
     val lazyPagingItems = viewModel.getMoreLikeVideoFlow(mid).collectAsLazyPagingItems()
+    val isRefreshing = lazyPagingItems.loadState.refresh is LoadState.Loading
+    val reportRefreshing by rememberUpdatedState(onRefreshingChanged)
+    val scope = rememberCoroutineScope()
+    LifecycleResumeEffect(viewModel, mid, refreshOnResume) {
+        if (hasResumed && currentlyActive) {
+            scope.launch { listState.scrollToItem(0) }
+            if (refreshOnResume) viewModel.refresh(mid)
+        }
+        hasResumed = true
+        onPauseOrDispose { }
+    }
+    LaunchedEffect(viewModel, mid, isActive) {
+        if (isActive) {
+            listState.scrollToItem(0)
+            if (hasProcessedVisibility || hadCachedData) viewModel.refresh(mid)
+        }
+        hasProcessedVisibility = true
+    }
+    LaunchedEffect(isActive, isRefreshing) {
+        reportRefreshing(isActive && isRefreshing)
+    }
+    DisposableEffect(viewModel) {
+        onDispose { reportRefreshing(false) }
+    }
     val isActionBusy by viewModel.isActionBusy.collectAsStateWithLifecycle()
     var selectedVideo by remember(mid) { mutableStateOf<LikeVideo?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -108,37 +156,78 @@ fun MoreLikeVideoContent(
             isActionBusy = isActionBusy,
             onDismissRequest = { selectedVideo = null },
             onCancelLike = {
-                viewModel.cancelLike(video) {
-                    selectedVideo = null
-                    lazyPagingItems.refresh()
-                }
+                viewModel.cancelLike(mid, video)
             },
             onAddToWatchLater = {
-                viewModel.addToWatchLater(video) { selectedVideo = null }
+                viewModel.addToWatchLater(video)
             },
         )
     }
-    Box(Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(
-                count = lazyPagingItems.itemCount,
-                key = lazyPagingItems.itemKey {
-                    it.param
-                }
-            ) { index ->
-                val likeVideo = lazyPagingItems[index] ?: return@items
-                LikeVideoItem(likeVideo, moreEnabled = !isActionBusy) { selectedVideo = likeVideo }
-            }
-            when (lazyPagingItems.loadState.append) {
-                is LoadState.Loading -> {
-                    item {
-                        LoadingIndicator()
-                    }
-                }
+    val content: @Composable BoxScope.() -> Unit = {
+        LikeVideoList(lazyPagingItems, listState, isActionBusy) { selectedVideo = it }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+    if (enablePullToRefresh) {
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { viewModel.refresh(mid) },
+            modifier = Modifier.fillMaxSize(),
+            content = content,
+        )
+    } else {
+        // 资料页由整页的 PullToRefreshBox 处理，避免两个刷新容器抢同一手势。
+        Box(Modifier.fillMaxSize(), content = content)
+    }
+}
 
-                is LoadState.NotLoading -> {
+@Composable
+private fun LikeVideoList(
+    lazyPagingItems: LazyPagingItems<LikeVideo>,
+    listState: LazyListState,
+    isActionBusy: Boolean,
+    onMoreClick: (LikeVideo) -> Unit,
+) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        when (val refresh = lazyPagingItems.loadState.refresh) {
+            is LoadState.Loading -> if (lazyPagingItems.itemCount == 0) {
+                item { LoadingIndicator() }
+            }
+
+            is LoadState.Error -> item {
+                Text(
+                    text = "刷新失败：${refresh.error.message}，点击重试",
+                    color = TipColor,
+                    modifier = Modifier.fillMaxWidth().clickable { lazyPagingItems.retry() }
+                        .padding(16.dp),
+                )
+            }
+
+            else -> Unit
+        }
+        items(
+            count = lazyPagingItems.itemCount,
+            key = lazyPagingItems.itemKey {
+                it.param
+            }
+        ) { index ->
+            val likeVideo = lazyPagingItems[index] ?: return@items
+            LikeVideoItem(likeVideo, moreEnabled = !isActionBusy) { onMoreClick(likeVideo) }
+        }
+        when (val append = lazyPagingItems.loadState.append) {
+            is LoadState.Loading -> {
+                item {
+                    LoadingIndicator()
+                }
+            }
+
+            is LoadState.NotLoading -> {
+                if (append.endOfPaginationReached) {
                     item {
                         Text(
                             text = "没有更多了",
@@ -148,15 +237,19 @@ fun MoreLikeVideoContent(
                         )
                     }
                 }
+            }
 
-                else -> {
+            is LoadState.Error -> {
+                item {
+                    Text(
+                        text = "加载更多失败，点击重试",
+                        color = TipColor,
+                        modifier = Modifier.fillMaxWidth().clickable { lazyPagingItems.retry() }
+                            .padding(16.dp),
+                    )
                 }
             }
         }
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
     }
 }
 

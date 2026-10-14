@@ -1,5 +1,7 @@
 package top.suzhelan.bili.route
 
+import androidx.compose.runtime.remember
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -14,10 +16,12 @@ import top.suzhelan.bili.biz.user.ui.FavoriteDetailScreen
 import top.suzhelan.bili.biz.user.ui.FavoriteFoldersScreen
 import top.suzhelan.bili.biz.user.ui.FollowListScreen
 import top.suzhelan.bili.biz.user.ui.MoreLikeVideoScreen
-import top.suzhelan.bili.biz.user.ui.UserProfileScreen
+import top.suzhelan.bili.biz.user.ui.NewUserProfileScreen
 import top.suzhelan.bili.biz.user.ui.WatchHistoryScreen
 import top.suzhelan.bili.biz.user.ui.WatchLaterScreen
+import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
+import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
 //路由表收拢所有路由,这样不会显得太臃肿
@@ -64,7 +68,13 @@ fun NavGraphBuilder.routingScreenRegistration() {
     }
     composable<SharedScreen.UserProfile> { backStackEntry ->
         val param = backStackEntry.toRoute<SharedScreen.UserProfile>()
-        UserProfileScreen(param.mid)
+        val navController = LocalNavigation.currentOrThrow.navigator
+        // 在进入时记录来源，避免后续跳转使当前页的返回图标发生变化。
+        val showBackButton = remember(backStackEntry) {
+            val previousDestination = navController.previousBackStackEntry?.destination
+            previousDestination != null && !previousDestination.hasRoute<SharedScreen.Home>()
+        }
+        NewUserProfileScreen(mid = param.mid, showBackButton = showBackButton)
     }
     composable<SharedScreen.MoreLikeVideos> {  backStackEntry ->
         val param = backStackEntry.toRoute<SharedScreen.MoreLikeVideos>()

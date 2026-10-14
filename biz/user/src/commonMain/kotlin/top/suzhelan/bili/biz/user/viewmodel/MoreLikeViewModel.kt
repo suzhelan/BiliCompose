@@ -11,14 +11,18 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.biz.user.api.UserApi
 import top.suzhelan.bili.biz.user.api.WatchLaterApi
 import top.suzhelan.bili.biz.user.data.LikeVideoListDataSource
 import top.suzhelan.bili.biz.user.entity.LikeVideo
+import top.suzhelan.bili.biz.user.entity.LikeVideoList
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 
-class MoreLikeViewModel : BaseViewModel() {
+class MoreLikeViewModel(
+    private val loadPage: (suspend (Long, Int, Int) -> BiliResponse.Success<LikeVideoList>)? = null,
+) : BaseViewModel() {
     private val userApi = UserApi()
     private val watchLaterApi = WatchLaterApi()
     private val _isActionBusy = MutableStateFlow(false)
@@ -26,15 +30,40 @@ class MoreLikeViewModel : BaseViewModel() {
     private val _messages = Channel<String>(Channel.BUFFERED)
     val messages = _messages.receiveAsFlow()
     private val moreLikeVideoFlows = mutableMapOf<Long, Flow<PagingData<LikeVideo>>>()
+    private val pagingSources = mutableMapOf<Long, LikeVideoListDataSource>()
 
-    fun cancelLike(video: LikeVideo, onSuccess: () -> Unit) = performAction(video) { aid ->
+    fun hasLoadedData(mid: Long): Boolean = pagingSources[mid]?.hasCompletedRefresh == true
+
+    fun getMoreLikeVideoFlow(mid: Long): Flow<PagingData<LikeVideo>> =
+        moreLikeVideoFlows.getOrPut(mid) {
+            Pager(
+                config = PagingConfig(
+                    pageSize = LikeVideoListDataSource.PAGE_SIZE,
+                    initialLoadSize = LikeVideoListDataSource.PAGE_SIZE,
+                    prefetchDistance = 5,
+                    enablePlaceholders = true,
+                ),
+                pagingSourceFactory = {
+                    LikeVideoListDataSource(mid, loadPage ?: userApi::getUserLikeVideoList)
+                        .also { pagingSources[mid] = it }
+                },
+            ).flow.cachedIn(viewModelScope)
+        }
+
+    fun refresh(mid: Long, force: Boolean = false) {
+        // 首次读取已经是最新数据；合并恢复显示和 Tab 激活产生的重复刷新。
+        pagingSources[mid]?.takeIf { force || it.hasCompletedRefresh }?.invalidate()
+    }
+
+    fun cancelLike(mid: Long, video: LikeVideo) = performAction(video) { aid ->
         val response = userApi.cancelLike(aid)
         if (response.code != 0) error(response.message)
-        onSuccess()
+        // 操作成功后连正在读取的旧快照也要失效，不能被自动刷新的去重挡住。
+        refresh(mid, force = true)
         _messages.send("已取消点赞")
     }
 
-    fun addToWatchLater(video: LikeVideo, onSuccess: () -> Unit) = performAction(video) { aid ->
+    fun addToWatchLater(video: LikeVideo) = performAction(video) { aid ->
         check(video.state) { "视频已失效，无法添加至稍后再看" }
         val response = watchLaterApi.add(aid)
         if (response.code != 0) {
@@ -46,7 +75,6 @@ class MoreLikeViewModel : BaseViewModel() {
                 }
             )
         }
-        onSuccess()
         _messages.send("已添加至稍后再看")
     }
 
@@ -66,17 +94,4 @@ class MoreLikeViewModel : BaseViewModel() {
         }
     }
 
-    fun getMoreLikeVideoFlow(mid: Long): Flow<PagingData<LikeVideo>> =
-        moreLikeVideoFlows.getOrPut(mid) {
-            Pager(
-                config = PagingConfig(
-                    pageSize = 10,
-                    prefetchDistance = 5,//提前多少页开始预加载
-                    enablePlaceholders = true
-                ),
-                pagingSourceFactory = {
-                    LikeVideoListDataSource(mid)
-                }
-            ).flow.cachedIn(viewModelScope)
-        }
 }

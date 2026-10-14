@@ -4,16 +4,21 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -21,25 +26,40 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
@@ -67,48 +87,213 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
  * 用户详情页
  */
 @Composable
-fun NewUserProfileScreen(mid: Long) {
-    val vm: UserProfileViewModel = viewModel {
-        UserProfileViewModel()
+fun NewUserProfileScreen(mid: Long, showBackButton: Boolean = true) {
+    key(mid) {
+        UserProfilePage(mid, showBackButton)
     }
-    val userSpaceRes by vm.userSpace.collectAsStateWithLifecycle(initialValue = BiliResponse.Loading)
-    LaunchedEffect(mid) {
-        vm.getUserSpace(mid)
-    }
-    when (userSpaceRes) {
-        is BiliResponse.Error -> {
-            //错误处理
-            Text(
-                text = "加载失败:\n\n" + (userSpaceRes as BiliResponse.Error).cause,
-                color = ErrorColor.error,
-                modifier = Modifier.fillMaxSize(),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-        }
-
-        is BiliResponse.Loading -> {
-            //加载中
-            LoadingIndicator()
-        }
-
-        is BiliResponse.Success -> {
-            val userSpace = userSpaceRes.getOrThrow()
-            UserProfile(userSpace)
-        }
-
-        else -> {
-            //其他情况
-        }
-    }
-
 }
 
 @Composable
-private fun UserProfile(userSpace: UserSpace) {
+private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
+    val vm = viewModel { UserProfileViewModel() }
+    val moreLikeViewModel = viewModel { MoreLikeViewModel() }
+    val userSpaceRes by vm.userSpace.collectAsStateWithLifecycle()
+    val profileRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
+    val refreshError by vm.refreshError.collectAsStateWithLifecycle()
+    var likesRefreshing by remember { mutableStateOf(false) }
+    val isRefreshing = profileRefreshing || likesRefreshing
+    val pullState = rememberPullToRefreshState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    LifecycleResumeEffect(mid, vm, moreLikeViewModel) {
+        vm.getUserSpace(mid)
+        // 即使恢复时停留在“主页”Tab，先让已经读取过的点赞缓存失效。
+        moreLikeViewModel.refresh(mid)
+        onPauseOrDispose { }
+    }
+    LaunchedEffect(refreshError) {
+        refreshError?.let { snackbarHostState.showSnackbar(it) }
+    }
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            vm.getUserSpace(mid)
+            moreLikeViewModel.refresh(mid)
+        },
+        state = pullState,
+        modifier = Modifier.fillMaxSize(),
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding(),
+            )
+        },
+    ) {
+        when (userSpaceRes) {
+            is BiliResponse.Error -> {
+                //错误处理
+                Text(
+                    text = "加载失败:\n\n" + (userSpaceRes as BiliResponse.Error).cause,
+                    color = ErrorColor.error,
+                    modifier = Modifier.fillMaxSize().clickable { vm.getUserSpace(mid) },
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            is BiliResponse.Loading -> {
+                //加载中
+                LoadingIndicator()
+            }
+
+            is BiliResponse.Success -> {
+                val userSpace = userSpaceRes.getOrThrow()
+                key(userSpace.card.mid) {
+                    UserProfile(userSpace, showBackButton, moreLikeViewModel) {
+                        likesRefreshing = it
+                    }
+                }
+            }
+
+            else -> {
+                //其他情况
+            }
+        }
+        SnackbarHost(snackbarHostState, Modifier.align(Alignment.BottomCenter))
+    }
+}
+
+@Composable
+private fun UserProfile(
+    userSpace: UserSpace,
+    showBackButton: Boolean,
+    moreLikeViewModel: MoreLikeViewModel,
+    onLikesRefreshingChanged: (Boolean) -> Unit,
+) {
+    val navigation = LocalNavigation.currentOrThrow
+    val scope = rememberCoroutineScope()
+    val tabItems = remember { listOf("主页", "动态", "收藏", "点赞") }
+    val pagerState = rememberPagerState(pageCount = { tabItems.size })
+    val listStates = tabItems.map { rememberLazyListState() }
+    val scrollState = rememberSaveable(saver = ProfileScrollState.Saver) {
+        ProfileScrollState()
+    }
+    val fadeStart = with(LocalDensity.current) { 100.dp.toPx() }
+    val fadeEnd = with(LocalDensity.current) { 180.dp.toPx() }
+    val topBarAlpha = remember(scrollState, fadeStart, fadeEnd) {
+        derivedStateOf {
+            ((scrollState.offset - fadeStart) / (fadeEnd - fadeStart)).coerceIn(0f, 1f)
+        }
+    }
+    val showTopBar by remember(topBarAlpha) { derivedStateOf { topBarAlpha.value > 0f } }
+
+    ProfileScrollLayout(
+        state = scrollState,
+        listState = listStates[pagerState.currentPage],
+        modifier = Modifier.fillMaxSize().background(ColorSurface),
+        header = { ProfileHeader(userSpace, showBackButton) },
+        tabs = {
+            ContentTab(tabItems, pagerState.currentPage) { index ->
+                scope.launch { pagerState.animateScrollToPage(index) }
+            }
+        },
+        topBar = {
+            // 背景先覆盖状态栏区域，再为内容留出安全距离；整块顶部栏一起渐显。
+            Box(
+                Modifier.fillMaxWidth()
+                    .graphicsLayer { alpha = topBarAlpha.value }
+                    .background(ColorSurface)
+                    .statusBarsPadding()
+            ) {
+                Box(Modifier.fillMaxWidth().height(64.dp)) {
+                    if (showTopBar) {
+                        SimpleTopBar(
+                            userSpace = userSpace,
+                            showBackButton = showBackButton,
+                            onBack = { navigation.pop() },
+                        )
+                    }
+                }
+            }
+        },
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+        ) { page ->
+            if (page == 3) {
+                MoreLikeVideoContent(
+                    mid = userSpace.card.mid.toLong(),
+                    viewModel = moreLikeViewModel,
+                    listState = listStates[page],
+                    isActive = pagerState.settledPage == page,
+                    refreshOnResume = false,
+                    enablePullToRefresh = false,
+                    onRefreshingChanged = onLikesRefreshingChanged,
+                )
+            } else {
+                LazyColumn(
+                    state = listStates[page],
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    item {
+                        Spacer(Modifier.fillParentMaxHeight())
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SimpleTopBar(
+    userSpace: UserSpace,
+    showBackButton: Boolean,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .background(ColorSurface)
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (showBackButton) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Rounded.ArrowBackIosNew,
+                    contentDescription = "返回",
+                    tint = TextColor,
+                )
+            }
+        }
+        AsyncImage(
+            model = userSpace.card.face,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(32.dp).clip(CircleShape),
+        )
+        Text(
+            text = userSpace.card.name,
+            color = TextColor,
+            fontSize = 18.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f).padding(start = 10.dp),
+        )
+    }
+}
+
+@Composable
+private fun ProfileHeader(
+    userSpace: UserSpace,
+    showBackButton: Boolean,
+) {
     ConstraintLayout(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
     ) {
         val navigation = LocalNavigation.currentOrThrow
         val (cover, avatar, nickname, header1, back) = createRefs()
@@ -124,24 +309,26 @@ private fun UserProfile(userSpace: UserSpace) {
                     centerHorizontallyTo(parent)
                 }
         )
-        //返回图标 原型黑色半透明背景
-        Icon(
-            imageVector = Icons.Rounded.ArrowBackIosNew,
-            contentDescription = "Back",
-            tint = Color.White,
-            modifier = Modifier
-                .size(45.dp)
-                .padding(5.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.5f))
-                .padding(5.dp)
-                .constrainAs(back) {
-                    top.linkTo(parent.top, 50.dp)
-                    start.linkTo(parent.start, 20.dp)
-                }.clickable {
-                    navigation.pop()
-                }
-        )
+        // 返回图标与顶部栏使用同一个入口开关。
+        if (showBackButton) {
+            Icon(
+                imageVector = Icons.Rounded.ArrowBackIosNew,
+                contentDescription = "返回",
+                tint = Color.White,
+                modifier = Modifier
+                    .size(45.dp)
+                    .padding(5.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .padding(5.dp)
+                    .constrainAs(back) {
+                        top.linkTo(parent.top, 50.dp)
+                        start.linkTo(parent.start, 20.dp)
+                    }.clickable {
+                        navigation.pop()
+                    }
+            )
+        }
         //头像位于封面左下角
         AsyncImage(
             model = userSpace.card.face,
@@ -184,15 +371,10 @@ private fun UserProfile(userSpace: UserSpace) {
                 .padding(start = 10.dp, top = 20.dp, end = 10.dp)
                 .constrainAs(header1) {
                     top.linkTo(cover.bottom, (-10).dp)
-                    // 使用上层导航布局分配的高度，避免列表延伸到底栏下方。
-                    bottom.linkTo(parent.bottom)
-                    height = Dimension.fillToConstraints
                 }
         ) {
             //简介
             CardHeader(userSpace)
-            //RowTab
-            ContentTab(userSpace)
         }
 
     }
@@ -363,60 +545,24 @@ private fun LevelProgressIndicator(
 }
 
 @Composable
-private fun ColumnScope.ContentTab(userSpace: UserSpace) {
-    val moreLikeViewModel = viewModel { MoreLikeViewModel() }
-    val scope = rememberCoroutineScope()
-    val tabItems = listOf(
-        "主页",
-        "动态",
-        "收藏",
-        "点赞"
-    )
-    val pageState = rememberPagerState(
-        initialPage = 0,
-        pageCount = {
-            tabItems.size
-        }
-    )
+private fun ContentTab(
+    tabItems: List<String>,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit,
+) {
     //横向Tab
     PrimaryTabRow(
-        selectedTabIndex = pageState.currentPage,
+        selectedTabIndex = selectedTabIndex,
         modifier = Modifier.fillMaxWidth()
     ) {
         tabItems.forEachIndexed { index, item ->
             Tab(
-                selected = pageState.currentPage == index,
-                onClick = {
-                    scope.launch {
-                        pageState.animateScrollToPage(index)
-                    }
-                },
+                selected = selectedTabIndex == index,
+                onClick = { onTabSelected(index) },
                 text = {
                     Text(text = item)
                 }
             )
-        }
-    }
-    HorizontalPager(
-        state = pageState,
-        modifier = Modifier.fillMaxWidth().weight(1f)
-    ) {
-        when (it) {
-            0 -> {
-                //主页
-            }
-
-            1 -> {
-                //动态
-            }
-
-            2 -> {
-                //收藏
-            }
-
-            3 -> {
-                MoreLikeVideoContent(userSpace.card.mid.toLong(), moreLikeViewModel)
-            }
         }
     }
 }
