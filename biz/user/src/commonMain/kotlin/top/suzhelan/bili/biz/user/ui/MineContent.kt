@@ -27,7 +27,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -78,14 +77,12 @@ import kotlin.math.abs
  */
 @Composable
 fun MineContent() {
-    Scaffold { paddingValues ->
-        //判断是否登录 如果没有登录 显示登录按钮
-        val isLogin by remember { LoginMapper.isLoginState }
-        if (isLogin) {
-            UserProfile(modifier = Modifier.padding(paddingValues))
-        } else {
-            NotLoggedInContent()
-        }
+    //判断是否登录 如果没有登录 显示登录按钮
+    val isLogin by remember { LoginMapper.isLoginState }
+    if (isLogin) {
+        UserProfile()
+    } else {
+        NotLoggedInContent()
     }
 }
 
@@ -94,7 +91,6 @@ fun MineContent() {
  */
 @Composable
 private fun UserProfile(
-    modifier: Modifier = Modifier,
     mineViewModel: MineViewModel = viewModel { MineViewModel() },
 ) {
     LaunchedEffect(Unit) {
@@ -105,14 +101,7 @@ private fun UserProfile(
         return
     }
     val mine = mineResponse.getOrThrow()
-    Column(modifier = modifier.fillMaxWidth()) {
-        ToolBar()
-        HeaderUserCard(mine)
-        Spacer(modifier = Modifier.height(20.dp))
-        UserAmount(mine)
-        Spacer(modifier = Modifier.height(24.dp))
-        UserFeatureEntries()
-    }
+    NewUserProfileScreen(mine.mid)
 }
 
 @Composable
