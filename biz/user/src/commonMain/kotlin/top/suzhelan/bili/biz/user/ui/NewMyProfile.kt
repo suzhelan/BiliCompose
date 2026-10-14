@@ -88,9 +88,7 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
  */
 @Composable
 fun NewUserProfileScreen(mid: Long, showBackButton: Boolean = true) {
-    key(mid) {
-        UserProfilePage(mid, showBackButton)
-    }
+    UserProfilePage(mid, showBackButton)
 }
 
 @Composable
@@ -101,7 +99,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
     val profileRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
     val refreshError by vm.refreshError.collectAsStateWithLifecycle()
     var likesRefreshing by remember { mutableStateOf(false) }
-    val isRefreshing = profileRefreshing || likesRefreshing
+    var isPullRefreshing by remember { mutableStateOf(false) }
     val pullState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
     LifecycleResumeEffect(mid, vm, moreLikeViewModel) {
@@ -113,9 +111,14 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
     LaunchedEffect(refreshError) {
         refreshError?.let { snackbarHostState.showSnackbar(it) }
     }
+    LaunchedEffect(isPullRefreshing, profileRefreshing, likesRefreshing) {
+        // 直接读取请求状态，避免手动刷新刚开始、Flow 尚未收集时提前结束指示器。
+        if (!vm.isRefreshing.value && !likesRefreshing) isPullRefreshing = false
+    }
     PullToRefreshBox(
-        isRefreshing = isRefreshing,
+        isRefreshing = isPullRefreshing,
         onRefresh = {
+            isPullRefreshing = true
             vm.getUserSpace(mid)
             moreLikeViewModel.refresh(mid)
         },
@@ -124,7 +127,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
         indicator = {
             PullToRefreshDefaults.Indicator(
                 state = pullState,
-                isRefreshing = isRefreshing,
+                isRefreshing = isPullRefreshing,
                 modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding(),
             )
         },
@@ -150,7 +153,12 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
             is BiliResponse.Success -> {
                 val userSpace = userSpaceRes.getOrThrow()
                 key(userSpace.card.mid) {
-                    UserProfile(userSpace, showBackButton, moreLikeViewModel) {
+                    UserProfile(
+                        userSpace,
+                        showBackButton,
+                        moreLikeViewModel,
+                        showLikesRefreshIndicator = !isPullRefreshing,
+                    ) {
                         likesRefreshing = it
                     }
                 }
@@ -169,6 +177,7 @@ private fun UserProfile(
     userSpace: UserSpace,
     showBackButton: Boolean,
     moreLikeViewModel: MoreLikeViewModel,
+    showLikesRefreshIndicator: Boolean,
     onLikesRefreshingChanged: (Boolean) -> Unit,
 ) {
     val navigation = LocalNavigation.currentOrThrow
@@ -230,6 +239,7 @@ private fun UserProfile(
                     isActive = pagerState.settledPage == page,
                     refreshOnResume = false,
                     enablePullToRefresh = false,
+                    showRefreshIndicator = showLikesRefreshIndicator,
                     onRefreshingChanged = onLikesRefreshingChanged,
                 )
             } else {
@@ -511,6 +521,8 @@ private fun ColumnScope.CardHeader(userSpace: UserSpace) {
             )
         }
     }
+    //操作栏部分 可以在这里放一些操作按钮
+
 }
 
 /**

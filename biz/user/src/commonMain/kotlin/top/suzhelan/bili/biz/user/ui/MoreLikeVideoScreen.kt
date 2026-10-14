@@ -28,6 +28,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
@@ -109,6 +110,7 @@ fun MoreLikeVideoContent(
     isActive: Boolean = true,
     refreshOnResume: Boolean = true,
     enablePullToRefresh: Boolean = true,
+    showRefreshIndicator: Boolean = !enablePullToRefresh,
     onRefreshingChanged: (Boolean) -> Unit = {},
 ) {
     // 进入组合时记录缓存状态，首次加载完成后的重组不额外发起刷新。
@@ -164,7 +166,9 @@ fun MoreLikeVideoContent(
         )
     }
     val content: @Composable BoxScope.() -> Unit = {
-        LikeVideoList(lazyPagingItems, listState, isActionBusy) { selectedVideo = it }
+        LikeVideoList(lazyPagingItems, listState, isActionBusy, showRefreshIndicator) {
+            selectedVideo = it
+        }
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -188,6 +192,7 @@ private fun LikeVideoList(
     lazyPagingItems: LazyPagingItems<LikeVideo>,
     listState: LazyListState,
     isActionBusy: Boolean,
+    showRefreshIndicator: Boolean,
     onMoreClick: (LikeVideo) -> Unit,
 ) {
     LazyColumn(
@@ -195,8 +200,14 @@ private fun LikeVideoList(
         modifier = Modifier.fillMaxSize(),
     ) {
         when (val refresh = lazyPagingItems.loadState.refresh) {
-            is LoadState.Loading -> if (lazyPagingItems.itemCount == 0) {
-                item { LoadingIndicator() }
+            is LoadState.Loading -> if (showRefreshIndicator || lazyPagingItems.itemCount == 0) {
+                item {
+                    if (lazyPagingItems.itemCount == 0) {
+                        LoadingIndicator()
+                    } else {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
+                }
             }
 
             is LoadState.Error -> item {

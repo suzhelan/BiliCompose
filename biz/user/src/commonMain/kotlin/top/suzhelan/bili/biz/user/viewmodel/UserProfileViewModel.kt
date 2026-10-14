@@ -35,7 +35,9 @@ class UserProfileViewModel : BaseViewModel() {
     fun getUserSpace(mid: Long) {
         if (spaceMid == mid && spaceJob?.isActive == true) return
         spaceJob?.cancel()
-        if (spaceMid != mid) _userSpace.value = BiliResponse.Loading
+        if (spaceMid != mid || _userSpace.value !is BiliResponse.Success) {
+            _userSpace.value = BiliResponse.Loading
+        }
         spaceMid = mid
         val version = ++requestVersion
         _isRefreshing.value = true
