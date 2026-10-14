@@ -16,13 +16,13 @@ jobs:
       - uses: actions/checkout@v5
       #配置jdk
       - name: Setup Java JDK
-        uses: actions/setup-java@v5.0.0
+        uses: actions/setup-java@v6
         with:
           java-version: 17
           distribution: temurin
       #配置gradle
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       #授权
       - name: Grant execute permission to gradlew
@@ -42,8 +42,9 @@ jobs:
 
       #上传apk到action
       - name: Upload APK
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.fileName }}
           path: ./app/android/build/outputs/apk/release/*.apk
-          retention-days: 30
+          retention-days: 1
+          archive: false
