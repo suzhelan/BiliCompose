@@ -28,7 +28,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
@@ -37,7 +36,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -110,8 +108,7 @@ fun MoreLikeVideoContent(
     isActive: Boolean = true,
     refreshOnResume: Boolean = true,
     enablePullToRefresh: Boolean = true,
-    showRefreshIndicator: Boolean = !enablePullToRefresh,
-    onRefreshingChanged: (Boolean) -> Unit = {},
+    showRefreshIndicator: Boolean = true,
 ) {
     // 进入组合时记录缓存状态，首次加载完成后的重组不额外发起刷新。
     val hadCachedData = remember(viewModel, mid) { viewModel.hasLoadedData(mid) }
@@ -120,7 +117,11 @@ fun MoreLikeVideoContent(
     val currentlyActive by rememberUpdatedState(isActive)
     val lazyPagingItems = viewModel.getMoreLikeVideoFlow(mid).collectAsLazyPagingItems()
     val isRefreshing = lazyPagingItems.loadState.refresh is LoadState.Loading
-    val reportRefreshing by rememberUpdatedState(onRefreshingChanged)
+    val requestRefreshing by viewModel.isRefreshing(mid).collectAsStateWithLifecycle()
+    var isPullRefreshing by remember(viewModel, mid) { mutableStateOf(false) }
+    LaunchedEffect(isPullRefreshing, requestRefreshing, isRefreshing) {
+        if (!viewModel.isRefreshing(mid).value && !isRefreshing) isPullRefreshing = false
+    }
     val scope = rememberCoroutineScope()
     LifecycleResumeEffect(viewModel, mid, refreshOnResume) {
         if (hasResumed && currentlyActive) {
@@ -136,12 +137,6 @@ fun MoreLikeVideoContent(
             if (hasProcessedVisibility || hadCachedData) viewModel.refresh(mid)
         }
         hasProcessedVisibility = true
-    }
-    LaunchedEffect(isActive, isRefreshing) {
-        reportRefreshing(isActive && isRefreshing)
-    }
-    DisposableEffect(viewModel) {
-        onDispose { reportRefreshing(false) }
     }
     val isActionBusy by viewModel.isActionBusy.collectAsStateWithLifecycle()
     var selectedVideo by remember(mid) { mutableStateOf<LikeVideo?>(null) }
@@ -166,7 +161,12 @@ fun MoreLikeVideoContent(
         )
     }
     val content: @Composable BoxScope.() -> Unit = {
-        LikeVideoList(lazyPagingItems, listState, isActionBusy, showRefreshIndicator) {
+        LikeVideoList(
+            lazyPagingItems,
+            listState,
+            isActionBusy,
+            showRefreshIndicator && !isPullRefreshing
+        ) {
             selectedVideo = it
         }
         SnackbarHost(
@@ -176,8 +176,11 @@ fun MoreLikeVideoContent(
     }
     if (enablePullToRefresh) {
         PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = { viewModel.refresh(mid) },
+            isRefreshing = isPullRefreshing,
+            onRefresh = {
+                isPullRefreshing = true
+                viewModel.refresh(mid)
+            },
             modifier = Modifier.fillMaxSize(),
             content = content,
         )
@@ -200,13 +203,9 @@ private fun LikeVideoList(
         modifier = Modifier.fillMaxSize(),
     ) {
         when (val refresh = lazyPagingItems.loadState.refresh) {
-            is LoadState.Loading -> if (showRefreshIndicator || lazyPagingItems.itemCount == 0) {
+            is LoadState.Loading -> if (showRefreshIndicator && lazyPagingItems.itemCount == 0) {
                 item {
-                    if (lazyPagingItems.itemCount == 0) {
-                        LoadingIndicator()
-                    } else {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    }
+                    LoadingIndicator()
                 }
             }
 

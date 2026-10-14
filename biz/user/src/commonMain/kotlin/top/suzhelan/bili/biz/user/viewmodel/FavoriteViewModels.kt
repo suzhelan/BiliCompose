@@ -1,5 +1,7 @@
 package top.suzhelan.bili.biz.user.viewmodel
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +19,7 @@ data class FavoriteFoldersUiState(
     val isLoadingMore: Boolean = false,
     val isMutating: Boolean = false,
     val error: String? = null,
+    val hasLoaded: Boolean = false,
 )
 
 class FavoriteFoldersViewModel : BaseViewModel() {
@@ -24,45 +27,74 @@ class FavoriteFoldersViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(FavoriteFoldersUiState())
     val state = _state.asStateFlow()
     private var mid: Long = 0
+    private var loadJob: Job? = null
+    private var loadMoreJob: Job? = null
+    private var requestVersion = 0
 
-    fun load(mid: Long, force: Boolean = false) = launchTask {
-        if (!force && this@FavoriteFoldersViewModel.mid == mid && _state.value.created.isNotEmpty()) return@launchTask
-        this@FavoriteFoldersViewModel.mid = mid
-        _state.value = FavoriteFoldersUiState(isLoading = true)
-        try {
-            val created = api.getCreatedFolders(mid)
-            val collected = api.getCollectedFolders(mid)
-            if (created.code != 0) error(created.message)
-            if (collected.code != 0) error(collected.message)
-            _state.value = FavoriteFoldersUiState(
-                created = created.data?.list.orEmpty(),
-                collected = collected.data?.list.orEmpty(),
-                collectedCount = collected.data?.count ?: 0,
-            )
-        } catch (exception: Exception) {
-            _state.value = FavoriteFoldersUiState(error = exception.message ?: "收藏夹加载失败")
+    fun load(mid: Long, force: Boolean = false) {
+        if (this.mid == mid && (loadJob?.isActive == true || (!force && _state.value.hasLoaded))) return
+        loadJob?.cancel()
+        loadMoreJob?.cancel()
+        if (this.mid != mid) {
+            _state.value = FavoriteFoldersUiState()
+        }
+        this.mid = mid
+        val version = ++requestVersion
+        val current = _state.value
+        _state.value = current.copy(isLoading = true, isLoadingMore = false, error = null)
+        loadJob = launchTask {
+            try {
+                val created = api.getCreatedFolders(mid)
+                val collected = api.getCollectedFolders(mid)
+                if (created.code != 0) error(created.message)
+                if (collected.code != 0) error(collected.message)
+                if (version != requestVersion) return@launchTask
+                _state.value = FavoriteFoldersUiState(
+                    created = created.data?.list.orEmpty(),
+                    collected = collected.data?.list.orEmpty(),
+                    collectedCount = collected.data?.count ?: 0,
+                    hasLoaded = true,
+                )
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                if (version == requestVersion) {
+                    _state.value = current.copy(error = exception.message ?: "收藏夹加载失败")
+                }
+            } finally {
+                if (version == requestVersion) {
+                    _state.value = _state.value.copy(isLoading = false, isLoadingMore = false)
+                }
+            }
         }
     }
 
-    fun loadMoreCollected() = launchTask {
+    fun loadMoreCollected() {
         val current = _state.value
-        if (mid == 0L || current.isLoadingMore || current.collected.size >= current.collectedCount) return@launchTask
-        _state.value = current.copy(isLoadingMore = true)
-        try {
-            val nextPage = current.collectedPage + 1
-            val response = api.getCollectedFolders(mid, page = nextPage)
-            if (response.code != 0) error(response.message)
-            _state.value = current.copy(
-                collected = current.collected + response.data?.list.orEmpty(),
-                collectedCount = response.data?.count ?: current.collectedCount,
-                collectedPage = nextPage,
-                isLoadingMore = false,
-            )
-        } catch (exception: Exception) {
-            _state.value = current.copy(
-                isLoadingMore = false,
-                error = exception.message ?: "更多收藏夹加载失败",
-            )
+        if (mid == 0L || current.isLoading || current.isLoadingMore || current.collected.size >= current.collectedCount) return
+        val version = requestVersion
+        _state.value = current.copy(isLoadingMore = true, error = null)
+        loadMoreJob = launchTask {
+            try {
+                val nextPage = current.collectedPage + 1
+                val response = api.getCollectedFolders(mid, page = nextPage)
+                if (response.code != 0) error(response.message)
+                if (version != requestVersion) return@launchTask
+                _state.value = current.copy(
+                    collected = current.collected + response.data?.list.orEmpty(),
+                    collectedCount = response.data?.count ?: current.collectedCount,
+                    collectedPage = nextPage,
+                    isLoadingMore = false,
+                    error = null,
+                )
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                if (version == requestVersion) _state.value = current.copy(
+                    isLoadingMore = false,
+                    error = exception.message ?: "更多收藏夹加载失败",
+                )
+            }
         }
     }
 

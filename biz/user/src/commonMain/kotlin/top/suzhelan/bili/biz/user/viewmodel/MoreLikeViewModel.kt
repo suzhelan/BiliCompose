@@ -9,6 +9,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import top.suzhelan.bili.api.BiliResponse
@@ -31,6 +32,11 @@ class MoreLikeViewModel(
     val messages = _messages.receiveAsFlow()
     private val moreLikeVideoFlows = mutableMapOf<Long, Flow<PagingData<LikeVideo>>>()
     private val pagingSources = mutableMapOf<Long, LikeVideoListDataSource>()
+    private val refreshStates = mutableMapOf<Long, MutableStateFlow<Boolean>>()
+
+    fun isRefreshing(mid: Long): StateFlow<Boolean> = refreshState(mid)
+
+    private fun refreshState(mid: Long) = refreshStates.getOrPut(mid) { MutableStateFlow(false) }
 
     fun hasLoadedData(mid: Long): Boolean = pagingSources[mid]?.hasCompletedRefresh == true
 
@@ -44,15 +50,30 @@ class MoreLikeViewModel(
                     enablePlaceholders = true,
                 ),
                 pagingSourceFactory = {
-                    LikeVideoListDataSource(mid, loadPage ?: userApi::getUserLikeVideoList)
-                        .also { pagingSources[mid] = it }
+                    lateinit var source: LikeVideoListDataSource
+                    source = LikeVideoListDataSource(
+                        mid,
+                        loadPage ?: userApi::getUserLikeVideoList
+                    ) { refreshing ->
+                        // 失效的旧请求结束时不能提前关闭新请求的刷新指示器。
+                        if (pagingSources[mid] === source && !source.invalid) {
+                            refreshState(mid).value = refreshing
+                        }
+                    }
+                    pagingSources[mid] = source
+                    refreshState(mid).value = true
+                    source
                 },
             ).flow.cachedIn(viewModelScope)
         }
 
     fun refresh(mid: Long, force: Boolean = false) {
         // 首次读取已经是最新数据；合并恢复显示和 Tab 激活产生的重复刷新。
-        pagingSources[mid]?.takeIf { force || it.hasCompletedRefresh }?.invalidate()
+        pagingSources[mid]?.takeIf { force || it.hasCompletedRefresh }?.let {
+            // 在 Paging 发布新一轮 LoadState 前就标记，整页刷新不会提前结束。
+            refreshState(mid).value = true
+            it.invalidate()
+        }
     }
 
     fun cancelLike(mid: Long, video: LikeVideo) = performAction(video) { aid ->

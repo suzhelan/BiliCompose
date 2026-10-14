@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,6 +69,7 @@ import org.jetbrains.compose.resources.painterResource
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.biz.user.entity.UserSpace
+import top.suzhelan.bili.biz.user.viewmodel.FavoriteFoldersViewModel
 import top.suzhelan.bili.biz.user.viewmodel.MoreLikeViewModel
 import top.suzhelan.bili.biz.user.viewmodel.UserProfileViewModel
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
@@ -88,39 +90,61 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
  */
 @Composable
 fun NewUserProfileScreen(mid: Long, showBackButton: Boolean = true) {
-    UserProfilePage(mid, showBackButton)
+    key(mid) { UserProfilePage(mid, showBackButton) }
 }
 
 @Composable
 private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
     val vm = viewModel { UserProfileViewModel() }
     val moreLikeViewModel = viewModel { MoreLikeViewModel() }
+    val favoriteFoldersViewModel = viewModel { FavoriteFoldersViewModel() }
+    val pagerState = rememberPagerState(pageCount = { 4 })
     val userSpaceRes by vm.userSpace.collectAsStateWithLifecycle()
     val profileRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
+    val favoriteState by favoriteFoldersViewModel.state.collectAsStateWithLifecycle()
+    val likesRefreshing by moreLikeViewModel.isRefreshing(mid).collectAsStateWithLifecycle()
     val refreshError by vm.refreshError.collectAsStateWithLifecycle()
-    var likesRefreshing by remember { mutableStateOf(false) }
-    var isPullRefreshing by remember { mutableStateOf(false) }
+    // 只有手动下拉开启指示器，并记录本轮刷新的 Tab，切换页面不影响等待对象。
+    var pullRefreshingPage by remember { mutableStateOf<Int?>(null) }
+    val isPullRefreshing = pullRefreshingPage != null
     val pullState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
-    LifecycleResumeEffect(mid, vm, moreLikeViewModel) {
+    LifecycleResumeEffect(mid, vm, moreLikeViewModel, favoriteFoldersViewModel) {
         vm.getUserSpace(mid)
         // 即使恢复时停留在“主页”Tab，先让已经读取过的点赞缓存失效。
         moreLikeViewModel.refresh(mid)
+        if (pagerState.currentPage == 2) favoriteFoldersViewModel.load(mid, force = true)
         onPauseOrDispose { }
     }
     LaunchedEffect(refreshError) {
         refreshError?.let { snackbarHostState.showSnackbar(it) }
     }
-    LaunchedEffect(isPullRefreshing, profileRefreshing, likesRefreshing) {
-        // 直接读取请求状态，避免手动刷新刚开始、Flow 尚未收集时提前结束指示器。
-        if (!vm.isRefreshing.value && !likesRefreshing) isPullRefreshing = false
+    LaunchedEffect(
+        pullRefreshingPage,
+        profileRefreshing,
+        favoriteState.isLoading,
+        likesRefreshing
+    ) {
+        pullRefreshingPage?.let { page ->
+            // 请求同步设置状态，直接读取以避开 Flow 尚未收集时提前结束的窗口。
+            val listRefreshing = when (page) {
+                2 -> favoriteFoldersViewModel.state.value.isLoading
+                3 -> moreLikeViewModel.isRefreshing(mid).value
+                else -> false
+            }
+            if (!vm.isRefreshing.value && !listRefreshing) pullRefreshingPage = null
+        }
     }
     PullToRefreshBox(
         isRefreshing = isPullRefreshing,
         onRefresh = {
-            isPullRefreshing = true
+            val page = pagerState.currentPage
+            pullRefreshingPage = page
             vm.getUserSpace(mid)
-            moreLikeViewModel.refresh(mid)
+            when (page) {
+                2 -> favoriteFoldersViewModel.load(mid, force = true)
+                3 -> moreLikeViewModel.refresh(mid)
+            }
         },
         state = pullState,
         modifier = Modifier.fillMaxSize(),
@@ -157,10 +181,10 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
                         userSpace,
                         showBackButton,
                         moreLikeViewModel,
-                        showLikesRefreshIndicator = !isPullRefreshing,
-                    ) {
-                        likesRefreshing = it
-                    }
+                        favoriteFoldersViewModel,
+                        pagerState,
+                        pullRefreshingPage,
+                    )
                 }
             }
 
@@ -177,13 +201,13 @@ private fun UserProfile(
     userSpace: UserSpace,
     showBackButton: Boolean,
     moreLikeViewModel: MoreLikeViewModel,
-    showLikesRefreshIndicator: Boolean,
-    onLikesRefreshingChanged: (Boolean) -> Unit,
+    favoriteFoldersViewModel: FavoriteFoldersViewModel,
+    pagerState: PagerState,
+    pullRefreshingPage: Int?,
 ) {
     val navigation = LocalNavigation.currentOrThrow
     val scope = rememberCoroutineScope()
     val tabItems = remember { listOf("主页", "动态", "收藏", "点赞") }
-    val pagerState = rememberPagerState(pageCount = { tabItems.size })
     val listStates = tabItems.map { rememberLazyListState() }
     val scrollState = rememberSaveable(saver = ProfileScrollState.Saver) {
         ProfileScrollState()
@@ -231,19 +255,26 @@ private fun UserProfile(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
         ) { page ->
-            if (page == 3) {
-                MoreLikeVideoContent(
+            when (page) {
+                2 -> FavoriteFoldersProfileContent(
+                    mid = userSpace.card.mid.toLong(),
+                    viewModel = favoriteFoldersViewModel,
+                    listState = listStates[page],
+                    isActive = pagerState.settledPage == page,
+                    showRefreshIndicator = pullRefreshingPage != page,
+                )
+
+                3 -> MoreLikeVideoContent(
                     mid = userSpace.card.mid.toLong(),
                     viewModel = moreLikeViewModel,
                     listState = listStates[page],
                     isActive = pagerState.settledPage == page,
                     refreshOnResume = false,
                     enablePullToRefresh = false,
-                    showRefreshIndicator = showLikesRefreshIndicator,
-                    onRefreshingChanged = onLikesRefreshingChanged,
+                    showRefreshIndicator = pullRefreshingPage != page,
                 )
-            } else {
-                LazyColumn(
+
+                else -> LazyColumn(
                     state = listStates[page],
                     modifier = Modifier.fillMaxSize(),
                 ) {

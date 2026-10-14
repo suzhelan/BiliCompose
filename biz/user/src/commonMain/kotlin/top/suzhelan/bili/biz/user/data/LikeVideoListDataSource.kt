@@ -15,6 +15,7 @@ import top.suzhelan.bili.shared.common.logger.error
 class LikeVideoListDataSource(
     private val mid: Long,
     private val loadPage: suspend (Long, Int, Int) -> BiliResponse.Success<LikeVideoList>,
+    private val onRefreshingChanged: (Boolean) -> Unit = {},
 ) : PagingSource<Int, LikeVideo>() {
 
     private val firstPageIndex = 1
@@ -26,6 +27,7 @@ class LikeVideoListDataSource(
     override fun getRefreshKey(state: PagingState<Int, LikeVideo>): Int? = null
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, LikeVideo> {
+        if (params is LoadParams.Refresh) onRefreshingChanged(true)
         return try {
             val currentKey = params.key ?: firstPageIndex
             val response = loadPage(mid, currentKey, PAGE_SIZE)
@@ -50,7 +52,10 @@ class LikeVideoListDataSource(
             e.error()
             LoadResult.Error(e)
         } finally {
-            if (params is LoadParams.Refresh) hasCompletedRefresh = true
+            if (params is LoadParams.Refresh) {
+                hasCompletedRefresh = true
+                onRefreshingChanged(false)
+            }
         }
     }
 

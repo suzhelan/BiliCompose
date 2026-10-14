@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -20,7 +22,6 @@ import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +49,7 @@ import top.suzhelan.bili.biz.user.viewmodel.FavoriteFoldersUiState
 import top.suzhelan.bili.biz.user.viewmodel.FavoriteFoldersViewModel
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.ui.AppScaffold
+import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
@@ -99,13 +101,10 @@ fun FavoriteFoldersProfileContent(mid: Long) {
     val vm = viewModel { FavoriteFoldersViewModel() }
     val state by vm.state.collectAsStateWithLifecycle()
     LaunchedEffect(mid) { vm.load(mid, force = true) }
+    val hasFolders = state.created.isNotEmpty() || state.collected.isNotEmpty()
     when {
-        state.isLoading -> Box(
-            Modifier.fillMaxWidth().padding(32.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        !hasFolders && state.error == null && (state.isLoading || !state.hasLoaded) ->
+            LoadingIndicator(Modifier.fillMaxWidth().padding(32.dp))
 
         state.error != null -> FavoriteMessage(state.error ?: "加载失败") {
             vm.load(
@@ -123,15 +122,46 @@ fun FavoriteFoldersProfileContent(mid: Long) {
                 navigator.push(SharedScreen.FavoriteDetail(it.id))
             }
             if (state.collected.size < state.collectedCount) {
-                Button(
-                    onClick = vm::loadMoreCollected,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text(if (state.isLoadingMore) "加载中…" else "加载更多")
+                if (state.isLoadingMore) {
+                    LoadingIndicator(Modifier.fillMaxWidth())
+                } else {
+                    Button(
+                        onClick = vm::loadMoreCollected,
+                        enabled = !state.isLoading,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text("加载更多")
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+fun FavoriteFoldersProfileContent(
+    mid: Long,
+    viewModel: FavoriteFoldersViewModel,
+    listState: LazyListState,
+    isActive: Boolean,
+    showRefreshIndicator: Boolean = true,
+) {
+    val navigator = LocalNavigation.currentOrThrow
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(mid, isActive) {
+        if (isActive) viewModel.load(mid, force = true)
+    }
+    val isOwner = LoginMapper.isLogin() && runCatching { LoginMapper.getMid() }.getOrNull() == mid
+    FavoriteFoldersLazyContent(
+        state = state,
+        onRetry = { viewModel.load(mid, force = true) },
+        onLoadMore = viewModel::loadMoreCollected,
+        onOpen = { navigator.push(SharedScreen.FavoriteDetail(it.id)) },
+        listState = listState,
+        showRefreshIndicator = showRefreshIndicator,
+        createdSectionTitle = if (isOwner) "我创建的收藏夹" else "创建的收藏夹",
+        emptyMessage = if (isOwner) "暂无收藏夹" else "暂无公开收藏夹",
+    )
 }
 
 @Composable
@@ -140,20 +170,29 @@ private fun FavoriteFoldersLazyContent(
     onRetry: () -> Unit,
     onLoadMore: () -> Unit,
     onOpen: (FavoriteFolder) -> Unit,
+    listState: LazyListState = rememberLazyListState(),
+    showRefreshIndicator: Boolean = true,
+    createdSectionTitle: String = "我创建的收藏夹",
+    emptyMessage: String = "暂无收藏夹",
 ) {
-    when {
-        state.isLoading -> Box(
-            Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) { CircularProgressIndicator() }
-
-        state.error != null && state.created.isEmpty() && state.collected.isEmpty() ->
-            FavoriteMessage(state.error, onRetry)
-
-        state.created.isEmpty() && state.collected.isEmpty() -> FavoriteMessage("暂无收藏夹")
-        else -> LazyColumn(Modifier.fillMaxSize()) {
+    val hasFolders = state.created.isNotEmpty() || state.collected.isNotEmpty()
+    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+        // 初始状态尚未请求成功，不能把默认的空列表当成“暂无收藏夹”。
+        if (!hasFolders && state.error == null && (state.isLoading || !state.hasLoaded)) {
+            if (showRefreshIndicator) {
+                item {
+                    LoadingIndicator(Modifier.fillParentMaxSize())
+                }
+            }
+        } else {
+            state.error?.let { error ->
+                item { FavoriteMessage(error, onRetry) }
+            }
+            if (!hasFolders && state.hasLoaded && !state.isLoading && state.error == null) {
+                item { FavoriteMessage(emptyMessage) }
+            }
             if (state.created.isNotEmpty()) {
-                item { FavoriteSectionHeader("我创建的收藏夹", state.created.size) }
+                item { FavoriteSectionHeader(createdSectionTitle, state.created.size) }
                 items(state.created, key = { "created-${it.id}" }) {
                     FavoriteFolderCard(
                         it,
@@ -170,11 +209,16 @@ private fun FavoriteFoldersLazyContent(
                     )
                 }
                 if (state.collected.size < state.collectedCount) item {
-                    Button(
-                        onClick = onLoadMore,
-                        modifier = Modifier.fillMaxWidth().padding(16.dp)
-                    ) {
-                        Text(if (state.isLoadingMore) "加载中…" else "加载更多")
+                    if (state.isLoadingMore) {
+                        LoadingIndicator(Modifier.fillMaxWidth())
+                    } else {
+                        Button(
+                            onClick = onLoadMore,
+                            enabled = !state.isLoading,
+                            modifier = Modifier.fillMaxWidth().padding(16.dp)
+                        ) {
+                            Text("加载更多")
+                        }
                     }
                 }
             }
