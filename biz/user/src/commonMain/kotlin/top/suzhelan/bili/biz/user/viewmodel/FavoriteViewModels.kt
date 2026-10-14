@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import top.suzhelan.bili.biz.user.api.FavoriteApi
 import top.suzhelan.bili.biz.user.entity.FavoriteFolder
 import top.suzhelan.bili.biz.user.entity.FavoriteResource
+import top.suzhelan.bili.biz.user.util.toOpenScreen
 import top.suzhelan.bili.shared.common.base.BaseViewModel
+import top.suzhelan.bili.shared.navigation.SharedScreen
 
 data class FavoriteFoldersUiState(
     val created: List<FavoriteFolder> = emptyList(),
@@ -30,6 +32,19 @@ class FavoriteFoldersViewModel : BaseViewModel() {
     private var loadJob: Job? = null
     private var loadMoreJob: Job? = null
     private var requestVersion = 0
+
+    fun openFolder(folder: FavoriteFolder, onOpen: (SharedScreen) -> Unit) {
+        if (!folder.canOpen) return
+        val screen = folder.toOpenScreen()
+        if (screen != null) {
+            onOpen(screen)
+        } else {
+            showMessageDialog(
+                title = "合集打开失败",
+                message = "接口未返回有效的视频标识，请刷新收藏列表后重试",
+            )
+        }
+    }
 
     fun load(mid: Long, force: Boolean = false) {
         if (this.mid == mid && (loadJob?.isActive == true || (!force && _state.value.hasLoaded))) return

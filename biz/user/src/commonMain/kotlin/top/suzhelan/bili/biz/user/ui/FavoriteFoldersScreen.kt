@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
@@ -50,9 +51,9 @@ import top.suzhelan.bili.biz.user.viewmodel.FavoriteFoldersViewModel
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.ui.AppScaffold
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
+import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.navigation.LocalNavigation
-import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 @Composable
@@ -63,7 +64,11 @@ fun FavoriteFoldersScreen(mid: Long) {
     val state by vm.state.collectAsStateWithLifecycle()
     var showCreate by remember { mutableStateOf(false) }
     val isOwner = LoginMapper.isLogin() && runCatching { LoginMapper.getMid() }.getOrNull() == mid
-    LaunchedEffect(mid) { vm.load(mid, force = true) }
+    LifecycleResumeEffect(mid) {
+        vm.load(mid, force = true)
+        onPauseOrDispose { }
+    }
+    DialogHandler(vm)
     AppScaffold(topBar = {
         TopAppBar(
             title = { Text(if (isOwner) "我的收藏" else "收藏夹") },
@@ -83,7 +88,7 @@ fun FavoriteFoldersScreen(mid: Long) {
             state = state,
             onRetry = { vm.load(mid, force = true) },
             onLoadMore = vm::loadMoreCollected,
-            onOpen = { navigator.push(SharedScreen.FavoriteDetail(it.id)) },
+            onOpen = { vm.openFolder(it, navigator::push) },
         )
     }
     if (showCreate) CreateFavoriteFolderDialog(
@@ -100,7 +105,11 @@ fun FavoriteFoldersProfileContent(mid: Long) {
     val navigator = LocalNavigation.currentOrThrow
     val vm = viewModel { FavoriteFoldersViewModel() }
     val state by vm.state.collectAsStateWithLifecycle()
-    LaunchedEffect(mid) { vm.load(mid, force = true) }
+    LifecycleResumeEffect(mid) {
+        vm.load(mid, force = true)
+        onPauseOrDispose { }
+    }
+    DialogHandler(vm)
     val hasFolders = state.created.isNotEmpty() || state.collected.isNotEmpty()
     when {
         !hasFolders && state.error == null && (state.isLoading || !state.hasLoaded) ->
@@ -116,10 +125,10 @@ fun FavoriteFoldersProfileContent(mid: Long) {
         state.created.isEmpty() && state.collected.isEmpty() -> FavoriteMessage("暂无公开收藏夹")
         else -> Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             FavoriteFolderSection("创建的收藏夹", state.created) {
-                navigator.push(SharedScreen.FavoriteDetail(it.id))
+                vm.openFolder(it, navigator::push)
             }
-            FavoriteFolderSection("收藏的其他人收藏夹", state.collected) {
-                navigator.push(SharedScreen.FavoriteDetail(it.id))
+            FavoriteFolderSection("收藏的收藏夹与合集", state.collected) {
+                vm.openFolder(it, navigator::push)
             }
             if (state.collected.size < state.collectedCount) {
                 if (state.isLoadingMore) {
@@ -148,6 +157,7 @@ fun FavoriteFoldersProfileContent(
 ) {
     val navigator = LocalNavigation.currentOrThrow
     val state by viewModel.state.collectAsStateWithLifecycle()
+    DialogHandler(viewModel)
     LaunchedEffect(mid, isActive) {
         if (isActive) viewModel.load(mid, force = true)
     }
@@ -156,7 +166,7 @@ fun FavoriteFoldersProfileContent(
         state = state,
         onRetry = { viewModel.load(mid, force = true) },
         onLoadMore = viewModel::loadMoreCollected,
-        onOpen = { navigator.push(SharedScreen.FavoriteDetail(it.id)) },
+        onOpen = { viewModel.openFolder(it, navigator::push) },
         listState = listState,
         showRefreshIndicator = showRefreshIndicator,
         createdSectionTitle = if (isOwner) "我创建的收藏夹" else "创建的收藏夹",
@@ -201,8 +211,8 @@ private fun FavoriteFoldersLazyContent(
                 }
             }
             if (state.collected.isNotEmpty()) {
-                item { FavoriteSectionHeader("收藏的其他人收藏夹", state.collectedCount) }
-                items(state.collected, key = { "collected-${it.id}" }) {
+                item { FavoriteSectionHeader("收藏的收藏夹与合集", state.collectedCount) }
+                items(state.collected, key = { "collected-${it.type}-${it.id}" }) {
                     FavoriteFolderCard(
                         it,
                         onOpen
@@ -246,7 +256,7 @@ private fun FavoriteSectionHeader(title: String, count: Int) {
 private fun FavoriteFolderCard(folder: FavoriteFolder, onOpen: (FavoriteFolder) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 5.dp)
-            .clickable(enabled = !folder.isInvalid) { onOpen(folder) },
+            .clickable(enabled = folder.canOpen) { onOpen(folder) },
         shape = RoundedCornerShape(12.dp),
     ) {
         Row(
@@ -287,7 +297,11 @@ private fun FavoriteFolderCard(folder: FavoriteFolder, onOpen: (FavoriteFolder) 
                 val owner = folder.upper?.name.orEmpty()
                 if (owner.isNotBlank()) Text(owner, color = TipColor, maxLines = 1)
                 Text(
-                    if (folder.isInvalid) "收藏夹已失效" else "${folder.mediaCount} 个内容",
+                    if (folder.isInvalid) {
+                        if (folder.isCollection) "合集已失效" else "收藏夹已失效"
+                    } else {
+                        "${if (folder.isCollection) "合集" else "收藏夹"} · ${folder.mediaCount} 个内容"
+                    },
                     color = TipColor
                 )
             }
