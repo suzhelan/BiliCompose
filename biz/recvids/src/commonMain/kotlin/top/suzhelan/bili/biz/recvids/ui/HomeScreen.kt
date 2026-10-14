@@ -67,7 +67,7 @@ val pages = listOf("推荐", "热门")
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeVideoContent() {
+fun HomeContent(onClickAvatar: () -> Unit) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val pagerState = rememberPagerState(pageCount = { pages.size }, initialPage = 0)
     Scaffold(
@@ -79,7 +79,7 @@ fun HomeVideoContent() {
                     scrolledContainerColor = MaterialTheme.colorScheme.background
                 ),
                 title = {
-                    HomeTopBar {}
+                    HomeTopBar(onClickAvatar = onClickAvatar) {}
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -132,8 +132,9 @@ private fun Tab(pagerState: PagerState) {
 
 @Composable
 private fun HomeTopBar(
+    onClickAvatar: () -> Unit,
     mineViewModel: MineViewModel = viewModel { MineViewModel() },
-    onClickSearchBar: () -> Unit
+    onClickSearchBar: () -> Unit,
 ) {
     val isLogin by remember {
         LoginMapper.isLoginState
@@ -153,6 +154,7 @@ private fun HomeTopBar(
                     contentDescription = null,
                     modifier = Modifier.size(36.dp)
                         .clip(RoundedCornerShape(50.dp))
+                        .clickable(onClick = onClickAvatar)
                 )
             }
         } else {

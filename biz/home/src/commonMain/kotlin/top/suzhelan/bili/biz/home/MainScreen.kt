@@ -12,7 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import top.suzhelan.bili.biz.recvids.ui.HomeVideoContent
+import top.suzhelan.bili.biz.recvids.ui.HomeContent
 import top.suzhelan.bili.biz.user.ui.MineContent
 
 enum class AppDestinations(
@@ -43,7 +43,9 @@ fun HomeScreen() {
         }) {
         when (currentDestination) {
             AppDestinations.HOME -> {
-                HomeVideoContent()
+                HomeContent(
+                    onClickAvatar = { currentDestination = AppDestinations.Mine }
+                )
             }
 
             AppDestinations.Mine -> {

@@ -13,7 +13,7 @@ jobs:
 
     steps:
       #签出代码
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       #配置jdk
       - name: Setup Java JDK
         uses: actions/setup-java@v6
