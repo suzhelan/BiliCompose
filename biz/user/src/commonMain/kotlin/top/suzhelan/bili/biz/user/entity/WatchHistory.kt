@@ -6,35 +6,36 @@ import kotlinx.serialization.Serializable
 /** `/x/web-interface/history/cursor` 的必要展示字段。 */
 @Serializable
 data class WatchHistoryPage(
-    val cursor: Cursor = Cursor(),
-    val list: List<Item> = emptyList(),
+    @SerialName("cursor") val cursor: Cursor = Cursor(),
+    @SerialName("list") val list: List<Item> = emptyList(),
 ) {
     @Serializable
     data class Cursor(
-        val max: Long = 0,
-        val business: String = "",
+        @SerialName("max") val max: Long = 0,
+        @SerialName("business") val business: String = "",
         @SerialName("view_at") val viewAt: Long = 0,
     )
 
     @Serializable
     data class Item(
-        val title: String = "",
+        @SerialName("title") val title: String = "",
         @SerialName("long_title") val longTitle: String = "",
-        val cover: String = "",
+        @SerialName("cover") val cover: String = "",
         @SerialName("author_name") val authorName: String = "",
         @SerialName("view_at") val viewAt: Long = 0,
-        val progress: Int = 0,
-        val duration: Int = 0,
+        @SerialName("progress") val progress: Int = 0,
+        @SerialName("duration") val duration: Int = 0,
         @SerialName("show_title") val showTitle: String = "",
-        val kid: Long = 0,
-        val history: Detail = Detail(),
+        @SerialName("kid") val kid: Long = 0,
+        @SerialName("history") val history: Detail = Detail(),
+        @SerialName("pubdate") val pubdate: Long = 0,
     )
 
     @Serializable
     data class Detail(
-        val oid: Long = 0,
-        val epid: Long = 0,
-        val bvid: String = "",
-        val business: String = "",
+        @SerialName("oid") val oid: Long = 0,
+        @SerialName("epid") val epid: Long = 0,
+        @SerialName("bvid") val bvid: String = "",
+        @SerialName("business") val business: String = "",
     )
 }

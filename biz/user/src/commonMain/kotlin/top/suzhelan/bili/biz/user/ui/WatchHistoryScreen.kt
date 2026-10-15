@@ -1,16 +1,16 @@
 package top.suzhelan.bili.biz.user.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,20 +38,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import coil3.compose.AsyncImage
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import top.suzhelan.bili.biz.user.entity.WatchHistoryPage
@@ -60,7 +57,6 @@ import top.suzhelan.bili.shared.common.ui.AppScaffold
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
-import top.suzhelan.bili.shared.common.util.TimeUtils
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
@@ -79,6 +75,10 @@ fun WatchHistoryScreen() {
     var searchQuery by remember { mutableStateOf("") }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val visibleItems = historyItems.itemSnapshotList.items.filter { it.matches(searchQuery) }
+    LifecycleResumeEffect(historyItems) {
+        if (historyItems.itemCount > 0) historyItems.refresh()
+        onPauseOrDispose { }
+    }
 
     AppScaffold(
         topBar = {
@@ -246,7 +246,7 @@ private fun WatchHistoryContent(
         }
 
         when (val refresh = historyItems.loadState.refresh) {
-            is LoadState.Loading -> item { LoadingIndicator() }
+            is LoadState.Loading -> if (historyItems.itemCount == 0) item { LoadingIndicator() }
             is LoadState.Error -> item {
                 LoadFailed(historyItems::retry, refresh.error.message ?: "历史记录加载失败")
             }
@@ -324,10 +324,10 @@ private fun WatchHistoryItem(
     onToggleSelection: () -> Unit,
 ) {
     val navigator = LocalNavigation.currentOrThrow
+    val progress = WatchVideoProgress(item.progress, item.duration)
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .height(112.dp)
             .padding(horizontal = 10.dp, vertical = 5.dp)
             .combinedClickable(
                 onClick = {
@@ -347,7 +347,7 @@ private fun WatchHistoryItem(
             ),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             if (isManaging) {
                 Checkbox(
                     checked = isSelected,
@@ -355,30 +355,15 @@ private fun WatchHistoryItem(
                     modifier = Modifier.align(Alignment.CenterVertically),
                 )
             }
-            Box(modifier = Modifier.width(148.dp).fillMaxHeight()) {
-                AsyncImage(
-                    model = item.cover,
-                    contentDescription = item.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(28.dp).align(Alignment.BottomStart)
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                1f to Color.Black.copy(alpha = 0.55f)
-                            )
-                        ),
-                )
-                Text(
-                    text = historyProgress(item),
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp),
-                )
-            }
-            Column(modifier = Modifier.fillMaxHeight().weight(1f).padding(8.dp)) {
+            WatchVideoCover(
+                cover = item.cover,
+                title = item.title,
+                progress = progress,
+                modifier = Modifier.width(148.dp).fillMaxHeight(),
+            )
+            Column(
+                modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 102.dp).padding(8.dp)
+            ) {
                 Text(
                     item.title,
                     fontSize = 14.sp,
@@ -396,13 +381,11 @@ private fun WatchHistoryItem(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = listOf(item.authorName, TimeUtils.formatTimeAgo(item.viewAt))
-                        .filter { it.isNotBlank() }.joinToString(" · "),
-                    fontSize = 11.sp,
-                    color = TipColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                WatchVideoMetadata(
+                    author = item.authorName,
+                    progress = progress,
+                    viewAt = item.viewAt,
+                    pubdate = item.pubdate,
                 )
             }
         }
@@ -432,12 +415,6 @@ private fun historySection(viewAt: Long): String {
         in 30L..59L -> "一月前"
         else -> "更早"
     }
-}
-
-private fun historyProgress(item: WatchHistoryPage.Item): String = when {
-    item.progress < 0 -> "已看完"
-    item.duration > 0 -> "已看 ${TimeUtils.formatSecondToTime(item.progress.coerceAtLeast(0))}"
-    else -> "已观看"
 }
 
 @Composable
