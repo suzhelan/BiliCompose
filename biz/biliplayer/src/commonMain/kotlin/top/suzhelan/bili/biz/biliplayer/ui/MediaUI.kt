@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
@@ -22,6 +21,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.first
 import top.suzhelan.bili.api.registerStatusListener
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
@@ -143,17 +143,12 @@ private fun ProgressReport(
     vm: VideoPlayerViewModel,
     playerSyncController: PlayerSyncController
 ) {
-    val totalDurationMillis by playerSyncController.totalDurationMillis.collectAsStateWithLifecycle()
-    val currentPositionMillis by playerSyncController.currentPositionMillis.collectAsStateWithLifecycle()
-    //转换为秒 秒级变化才重组
-    val currentPositionSeconds by derivedStateOf {
-        currentPositionMillis / 1000
-    }
+    // 完成态和毫秒进度统一换算，确保最后不足一秒也能上报。
+    val currentPositionSeconds by playerSyncController.currentPositionSeconds.collectAsStateWithLifecycle()
 
-    LaunchedEffect(totalDurationMillis) {
-        if (totalDurationMillis == 0L) {
-            return@LaunchedEffect
-        }
+    LaunchedEffect(playerSyncController, argsItem) {
+        // 只恢复一次，避免时长随 timeline 更新时再次跳回历史位置。
+        val totalDurationMillis = playerSyncController.totalDurationMillis.first { it > 0 }
         if (argsItem.lastPlayTime > 0//必须有上次观看的记录
             && argsItem.lastPlayTime < totalDurationMillis - 500//如果已经看完
         ) {

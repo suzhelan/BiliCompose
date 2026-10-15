@@ -62,7 +62,12 @@ fun OnPreviewIndicator(modifier: Modifier = Modifier, progress: Long, total: Lon
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "${TimeUtil.formatMillisToTime(progress)}/${TimeUtil.formatMillisToTime(total)}",
+            text = "${
+                TimeUtil.formatProgressMillisToTime(
+                    progress,
+                    total
+                )
+            }/${TimeUtil.formatDurationMillisToTime(total)}",
             color = PlayerColor.control.copy(alpha = 0.8f),
         )
     }

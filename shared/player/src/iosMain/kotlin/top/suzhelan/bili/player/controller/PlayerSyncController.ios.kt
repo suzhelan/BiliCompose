@@ -7,10 +7,12 @@ actual object PlayerMediaDataUtils {
     actual fun doLoadMediaData(
         mediampPlayer: MediampPlayer,
         videoUrl: String,
-        audioUrl: String
-    ) {
+        audioUrl: String,
+        onVideoSizeChanged: ((width: Int, height: Int) -> Unit)?,
+    ): () -> Unit {
+        return {}
     }
 
-    actual fun setFullScreen(context: BiliContext, fullScreen: Boolean) {
+    actual fun setFullScreen(context: BiliContext, fullScreen: Boolean, isPortraitVideo: Boolean) {
     }
 }

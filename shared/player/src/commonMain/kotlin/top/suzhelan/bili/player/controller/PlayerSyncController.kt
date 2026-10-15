@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +34,7 @@ class PlayerSyncController(
 ) {
     val videoPlayer: MediampPlayer = MediampPlayer(context)
     private val playerStateScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var releaseMediaListener: (() -> Unit)? = null
     var visibility by mutableStateOf(PlayerToolBarVisibility.Visible)
         private set
 
@@ -69,27 +71,32 @@ class PlayerSyncController(
         .map { it.isPlaying }
         .stateIn(playerStateScope, SharingStarted.Eagerly, false)
 
-    //当前播放时长
-    val currentPositionMillis: StateFlow<Long> get() = videoPlayer.currentPositionMillis
-
     /**
      * 总时长 没有获取到视频时长时为0L
      */
     val totalDurationMillis: StateFlow<Long> = MutableStateFlow(0L).apply {
         playerStateScope.launch {
             videoPlayer.mediaProperties.collect {
-                value = (it?.durationMillis ?: 0)
+                value = (it?.durationMillis ?: 0).coerceAtLeast(0)
             }
         }
     }
 
-    val playbackFinished: StateFlow<Boolean> = MutableStateFlow(false).apply {
-        playerStateScope.launch {
-            videoPlayer.playbackState.collect {
-                value = it == PlaybackState.FINISHED
-            }
-        }
-    }
+    val progress: StateFlow<PlayerProgress> = playerProgressFlow(
+        videoPlayer.currentPositionMillis,
+        totalDurationMillis,
+        videoPlayer.playbackState,
+    ).stateIn(playerStateScope, SharingStarted.Eagerly, PlayerProgress())
+
+    // 结束事件到达时补齐最后一次采样，不依赖进度定时器恰好采到终点。
+    val currentPositionMillis: StateFlow<Long> = progress.map { it.positionMillis }
+        .stateIn(playerStateScope, SharingStarted.Eagerly, 0L)
+
+    val currentPositionSeconds: StateFlow<Long> = progress.map { it.positionSeconds }
+        .stateIn(playerStateScope, SharingStarted.Eagerly, 0L)
+
+    val playbackFinished: StateFlow<Boolean> = progress.map { it.finished }
+        .stateIn(playerStateScope, SharingStarted.Eagerly, false)
 
     fun updateVisibility(newVisibility: PlayerToolBarVisibility) {
         visibility = newVisibility
@@ -107,7 +114,8 @@ class PlayerSyncController(
      * 播放视频
      */
     fun play(videoUrl: String, audioUrl: String) {
-        PlayerMediaDataUtils.doLoadMediaData(
+        releaseMediaListener?.invoke()
+        releaseMediaListener = PlayerMediaDataUtils.doLoadMediaData(
             videoPlayer,
             videoUrl,
             audioUrl,
@@ -122,6 +130,9 @@ class PlayerSyncController(
      * 停止播放
      */
     fun close() {
+        releaseMediaListener?.invoke()
+        releaseMediaListener = null
+        playerStateScope.cancel()
         videoPlayer.close()
     }
 
@@ -227,8 +238,8 @@ expect object PlayerMediaDataUtils {
         mediampPlayer: MediampPlayer,
         videoUrl: String,
         audioUrl: String,
-        onVideoSizeChanged: ((width: Int, height: Int) -> Unit)? = null
-    )
+        onVideoSizeChanged: ((width: Int, height: Int) -> Unit)? = null,
+    ): () -> Unit
 
     fun setFullScreen(context: BiliContext, fullScreen: Boolean, isPortraitVideo: Boolean = false)
 }

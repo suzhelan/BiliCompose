@@ -84,8 +84,13 @@ fun PlayerBottomBar(
     )
     //右边 时长,全屏
     Text(
-        text = "${TimeUtil.formatMillisToTime(progressSliderState.currentPositionMillis)}/${
-            TimeUtil.formatMillisToTime(
+        text = "${
+            TimeUtil.formatProgressMillisToTime(
+                progressSliderState.currentPositionMillis,
+                progressSliderState.totalDurationMillis
+            )
+        }/${
+            TimeUtil.formatDurationMillisToTime(
                 progressSliderState.totalDurationMillis
             )
         }",
