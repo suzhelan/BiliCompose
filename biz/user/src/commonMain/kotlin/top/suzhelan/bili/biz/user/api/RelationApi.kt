@@ -9,6 +9,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.parameters
 import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
+import top.suzhelan.bili.api.bodyBiliSuccess
 import top.suzhelan.bili.api.getKtorClient
 import top.suzhelan.bili.biz.user.entity.Relation
 import top.suzhelan.bili.biz.user.entity.RelationTags
@@ -31,14 +32,20 @@ class RelationApi {
      * 关注
      * @param mid 目标mid
      * @param action 1为关注，2为取消关注,3为悄悄关注，4为取消悄悄关注,5为拉黑，6为取消拉黑,7为踢出粉丝
+     * @param source 关注来源，个人空间为11
      * @return
      */
-    suspend fun modify(mid: Long, action: Int): BiliResponse.SuccessOrNull<Nothing> {
+    suspend fun modify(
+        mid: Long,
+        action: Int,
+        source: Int? = null,
+    ): BiliResponse.SuccessOrNull<Nothing> {
         return ktor.post("x/relation/modify") {
             setBody(FormDataContent(parameters {
                 append("access_key", LoginMapper.getAccessKey())
                 append("fid", mid.toString())
                 append("act", action.toString())
+                source?.let { append("re_src", it.toString()) }
             }))
         }.body()
     }
@@ -79,7 +86,7 @@ class RelationApi {
                 parameter("access_key", LoginMapper.getAccessKey())
                 parameter("fid", mid)
             }
-        }.body()
+        }.bodyBiliSuccess()
     }
 
     /**

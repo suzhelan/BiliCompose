@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -25,10 +26,19 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -71,7 +81,9 @@ import top.suzhelan.bili.api.getOrThrow
 import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.biz.user.viewmodel.FavoriteFoldersViewModel
 import top.suzhelan.bili.biz.user.viewmodel.MoreLikeViewModel
+import top.suzhelan.bili.biz.user.viewmodel.ProfileRelationState
 import top.suzhelan.bili.biz.user.viewmodel.UserProfileViewModel
+import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.icons.LevelIcons
 import top.suzhelan.bili.shared.common.ui.theme.ColorPrimary
@@ -82,6 +94,7 @@ import top.suzhelan.bili.shared.common.ui.theme.TextColor
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.toStringCount
 import top.suzhelan.bili.shared.navigation.LocalNavigation
+import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
@@ -104,13 +117,16 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
     val favoriteState by favoriteFoldersViewModel.state.collectAsStateWithLifecycle()
     val likesRefreshing by moreLikeViewModel.isRefreshing(mid).collectAsStateWithLifecycle()
     val refreshError by vm.refreshError.collectAsStateWithLifecycle()
+    val relationState by vm.relationState.collectAsStateWithLifecycle()
+    val isLoggedIn by LoginMapper.isLoginState
     // 只有手动下拉开启指示器，并记录本轮刷新的 Tab，切换页面不影响等待对象。
     var pullRefreshingPage by remember { mutableStateOf<Int?>(null) }
     val isPullRefreshing = pullRefreshingPage != null
     val pullState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
-    LifecycleResumeEffect(mid, vm, moreLikeViewModel, favoriteFoldersViewModel) {
+    LifecycleResumeEffect(mid, vm, moreLikeViewModel, favoriteFoldersViewModel, isLoggedIn) {
         vm.getUserSpace(mid)
+        vm.refreshRelation(mid)
         // 即使恢复时停留在“主页”Tab，先让已经读取过的点赞缓存失效。
         moreLikeViewModel.refresh(mid)
         if (pagerState.currentPage == 2) favoriteFoldersViewModel.load(mid, force = true)
@@ -118,6 +134,9 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
     }
     LaunchedEffect(refreshError) {
         refreshError?.let { snackbarHostState.showSnackbar(it) }
+    }
+    LaunchedEffect(vm) {
+        vm.actionMessages.collect { snackbarHostState.showSnackbar(it) }
     }
     LaunchedEffect(
         pullRefreshingPage,
@@ -141,6 +160,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
             val page = pagerState.currentPage
             pullRefreshingPage = page
             vm.getUserSpace(mid)
+            vm.refreshRelation(mid)
             when (page) {
                 2 -> favoriteFoldersViewModel.load(mid, force = true)
                 3 -> moreLikeViewModel.refresh(mid)
@@ -184,6 +204,14 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
                         favoriteFoldersViewModel,
                         pagerState,
                         pullRefreshingPage,
+                        profileActions = {
+                            ProfileActions(
+                                userSpace = userSpace,
+                                relationState = relationState,
+                                onFollow = { following -> vm.setFollowing(mid, following) },
+                                onRetry = { vm.refreshRelation(mid) },
+                            )
+                        },
                     )
                 }
             }
@@ -204,6 +232,7 @@ private fun UserProfile(
     favoriteFoldersViewModel: FavoriteFoldersViewModel,
     pagerState: PagerState,
     pullRefreshingPage: Int?,
+    profileActions: @Composable () -> Unit,
 ) {
     val navigation = LocalNavigation.currentOrThrow
     val scope = rememberCoroutineScope()
@@ -225,7 +254,7 @@ private fun UserProfile(
         state = scrollState,
         listState = listStates[pagerState.currentPage],
         modifier = Modifier.fillMaxSize().background(ColorSurface),
-        header = { ProfileHeader(userSpace, showBackButton) },
+        header = { ProfileHeader(userSpace, showBackButton, profileActions) },
         tabs = {
             ContentTab(tabItems, pagerState.currentPage) { index ->
                 scope.launch { pagerState.animateScrollToPage(index) }
@@ -332,6 +361,7 @@ private fun SimpleTopBar(
 private fun ProfileHeader(
     userSpace: UserSpace,
     showBackButton: Boolean,
+    profileActions: @Composable () -> Unit,
 ) {
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth()
@@ -415,7 +445,7 @@ private fun ProfileHeader(
                 }
         ) {
             //简介
-            CardHeader(userSpace)
+            CardHeader(userSpace, profileActions)
         }
 
     }
@@ -480,7 +510,7 @@ private fun ColumnScope.NicknameUI(userSpace: UserSpace) = Row(
  * 信息卡
  */
 @Composable
-private fun ColumnScope.CardHeader(userSpace: UserSpace) {
+private fun ColumnScope.CardHeader(userSpace: UserSpace, profileActions: @Composable () -> Unit) {
     //统计信息 粉丝 关注 获赞
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -552,7 +582,105 @@ private fun ColumnScope.CardHeader(userSpace: UserSpace) {
             )
         }
     }
-    //操作栏部分 可以在这里放一些操作按钮
+    profileActions()
+
+}
+
+@Composable
+private fun ProfileActions(
+    userSpace: UserSpace,
+    relationState: ProfileRelationState,
+    onFollow: (Boolean) -> Unit,
+    onRetry: () -> Unit,
+) {
+    val navigation = LocalNavigation.currentOrThrow
+    val isLoggedIn by LoginMapper.isLoginState
+    val mid = userSpace.card.mid.toLong()
+    val isSelf = isLoggedIn && LoginMapper.getMid() == mid
+    val shape = RoundedCornerShape(14.dp)
+    val modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp)
+    if (isSelf) {
+        Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            FilledTonalButton(
+                onClick = { navigation.push(SharedScreen.WatchHistory) },
+                modifier = Modifier.weight(1f),
+                shape = shape,
+            ) {
+                Icon(
+                    Icons.Outlined.History,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("历史观看", maxLines = 1)
+            }
+            FilledTonalButton(
+                onClick = { navigation.push(SharedScreen.WatchLater) },
+                modifier = Modifier.weight(1f),
+                shape = shape,
+            ) {
+                Icon(
+                    Icons.Outlined.Schedule,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("稍后再看", maxLines = 1)
+            }
+        }
+        return
+    }
+
+    val isFollowing = isLoggedIn && relationState.isFollowing
+    val isLoading = isLoggedIn && relationState.attribute == null && relationState.error == null
+    val needsRetry = isLoggedIn && relationState.attribute == null && relationState.error != null
+    FilledTonalButton(
+        onClick = {
+            when {
+                !isLoggedIn -> navigation.push(SharedScreen.Login)
+                needsRetry -> onRetry()
+                isFollowing -> onFollow(false)
+                else -> onFollow(true)
+            }
+        },
+        enabled = !isLoggedIn || (!isLoading && !relationState.isUpdating),
+        modifier = modifier,
+        shape = shape,
+        colors = if (isFollowing) {
+            ButtonDefaults.filledTonalButtonColors()
+        } else {
+            ButtonDefaults.buttonColors()
+        },
+    ) {
+        if (isLoading || (isLoggedIn && relationState.isUpdating)) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                color = LocalContentColor.current,
+                strokeWidth = 2.dp,
+            )
+        } else {
+            Icon(
+                imageVector = when {
+                    needsRetry -> Icons.Rounded.Refresh
+                    isFollowing -> Icons.Rounded.Check
+                    else -> Icons.Rounded.Add
+                },
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = when {
+                isLoading -> "加载关注状态"
+                needsRetry -> "重试加载关注状态"
+                isFollowing && relationState.attribute == 6 -> "互相关注"
+                isFollowing -> "已关注"
+                else -> "关注"
+            },
+            maxLines = 1,
+        )
+    }
 
 }
 
