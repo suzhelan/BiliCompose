@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 import top.suzhelan.bili.biz.recvids.ui.card.EmptyCard
 import top.suzhelan.bili.biz.recvids.ui.card.UnknownTypeCoverCard
@@ -85,11 +84,14 @@ fun FeedVideoContent(
             }
             items(
                 count = lazyPagingItems.itemCount,
-                key = lazyPagingItems.itemKey {
-                    when (it) {
-                        is SmallCoverV2Item -> it.param
-                        else -> it.idx
+                key = { index ->
+                    val video = lazyPagingItems.peek(index)
+                    val itemId = when (video) {
+                        is SmallCoverV2Item -> video.param
+                        else -> video?.idx
                     }
+                    // 推荐接口可能跨页返回相同视频，使用列表位置区分每次出现。
+                    "feed:$index:$itemId"
                 }
             ) { index ->
                 val video = lazyPagingItems[index]
