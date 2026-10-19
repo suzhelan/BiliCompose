@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
+import top.suzhelan.bili.biz.recvids.entity.playbackAid
+import top.suzhelan.bili.biz.recvids.entity.playbackCid
 import top.suzhelan.bili.shared.common.ui.autoSkeleton
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
@@ -57,6 +59,8 @@ fun EmptyCard() {
 @Composable
 fun VideoCard(video: SmallCoverV2Item) {
     val navigator = LocalNavigation.currentOrThrow
+    val aid = video.playbackAid
+    val cid = video.playbackCid
 
     // 判断是否为竖屏视频 - 使用 goto 字段判断更准确
     val isVerticalVideo = video.goto == "vertical_av"
@@ -69,19 +73,20 @@ fun VideoCard(video: SmallCoverV2Item) {
         modifier = Modifier
             .fillMaxWidth()
             .height(225.dp)
-            .clickable {
+            .clickable(enabled = aid != null) {
+                val videoAid = aid ?: return@clickable
                 if (isVerticalVideo) {
                     // 竖屏视频 - 跳转到短视频播放器，传递完整视频信息
                     val videoScreen = SharedScreen.NewVertical(
-                        aid = video.playerArgs.aid,
-                        cid = video.playerArgs.cid,
+                        aid = videoAid,
+                        cid = cid,
                     )
                     navigator.push(videoScreen)
                 } else {
                     // 横屏视频 - 跳转到普通播放器
                     val videoScreen = SharedScreen.VideoPlayer(
-                        aid = video.playerArgs.aid,
-                        cid = video.playerArgs.cid,
+                        aid = videoAid,
+                        cid = cid,
                     )
                     navigator.push(videoScreen)
                 }

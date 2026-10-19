@@ -64,7 +64,7 @@ class ShortVideoDataSource {
                 .filterIsInstance<SmallCoverV2Item>()
 
             // 转换为短视频模型
-            val videos = items.map { ShortVideoItem.fromSmallCoverV2Item(it) }
+            val videos = items.mapNotNull { ShortVideoItem.fromSmallCoverV2Item(it) }
 
             LogUtils.d("ShortVideoDataSource: 成功加载 ${videos.size} 个视频")
             LoadResult.Success(videos)

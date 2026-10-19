@@ -7,6 +7,16 @@ import kotlinx.serialization.Serializable
 //拓展静态字段
 inline val SmallCoverV2Item.Companion.targetCardType get() = "small_cover_v2"
 
+// 部分推荐卡片没有 player_args，仍可使用卡片自身的 AID 打开视频。
+val SmallCoverV2Item.playbackAid: Long?
+    get() = playerArgs?.aid?.takeIf { it > 0 }
+        ?: param.toLongOrNull()?.takeIf { it > 0 }
+        ?: args.aid.takeIf { it > 0 }
+
+// 缺失 CID 时交给播放器通过 AID 补全，不能将默认值 0 当作有效 CID。
+val SmallCoverV2Item.playbackCid: Long?
+    get() = playerArgs?.cid?.takeIf { it > 0 }
+
 
 @Immutable
 @Serializable
@@ -31,13 +41,13 @@ data class SmallCoverV2Item(
     @SerialName("idx") override val idx: Int = 0,
     @SerialName("official_icon") val officialIcon: Int = 0,
     @SerialName("param") val `param`: String = "", // 视频aid
-    @SerialName("player_args") val playerArgs: PlayerArgs, // 视频信息
+    @SerialName("player_args") val playerArgs: PlayerArgs? = null, // 接口可能不返回视频信息
     @SerialName("report_flow_data") val reportFlowData: String = "",
     @SerialName("talk_back") val talkBack: String = "",
     @SerialName("three_point") val threePoint: ThreePoint = ThreePoint(),
     @SerialName("three_point_v2") val threePointV2: List<ThreePointV2> = emptyList(),
     @SerialName("title") val title: String = "", // 视频标题
-    @SerialName("uri") val uri: String = "" // 跳转链接
+    @SerialName("uri") val uri: String = "", // 跳转链接
 ) : BaseCoverItem() {
     @Immutable
     @Serializable

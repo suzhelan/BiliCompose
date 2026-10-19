@@ -2,6 +2,8 @@ package top.suzhelan.bili.biz.shorts.entity
 
 import kotlinx.serialization.Serializable
 import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
+import top.suzhelan.bili.biz.recvids.entity.playbackAid
+import top.suzhelan.bili.biz.recvids.entity.playbackCid
 
 /**
  * 短视频项实体
@@ -52,9 +54,10 @@ data class ShortVideoItem(
          * 从推荐流视频项转换为短视频项
          *
          * @param item 推荐流视频项
-         * @return 短视频项
+         * @return 短视频项；缺少有效视频 AID 时返回 null
          */
-        fun fromSmallCoverV2Item(item: SmallCoverV2Item): ShortVideoItem {
+        fun fromSmallCoverV2Item(item: SmallCoverV2Item): ShortVideoItem? {
+            val aid = item.playbackAid ?: return null
             // 判断是否为竖屏视频
             // goto字段为 "vertical_av" 表示竖屏视频
             // 也可以是 "av" 但需要额外判断
@@ -62,14 +65,14 @@ data class ShortVideoItem(
                     item.cardGoto == "vertical_av"
 
             return ShortVideoItem(
-                aid = item.playerArgs.aid,
-                cid = item.playerArgs.cid,
+                aid = aid,
+                cid = item.playbackCid ?: 0,
                 title = item.title,
                 cover = item.cover,
                 author = item.args.upName,
                 authorId = item.args.upId,
                 authorAvatar = "",
-                duration = item.playerArgs.duration,
+                duration = item.playerArgs?.duration ?: 0,
                 playCount = item.coverLeftText1,
                 isVertical = isVertical
             )

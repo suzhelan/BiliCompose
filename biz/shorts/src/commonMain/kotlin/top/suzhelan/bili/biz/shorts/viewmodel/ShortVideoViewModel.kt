@@ -104,8 +104,8 @@ class ShortVideoViewModel : BaseViewModel() {
         LogUtils.d("ShortVideoViewModel: 初始化新会话 sessionId=${_sessionId.value}")
 
         // 如果有初始视频，添加到列表
-        if (initialVideo != null) {
-            val shortVideo = ShortVideoItem.fromSmallCoverV2Item(initialVideo)
+        val shortVideo = initialVideo?.let { ShortVideoItem.fromSmallCoverV2Item(it) }
+        if (shortVideo != null) {
             addVideoToPool(shortVideo, atStart = true)
             _isInitialized.value = true
 

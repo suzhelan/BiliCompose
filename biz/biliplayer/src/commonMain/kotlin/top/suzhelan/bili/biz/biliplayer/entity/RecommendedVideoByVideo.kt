@@ -123,9 +123,9 @@ data class RecommendedVideoByVideo(
         @SerialName("face")
         val face: String, // https://i0.hdslb.com/bfs/face/706ef370ccb11a46716f593fd8daf005d3c967f6.jpg
         @SerialName("fans")
-        val fans: Int, // 4298
+        val fans: Int = 0, // 4298，接口可能省略粉丝数
         @SerialName("like_num")
-        val likeNum: Int, // 508147
+        val likeNum: Int = 0, // 508147，接口可能省略获赞数
         @SerialName("mid")
         val mid: Long, // 3461582560430399
         @SerialName("name")

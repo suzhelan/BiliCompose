@@ -25,6 +25,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import org.openani.mediamp.compose.MediampPlayerSurface
+import top.suzhelan.bili.biz.biliplayer.api.VideoInfoApi
 import top.suzhelan.bili.biz.biliplayer.api.VideoPlayerApi
 import top.suzhelan.bili.biz.shorts.entity.ShortVideoItem
 import top.suzhelan.bili.player.controller.PlayerSyncController
@@ -69,9 +70,11 @@ fun ShortVideoPlayer(
 
         try {
             val api = VideoPlayerApi()
+            val cid = video.cid.takeIf { it > 0 }
+                ?: VideoInfoApi().getVideoDetails(aid = video.aid).data.cid
             val response = api.getPlayerInfo(
                 avid = video.aid,
-                cid = video.cid,
+                cid = cid,
                 qn = 64
             )
 
