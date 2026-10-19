@@ -21,9 +21,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.flow.first
 import top.suzhelan.bili.api.registerStatusListener
-import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
@@ -76,14 +74,14 @@ fun MediaUI(playerParams: PlayerParams, vm: VideoPlayerViewModel, modifier: Modi
                 )
             }
         }
-        onSuccess { video ->
+        onSuccess {
             vm.doPlayer(playerController)
             VideoPlayer(
                 controller = playerController,
                 modifier = if (isFullScreen || isFillMaxSize) modifier.fillMaxSize()
                 else modifier.fillMaxWidth().aspectRatio(16f / 9f)
             )
-            ProgressReport(playerParams, video, vm, playerController)
+            ProgressReport(playerParams, vm, playerController)
             BiliBackHandler(isFullScreen) {
                 playerController.reversalFullScreen()
             }
@@ -134,27 +132,17 @@ private fun AutoPaused(playerSyncController: PlayerSyncController) {
 
 /**
  * 不要把这个放在上面 容易导致局部重组 Compose智能重组单位是方法 这样重组也只会重组这个方法
- * 上报和回滚观看进度
+ * 上报观看进度
  */
 @Composable
 private fun ProgressReport(
     playerParams: PlayerParams,
-    argsItem: PlayerArgsItem,
     vm: VideoPlayerViewModel,
     playerSyncController: PlayerSyncController
 ) {
     // 完成态和毫秒进度统一换算，确保最后不足一秒也能上报。
     val currentPositionSeconds by playerSyncController.currentPositionSeconds.collectAsStateWithLifecycle()
 
-    LaunchedEffect(playerSyncController, argsItem) {
-        // 只恢复一次，避免时长随 timeline 更新时再次跳回历史位置。
-        val totalDurationMillis = playerSyncController.totalDurationMillis.first { it > 0 }
-        if (argsItem.lastPlayTime > 0//必须有上次观看的记录
-            && argsItem.lastPlayTime < totalDurationMillis - 500//如果已经看完
-        ) {
-            playerSyncController.seekTo(argsItem.lastPlayTime)
-        }
-    }
     LaunchedEffect(currentPositionSeconds) {
         //至少观看1秒才上报,不然会把上次观看记录直接顶掉
         if (currentPositionSeconds > 0) {

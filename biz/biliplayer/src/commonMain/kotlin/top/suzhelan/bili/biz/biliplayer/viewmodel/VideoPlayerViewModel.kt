@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import top.suzhelan.bili.api.BiliResponse
@@ -87,8 +88,16 @@ class VideoPlayerViewModel(
         MutableStateFlow<BiliResponse<PlayerParams>>(BiliResponse.Wait)
     val preparedPlayerParams = _preparedPlayerParams.asStateFlow()
     private var preparePlayerJob: Job? = null
+    private var requestedPlayerParams: PlayerParams? = null
 
     fun preparePlayer(params: PlayerParams) {
+        // 返回当前播放页时沿用已准备好的参数，避免重新加载并重建播放器 UI。
+        if (requestedPlayerParams == params &&
+            (_preparedPlayerParams.value is BiliResponse.Success || preparePlayerJob?.isActive == true)
+        ) {
+            return
+        }
+        requestedPlayerParams = params
         // 重试或切换视频时取消旧请求，避免旧结果覆盖当前状态。
         preparePlayerJob?.cancel()
         _preparedPlayerParams.value = BiliResponse.Loading
@@ -155,6 +164,13 @@ class VideoPlayerViewModel(
         val maxVideoUrl = allVideo.maxBy { it.id }
         val maxAudioUrl = audio?.maxBy { it.id }
         controller.play(maxVideoUrl.baseUrl, maxAudioUrl?.baseUrl ?: "")
+        // 历史进度只在播放器首次启动时恢复，任务随 ViewModel 保留，返回页面不会再次跳转。
+        launchTask {
+            val totalDurationMillis = controller.totalDurationMillis.first { it > 0 }
+            if (video.lastPlayTime > 0 && video.lastPlayTime < totalDurationMillis - 500) {
+                controller.seekTo(video.lastPlayTime)
+            }
+        }
     }
 
 

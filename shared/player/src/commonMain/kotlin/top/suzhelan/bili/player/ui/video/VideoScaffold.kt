@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import top.suzhelan.bili.player.controller.PlayerSyncController
 
 /**
@@ -35,48 +38,51 @@ fun VideoScaffold(
     bottomBar: @Composable BoxScope.() -> Unit,
     progressIndicator: @Composable BoxScope.() -> Unit,
     gesture: @Composable BoxWithConstraintsScope.() -> Unit,
-    modifier: Modifier
-) = Box(modifier = modifier.background(color = Color.Black)) {
-    //是否展示工具栏
-    val toolBarVisibility = playerSyncController.visibility
+    modifier: Modifier,
+) {
+    val isPlaying by playerSyncController.isPlayingState.collectAsStateWithLifecycle()
+    // 常亮跟随播放状态，与是否全屏无关；暂停或播放器离开组合时自动释放。
+    val keepScreenOnModifier = if (isPlaying) Modifier.keepScreenOn() else Modifier
+    Box(modifier = modifier.then(keepScreenOnModifier).background(color = Color.Black)) {
+        //是否展示工具栏
+        val toolBarVisibility = playerSyncController.visibility
 
-    //对于视频主界面 总是显示
-    video()
+        //对于视频主界面 总是显示
+        video()
 
-    val stateBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val navigationBarPadding =
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        val stateBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val navigationBarPadding =
+            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
-    //手势控制器 控制全屏的手势
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxSize().padding(
-            top = stateBarPadding + 30.dp,
-            bottom = navigationBarPadding
-        )
-    ) {
-        gesture()
-    }
+        //手势控制器 控制全屏的手势
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize().padding(
+                top = stateBarPadding + 30.dp,
+                bottom = navigationBarPadding
+            )
+        ) {
+            gesture()
+        }
 
-    //缓冲中...
-    Box(modifier = Modifier.align(Alignment.Center)) {
-        floatMessageCenter()
-    }
-    //顶栏
-    Box(
-        modifier = Modifier.align(Alignment.TopStart)
-    ) {
-        if (toolBarVisibility.topBar) {
-            topBar()
+        //缓冲中...
+        Box(modifier = Modifier.align(Alignment.Center)) {
+            floatMessageCenter()
+        }
+        //顶栏
+        Box(
+            modifier = Modifier.align(Alignment.TopStart)
+        ) {
+            if (toolBarVisibility.topBar) {
+                topBar()
+            }
+        }
+        //进度条 + 操作栏
+        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+            if (toolBarVisibility.bottomBar) {
+                bottomBar()
+            } else {
+                progressIndicator()
+            }
         }
     }
-    //进度条 + 操作栏
-    Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-        if (toolBarVisibility.bottomBar) {
-            bottomBar()
-        } else {
-            progressIndicator()
-        }
-    }
-
-
 }

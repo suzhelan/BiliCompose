@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.view.View
-import android.view.WindowManager
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
@@ -117,8 +116,6 @@ actual object PlayerMediaDataUtils {
                     context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 }
 
-                //屏幕常亮
-                context.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 // 使用 WindowInsetsController 隐藏系统 UI（推荐方式）
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                     context.window.insetsController?.let { controller ->
@@ -140,8 +137,6 @@ actual object PlayerMediaDataUtils {
             } else {
                 //取消方向锁定
                 context.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                //取消屏幕常亮
-                context.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 // 恢复系统 UI 显示
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                     context.window.insetsController?.show(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
