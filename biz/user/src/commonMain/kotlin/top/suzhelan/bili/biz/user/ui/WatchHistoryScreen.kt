@@ -21,9 +21,8 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -325,7 +324,7 @@ private fun WatchHistoryItem(
 ) {
     val navigator = LocalNavigation.currentOrThrow
     val progress = WatchVideoProgress(item.progress, item.duration)
-    ElevatedCard(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp, vertical = 5.dp)
@@ -345,7 +344,6 @@ private fun WatchHistoryItem(
                     }
                 },
             ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             if (isManaging) {

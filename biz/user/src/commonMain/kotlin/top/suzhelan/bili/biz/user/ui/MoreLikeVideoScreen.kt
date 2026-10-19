@@ -23,9 +23,8 @@ import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.ThumbUpOffAlt
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -268,10 +267,7 @@ private fun LikeVideoItem(video: LikeVideo, moreEnabled: Boolean, onMoreClick: (
     val navigator = LocalNavigation.currentOrThrow
 
     // 首先就是一个圆角卡片背景
-    ElevatedCard(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        ),
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)

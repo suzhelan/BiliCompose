@@ -20,7 +20,6 @@ import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +39,7 @@ import top.suzhelan.bili.biz.recvids.entity.SmallCoverV2Item
 import top.suzhelan.bili.biz.recvids.entity.playbackAid
 import top.suzhelan.bili.biz.recvids.entity.playbackCid
 import top.suzhelan.bili.shared.common.ui.autoSkeleton
+import top.suzhelan.bili.shared.common.ui.theme.TextColor
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
@@ -66,10 +66,7 @@ fun VideoCard(video: SmallCoverV2Item) {
     val isVerticalVideo = video.goto == "vertical_av"
 
     //首先就是一个圆角卡片背景
-    ElevatedCard(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        ),
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(225.dp)
@@ -180,6 +177,7 @@ private fun VideoInfoBar(video: SmallCoverV2Item) {
         lineHeight = 15.sp,
         overflow = TextOverflow.Ellipsis,
         fontWeight = FontWeight.Bold,
+        color = TextColor,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)
     )
     //最底下的up主等信息

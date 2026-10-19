@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -39,12 +40,13 @@ import top.suzhelan.bili.shared.common.util.toStringCount
 @Composable
 private fun PreViewConstraintCard(
     modifier: Modifier = Modifier,
-    content: @Composable ConstraintLayoutScope.() -> Unit
+    elevation: Dp = 5.dp,
+    content: @Composable ConstraintLayoutScope.() -> Unit,
 ) = ElevatedCard(
     modifier = modifier.fillMaxWidth()
         .padding(5.dp),
     elevation = CardDefaults.cardElevation(
-        defaultElevation = 5.dp
+        defaultElevation = elevation
     ),
 ) {
     ConstraintLayout(
@@ -124,6 +126,7 @@ fun VideoPreViewCard(
     danmaku: Int,
     onClick: () -> Unit
 ) = PreViewConstraintCard(
+    elevation = 0.dp,
     modifier = Modifier
         .clickable {
             onClick()

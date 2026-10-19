@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import top.suzhelan.bili.biz.biliplayer.entity.VideoCollection
 
 @Composable
-internal fun VideoCollectionCard(
+fun VideoCollectionCard(
     collection: VideoCollection,
     currentAid: Long,
     isPlaying: Boolean,
