@@ -1,7 +1,7 @@
 package top.suzhelan.bili.api.config
 
 import io.ktor.http.encodeURLParameter
-
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import top.suzhelan.bili.shared.common.ext.md5
 import kotlin.time.Clock
@@ -30,8 +30,8 @@ object BiliWbi {
 
 @Serializable
 data class WbiParams(
-    val imgKey: String,
-    val subKey: String,
+    @SerialName("imgKey") val imgKey: String,
+    @SerialName("subKey") val subKey: String,
 ) {
     private val mixinKeyEncTab = intArrayOf(
         46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49,
@@ -50,27 +50,17 @@ data class WbiParams(
         }
 
     @OptIn(ExperimentalTime::class)
-    fun enc(params: Map<String, Any?>): String {
-        val sortedList = params.entries.sortedBy { it.key }
-        val sorted = mutableMapOf<String, Any?>()
-        for ((key, value) in sortedList) {
-            sorted[key] = value
-        }
-        return buildString {
-            append(sorted.toQueryString())
-            val wts = Clock.System.now().epochSeconds
-            sorted["wts"] = wts
-            append("&wts=")
-            append(wts)
-            append("&w_rid=")
-            append((sorted.toQueryString() + mixinKey).md5())
-        }
+    fun enc(params: Map<String, Any?>, timestamp: Long = Clock.System.now().epochSeconds): String {
+        // wts 必须参与排序；中文、空格和特殊符号使用同一份规范化参数签名并发送。
+        val query = (params.filterKeys { it != "w_rid" && it != "wts" } + ("wts" to timestamp))
+            .filterValues { it != null }
+            .entries.sortedBy { it.key }
+            .joinToString("&") { (key, value) ->
+                val normalized = value.toString().filterNot { it in "!'()*" }
+                "${key.encodeURLParameter()}=${normalized.encodeURLParameter()}"
+            }
+        return "$query&w_rid=${(query + mixinKey).md5()}"
     }
-
-    private fun Map<String, Any?>.toQueryString() =
-        this.filterValues { it != null }.entries.joinToString("&") { (k, v) ->
-            "${k.encodeURLParameter()}=${v.toString().encodeURLParameter()}"
-        }
 }
 
 

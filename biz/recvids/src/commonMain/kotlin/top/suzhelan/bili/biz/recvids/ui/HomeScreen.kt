@@ -68,6 +68,7 @@ val pages = listOf("推荐", "热门")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(onClickAvatar: () -> Unit) {
+    val navigator = LocalNavigation.currentOrThrow
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val pagerState = rememberPagerState(pageCount = { pages.size }, initialPage = 0)
     Scaffold(
@@ -79,7 +80,9 @@ fun HomeContent(onClickAvatar: () -> Unit) {
                     scrolledContainerColor = MaterialTheme.colorScheme.background
                 ),
                 title = {
-                    HomeTopBar(onClickAvatar = onClickAvatar) {}
+                    HomeTopBar(onClickAvatar = onClickAvatar) {
+                        navigator.push(SharedScreen.Search)
+                    }
                 },
                 scrollBehavior = scrollBehavior
             )

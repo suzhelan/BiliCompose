@@ -43,5 +43,6 @@ include(
     ":biz:login",
     ":biz:recvids",
     ":biz:comment",
+    ":biz:search",
 )
 include(":app:android", ":app:desktop")

@@ -1,5 +1,6 @@
 package top.suzhelan.bili.shared.navigation
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -9,6 +10,13 @@ import kotlinx.serialization.Serializable
 sealed class SharedScreen(val path: String) : BiliScreenProvider {
     @Serializable
     data object Home : SharedScreen("/home")
+
+    @Serializable
+    data object Search : SharedScreen("/search")
+
+    @Serializable
+    data class SearchResults(@SerialName("keyword") val keyword: String) :
+        SharedScreen("/search/results")
 
     @Serializable
     data object Login : SharedScreen("/login")

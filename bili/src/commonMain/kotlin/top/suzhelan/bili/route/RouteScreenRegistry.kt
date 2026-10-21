@@ -1,6 +1,8 @@
 package top.suzhelan.bili.route
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -12,6 +14,9 @@ import top.suzhelan.bili.biz.home.HomeScreen
 import top.suzhelan.bili.biz.login.ui.LoginScreen
 import top.suzhelan.bili.biz.login.ui.ScanQRCodeScreen
 import top.suzhelan.bili.biz.login.ui.WebViewScreen
+import top.suzhelan.bili.biz.search.ui.SEARCH_EDIT_KEY
+import top.suzhelan.bili.biz.search.ui.SearchInputScreen
+import top.suzhelan.bili.biz.search.ui.SearchResultsScreen
 import top.suzhelan.bili.biz.user.ui.FavoriteDetailScreen
 import top.suzhelan.bili.biz.user.ui.FavoriteFoldersScreen
 import top.suzhelan.bili.biz.user.ui.FollowListScreen
@@ -26,6 +31,24 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 //路由表收拢所有路由,这样不会显得太臃肿
 fun NavGraphBuilder.routingScreenRegistration() {
+    composable<SharedScreen.Search> { entry ->
+        val editKeyword by entry.savedStateHandle.getStateFlow<String?>(SEARCH_EDIT_KEY, null)
+            .collectAsStateWithLifecycle()
+        SearchInputScreen(
+            editKeyword = editKeyword,
+            onEditConsumed = { entry.savedStateHandle[SEARCH_EDIT_KEY] = null })
+    }
+    composable<SharedScreen.SearchResults> { entry ->
+        val keyword = entry.toRoute<SharedScreen.SearchResults>().keyword
+        val navigation = LocalNavigation.currentOrThrow
+        SearchResultsScreen(keyword = keyword, onEditKeyword = {
+            navigation.navigator.previousBackStackEntry?.savedStateHandle?.set(
+                SEARCH_EDIT_KEY,
+                keyword
+            )
+            navigation.pop()
+        })
+    }
     composable<SharedScreen.Home> { backStackEntry ->
         HomeScreen()
     }
