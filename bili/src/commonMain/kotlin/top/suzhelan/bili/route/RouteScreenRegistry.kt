@@ -22,6 +22,7 @@ import top.suzhelan.bili.biz.user.ui.FavoriteFoldersScreen
 import top.suzhelan.bili.biz.user.ui.FollowListScreen
 import top.suzhelan.bili.biz.user.ui.MoreLikeVideoScreen
 import top.suzhelan.bili.biz.user.ui.NewUserProfileScreen
+import top.suzhelan.bili.biz.user.ui.UserCollectionScreen
 import top.suzhelan.bili.biz.user.ui.WatchHistoryScreen
 import top.suzhelan.bili.biz.user.ui.WatchLaterScreen
 import top.suzhelan.bili.shared.navigation.LocalNavigation
@@ -118,5 +119,9 @@ fun NavGraphBuilder.routingScreenRegistration() {
     composable<SharedScreen.FavoriteDetail> { backStackEntry ->
         val param = backStackEntry.toRoute<SharedScreen.FavoriteDetail>()
         FavoriteDetailScreen(param.mediaId)
+    }
+    composable<SharedScreen.UserCollection> { entry ->
+        val param = entry.toRoute<SharedScreen.UserCollection>()
+        UserCollectionScreen(param.mid, param.id, param.kind, param.title)
     }
 }

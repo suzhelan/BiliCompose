@@ -83,6 +83,7 @@ import top.suzhelan.bili.biz.user.viewmodel.FavoriteFoldersViewModel
 import top.suzhelan.bili.biz.user.viewmodel.MoreLikeViewModel
 import top.suzhelan.bili.biz.user.viewmodel.ProfileRelationState
 import top.suzhelan.bili.biz.user.viewmodel.UserProfileViewModel
+import top.suzhelan.bili.biz.user.viewmodel.UserSubmissionsViewModel
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.icons.LevelIcons
@@ -111,10 +112,14 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
     val vm = viewModel { UserProfileViewModel() }
     val moreLikeViewModel = viewModel { MoreLikeViewModel() }
     val favoriteFoldersViewModel = viewModel { FavoriteFoldersViewModel() }
+    val submissionsViewModel = viewModel { UserSubmissionsViewModel() }
+    var showCollections by rememberSaveable(mid) { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { 4 })
     val userSpaceRes by vm.userSpace.collectAsStateWithLifecycle()
     val profileRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
     val favoriteState by favoriteFoldersViewModel.state.collectAsStateWithLifecycle()
+    val submissionState by submissionsViewModel.videos.state.collectAsStateWithLifecycle()
+    val collectionState by submissionsViewModel.collections.state.collectAsStateWithLifecycle()
     val likesRefreshing by moreLikeViewModel.isRefreshing(mid).collectAsStateWithLifecycle()
     val refreshError by vm.refreshError.collectAsStateWithLifecycle()
     val relationState by vm.relationState.collectAsStateWithLifecycle()
@@ -124,12 +129,25 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
     val isPullRefreshing = pullRefreshingPage != null
     val pullState = rememberPullToRefreshState()
     val snackbarHostState = remember { SnackbarHostState() }
-    LifecycleResumeEffect(mid, vm, moreLikeViewModel, favoriteFoldersViewModel, isLoggedIn) {
+    LifecycleResumeEffect(
+        mid,
+        vm,
+        moreLikeViewModel,
+        favoriteFoldersViewModel,
+        submissionsViewModel,
+        isLoggedIn
+    ) {
         vm.getUserSpace(mid)
         vm.refreshRelation(mid)
         // 即使恢复时停留在“主页”Tab，先让已经读取过的点赞缓存失效。
         moreLikeViewModel.refresh(mid)
         if (pagerState.currentPage == 2) favoriteFoldersViewModel.load(mid, force = true)
+        submissionsViewModel.videos.invalidate()
+        submissionsViewModel.collections.invalidate()
+        if (pagerState.currentPage == 0) {
+            if (showCollections) submissionsViewModel.loadCollections(mid, force = true)
+            else submissionsViewModel.loadVideos(mid, force = true)
+        }
         onPauseOrDispose { }
     }
     LaunchedEffect(refreshError) {
@@ -142,11 +160,15 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
         pullRefreshingPage,
         profileRefreshing,
         favoriteState.isLoading,
-        likesRefreshing
+        likesRefreshing,
+        submissionState.isRefreshing,
+        collectionState.isRefreshing,
     ) {
         pullRefreshingPage?.let { page ->
             // 请求同步设置状态，直接读取以避开 Flow 尚未收集时提前结束的窗口。
             val listRefreshing = when (page) {
+                0 -> submissionsViewModel.videos.state.value.isRefreshing ||
+                        submissionsViewModel.collections.state.value.isRefreshing
                 2 -> favoriteFoldersViewModel.state.value.isLoading
                 3 -> moreLikeViewModel.isRefreshing(mid).value
                 else -> false
@@ -162,6 +184,8 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
             vm.getUserSpace(mid)
             vm.refreshRelation(mid)
             when (page) {
+                0 -> if (showCollections) submissionsViewModel.loadCollections(mid, force = true)
+                else submissionsViewModel.loadVideos(mid, force = true)
                 2 -> favoriteFoldersViewModel.load(mid, force = true)
                 3 -> moreLikeViewModel.refresh(mid)
             }
@@ -202,6 +226,9 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
                         showBackButton,
                         moreLikeViewModel,
                         favoriteFoldersViewModel,
+                        submissionsViewModel,
+                        showCollections,
+                        { showCollections = it },
                         pagerState,
                         pullRefreshingPage,
                         profileActions = {
@@ -230,6 +257,9 @@ private fun UserProfile(
     showBackButton: Boolean,
     moreLikeViewModel: MoreLikeViewModel,
     favoriteFoldersViewModel: FavoriteFoldersViewModel,
+    submissionsViewModel: UserSubmissionsViewModel,
+    showCollections: Boolean,
+    onShowCollections: (Boolean) -> Unit,
     pagerState: PagerState,
     pullRefreshingPage: Int?,
     profileActions: @Composable () -> Unit,
@@ -285,6 +315,15 @@ private fun UserProfile(
             modifier = Modifier.fillMaxSize(),
         ) { page ->
             when (page) {
+                0 -> UserSubmissionsContent(
+                    mid = userSpace.card.mid.toLong(),
+                    viewModel = submissionsViewModel,
+                    listState = listStates[page],
+                    isActive = pagerState.settledPage == page,
+                    showCollections = showCollections,
+                    onShowCollections = onShowCollections,
+                    showInitialIndicator = pullRefreshingPage != page,
+                )
                 2 -> FavoriteFoldersProfileContent(
                     mid = userSpace.card.mid.toLong(),
                     viewModel = favoriteFoldersViewModel,
