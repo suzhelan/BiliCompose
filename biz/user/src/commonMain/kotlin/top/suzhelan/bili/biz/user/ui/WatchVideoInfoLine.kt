@@ -136,8 +136,14 @@ fun WatchVideoMetadata(
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         if (author.isNotBlank()) WatchVideoMetadataLine(author)
         if (isUnavailable) WatchVideoMetadataLine("无法播放")
-        else if (progress != null) WatchVideoMetadataLine(progress.percentLabel)
-        if (viewAt > 0) WatchVideoMetadataLine("上次观看：${TimeUtils.formatTimeAgo(viewAt)}")
+        //合并进度和上次观看为一行
+        if (progress != null && viewAt > 0) WatchVideoMetadataLine(
+            "进度：${progress.percentLabel} - 上次观看：${
+                TimeUtils.formatTimeAgo(
+                    viewAt
+                )
+            }"
+        )
         if (pubdate > 0) WatchVideoMetadataLine("发布：${TimeUtils.formatTimeAgo(pubdate)}")
     }
 }
