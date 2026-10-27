@@ -126,6 +126,7 @@ fun VideoPlayer(controller: PlayerSyncController, modifier: Modifier = Modifier)
             // 统一手势控制器，处理点击、双击和拖拽手势
             GestureHost(
                 currentProgress = { progressSliderState.displayPositionRatio },
+                totalDurationMillis = { totalDurationMillis },
                 onClick = {
                     controller.showOrHideToolBar()
                 },

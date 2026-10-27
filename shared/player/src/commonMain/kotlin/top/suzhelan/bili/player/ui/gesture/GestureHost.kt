@@ -18,6 +18,7 @@ import androidx.compose.ui.input.pointer.pointerInput
  * @param onDoubleTap 双击
  *
  * @param currentProgress 当前进度
+ * @param totalDurationMillis 视频总时长，用于降低长视频的横向拖动灵敏度
  * @param onProgress 左右滑进度
  * @param onProgressFinished 拖动进度条结束
  *
@@ -35,6 +36,7 @@ fun BoxWithConstraintsScope.GestureHost(
     onDoubleTap: () -> Unit,
     //进度相关
     currentProgress: () -> Float,
+    totalDurationMillis: () -> Long,
     onProgress: (Float) -> Unit,
     onProgressFinished: () -> Unit,
     //当前系统音量
@@ -44,7 +46,7 @@ fun BoxWithConstraintsScope.GestureHost(
     //当前亮度
     currentBrightness: () -> Float,
     onBrightness: (Float) -> Unit,
-    onBrightnessFinished: () -> Unit
+    onBrightnessFinished: () -> Unit,
 ) {
     val maxWidth = constraints.maxWidth
     val maxHeight = constraints.maxHeight
@@ -52,6 +54,7 @@ fun BoxWithConstraintsScope.GestureHost(
     //拖拽进度
     val targetProgress = rememberGestureController(
         widthOrHeight = maxWidth,
+        sensitivity = { progressGestureSensitivity(totalDurationMillis()) },
         initialProgress = currentProgress,
         onChange = {
             onProgress(it)
@@ -92,7 +95,7 @@ fun BoxWithConstraintsScope.GestureHost(
                     onTap = { onClick() }
                 )
             }
-            .pointerInput(Unit) {
+            .pointerInput(targetProgress) {
                 //监听水平拖动
                 detectHorizontalDragGestures(
                     onDragStart = {
@@ -105,7 +108,7 @@ fun BoxWithConstraintsScope.GestureHost(
                         targetProgress.onFinish()
                     }
                 )
-            }.pointerInput(Unit) {
+            }.pointerInput(targetBrightness, targetVolume, maxWidth) {
                 detectVerticalDragGestures(
                     onVerticalDrag = { change, dragAmount ->
                         //判断触摸点是否是在屏幕中间1/3,如果是 不做任何操作
