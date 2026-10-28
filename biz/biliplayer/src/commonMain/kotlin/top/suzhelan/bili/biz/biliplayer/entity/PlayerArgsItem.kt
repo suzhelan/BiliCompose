@@ -96,7 +96,7 @@ data class PlayerArgsItem(
         @SerialName("format") val format: String = "",
         @SerialName("new_description") val newDesc: String = "",
         @SerialName("display_desc") val displayDesc: String = "",
-        @SerialName("codecs") val codecs: List<String> = emptyList()
+        @SerialName("codecs") val codecs: List<String>? = emptyList(),
     )
 
     @Serializable
