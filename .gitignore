@@ -18,6 +18,9 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 **/kcef-bundle
 **/cache
+.codegraph
+
+
 
 **.prop
 **.exe

@@ -1,5 +1,6 @@
 package top.suzhelan.bili.biz.user.api
 
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
@@ -12,17 +13,26 @@ import io.ktor.http.parameters
 import kotlinx.serialization.json.JsonElement
 import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
+import top.suzhelan.bili.api.bodyBiliSuccess
 import top.suzhelan.bili.api.getKtorClient
+import top.suzhelan.bili.biz.user.entity.CollectionFavoriteStatus
 import top.suzhelan.bili.biz.user.entity.FavoriteFolder
 import top.suzhelan.bili.biz.user.entity.FavoriteFolderList
 import top.suzhelan.bili.biz.user.entity.FavoriteResourcePage
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 
-class FavoriteApi {
-    private val client = getKtorClient(
+class FavoriteApi(
+    private val client: HttpClient = getKtorClient(
         baseUrl = AppConfig.API_BASE_URL,
         withCookie = true,
-    )
+    ),
+    private val csrfProvider: () -> String = {
+        LoginMapper.getUniversalLoginInfo().cookieInfo.cookies
+            .firstOrNull { it.name == "bili_jct" }
+            ?.value
+            ?: error("登录信息中缺少 bili_jct，无法执行收藏操作")
+    },
+) {
 
     suspend fun getCreatedFolders(
         upMid: Long,
@@ -44,6 +54,27 @@ class FavoriteApi {
             parameter("pn", page)
             parameter("ps", pageSize)
             parameter("platform", "web")
+        }.body()
+
+    /** 合集收藏状态独立于当前视频的收藏状态。 */
+    suspend fun isCollectionFavorite(aid: Long): Boolean {
+        val status = client.get("/x/web-interface/archive/relation") {
+            parameter("aid", aid)
+        }.bodyBiliSuccess<CollectionFavoriteStatus>().data
+        return status.isFavorite ?: error("接口未返回合集收藏状态，请重试")
+    }
+
+    /** 收藏整个 UGC 合集，不需要选择视频收藏夹。 */
+    suspend fun setCollectionFavorite(
+        seasonId: Long,
+        favorite: Boolean,
+    ): BiliResponse.SuccessOrNull<JsonElement> =
+        client.post(if (favorite) "/x/v3/fav/season/fav" else "/x/v3/fav/season/unfav") {
+            header(HttpHeaders.Referrer, "https://www.bilibili.com/")
+            setBody(formData {
+                append("season_id", seasonId.toString())
+                append("platform", "web")
+            })
         }.body()
 
     suspend fun getFolderInfo(mediaId: Long): BiliResponse.Success<FavoriteFolder> =
@@ -133,11 +164,6 @@ class FavoriteApi {
     private fun formData(block: io.ktor.http.ParametersBuilder.() -> Unit) =
         FormDataContent(parameters {
             block()
-            append("csrf", csrf())
+            append("csrf", csrfProvider())
         })
-
-    private fun csrf(): String = LoginMapper.getUniversalLoginInfo().cookieInfo.cookies
-        .firstOrNull { it.name == "bili_jct" }
-        ?.value
-        ?: error("登录信息中缺少 bili_jct，无法执行收藏操作")
 }

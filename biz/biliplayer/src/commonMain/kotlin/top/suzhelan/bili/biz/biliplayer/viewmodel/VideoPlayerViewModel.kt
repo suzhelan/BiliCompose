@@ -27,6 +27,7 @@ import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoTag
 import top.suzhelan.bili.biz.biliplayer.ui.controller.PlayerPool
 import top.suzhelan.bili.biz.common.util.PlayerUtils
+import top.suzhelan.bili.biz.user.api.FavoriteApi
 import top.suzhelan.bili.biz.user.api.WatchLaterApi
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.platform.BiliContext
@@ -46,8 +47,107 @@ class VideoPlayerViewModel(
     private val playerApi = VideoPlayerApi()
     private val api = VideoInfoApi()
     private val watchLaterApi = WatchLaterApi()
+    private val favoriteApi = FavoriteApi()
     private val collectionProgressRequests = Semaphore(2)
     private val collectionProgressCache = mutableMapOf<Triple<Long, Long, Long>, Long?>()
+
+    private val _collectionFavorite = MutableStateFlow(CollectionFavoriteState())
+    val collectionFavorite = _collectionFavorite.asStateFlow()
+    private var collectionFavoriteJob: Job? = null
+    private var collectionFavoriteTarget: Triple<Long?, Long, Long>? = null
+    private var collectionFavoriteVersion = 0
+
+    fun refreshCollectionFavorite(aid: Long, seasonId: Long) {
+        val accountId = currentAccountId()
+        val target = Triple(accountId, aid, seasonId)
+        val sameTarget = collectionFavoriteTarget == target
+        if (sameTarget && collectionFavoriteJob?.isActive == true) return
+        collectionFavoriteJob?.cancel()
+        val version = ++collectionFavoriteVersion
+        collectionFavoriteTarget = target
+        val previous = if (sameTarget) _collectionFavorite.value else CollectionFavoriteState(
+            accountId = accountId,
+            seasonId = seasonId,
+        )
+        _collectionFavorite.value = previous.copy(
+            isLoading = accountId != null && previous.isFavorite == null,
+            isSaving = false,
+            error = null,
+        )
+        if (accountId == null || seasonId <= 0) return
+        collectionFavoriteJob = launchTask {
+            try {
+                val favorite = favoriteApi.isCollectionFavorite(aid)
+                if (isCurrentCollectionTarget(target, version)) {
+                    _collectionFavorite.value =
+                        _collectionFavorite.value.copy(isFavorite = favorite)
+                }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                if (isCurrentCollectionTarget(target, version)) {
+                    _collectionFavorite.value = _collectionFavorite.value.copy(
+                        error = exception.message ?: "合集收藏状态加载失败",
+                    )
+                }
+            } finally {
+                if (isCurrentCollectionTarget(target, version)) {
+                    _collectionFavorite.value = _collectionFavorite.value.copy(isLoading = false)
+                }
+            }
+        }
+    }
+
+    fun toggleCollectionFavorite(aid: Long, seasonId: Long) {
+        val accountId = currentAccountId()
+        if (accountId == null) {
+            showMessageDialog(message = "请先登录后收藏合集")
+            return
+        }
+        val target = Triple(accountId, aid, seasonId)
+        val current = _collectionFavorite.value
+        // 状态未知时先查询，不能将查询失败当成“未收藏”。
+        if (collectionFavoriteTarget != target || current.isFavorite == null) {
+            refreshCollectionFavorite(aid, seasonId)
+            return
+        }
+        if (current.isLoading || current.isSaving || seasonId <= 0) return
+        // 用户点击优先于静默查询，旧查询不能覆盖这次提交的结果。
+        collectionFavoriteJob?.cancel()
+        val version = ++collectionFavoriteVersion
+        val favorite = !current.isFavorite
+        _collectionFavorite.value = current.copy(isSaving = true, error = null)
+        collectionFavoriteJob = launchTask {
+            try {
+                val response = favoriteApi.setCollectionFavorite(seasonId, favorite)
+                if (response.code != 0) error(response.message)
+                if (isCurrentCollectionTarget(target, version)) {
+                    _collectionFavorite.value =
+                        _collectionFavorite.value.copy(isFavorite = favorite)
+                }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                if (isCurrentCollectionTarget(target, version)) {
+                    showMessageDialog(message = exception.message ?: "合集收藏操作失败，请重试")
+                }
+            } finally {
+                if (isCurrentCollectionTarget(target, version)) {
+                    _collectionFavorite.value = _collectionFavorite.value.copy(isSaving = false)
+                }
+            }
+        }
+    }
+
+    private fun currentAccountId(): Long? =
+        if (LoginMapper.isLogin()) LoginMapper.getMid() else null
+
+    private fun isCurrentCollectionTarget(
+        target: Triple<Long?, Long, Long>,
+        version: Int,
+    ): Boolean =
+        collectionFavoriteVersion == version && collectionFavoriteTarget == target &&
+                currentAccountId() == target.first
 
     fun refreshCollectionWatchProgress() {
         collectionProgressCache.clear()
@@ -426,6 +526,15 @@ class VideoPlayerViewModel(
         api.reportViewingProgress(aid = aid, cid = cid, seconds = seconds)
     }
 }
+
+data class CollectionFavoriteState(
+    val accountId: Long? = null,
+    val seasonId: Long = 0,
+    val isFavorite: Boolean? = null,
+    val isLoading: Boolean = false,
+    val isSaving: Boolean = false,
+    val error: String? = null,
+)
 
 sealed class ActionState {
     object Like : ActionState()

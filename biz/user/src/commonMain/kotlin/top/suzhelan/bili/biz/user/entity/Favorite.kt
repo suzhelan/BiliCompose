@@ -4,6 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class CollectionFavoriteStatus(
+    @SerialName("season_fav") val isFavorite: Boolean? = null,
+)
+
+@Serializable
 data class FavoriteFolderList(
     @SerialName("count") val count: Int = 0,
     @SerialName("list") val list: List<FavoriteFolder>? = null,

@@ -74,8 +74,10 @@ import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
 import top.suzhelan.bili.biz.biliplayer.ui.dialog.SelectCoinCountDialog
 import top.suzhelan.bili.biz.biliplayer.ui.dialog.VideoCollectionDialog
+import top.suzhelan.bili.biz.biliplayer.ui.item.CollectionFavoriteButton
 import top.suzhelan.bili.biz.biliplayer.ui.item.SimpleVideoCard
 import top.suzhelan.bili.biz.biliplayer.ui.item.VideoCollectionCard
+import top.suzhelan.bili.biz.biliplayer.viewmodel.CollectionFavoriteState
 import top.suzhelan.bili.biz.biliplayer.viewmodel.VideoPlayerViewModel
 import top.suzhelan.bili.biz.user.entity.UserCard
 import top.suzhelan.bili.biz.user.ui.FavoriteVideoDialog
@@ -218,11 +220,34 @@ private fun VideoCollectionUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
     val isPlaying by controller.isPlayingState.collectAsStateWithLifecycle()
     val isLogin by LoginMapper.isLoginState
     val accountId = if (isLogin) LoginMapper.getMid() else null
+    val favoriteState by viewModel.collectionFavorite.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(videoInfo.aid, collection.id, accountId) {
+        viewModel.refreshCollectionFavorite(videoInfo.aid, collection.id)
+        onPauseOrDispose { }
+    }
+    val favoriteAction: @Composable (Boolean) -> Unit = { iconOnly ->
+        if (collection.id > 0) {
+            CollectionFavoriteButton(
+                state = favoriteState.takeIf {
+                    it.accountId == accountId && it.seasonId == collection.id
+                } ?: CollectionFavoriteState(isLoading = isLogin),
+                iconOnly = iconOnly,
+                onClick = {
+                    if (isLogin) {
+                        viewModel.toggleCollectionFavorite(videoInfo.aid, collection.id)
+                    } else {
+                        navigator.push(SharedScreen.Login)
+                    }
+                },
+            )
+        }
+    }
     var showCollection by remember(videoInfo.aid, collection.id) { mutableStateOf(false) }
     VideoCollectionCard(
         collection = collection,
         currentAid = videoInfo.aid,
         isPlaying = isPlaying,
+        favoriteAction = { favoriteAction(true) },
         onClick = {
             viewModel.refreshCollectionWatchProgress()
             showCollection = true
@@ -235,6 +260,7 @@ private fun VideoCollectionUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
             currentPositionMillis = controller.currentPositionMillis,
             accountId = accountId,
             loadWatchProgress = viewModel::getCollectionWatchProgress,
+            favoriteAction = { favoriteAction(false) },
             onDismissRequest = { showCollection = false },
             onVideoClick = { episode ->
                 showCollection = false

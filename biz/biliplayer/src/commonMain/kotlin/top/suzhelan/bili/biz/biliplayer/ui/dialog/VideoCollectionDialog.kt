@@ -39,6 +39,7 @@ internal fun VideoCollectionDialog(
     loadWatchProgress: suspend (aid: Long, cid: Long) -> Long?,
     onDismissRequest: () -> Unit,
     onVideoClick: (VideoCollection.Episode) -> Unit,
+    favoriteAction: @Composable () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -58,6 +59,7 @@ internal fun VideoCollectionDialog(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
+                favoriteAction()
                 IconButton(onClick = onDismissRequest) {
                     Icon(Icons.Outlined.Close, contentDescription = "关闭合集列表")
                 }
