@@ -147,7 +147,7 @@ object BiliWebClient {
     )
 }
 
-internal fun decodeWebJson(text: String): JsonObject =
+fun decodeWebJson(text: String): JsonObject =
     HttpJsonDecoder.parseToJsonElement(text) as? JsonObject
         ?: throw SerializationException("无效的 Web 接口响应")
 

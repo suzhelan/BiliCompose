@@ -32,7 +32,7 @@ import top.suzhelan.bili.shared.common.ui.theme.TipColor
  * 并在接口成功后把返回的新评论插入到对应位置。
  */
 @Composable
-internal fun CommentInputBar(
+fun CommentInputBar(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,

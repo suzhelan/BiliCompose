@@ -58,7 +58,7 @@ data class SubmissionCursor(
     @SerialName("is_last_watched_arc") val isLastWatched: Boolean = false,
 )
 
-internal fun parseSubmissionDuration(length: String): Int {
+fun parseSubmissionDuration(length: String): Int {
     val parts = length.trim().split(':')
     if (parts.size !in 2..3) return 0
     var seconds = 0L
@@ -72,20 +72,20 @@ internal fun parseSubmissionDuration(length: String): Int {
 }
 
 @Serializable
-internal data class SubmissionData(
+data class SubmissionData(
     @SerialName("list") val list: SubmissionList,
     @SerialName("page") val page: SubmissionPageInfo,
 )
 
 @Serializable
-internal data class SubmissionList(
+data class SubmissionList(
     @SerialName("vlist") val videos: List<SubmissionVideo>?,
     // 无投稿时有些响应使用 [] 或 null，而不是分区字典。
     @SerialName("tlist") val categories: JsonElement? = null,
 )
 
 @Serializable
-internal data class SubmissionPageInfo(
+data class SubmissionPageInfo(
     @SerialName("count") val count: Int,
     @SerialName("pn") val number: Int = 1,
     @SerialName("ps") val size: Int = 30,
@@ -105,13 +105,13 @@ data class UserCollection(
 }
 
 @Serializable
-internal data class CollectionEntry(
+data class CollectionEntry(
     @SerialName("meta") val meta: CollectionMeta,
     @SerialName("archives") val archives: List<CollectionArchive> = emptyList(),
 )
 
 @Serializable
-internal data class CollectionMeta(
+data class CollectionMeta(
     @SerialName("season_id") val seasonId: Long = 0,
     @SerialName("series_id") val seriesId: Long = 0,
     @SerialName("name") val name: String = "",
@@ -121,7 +121,7 @@ internal data class CollectionMeta(
 )
 
 @Serializable
-internal data class CollectionArchive(
+data class CollectionArchive(
     @SerialName("aid") val aid: Long = 0,
     @SerialName("bvid") val bvid: String = "",
     @SerialName("title") val title: String = "",
@@ -146,7 +146,7 @@ internal data class CollectionArchive(
 }
 
 @Serializable
-internal data class CollectionArchiveStat(
+data class CollectionArchiveStat(
     @SerialName("view") val view: JsonPrimitive? = null,
     @SerialName("danmaku") val danmaku: JsonPrimitive? = null,
     @SerialName("reply") val reply: JsonPrimitive? = null,
@@ -160,7 +160,7 @@ data class ProfilePage<T>(
     val notice: String? = null,
 )
 
-internal fun String.secureImageUrl(): String = when {
+fun String.secureImageUrl(): String = when {
     startsWith("//") -> "https:$this"
     startsWith("http://") -> replaceFirst("http://", "https://")
     else -> this

@@ -136,7 +136,7 @@ private const val MAX_COIN_COUNT = 2
  *
  * 页面 overlay 和底部进度条共用同一个值，避免信息区和操作区与底部预留 Row 重叠。
  */
-internal val VerticalBottomReservedHeight = 80.dp
+val VerticalBottomReservedHeight = 80.dp
 
 /**
  * 竖屏页底部预留区域。
@@ -145,7 +145,7 @@ internal val VerticalBottomReservedHeight = 80.dp
  * 停止操作 3 秒后自动收回，避免长期遮挡视频信息。
  */
 @Composable
-internal fun VerticalBottomProgressArea(
+fun VerticalBottomProgressArea(
     controller: PlayerSyncController,
     modifier: Modifier = Modifier,
     onPreview: (positionMillis: Long, totalDurationMillis: Long) -> Unit,

@@ -44,7 +44,7 @@ import top.suzhelan.bili.shared.common.util.toStringCount
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun VerticalVideoBottomSheet(
+fun VerticalVideoBottomSheet(
     video: VerticalVideoWrap,
     initialTab: VerticalSheetTab,
     onDismissRequest: () -> Unit,
@@ -171,7 +171,7 @@ private fun MetaText(label: String, value: String) {
     }
 }
 
-internal enum class VerticalSheetTab(val title: String) {
+enum class VerticalSheetTab(val title: String) {
     Introduction("简介"),
     Comment("评论")
 }

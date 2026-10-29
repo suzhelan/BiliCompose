@@ -5,7 +5,7 @@ import top.suzhelan.bili.shared.navigation.SharedScreen
 
 private val collectionVideoLink = Regex("^bilibili://video/([0-9]+)(?:[/?#].*)?$")
 
-internal fun FavoriteFolder.toOpenScreen(): SharedScreen? {
+fun FavoriteFolder.toOpenScreen(): SharedScreen? {
     if (!canOpen) return null
     if (!isCollection) return SharedScreen.FavoriteDetail(id)
 

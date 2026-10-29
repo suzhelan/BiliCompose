@@ -14,11 +14,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,7 +39,7 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
  * 左侧底部信息区：博主信息、关注按钮、标题和简介预览。
  */
 @Composable
-internal fun VerticalInfoPanel(
+fun VerticalInfoPanel(
     video: VerticalVideoWrap,
     onMoreDescriptionClick: () -> Unit,
     onFollowClick: () -> Unit,

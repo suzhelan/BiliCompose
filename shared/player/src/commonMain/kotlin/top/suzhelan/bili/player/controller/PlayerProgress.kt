@@ -21,7 +21,7 @@ data class PlayerProgress(
         }
 }
 
-internal fun playerProgressFlow(
+fun playerProgressFlow(
     positionMillis: StateFlow<Long>,
     durationMillis: StateFlow<Long>,
     playbackState: StateFlow<PlaybackState>,

@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import top.suzhelan.bili.biz.biliplayer.viewmodel.CollectionFavoriteState
 
 @Composable
-internal fun CollectionFavoriteButton(
+fun CollectionFavoriteButton(
     state: CollectionFavoriteState,
     onClick: () -> Unit,
     iconOnly: Boolean = false,

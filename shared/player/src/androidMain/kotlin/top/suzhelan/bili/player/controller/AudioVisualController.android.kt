@@ -10,8 +10,8 @@ import androidx.compose.ui.platform.LocalContext
 import kotlin.math.roundToInt
 
 
-internal class AndroidAudioVisualManager(
-    private val context: Context
+class AndroidAudioVisualManager(
+    private val context: Context,
 ) : AudioVisualManager {
     private val audioManager by lazy {
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager

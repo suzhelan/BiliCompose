@@ -21,7 +21,7 @@ import kotlin.math.PI
 import kotlin.math.sin
 
 @Composable
-internal fun PlayingWaveIcon(isPlaying: Boolean, modifier: Modifier = Modifier) {
+fun PlayingWaveIcon(isPlaying: Boolean, modifier: Modifier = Modifier) {
     val phase = if (isPlaying) {
         val transition = rememberInfiniteTransition(label = "播放波浪")
         val animatedPhase by transition.animateFloat(

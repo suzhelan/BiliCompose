@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,6 +73,7 @@ import top.suzhelan.bili.api.registerStatusListener
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
+import top.suzhelan.bili.biz.biliplayer.ui.dialog.CollectionSortOrder
 import top.suzhelan.bili.biz.biliplayer.ui.dialog.SelectCoinCountDialog
 import top.suzhelan.bili.biz.biliplayer.ui.dialog.VideoCollectionDialog
 import top.suzhelan.bili.biz.biliplayer.ui.item.CollectionFavoriteButton
@@ -243,6 +245,9 @@ private fun VideoCollectionUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
         }
     }
     var showCollection by remember(videoInfo.aid, collection.id) { mutableStateOf(false) }
+    var collectionSortOrderName by rememberSaveable(collection.id) {
+        mutableStateOf(CollectionSortOrder.Default.name)
+    }
     VideoCollectionCard(
         collection = collection,
         currentAid = videoInfo.aid,
@@ -261,6 +266,9 @@ private fun VideoCollectionUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
             accountId = accountId,
             loadWatchProgress = viewModel::getCollectionWatchProgress,
             favoriteAction = { favoriteAction(false) },
+            sortOrder = CollectionSortOrder.entries.firstOrNull { it.name == collectionSortOrderName }
+                ?: CollectionSortOrder.Default,
+            onSortOrderChange = { collectionSortOrderName = it.name },
             onDismissRequest = { showCollection = false },
             onVideoClick = { episode ->
                 showCollection = false

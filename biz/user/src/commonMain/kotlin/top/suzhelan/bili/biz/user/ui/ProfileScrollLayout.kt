@@ -22,7 +22,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import kotlin.math.roundToInt
 
-internal class ProfileScrollState(initialOffset: Float = 0f) {
+class ProfileScrollState(initialOffset: Float = 0f) {
     var offset by mutableFloatStateOf(initialOffset)
         private set
 
@@ -53,7 +53,7 @@ internal class ProfileScrollState(initialOffset: Float = 0f) {
  * 外层只消费头部位移，不用 verticalScroll，正文始终以有限高度测量。
  */
 @Composable
-internal fun ProfileScrollLayout(
+fun ProfileScrollLayout(
     state: ProfileScrollState,
     listState: LazyListState,
     modifier: Modifier = Modifier,

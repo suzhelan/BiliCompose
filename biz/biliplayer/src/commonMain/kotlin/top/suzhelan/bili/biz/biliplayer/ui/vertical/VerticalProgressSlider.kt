@@ -33,7 +33,7 @@ data class ProgressPreview(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun VerticalAdaptiveProgressSlider(
+fun VerticalAdaptiveProgressSlider(
     state: PlayerProgressSliderState,
     isExpanded: Boolean,
     onUserInteraction: () -> Unit,

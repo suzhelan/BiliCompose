@@ -32,7 +32,7 @@ import top.suzhelan.bili.shared.common.util.toStringCount
  * 右侧底部操作栏：点赞、评论、投币、收藏、分享。
  */
 @Composable
-internal fun VerticalActionBar(
+fun VerticalActionBar(
     video: VerticalVideoWrap,
     onLikeClick: () -> Unit,
     onCommentClick: () -> Unit,

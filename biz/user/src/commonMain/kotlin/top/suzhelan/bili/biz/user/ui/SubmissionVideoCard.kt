@@ -43,7 +43,7 @@ import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
 
-internal fun SubmissionVideo.watchProgress(history: WatchHistoryPage.Item?): WatchVideoProgress? {
+fun SubmissionVideo.watchProgress(history: WatchHistoryPage.Item?): WatchVideoProgress? {
     if (history != null) return WatchVideoProgress(
         history.progress,
         history.duration.takeIf { it > 0 } ?: durationSeconds)
@@ -52,7 +52,7 @@ internal fun SubmissionVideo.watchProgress(history: WatchHistoryPage.Item?): Wat
 }
 
 @Composable
-internal fun SubmissionVideoCard(
+fun SubmissionVideoCard(
     video: SubmissionVideo,
     history: WatchHistoryPage.Item?,
     showWatchState: Boolean,

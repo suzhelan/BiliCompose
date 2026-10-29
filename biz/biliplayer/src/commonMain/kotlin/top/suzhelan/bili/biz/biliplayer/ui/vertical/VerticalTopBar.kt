@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
  * 短视频顶栏：返回、当前观看人数、搜索和更多入口。
  */
 @Composable
-internal fun VerticalTopBar(
+fun VerticalTopBar(
     onlineCountText: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,

@@ -128,7 +128,7 @@ object UserSubmissionApi {
         )
     }
 
-    internal fun decodeVideos(data: JsonObject, page: Int): ProfilePage<SubmissionVideo> {
+    fun decodeVideos(data: JsonObject, page: Int): ProfilePage<SubmissionVideo> {
         checkRisk(data)
         val result = json.decodeFromJsonElement<SubmissionData>(data)
         val categories = when (val value = result.list.categories) {
@@ -147,7 +147,7 @@ object UserSubmissionApi {
         )
     }
 
-    internal fun decodeCollections(data: JsonObject, page: Int): ProfilePage<UserCollection> {
+    fun decodeCollections(data: JsonObject, page: Int): ProfilePage<UserCollection> {
         val lists =
             data["items_lists"] as? JsonObject ?: throw SerializationException("缺少合集与系列数据")
 
@@ -180,7 +180,7 @@ object UserSubmissionApi {
         return ProfilePage(items, items.isNotEmpty() && page.toLong() * size < total, total)
     }
 
-    internal fun decodeArchives(data: JsonObject, page: Int): ProfilePage<SubmissionVideo> {
+    fun decodeArchives(data: JsonObject, page: Int): ProfilePage<SubmissionVideo> {
         val videos = array(data, "archives").map {
             json.decodeFromJsonElement<CollectionArchive>(it).toVideo()
         }
@@ -201,7 +201,7 @@ object UserSubmissionApi {
 }
 
 /** 备用接口仅支持这两种未筛选查询；一轮分页固定来源，刷新时再尝试主接口。 */
-internal fun submissionPagesWithFallback(
+fun submissionPagesWithFallback(
     order: SubmissionOrder,
     tid: Int,
     primary: suspend (Int) -> ProfilePage<SubmissionVideo>,
