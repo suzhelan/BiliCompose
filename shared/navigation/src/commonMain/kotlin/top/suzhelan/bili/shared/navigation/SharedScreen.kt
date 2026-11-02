@@ -26,12 +26,17 @@ sealed class SharedScreen(val path: String) : BiliScreenProvider {
 
     @Serializable
     data class VideoPlayer(
-        val aid: Long? = null,
-        val bvid: String? = null,
-        val epid: String? = null,
-        val seasonId: String? = null,
-        val cid: Long? = null,
-        val qn: Int = 80,
+        @SerialName("aid") val aid: Long? = null,
+        @SerialName("bvid") val bvid: String? = null,
+        @SerialName("epid") val epid: String? = null,
+        @SerialName("seasonId") val seasonId: String? = null,
+        @SerialName("cid") val cid: Long? = null,
+        @SerialName("qn") val qn: Int = 80,
+        @SerialName("collectionMid") val collectionMid: Long? = null,
+        @SerialName("collectionId") val collectionId: Long? = null,
+        @SerialName("collectionKind") val collectionKind: String? = null,
+        @SerialName("collectionTitle") val collectionTitle: String = "",
+        @SerialName("collectionNewestFirst") val collectionNewestFirst: Boolean = false,
     ) : SharedScreen("/video")
 
     @Serializable

@@ -25,6 +25,7 @@ import top.suzhelan.bili.biz.user.ui.NewUserProfileScreen
 import top.suzhelan.bili.biz.user.ui.UserCollectionScreen
 import top.suzhelan.bili.biz.user.ui.WatchHistoryScreen
 import top.suzhelan.bili.biz.user.ui.WatchLaterScreen
+import top.suzhelan.bili.shared.navigation.CollectionPlaybackSource
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
@@ -61,14 +62,27 @@ fun NavGraphBuilder.routingScreenRegistration() {
     }
     composable<SharedScreen.VideoPlayer> { backStackEntry ->
         val param = backStackEntry.toRoute<SharedScreen.VideoPlayer>()
+        val collectionMid = param.collectionMid
+        val collectionId = param.collectionId
+        val collectionKind = param.collectionKind
         VideoPlayerScreen(
             playerParams = PlayerParams(
                 aid = param.aid,
                 bvid = param.bvid,
                 epid = param.epid,
                 seasonId = param.seasonId,
-                cid = param.cid
-            )
+                cid = param.cid,
+                qn = param.qn,
+            ),
+            collectionSource = if (collectionMid != null && collectionId != null && collectionKind != null) {
+                CollectionPlaybackSource(
+                    mid = collectionMid,
+                    id = collectionId,
+                    kind = collectionKind,
+                    title = param.collectionTitle,
+                    newestFirst = param.collectionNewestFirst,
+                )
+            } else null,
         )
     }
     composable<SharedScreen.NewVertical> { backStackEntry ->

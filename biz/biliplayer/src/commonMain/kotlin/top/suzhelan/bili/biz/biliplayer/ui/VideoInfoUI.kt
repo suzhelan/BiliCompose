@@ -41,13 +41,13 @@ import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +73,6 @@ import top.suzhelan.bili.api.registerStatusListener
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.ui.controller.rememberPlayerController
-import top.suzhelan.bili.biz.biliplayer.ui.dialog.CollectionSortOrder
 import top.suzhelan.bili.biz.biliplayer.ui.dialog.SelectCoinCountDialog
 import top.suzhelan.bili.biz.biliplayer.ui.dialog.VideoCollectionDialog
 import top.suzhelan.bili.biz.biliplayer.ui.item.CollectionFavoriteButton
@@ -89,6 +88,7 @@ import top.suzhelan.bili.comment.ui.CommentContent
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.ext.dismiss
 import top.suzhelan.bili.shared.common.ext.show
+import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.PagerBottomIndicator
 import top.suzhelan.bili.shared.common.ui.ProvideContentColor
 import top.suzhelan.bili.shared.common.ui.autoSkeleton
@@ -216,7 +216,19 @@ private fun VideoDetailsUI(
 
 @Composable
 private fun VideoCollectionUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewModel) {
-    val collection = videoInfo.ugcSeason ?: return
+    val playback by viewModel.collectionPlayback.collectAsStateWithLifecycle()
+    if (playback.loading) {
+        LoadingIndicator(
+            modifier = Modifier.fillMaxWidth().height(140.dp), text = "加载合集…",
+        )
+        return
+    }
+    if (playback.error != null) {
+        Text(playback.error.orEmpty(), modifier = Modifier.padding(12.dp))
+        TextButton(onClick = viewModel::loadSourceCollection) { Text("重试加载合集") }
+        return
+    }
+    val collection = playback.collection ?: return
     val navigator = LocalNavigation.currentOrThrow
     val controller = rememberPlayerController(viewModel)
     val isPlaying by controller.isPlayingState.collectAsStateWithLifecycle()
@@ -224,11 +236,14 @@ private fun VideoCollectionUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
     val accountId = if (isLogin) LoginMapper.getMid() else null
     val favoriteState by viewModel.collectionFavorite.collectAsStateWithLifecycle()
     LifecycleResumeEffect(videoInfo.aid, collection.id, accountId) {
-        viewModel.refreshCollectionFavorite(videoInfo.aid, collection.id)
+        if (viewModel.canFavoriteCollection) viewModel.refreshCollectionFavorite(
+            videoInfo.aid,
+            collection.id
+        )
         onPauseOrDispose { }
     }
     val favoriteAction: @Composable (Boolean) -> Unit = { iconOnly ->
-        if (collection.id > 0) {
+        if (collection.id > 0 && viewModel.canFavoriteCollection) {
             CollectionFavoriteButton(
                 state = favoriteState.takeIf {
                     it.accountId == accountId && it.seasonId == collection.id
@@ -245,13 +260,12 @@ private fun VideoCollectionUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
         }
     }
     var showCollection by remember(videoInfo.aid, collection.id) { mutableStateOf(false) }
-    var collectionSortOrderName by rememberSaveable(collection.id) {
-        mutableStateOf(CollectionSortOrder.Default.name)
-    }
     VideoCollectionCard(
         collection = collection,
         currentAid = videoInfo.aid,
         isPlaying = isPlaying,
+        locked = playback.locked,
+        sortOrder = playback.sortOrder,
         favoriteAction = { favoriteAction(true) },
         onClick = {
             viewModel.refreshCollectionWatchProgress()
@@ -266,21 +280,14 @@ private fun VideoCollectionUI(videoInfo: VideoInfo, viewModel: VideoPlayerViewMo
             accountId = accountId,
             loadWatchProgress = viewModel::getCollectionWatchProgress,
             favoriteAction = { favoriteAction(false) },
-            sortOrder = CollectionSortOrder.entries.firstOrNull { it.name == collectionSortOrderName }
-                ?: CollectionSortOrder.Default,
-            onSortOrderChange = { collectionSortOrderName = it.name },
+            sortOrder = playback.sortOrder,
+            onSortOrderChange = viewModel::setCollectionSortOrder,
+            locked = playback.locked,
+            onToggleLock = viewModel::toggleCollectionLock,
             onDismissRequest = { showCollection = false },
             onVideoClick = { episode ->
                 showCollection = false
-                if (episode.aid != videoInfo.aid) {
-                    navigator.push(
-                        SharedScreen.VideoPlayer(
-                            aid = episode.aid.takeIf { it > 0 },
-                            bvid = episode.bvid.takeIf { it.isNotBlank() },
-                            cid = episode.cid.takeIf { it > 0 },
-                        )
-                    )
-                }
+                viewModel.playCollectionEpisode(episode)
             },
         )
     }

@@ -61,7 +61,9 @@ actual object PlayerMediaDataUtils {
     ): () -> Unit {
         val exoPlayer = mediampPlayer.impl as ExoPlayer
         val videoSource = AndroidPlayerParam.buildMediaSource(videoUrl)
-        val audioSource = AndroidPlayerParam.buildMediaSource(audioUrl)
+        val mediaSource = if (audioUrl.isBlank()) videoSource else {
+            MergingMediaSource(videoSource, AndroidPlayerParam.buildMediaSource(audioUrl))
+        }
         val mediaProperties = mediampPlayer.mediaProperties as MutableStateFlow<MediaProperties?>
         val playbackState = mediampPlayer.playbackState as MutableStateFlow<PlaybackState>
         val listener = object : Player.Listener {
@@ -96,7 +98,7 @@ actual object PlayerMediaDataUtils {
         mediaProperties.value = null
         exoPlayer.apply {
             addListener(listener)
-            setMediaSource(MergingMediaSource(videoSource, audioSource))
+            setMediaSource(mediaSource)
             prepare()
         }
         return { exoPlayer.removeListener(listener) }

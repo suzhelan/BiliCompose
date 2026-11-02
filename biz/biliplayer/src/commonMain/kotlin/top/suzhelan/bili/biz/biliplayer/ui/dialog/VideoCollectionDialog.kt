@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -52,6 +54,8 @@ fun VideoCollectionDialog(
     favoriteAction: @Composable () -> Unit,
     sortOrder: CollectionSortOrder,
     onSortOrderChange: (CollectionSortOrder) -> Unit,
+    locked: Boolean,
+    onToggleLock: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val sortedEpisodes = remember(collection, sortOrder) {
@@ -123,6 +127,14 @@ fun VideoCollectionDialog(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 favoriteAction()
+                TextButton(onClick = onToggleLock) {
+                    Icon(
+                        if (locked) Icons.Outlined.Lock else Icons.Outlined.LockOpen,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(if (locked) "合集模式已开启" else "开启合集模式")
+                }
                 CollectionSortPopup(
                     sortOrder = sortOrder,
                     onSortOrderChange = {

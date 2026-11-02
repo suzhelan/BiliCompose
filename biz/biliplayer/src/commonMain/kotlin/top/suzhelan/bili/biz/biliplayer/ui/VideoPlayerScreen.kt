@@ -8,11 +8,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import top.suzhelan.bili.api.BiliResponse
@@ -25,18 +30,34 @@ import top.suzhelan.bili.shared.common.ui.LoadingIndicator
 import top.suzhelan.bili.shared.common.ui.ScreenSizeCalculation
 import top.suzhelan.bili.shared.common.ui.dialog.DialogHandler
 import top.suzhelan.bili.shared.common.ui.isPhone
+import top.suzhelan.bili.shared.navigation.CollectionPlaybackSource
+import top.suzhelan.bili.shared.navigation.NavigationPageEffect
 
 
 @Composable
 fun VideoPlayerScreen(
-    playerParams: PlayerParams
+    playerParams: PlayerParams,
+    collectionSource: CollectionPlaybackSource? = null,
 ) {
     val context = BiliLocalContext.current
     val viewModel = viewModel { VideoPlayerViewModel(context) }
+    NavigationPageEffect(viewModel::setPlaybackPageActive)
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(viewModel) { viewModel.initializePlayer(playerParams, collectionSource) }
+    DisposableEffect(viewModel, lifecycle) {
+        viewModel.setPlaybackForeground(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+        val observer = LifecycleEventObserver { _, _ ->
+            viewModel.setPlaybackForeground(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+        }
+        lifecycle.addObserver(observer)
+        onDispose {
+            viewModel.setPlaybackForeground(false)
+            lifecycle.removeObserver(observer)
+        }
+    }
     AppScaffold {
         DialogHandler(viewModel)
         PlayerUI(
-            playerParams = playerParams,
             viewModel = viewModel
         )
     }
@@ -45,13 +66,9 @@ fun VideoPlayerScreen(
 
 @Composable
 private fun PlayerUI(
-    playerParams: PlayerParams,
     viewModel: VideoPlayerViewModel,
 ) {
     val preparedParams by viewModel.preparedPlayerParams.collectAsStateWithLifecycle()
-    LaunchedEffect(playerParams) {
-        viewModel.preparePlayer(playerParams)
-    }
     val fixParam = when (val state = preparedParams) {
         is BiliResponse.Success -> state.data
         is BiliResponse.Error -> {
@@ -64,7 +81,7 @@ private fun PlayerUI(
                     text = if (state.code == -404) "视频信息不存在或暂不可用"
                     else "获取视频信息失败：${state.msg}"
                 )
-                Button(onClick = { viewModel.preparePlayer(playerParams) }) {
+                Button(onClick = viewModel::retryPlayer) {
                     Text("重试")
                 }
             }
@@ -83,7 +100,7 @@ private fun PlayerUI(
             Column(modifier = Modifier.fillMaxSize()) {
                 MediaUI(fixParam, viewModel)
                 if (!controller.isFullScreen) {
-                    VideoInfoUI(fixParam, viewModel)
+                    key(fixParam.aid, fixParam.cid) { VideoInfoUI(fixParam, viewModel) }
                 }
             }
         } else {
@@ -91,7 +108,9 @@ private fun PlayerUI(
             Row(modifier = Modifier.fillMaxSize()) {
                 MediaUI(fixParam, viewModel, modifier = Modifier.weight(2f))
                 if (!controller.isFullScreen) {
-                    VideoInfoUI(fixParam, viewModel, modifier = Modifier.weight(1f))
+                    key(fixParam.aid, fixParam.cid) {
+                        VideoInfoUI(fixParam, viewModel, modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }

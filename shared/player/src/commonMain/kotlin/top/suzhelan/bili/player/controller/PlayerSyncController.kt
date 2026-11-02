@@ -14,6 +14,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -98,6 +99,9 @@ class PlayerSyncController(
     val playbackFinished: StateFlow<Boolean> = progress.map { it.finished }
         .stateIn(playerStateScope, SharingStarted.Eagerly, false)
 
+    val playbackFailed: StateFlow<Boolean> = playbackState.map { it == PlaybackState.ERROR }
+        .stateIn(playerStateScope, SharingStarted.Eagerly, false)
+
     fun updateVisibility(newVisibility: PlayerToolBarVisibility) {
         visibility = newVisibility
     }
@@ -135,6 +139,19 @@ class PlayerSyncController(
         playerStateScope.cancel()
         videoPlayer.close()
     }
+
+    /** 换集保留播放器及全屏、音量和倍速配置，只重置媒体启动标记。 */
+    fun resetMedia() {
+        pause()
+        releaseMediaListener?.invoke()
+        releaseMediaListener = null
+        videoPlayer.stopPlayback()
+        isStarted = false
+    }
+
+    /** 从新媒体属性读取时长，避免换集后误用上一集尚未更新的派生时长。 */
+    suspend fun awaitMediaDurationMillis(): Long =
+        videoPlayer.mediaProperties.first { (it?.durationMillis ?: 0) > 0 }!!.durationMillis
 
     /**
      * 播放

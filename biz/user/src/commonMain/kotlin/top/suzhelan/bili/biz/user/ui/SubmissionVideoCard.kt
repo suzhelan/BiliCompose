@@ -39,6 +39,7 @@ import top.suzhelan.bili.biz.user.entity.secureImageUrl
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
 import top.suzhelan.bili.shared.common.util.TimeUtils
 import top.suzhelan.bili.shared.common.util.toStringCount
+import top.suzhelan.bili.shared.navigation.CollectionPlaybackSource
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
@@ -57,6 +58,7 @@ fun SubmissionVideoCard(
     history: WatchHistoryPage.Item?,
     showWatchState: Boolean,
     isLastWatched: Boolean,
+    collectionSource: CollectionPlaybackSource? = null,
 ) {
     val navigation = LocalNavigation.currentOrThrow
     val progress = if (showWatchState) video.watchProgress(history) else null
@@ -72,6 +74,11 @@ fun SubmissionVideoCard(
                     SharedScreen.VideoPlayer(
                         aid = video.aid.takeIf { it > 0 },
                         bvid = video.bvid.takeIf { it.isNotBlank() },
+                        collectionMid = collectionSource?.mid,
+                        collectionId = collectionSource?.id,
+                        collectionKind = collectionSource?.kind,
+                        collectionTitle = collectionSource?.title.orEmpty(),
+                        collectionNewestFirst = collectionSource?.newestFirst ?: false,
                     )
                 )
             },

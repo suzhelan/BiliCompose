@@ -6,6 +6,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.ext.apiCall
 import top.suzhelan.bili.api.getOrThrow
@@ -20,29 +23,194 @@ import top.suzhelan.bili.api.isSuccess
 import top.suzhelan.bili.biz.biliplayer.api.VideoInfoApi
 import top.suzhelan.bili.biz.biliplayer.api.VideoPlayerApi
 import top.suzhelan.bili.biz.biliplayer.data.RecommendedVideoPagingSource
+import top.suzhelan.bili.biz.biliplayer.entity.CollectionPlayback
+import top.suzhelan.bili.biz.biliplayer.entity.NextPlayback
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerArgsItem
 import top.suzhelan.bili.biz.biliplayer.entity.PlayerParams
 import top.suzhelan.bili.biz.biliplayer.entity.RecommendedVideoByVideo
+import top.suzhelan.bili.biz.biliplayer.entity.VideoCollection
 import top.suzhelan.bili.biz.biliplayer.entity.VideoInfo
 import top.suzhelan.bili.biz.biliplayer.entity.VideoTag
+import top.suzhelan.bili.biz.biliplayer.entity.nextPlayback
 import top.suzhelan.bili.biz.biliplayer.ui.controller.PlayerPool
-import top.suzhelan.bili.biz.common.util.PlayerUtils
+import top.suzhelan.bili.biz.biliplayer.ui.dialog.CollectionSortOrder
 import top.suzhelan.bili.biz.user.api.FavoriteApi
+import top.suzhelan.bili.biz.user.api.UserSubmissionApi
 import top.suzhelan.bili.biz.user.api.WatchLaterApi
+import top.suzhelan.bili.biz.user.entity.UserCollectionKind
 import top.suzhelan.bili.player.controller.PlayerSyncController
 import top.suzhelan.bili.player.platform.BiliContext
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.base.BaseViewModel
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+import top.suzhelan.bili.shared.navigation.CollectionPlaybackSource
 
 class VideoPlayerViewModel(
     private val context: BiliContext,
 ) : BaseViewModel() {
 
-    //生成时间戳构建的随机数
-    @OptIn(ExperimentalTime::class)
-    private val playerId: String = Clock.System.now().epochSeconds.toString()
+    // 每个播放页独立持有播放器，避免同一秒打开多个页面时共享实例。
+    private val playerId: String = kotlin.random.Random.nextLong().toString()
+
+    private val videoJobs = mutableListOf<Job>()
+    private fun launchVideoTask(task: suspend CoroutineScope.() -> Unit): Job {
+        videoJobs.removeAll { it.isCompleted }
+        return launchTask(task).also { videoJobs += it }
+    }
+
+    private val _collectionPlayback = MutableStateFlow(CollectionPlayback())
+    val collectionPlayback = _collectionPlayback.asStateFlow()
+    private val _nextPlayback = MutableStateFlow<NextPlayback?>(null)
+    val nextPlayback = _nextPlayback.asStateFlow()
+    private val foreground = MutableStateFlow(false)
+    private var pageActive = true
+    private var initialized = false
+    private var collectionSource: CollectionPlaybackSource? = null
+    private var collectionLoadJob: Job? = null
+    private var countdownJob: Job? = null
+    private var completionJob: Job? = null
+    private var awaitingCollection = false
+
+    val canFavoriteCollection: Boolean
+        get() = collectionSource?.kind != UserCollectionKind.SERIES.name
+
+    fun initializePlayer(params: PlayerParams, source: CollectionPlaybackSource?) {
+        if (initialized) return
+        initialized = true
+        collectionSource = source
+        if (source != null) {
+            _collectionPlayback.value = CollectionPlayback(
+                locked = true,
+                loading = true,
+                sortOrder = if (source.newestFirst) CollectionSortOrder.Newest else CollectionSortOrder.Default,
+            )
+        }
+        preparePlayer(params)
+    }
+
+    fun loadSourceCollection() {
+        val source = collectionSource ?: return
+        collectionLoadJob?.cancel()
+        _collectionPlayback.value = _collectionPlayback.value.copy(loading = true, error = null)
+        collectionLoadJob = launchTask {
+            try {
+                val kind = UserCollectionKind.valueOf(source.kind)
+                val episodes = linkedMapOf<String, VideoCollection.Episode>()
+                var page = 1
+                do {
+                    val result = UserSubmissionApi.collectionVideos(
+                        source.mid,
+                        source.id,
+                        kind,
+                        false,
+                        page++
+                    )
+                    val previousSize = episodes.size
+                    result.items.forEach { video ->
+                        episodes[video.key] = VideoCollection.Episode(
+                            aid = video.aid, bvid = video.bvid, title = video.title,
+                            arc = VideoCollection.Archive(
+                                pic = video.cover,
+                                duration = video.durationSeconds,
+                                pubdate = video.created,
+                                stat = VideoCollection.Statistics(view = video.playCount ?: -1),
+                            ),
+                        )
+                    }
+                    check(!result.hasMore || episodes.size > previousSize) { "合集分页未返回新视频，请重试" }
+                } while (result.hasMore)
+                _collectionPlayback.value = _collectionPlayback.value.copy(
+                    loading = false,
+                    collection = VideoCollection(
+                        id = source.id, title = source.title, episodeCount = episodes.size,
+                        sections = listOf(VideoCollection.Section(episodes = episodes.values.toList())),
+                    ),
+                )
+                if (awaitingCollection && controller.playbackFinished.value) onPlaybackFinished()
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                _collectionPlayback.value = _collectionPlayback.value.copy(
+                    loading = false, error = exception.message ?: "合集加载失败",
+                )
+            }
+        }
+    }
+
+    fun toggleCollectionLock() {
+        val state = _collectionPlayback.value
+        _collectionPlayback.value = state.copy(locked = !state.locked)
+        if (state.locked) cancelNextPlayback()
+    }
+
+    fun setCollectionSortOrder(order: CollectionSortOrder) {
+        _collectionPlayback.value = _collectionPlayback.value.copy(sortOrder = order)
+        val pending = _nextPlayback.value ?: return
+        val video = (_videoDetailsInfo.value as? BiliResponse.Success)?.data ?: return
+        val current = (_preparedPlayerParams.value as? BiliResponse.Success)?.data ?: return
+        val next = _collectionPlayback.value.nextPlayback(video, current)
+        if (next == null) cancelNextPlayback()
+        else _nextPlayback.value = next.copy(seconds = pending.seconds)
+    }
+
+    fun playCollectionEpisode(episode: VideoCollection.Episode) {
+        _collectionPlayback.value = _collectionPlayback.value.copy(locked = true)
+        val current = (_preparedPlayerParams.value as? BiliResponse.Success)?.data
+        if (current?.aid == episode.aid) return
+        preparePlayer(
+            PlayerParams(
+                aid = episode.aid.takeIf { it > 0 }, bvid = episode.bvid.takeIf { it.isNotBlank() },
+                qn = current?.qn ?: 80,
+            )
+        )
+    }
+
+    fun setPlaybackForeground(active: Boolean) {
+        foreground.value = active
+    }
+
+    fun setPlaybackPageActive(active: Boolean) {
+        pageActive = active
+        if (!active) cancelNextPlayback()
+    }
+
+    fun cancelNextPlayback() {
+        awaitingCollection = false
+        countdownJob?.cancel()
+        countdownJob = null
+        _nextPlayback.value = null
+    }
+
+    fun playNextNow() {
+        if (!pageActive || !foreground.value) return
+        val next = _nextPlayback.value ?: return
+        cancelNextPlayback()
+        preparePlayer(next.params)
+    }
+
+    private fun onPlaybackFinished() {
+        if (!pageActive) return
+        val video = (_videoDetailsInfo.value as? BiliResponse.Success)?.data ?: return
+        val current = (_preparedPlayerParams.value as? BiliResponse.Success)?.data ?: return
+        val state = _collectionPlayback.value
+        val next = state.nextPlayback(video, current)
+        if (next == null) {
+            awaitingCollection = state.locked && (state.loading || state.error != null)
+            return
+        }
+        cancelNextPlayback()
+        _nextPlayback.value = next
+        countdownJob = launchTask {
+            playbackCountdown(foreground) { seconds ->
+                _nextPlayback.value = _nextPlayback.value?.copy(seconds = seconds)
+            }
+            foreground.first { it }
+            playNextNow()
+        }
+    }
+
+    fun retryPlayer() {
+        requestedPlayerParams?.let { preparePlayer(it, force = true) }
+    }
 
     private val playerApi = VideoPlayerApi()
     private val api = VideoInfoApi()
@@ -75,7 +243,7 @@ class VideoPlayerViewModel(
             error = null,
         )
         if (accountId == null || seasonId <= 0) return
-        collectionFavoriteJob = launchTask {
+        collectionFavoriteJob = launchVideoTask {
             try {
                 val favorite = favoriteApi.isCollectionFavorite(aid)
                 if (isCurrentCollectionTarget(target, version)) {
@@ -117,7 +285,7 @@ class VideoPlayerViewModel(
         val version = ++collectionFavoriteVersion
         val favorite = !current.isFavorite
         _collectionFavorite.value = current.copy(isSaving = true, error = null)
-        collectionFavoriteJob = launchTask {
+        collectionFavoriteJob = launchVideoTask {
             try {
                 val response = favoriteApi.setCollectionFavorite(seasonId, favorite)
                 if (response.code != 0) error(response.message)
@@ -190,9 +358,9 @@ class VideoPlayerViewModel(
     private var preparePlayerJob: Job? = null
     private var requestedPlayerParams: PlayerParams? = null
 
-    fun preparePlayer(params: PlayerParams) {
+    fun preparePlayer(params: PlayerParams, force: Boolean = false) {
         // 返回当前播放页时沿用已准备好的参数，避免重新加载并重建播放器 UI。
-        if (requestedPlayerParams == params &&
+        if (!force && requestedPlayerParams == params &&
             (_preparedPlayerParams.value is BiliResponse.Success || preparePlayerJob?.isActive == true)
         ) {
             return
@@ -200,11 +368,33 @@ class VideoPlayerViewModel(
         requestedPlayerParams = params
         // 重试或切换视频时取消旧请求，避免旧结果覆盖当前状态。
         preparePlayerJob?.cancel()
+        completionJob?.cancel()
+        cancelNextPlayback()
+        videoJobs.forEach { it.cancel() }
+        videoJobs.clear()
+        controller.resetMedia()
+        _videoUrlData.value = BiliResponse.Loading
+        _videoDetailsInfo.value = BiliResponse.Loading
+        _onlineCountText.value = ""
+        _videoTags.value = emptyList()
+        _isInWatchLater.value = null
+        _isWatchLaterBusy.value = false
+        isLike.value = false
+        coinQuotationCount.value = -1
+        isFavorite.value = false
+        operationState.value = ActionState.None
+        isShowAddCoinDialog.value = false
+        isShowFavoriteDialog.value = false
+        dismissDialog()
         _preparedPlayerParams.value = BiliResponse.Loading
         preparePlayerJob = launchTask {
             _preparedPlayerParams.value = apiCall {
                 BiliResponse.buildSuccess(getFixPlayerParam(params))
             }
+            if (_preparedPlayerParams.value is BiliResponse.Success &&
+                collectionSource != null && _collectionPlayback.value.collection == null &&
+                collectionLoadJob?.isActive != true
+            ) loadSourceCollection()
         }
     }
 
@@ -222,13 +412,33 @@ class VideoPlayerViewModel(
     }
 
     suspend fun getFixPlayerParam(playerParams: PlayerParams): PlayerParams {
-        //检查是否有cid
-        if (playerParams.cid != null) {
-            return playerParams
+        val response = api.getVideoDetails(playerParams.aid, playerParams.bvid)
+        val video = response.data
+        var cid = playerParams.cid ?: video.pages.firstOrNull()?.cid ?: video.cid
+        if (playerParams.cid == null && LoginMapper.isLogin()) {
+            try {
+                val history = api.getWatchProgress(video.aid, cid)
+                if (video.pages.any { it.cid == history.lastPlayCid }) cid = history.lastPlayCid
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (_: Exception) {
+                // 可选进度获取失败时仍允许播放第一 P。
+            }
         }
-        //没有则根据aid/bvid获取cid
-        val cid = PlayerUtils.getCidByAidOrBvid(playerParams.aid, playerParams.bvid)
-        return playerParams.copy(cid = cid)
+        check(cid > 0) { "视频分 P 信息不可用" }
+        withContext(Dispatchers.Main) {
+            _videoDetailsInfo.value = response.copy(data = video.copy(cid = cid))
+            val source = collectionSource
+            val playback = _collectionPlayback.value
+            if ((!playback.locked || playback.collection == null) &&
+                (source == null || (source.kind == UserCollectionKind.SEASON.name && video.ugcSeason?.id == source.id))
+            ) {
+                _collectionPlayback.value = playback.copy(
+                    collection = video.ugcSeason, loading = false, error = null,
+                )
+            }
+        }
+        return playerParams.copy(aid = video.aid, bvid = video.bvid, cid = cid)
     }
 
     fun getPlayerUrl(
@@ -238,12 +448,12 @@ class VideoPlayerViewModel(
         seasonId: String? = null,
         cid: Long,
         qn: Int = 80,
-    ) = launchTask {
+    ) = launchVideoTask {
         if (_videoUrlData.value is BiliResponse.Success) {
-            return@launchTask
+            return@launchVideoTask
         }
         _videoUrlData.value = apiCall {
-            playerApi.getPlayerInfo(
+            val response = playerApi.getPlayerInfo(
                 avid = avid,
                 bvid = bvid,
                 epid = epid,
@@ -251,6 +461,8 @@ class VideoPlayerViewModel(
                 cid = cid,
                 qn = qn
             )
+            check(response.data.dash.video.isNotEmpty()) { "该视频暂无可播放的视频流" }
+            response
         }
     }
 
@@ -262,12 +474,27 @@ class VideoPlayerViewModel(
         val allVideo = video.dash.video
         val audio = video.dash.audio
         val maxVideoUrl = allVideo.maxBy { it.id }
-        val maxAudioUrl = audio?.maxBy { it.id }
+        val maxAudioUrl = audio?.maxByOrNull { it.id }
         controller.play(maxVideoUrl.baseUrl, maxAudioUrl?.baseUrl ?: "")
+        controller.resume()
+        completionJob?.cancel()
+        completionJob = launchTask {
+            var armed = false
+            controller.playbackFinished.collect { finished ->
+                if (!finished) {
+                    armed = true
+                    if (_nextPlayback.value != null) cancelNextPlayback()
+                } else if (armed) {
+                    armed = false
+                    onPlaybackFinished()
+                }
+            }
+        }
         // 历史进度只在播放器首次启动时恢复，任务随 ViewModel 保留，返回页面不会再次跳转。
-        launchTask {
-            val totalDurationMillis = controller.totalDurationMillis.first { it > 0 }
-            if (video.lastPlayTime > 0 && video.lastPlayTime < totalDurationMillis - 500) {
+        launchVideoTask {
+            val totalDurationMillis = controller.awaitMediaDurationMillis()
+            val current = (_preparedPlayerParams.value as? BiliResponse.Success)?.data
+            if (video.lastPlayCid == current?.cid && video.lastPlayTime > 0 && video.lastPlayTime < totalDurationMillis - 500) {
                 controller.seekTo(video.lastPlayTime)
             }
         }
@@ -279,9 +506,9 @@ class VideoPlayerViewModel(
     fun getVideoDetailsInfo(
         avid: Long? = null,
         bvid: String? = null,
-    ) = launchTask {
+    ) = launchVideoTask {
         if (_videoDetailsInfo.value is BiliResponse.Success) {
-            return@launchTask
+            return@launchVideoTask
         }
         _videoDetailsInfo.value = BiliResponse.Loading
         _videoDetailsInfo.value = apiCall {
@@ -301,9 +528,9 @@ class VideoPlayerViewModel(
     fun getVideoOnlineCountText(
         aid: Long,
         cid: Long,
-    ) = launchTask {
+    ) = launchVideoTask {
         if (_onlineCountText.value.isNotEmpty()) {
-            return@launchTask
+            return@launchVideoTask
         }
         _onlineCountText.value = api.getVideoOnlineCountText(
             aid = aid,
@@ -322,9 +549,9 @@ class VideoPlayerViewModel(
         aid: Long? = null,
         bvid: String? = null,
         cid: Long? = null,
-    ) = launchTask {
+    ) = launchVideoTask {
         if (_videoTags.value.isNotEmpty()) {
-            return@launchTask
+            return@launchVideoTask
         }
         _videoTags.value = api.getVideoTags(
             aid = aid,
@@ -370,10 +597,10 @@ class VideoPlayerViewModel(
     private val _isWatchLaterBusy = MutableStateFlow(false)
     val isWatchLaterBusy = _isWatchLaterBusy.asStateFlow()
 
-    fun updateWatchLaterState(aid: Long) = launchTask {
-        if (_isWatchLaterBusy.value) return@launchTask
+    fun updateWatchLaterState(aid: Long) = launchVideoTask {
+        if (_isWatchLaterBusy.value) return@launchVideoTask
         _isInWatchLater.value = null
-        if (!LoginMapper.isLogin()) return@launchTask
+        if (!LoginMapper.isLogin()) return@launchVideoTask
         _isWatchLaterBusy.value = true
         try {
             _isInWatchLater.value = queryWatchLaterState(aid)
@@ -386,11 +613,11 @@ class VideoPlayerViewModel(
         }
     }
 
-    fun toggleWatchLater(aid: Long) = launchTask {
-        if (_isWatchLaterBusy.value) return@launchTask
+    fun toggleWatchLater(aid: Long) = launchVideoTask {
+        if (_isWatchLaterBusy.value) return@launchVideoTask
         if (!LoginMapper.isLogin()) {
             showMessageDialog(message = "请先登录后使用稍后再看")
-            return@launchTask
+            return@launchVideoTask
         }
         _isWatchLaterBusy.value = true
         try {
@@ -425,7 +652,7 @@ class VideoPlayerViewModel(
 
     fun updateUserActionState(
         aid: Long,
-    ) = launchTask {
+    ) = launchVideoTask {
         operationState.value = ActionState.AllLoading
         updateLikeWait(aid)
         updateCoinQuotationWait(aid)
@@ -451,9 +678,9 @@ class VideoPlayerViewModel(
     fun like(
         aid: Long,
         like: Boolean,
-    ) = launchTask {
+    ) = launchVideoTask {
         if (operationState.value == ActionState.Like) {
-            return@launchTask
+            return@launchVideoTask
         }
         operationState.value = ActionState.Like
 
@@ -500,9 +727,9 @@ class VideoPlayerViewModel(
         aid: Long,
         multiply: Int,
         selectLike: Boolean = false,
-    ) = launchTask {
+    ) = launchVideoTask {
         if (operationState.value == ActionState.Coin) {
-            return@launchTask
+            return@launchVideoTask
         }
         operationState.value = ActionState.Coin
 

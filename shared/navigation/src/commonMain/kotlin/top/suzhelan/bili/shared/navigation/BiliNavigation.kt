@@ -2,11 +2,17 @@ package top.suzhelan.bili.shared.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -65,6 +71,27 @@ class BiliNavigation(val navigator: NavHostController) {
 
 
 interface BiliScreenProvider
+
+/** 区分栈内导航与应用退到后台：后台不会改变当前栈条目。 */
+@Composable
+fun NavigationPageEffect(onActiveChange: (Boolean) -> Unit) {
+    val controller = LocalNavigation.currentOrThrow.navigator
+    val owner = LocalLifecycleOwner.current
+    val entryId = remember(owner) {
+        (owner as? NavBackStackEntry)?.id ?: controller.currentBackStackEntry?.id
+    }
+    val onChange by rememberUpdatedState(onActiveChange)
+    DisposableEffect(controller, entryId) {
+        val listener = NavController.OnDestinationChangedListener { nav, _, _ ->
+            onChange(nav.currentBackStackEntry?.id == entryId)
+        }
+        controller.addOnDestinationChangedListener(listener)
+        onDispose {
+            if (controller.currentBackStackEntry?.id != entryId) onChange(false)
+            controller.removeOnDestinationChangedListener(listener)
+        }
+    }
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

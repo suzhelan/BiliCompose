@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,17 +20,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import top.suzhelan.bili.biz.biliplayer.entity.VideoCollection
+import top.suzhelan.bili.biz.biliplayer.ui.dialog.CollectionSortOrder
 
 @Composable
 fun VideoCollectionCard(
     collection: VideoCollection,
     currentAid: Long,
     isPlaying: Boolean,
+    locked: Boolean,
+    sortOrder: CollectionSortOrder,
     onClick: () -> Unit,
     favoriteAction: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val episodes = remember(collection) { collection.sections.flatMap { it.episodes } }
+    val episodes = remember(collection, sortOrder) {
+        collection.sections.flatMap { section ->
+            sortOrder.sortEpisodes(section.episodes).map { it.value }
+        }
+    }
     val currentIndex = episodes.indexOfFirst { it.aid == currentAid }
     val totalCount = maxOf(collection.episodeCount, episodes.size)
     Card(
@@ -48,6 +57,11 @@ fun VideoCollectionCard(
                 overflow = TextOverflow.Ellipsis,
             )
             PlayingWaveIcon(isPlaying = isPlaying)
+            Icon(
+                imageVector = if (locked) Icons.Outlined.Lock else Icons.Outlined.LockOpen,
+                contentDescription = if (locked) "合集模式已开启" else "合集模式已关闭",
+                modifier = Modifier.size(18.dp),
+            )
             Text(
                 text = "${if (currentIndex >= 0) currentIndex + 1 else "-"}/$totalCount",
                 style = MaterialTheme.typography.bodyMedium,

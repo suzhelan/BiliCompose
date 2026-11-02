@@ -2,8 +2,10 @@ package top.suzhelan.bili.player.controller
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
+import org.openani.mediamp.metadata.MediaProperties
 import org.openani.mediamp.vlc.VlcMediampPlayer
 import top.suzhelan.bili.player.platform.BiliContext
 
@@ -15,7 +17,8 @@ actual object PlayerMediaDataUtils {
         audioUrl: String,
         onVideoSizeChanged: ((width: Int, height: Int) -> Unit)?,
     ): () -> Unit {
-        CoroutineScope(Dispatchers.IO).launch {
+        (mediampPlayer.mediaProperties as MutableStateFlow<MediaProperties?>).value = null
+        val loadJob = CoroutineScope(Dispatchers.IO).launch {
            /* mediampPlayer.setMediaData(
                 UriMediaData(
                     uri = videoUrl,
@@ -26,10 +29,10 @@ actual object PlayerMediaDataUtils {
             val vlcPlayer = mediampPlayer as VlcMediampPlayer
             val embeddedMediaPlayer = vlcPlayer.impl
             embeddedMediaPlayer.media().play(
-                audioUrl,
+                audioUrl.ifBlank { videoUrl },
                 *buildList {
                     // 主从同步设置
-                    add("input-slave=$videoUrl")
+                    if (audioUrl.isNotBlank()) add("input-slave=$videoUrl")
                     add("input-slave-sync")  // 强制同步
                     add("avsync-force")      // 强制音视频同步
 
@@ -44,7 +47,7 @@ actual object PlayerMediaDataUtils {
                 }.toTypedArray()
             )
         }
-        return {}
+        return { loadJob.cancel() }
     }
 
     actual fun setFullScreen(context: BiliContext, fullScreen: Boolean, isPortraitVideo: Boolean) {

@@ -70,6 +70,7 @@ import top.suzhelan.bili.shared.auth.config.LoginMapper
 import top.suzhelan.bili.shared.common.ui.AppScaffold
 import top.suzhelan.bili.shared.common.ui.TitleUI
 import top.suzhelan.bili.shared.common.ui.theme.TipColor
+import top.suzhelan.bili.shared.navigation.CollectionPlaybackSource
 import top.suzhelan.bili.shared.navigation.LocalNavigation
 import top.suzhelan.bili.shared.navigation.SharedScreen
 import top.suzhelan.bili.shared.navigation.currentOrThrow
@@ -291,7 +292,11 @@ fun UserCollectionScreen(mid: Long, id: Long, kind: String, title: String) {
                         video,
                         watchHistory.find(video),
                         watchHistory.accountId != null,
-                        video.key == lastWatchedKey
+                        video.key == lastWatchedKey,
+                        collectionSource = CollectionPlaybackSource(
+                            mid, id, kind, title,
+                            newestFirst = if (collectionKind == UserCollectionKind.SERIES) !reverse else reverse,
+                        ),
                     )
                 }
             }
