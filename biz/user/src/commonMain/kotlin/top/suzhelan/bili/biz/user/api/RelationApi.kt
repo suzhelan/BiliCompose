@@ -3,6 +3,7 @@ package top.suzhelan.bili.biz.user.api
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -11,9 +12,10 @@ import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.bodyBiliSuccess
 import top.suzhelan.bili.api.getKtorClient
+import top.suzhelan.bili.biz.user.entity.FollowingUser
+import top.suzhelan.bili.biz.user.entity.FollowingsPage
 import top.suzhelan.bili.biz.user.entity.Relation
 import top.suzhelan.bili.biz.user.entity.RelationTags
-import top.suzhelan.bili.biz.user.entity.RelationUser
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 
 /**
@@ -61,8 +63,8 @@ class RelationApi {
      */
     suspend fun queryFollowList(
         tagId: Int = -20,
-        page: Int = 1
-    ): BiliResponse.Success<List<RelationUser>> {
+        page: Int = 1,
+    ): BiliResponse.Success<List<FollowingUser>> {
         val pageSize = 50
         return ktor.get("/x/relation/tag") {
             url {
@@ -72,7 +74,19 @@ class RelationApi {
                 parameter("ps", pageSize.toString())
                 parameter("pn", page.toString())
             }
-        }.body()
+        }.bodyBiliSuccess()
+    }
+
+    /** 查询指定用户的关注列表，不读取当前账号的私有分组。 */
+    suspend fun queryFollowings(mid: Long, page: Int = 1): BiliResponse.Success<FollowingsPage> {
+        return ktor.get("/x/relation/followings") {
+            header("Referer", "https://space.bilibili.com/$mid")
+            parameter("access_key", LoginMapper.getAccessKey())
+            parameter("vmid", mid)
+            parameter("pn", page)
+            parameter("ps", 50)
+            parameter("order_type", "")
+        }.bodyBiliSuccess()
     }
 
     /**
@@ -102,7 +116,7 @@ class RelationApi {
                 parameter("access_key", LoginMapper.getAccessKey())
                 parameter("fids", mids)
             }
-        }.body()
+        }.bodyBiliSuccess()
     }
 
     /**
@@ -117,7 +131,7 @@ class RelationApi {
             url {
                 parameter("access_key", LoginMapper.getAccessKey())
             }
-        }.body()
+        }.bodyBiliSuccess()
     }
 
     /**

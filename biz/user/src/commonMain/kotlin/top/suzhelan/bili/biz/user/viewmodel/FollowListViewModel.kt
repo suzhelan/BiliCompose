@@ -7,31 +7,42 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import top.suzhelan.bili.api.ApiException
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.ext.apiCall
 import top.suzhelan.bili.api.isSuccess
 import top.suzhelan.bili.biz.user.api.RelationApi
 import top.suzhelan.bili.biz.user.data.FollowListDataSource
+import top.suzhelan.bili.biz.user.entity.FollowingUser
 import top.suzhelan.bili.biz.user.entity.RelationTags
-import top.suzhelan.bili.biz.user.entity.RelationUser
 import top.suzhelan.bili.biz.user.util.RelationUtils
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 
-class FollowListViewModel : BaseViewModel() {
+class FollowListViewModel(private val mid: Long? = null) : BaseViewModel() {
 
     private val api = RelationApi()
-    private val followListFlows = mutableMapOf<Int, Flow<PagingData<RelationUser>>>()
+    private val followListFlows = mutableMapOf<Int, Flow<PagingData<FollowingUser>>>()
 
     private val _tags = mutableStateListOf<RelationTags>()
     val tags: List<RelationTags> = _tags
+    val tagsError = MutableStateFlow<String?>(null)
 
     /**
      * 查询分组
      */
     fun queryTags() = launchTask {
-        val resultTags = api.queryTags().data
+        tagsError.value = null
+        val resultTags = try {
+            api.queryTags().data
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            tagsError.value = e.message ?: "关注分组加载失败"
+            return@launchTask
+        }
         _tags.clear()
         _tags.add(
             0,
@@ -52,45 +63,46 @@ class FollowListViewModel : BaseViewModel() {
     /**
      * 取消关注
      */
-    fun cancelFollow(mid: Long, onUserUpdate: (Int) -> Unit) = launchTask {
-        followList[mid] = BiliResponse.Loading
-        val result = api.modify(mid, 2)
-        if (result.code == 0) {
-            //只更新关系
-            val relation = api.queryRelation(mid).data
-            onUserUpdate(relation.attribute)
-        } else {
-            showMessageDialog(message = RelationUtils.getToastByModifyResult(result))
-        }
-        followList[mid] = result
-    }
+    fun cancelFollow(mid: Long, onUserUpdate: (Int) -> Unit) = modifyFollow(mid, 2, onUserUpdate)
 
     /**
      * 关注用户
      */
-    fun addFollow(mid: Long, onUserUpdate: (Int) -> Unit) = launchTask {
+    fun addFollow(mid: Long, onUserUpdate: (Int) -> Unit) = modifyFollow(mid, 1, onUserUpdate)
+
+    private fun modifyFollow(mid: Long, action: Int, onUserUpdate: (Int) -> Unit) = launchTask {
+        if (followList[mid] is BiliResponse.Loading) return@launchTask
         followList[mid] = BiliResponse.Loading
-        val result = api.modify(mid, 1)
-        if (result.code == 0) {
-            //只更新关系
-            val relation = api.queryRelation(mid).data
-            onUserUpdate(relation.attribute)
-        } else {
-            showMessageDialog(message = RelationUtils.getToastByModifyResult(result))
+        try {
+            val result = api.modify(mid, action)
+            if (result.code == 0) {
+                onUserUpdate(api.queryRelation(mid).data.attribute)
+            } else {
+                showMessageDialog(message = RelationUtils.getToastByModifyResult(result))
+            }
+            followList[mid] = result
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            val error = ApiException.build(e)
+            followList[mid] = error.toResponse<Nothing>()
+            showMessageDialog(message = error.message)
+        } finally {
+            if (followList[mid] is BiliResponse.Loading) followList.remove(mid)
         }
-        followList[mid] = result
     }
 
-    fun getFollowListFlow(tagId: Int): Flow<PagingData<RelationUser>> =
+    fun getFollowListFlow(tagId: Int): Flow<PagingData<FollowingUser>> =
         followListFlows.getOrPut(tagId) {
             Pager(
                 config = PagingConfig(
-                    pageSize = 10,
-                    prefetchDistance = 5,//提前多少页开始预加载
-                    enablePlaceholders = true
+                    pageSize = 50,
+                    initialLoadSize = 50,
+                    prefetchDistance = 5,
+                    enablePlaceholders = false
                 ),
                 pagingSourceFactory = {
-                    FollowListDataSource(tagId)
+                    FollowListDataSource(tagId, mid)
                 }
             ).flow.cachedIn(viewModelScope)
         }

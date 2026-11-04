@@ -32,6 +32,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
@@ -44,6 +45,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -550,36 +552,71 @@ private fun ColumnScope.NicknameUI(userSpace: UserSpace) = Row(
  */
 @Composable
 private fun ColumnScope.CardHeader(userSpace: UserSpace, profileActions: @Composable () -> Unit) {
+    val navigation = LocalNavigation.currentOrThrow
+    val isLoggedIn by LoginMapper.isLoginState
+    var showLikesDialog by rememberSaveable(userSpace.card.mid) { mutableStateOf(false) }
+    if (showLikesDialog) {
+        AlertDialog(
+            onDismissRequest = { showLikesDialog = false },
+            title = { Text(userSpace.card.name) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("视频 专栏 动态累计获赞")
+                    Text(
+                        text = userSpace.card.likes.likeNum.toString(),
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLikesDialog = false }) { Text("确定") }
+            },
+        )
+    }
     //统计信息 粉丝 关注 获赞
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         //获赞数
-        Text(
-            text = userSpace.card.likes.likeNum.toStringCount(),
-            fontSize = 20.sp,
-            color = TextColor,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 10.dp)
-        )
-        Text(
-            text = "获赞",
-            modifier = Modifier.padding(start = 5.dp),
-            color = TipColor
-        )
+        Row(
+            modifier = Modifier.clickable { showLikesDialog = true }.padding(start = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = userSpace.card.likes.likeNum.toStringCount(),
+                fontSize = 20.sp,
+                color = TextColor,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "获赞",
+                modifier = Modifier.padding(start = 5.dp),
+                color = TipColor,
+            )
+        }
         //关注数
-        Text(
-            text = userSpace.card.attention.toStringCount(),
-            fontSize = 20.sp,
-            color = TextColor,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 10.dp)
-        )
-        Text(
-            text = "关注",
-            modifier = Modifier.padding(start = 5.dp),
-            color = TipColor
-        )
+        Row(
+            modifier = Modifier.clickable {
+                navigation.push(
+                    if (isLoggedIn) SharedScreen.FollowList(userSpace.card.mid.toLong())
+                    else SharedScreen.Login
+                )
+            }.padding(start = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = userSpace.card.attention.toStringCount(),
+                fontSize = 20.sp,
+                color = TextColor,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "关注",
+                modifier = Modifier.padding(start = 5.dp),
+                color = TipColor,
+            )
+        }
         //粉丝数
         Text(
             text = userSpace.card.fans.toStringCount(),

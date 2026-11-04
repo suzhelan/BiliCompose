@@ -53,7 +53,7 @@ data class UserSpace(
     @SerialName("tab")
     val tab: Tab,
     @SerialName("tab2")
-    val tab2: List<Tab2>,
+    val tab2: List<Tab2> = emptyList(),
     @SerialName("ugc_season")
     val ugcSeason: UgcSeason,
     @SerialName("vip_space_label")

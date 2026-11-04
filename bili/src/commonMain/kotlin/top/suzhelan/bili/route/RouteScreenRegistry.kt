@@ -57,8 +57,8 @@ fun NavGraphBuilder.routingScreenRegistration() {
     composable<SharedScreen.Login> {
         LoginScreen()
     }
-    composable<SharedScreen.FollowList> {
-        FollowListScreen()
+    composable<SharedScreen.FollowList> { entry ->
+        FollowListScreen(mid = entry.toRoute<SharedScreen.FollowList>().mid)
     }
     composable<SharedScreen.VideoPlayer> { backStackEntry ->
         val param = backStackEntry.toRoute<SharedScreen.VideoPlayer>()

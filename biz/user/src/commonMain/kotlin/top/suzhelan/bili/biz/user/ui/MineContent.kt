@@ -283,7 +283,7 @@ private fun ColumnScope.UserAmount(
                             }
 
                             Res.string.follow -> {
-                                navigate.push(SharedScreen.FollowList)
+                                navigate.push(SharedScreen.FollowList())
                             }
 
                             Res.string.fans -> {
