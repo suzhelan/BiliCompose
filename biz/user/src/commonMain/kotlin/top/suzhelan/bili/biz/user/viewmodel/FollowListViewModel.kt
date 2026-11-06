@@ -1,7 +1,11 @@
 package top.suzhelan.bili.biz.user.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -10,25 +14,47 @@ import androidx.paging.cachedIn
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import top.suzhelan.bili.api.ApiException
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.ext.apiCall
 import top.suzhelan.bili.api.isSuccess
 import top.suzhelan.bili.biz.user.api.RelationApi
+import top.suzhelan.bili.biz.user.api.RelationApi.Companion.LIST_PAGE_SIZE
 import top.suzhelan.bili.biz.user.data.FollowListDataSource
-import top.suzhelan.bili.biz.user.entity.FollowingUser
+import top.suzhelan.bili.biz.user.entity.RelationListUser
 import top.suzhelan.bili.biz.user.entity.RelationTags
 import top.suzhelan.bili.biz.user.util.RelationUtils
 import top.suzhelan.bili.shared.common.base.BaseViewModel
 
-class FollowListViewModel(private val mid: Long? = null) : BaseViewModel() {
+class FollowListViewModel(
+    private val mid: Long? = null,
+    private val fans: Boolean = false,
+) : BaseViewModel() {
 
     private val api = RelationApi()
-    private val followListFlows = mutableMapOf<Int, Flow<PagingData<FollowingUser>>>()
+    private val relationLookupPermits = Semaphore(4)
+    private val followListFlows = mutableMapOf<Int, Flow<PagingData<RelationListUser>>>()
+    private val listRefreshVersions = mutableMapOf<Int, Int>()
+    private var hasResumed = false
+    var refreshVersion by mutableIntStateOf(0)
+        private set
 
-    private val _tags = mutableStateListOf<RelationTags>()
-    val tags: List<RelationTags> = _tags
+    var tags by mutableStateOf<List<RelationTags>>(emptyList())
+        private set
     val tagsError = MutableStateFlow<String?>(null)
+
+    fun onScreenResumed() {
+        if (hasResumed) refreshVersion++
+        hasResumed = true
+    }
+
+    fun refreshListIfNeeded(tagId: Int, refresh: () -> Unit) {
+        if (listRefreshVersions[tagId] == refreshVersion) return
+        listRefreshVersions[tagId] = refreshVersion
+        refresh()
+    }
 
     /**
      * 查询分组
@@ -43,66 +69,94 @@ class FollowListViewModel(private val mid: Long? = null) : BaseViewModel() {
             tagsError.value = e.message ?: "关注分组加载失败"
             return@launchTask
         }
-        _tags.clear()
-        _tags.add(
-            0,
+        tags = listOf(
             RelationTags(
                 count = 0,
                 name = "全部",
                 tagid = -20,
                 tip = "All"
             )
-        )
-        _tags.addAll(resultTags)
+        ) + resultTags
     }
 
 
-    val followList = mutableStateMapOf<Long, BiliResponse<*>>()
+    private val pendingRelationActions = mutableStateSetOf<Long>()
 
+    fun isRelationActionRunning(mid: Long) = mid in pendingRelationActions
 
     /**
      * 取消关注
      */
-    fun cancelFollow(mid: Long, onUserUpdate: (Int) -> Unit) = modifyFollow(mid, 2, onUserUpdate)
+    fun cancelFollow(mid: Long, onUserUpdate: (Int?) -> Unit) = modifyFollow(mid, 2, onUserUpdate)
 
     /**
      * 关注用户
      */
-    fun addFollow(mid: Long, onUserUpdate: (Int) -> Unit) = modifyFollow(mid, 1, onUserUpdate)
+    fun addFollow(mid: Long, onUserUpdate: (Int?) -> Unit) = modifyFollow(mid, 1, onUserUpdate)
 
-    private fun modifyFollow(mid: Long, action: Int, onUserUpdate: (Int) -> Unit) = launchTask {
-        if (followList[mid] is BiliResponse.Loading) return@launchTask
-        followList[mid] = BiliResponse.Loading
-        try {
-            val result = api.modify(mid, action)
-            if (result.code == 0) {
-                onUserUpdate(api.queryRelation(mid).data.attribute)
-            } else {
-                showMessageDialog(message = RelationUtils.getToastByModifyResult(result))
+    fun retryRelation(mid: Long, onUserUpdate: (Int) -> Unit) =
+        runRelationAction(mid) {
+            onUserUpdate(api.queryRelation(mid).data.attribute)
+        }
+
+    suspend fun resolveMissingRelation(item: RelationListUser) {
+        if (!item.needsRelationLookup) return
+        val attribute = try {
+            relationLookupPermits.withPermit {
+                if (!item.needsRelationLookup) return
+                api.queryRelation(item.user.mid).data.attribute
             }
-            followList[mid] = result
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null
+        }
+        // 用户操作已返回时，后台补查的结果可能早于本次操作。
+        if (!item.needsRelationLookup) return
+        if (attribute != null) item.attribute = attribute
+        item.needsRelationLookup = false
+    }
+
+    private fun modifyFollow(mid: Long, action: Int, onUserUpdate: (Int?) -> Unit) =
+        runRelationAction(mid) {
+            val result = api.modify(mid, action)
+            if (result.code != 0) {
+                showMessageDialog(message = RelationUtils.getToastByModifyResult(result))
+                return@runRelationAction
+            }
+            // 修改已成功，查询失败时让用户重试查询，避免继续显示并执行旧操作。
+            onUserUpdate(null)
+            onUserUpdate(api.queryRelation(mid).data.attribute)
+        }
+
+    private fun runRelationAction(
+        mid: Long,
+        action: suspend () -> Unit,
+    ) = launchTask {
+        if (!pendingRelationActions.add(mid)) return@launchTask
+        try {
+            action()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            val error = ApiException.build(e)
-            followList[mid] = error.toResponse<Nothing>()
-            showMessageDialog(message = error.message)
+            showMessageDialog(message = ApiException.build(e).message)
         } finally {
-            if (followList[mid] is BiliResponse.Loading) followList.remove(mid)
+            pendingRelationActions.remove(mid)
         }
     }
 
-    fun getFollowListFlow(tagId: Int): Flow<PagingData<FollowingUser>> =
+    fun getFollowListFlow(tagId: Int): Flow<PagingData<RelationListUser>> =
         followListFlows.getOrPut(tagId) {
+            listRefreshVersions[tagId] = refreshVersion
             Pager(
                 config = PagingConfig(
-                    pageSize = 50,
-                    initialLoadSize = 50,
+                    pageSize = LIST_PAGE_SIZE,
+                    initialLoadSize = LIST_PAGE_SIZE,
                     prefetchDistance = 5,
                     enablePlaceholders = false
                 ),
                 pagingSourceFactory = {
-                    FollowListDataSource(tagId, mid)
+                    FollowListDataSource(tagId, mid, fans, api)
                 }
             ).flow.cachedIn(viewModelScope)
         }
@@ -129,7 +183,7 @@ class FollowListViewModel(private val mid: Long? = null) : BaseViewModel() {
     val userInTags = MutableStateFlow<BiliResponse<Map<Int, String>>>(BiliResponse.Loading)
     private fun getUserInTags(mid: Long) = launchTask {
         _tagsCheckedMap.clear()
-        _tags.forEach { tags ->
+        tags.forEach { tags ->
             _tagsCheckedMap[tags.tagid] = false
         }
         userInTags.value = BiliResponse.Loading

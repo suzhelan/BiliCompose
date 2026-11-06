@@ -17,6 +17,7 @@ import top.suzhelan.bili.biz.login.ui.WebViewScreen
 import top.suzhelan.bili.biz.search.ui.SEARCH_EDIT_KEY
 import top.suzhelan.bili.biz.search.ui.SearchInputScreen
 import top.suzhelan.bili.biz.search.ui.SearchResultsScreen
+import top.suzhelan.bili.biz.user.ui.FansListScreen
 import top.suzhelan.bili.biz.user.ui.FavoriteDetailScreen
 import top.suzhelan.bili.biz.user.ui.FavoriteFoldersScreen
 import top.suzhelan.bili.biz.user.ui.FollowListScreen
@@ -59,6 +60,9 @@ fun NavGraphBuilder.routingScreenRegistration() {
     }
     composable<SharedScreen.FollowList> { entry ->
         FollowListScreen(mid = entry.toRoute<SharedScreen.FollowList>().mid)
+    }
+    composable<SharedScreen.FansList> { entry ->
+        FansListScreen(mid = entry.toRoute<SharedScreen.FansList>().mid)
     }
     composable<SharedScreen.VideoPlayer> { backStackEntry ->
         val param = backStackEntry.toRoute<SharedScreen.VideoPlayer>()

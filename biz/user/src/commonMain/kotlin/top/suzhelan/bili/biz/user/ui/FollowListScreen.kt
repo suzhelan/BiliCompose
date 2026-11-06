@@ -4,9 +4,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,10 +28,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +43,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,8 +52,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
-import top.suzhelan.bili.api.BiliResponse
-import top.suzhelan.bili.biz.user.entity.FollowingUser
+import top.suzhelan.bili.api.ApiException
+import top.suzhelan.bili.biz.login.ui.content.NotLoggedInContent
+import top.suzhelan.bili.biz.user.entity.RelationListUser
 import top.suzhelan.bili.biz.user.ui.dialog.TagsDialog
 import top.suzhelan.bili.biz.user.viewmodel.FollowListViewModel
 import top.suzhelan.bili.shared.auth.config.LoginMapper
@@ -74,29 +75,47 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
  */
 @Composable
 fun FollowListScreen(mid: Long? = null) {
-    val isOwnList = mid == null || mid == LoginMapper.getMid()
-    val viewModel = viewModel(key = "followList:$mid:${LoginMapper.getMid()}") {
-        FollowListViewModel(mid = mid.takeUnless { isOwnList })
-    }
-    LifecycleResumeEffect(viewModel, isOwnList) {
-        if (isOwnList) viewModel.queryTags()
-        onPauseOrDispose { }
-    }
+    RelationListScreen(mid, fans = false)
+}
+
+@Composable
+fun FansListScreen(mid: Long? = null) {
+    RelationListScreen(mid, fans = true)
+}
+
+@Composable
+private fun RelationListScreen(mid: Long?, fans: Boolean) {
+    val navigation = LocalNavigation.currentOrThrow
+    val isLoggedIn by LoginMapper.isLoginState
+    val listName = if (fans) "粉丝" else "关注"
     AppScaffold(
         topBar = {
-            val navigate = LocalNavigation.currentOrThrow
-            TitleUI(title = "关注列表", onClickBack = {
-                navigate.pop()
-            })
+            TitleUI(title = "${listName}列表", onClickBack = { navigation.pop() })
         }
     ) {
+        if (!isLoggedIn) {
+            NotLoggedInContent()
+            return@AppScaffold
+        }
+        val accountMid = LoginMapper.getMid()
+        val targetMid = mid ?: accountMid
+        val canManageTags = !fans && targetMid == accountMid
+        val viewModel = viewModel(key = "relationList:$fans:$targetMid:$accountMid") {
+            FollowListViewModel(mid = targetMid.takeUnless { canManageTags }, fans = fans)
+        }
+        LifecycleResumeEffect(viewModel) {
+            viewModel.onScreenResumed()
+            if (canManageTags) viewModel.queryTags()
+            onPauseOrDispose { }
+        }
         DialogHandler(viewModel)
-        Dialogs(viewModel)
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            if (isOwnList) TabPageUI(viewModel)
-            else FollowListPage(viewModel, tagId = -20, canManageTags = false)
+        if (canManageTags) {
+            Dialogs(viewModel)
+            Column(modifier = Modifier.fillMaxSize()) {
+                TabPageUI(viewModel)
+            }
+        } else {
+            FollowListPage(viewModel, tagId = -20, canManageTags = false, listName = listName)
         }
     }
 }
@@ -118,8 +137,8 @@ private fun Dialogs(vm: FollowListViewModel) {
 }
 
 @Composable
-private fun ColumnScope.TabPageUI(vm: FollowListViewModel) {
-    val scoop = rememberCoroutineScope()
+private fun TabPageUI(vm: FollowListViewModel) {
+    val scope = rememberCoroutineScope()
     val tags = vm.tags
     val tagsError by vm.tagsError.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(pageCount = { tags.size }, initialPage = 0)
@@ -144,7 +163,7 @@ private fun ColumnScope.TabPageUI(vm: FollowListViewModel) {
             FilterChip(
                 selected = pagerState.currentPage == index,
                 onClick = {
-                    scoop.launch { pagerState.animateScrollToPage(index) }
+                    scope.launch { pagerState.animateScrollToPage(index) }
                 },
                 label = {
                     Text(text = tag.name)
@@ -155,6 +174,7 @@ private fun ColumnScope.TabPageUI(vm: FollowListViewModel) {
 
     HorizontalPager(
         state = pagerState,
+        key = { tags[it].tagid },
     ) { page ->
         val tag = tags[page]
         FollowListPage(vm, tag.tagid)
@@ -162,13 +182,44 @@ private fun ColumnScope.TabPageUI(vm: FollowListViewModel) {
 }
 
 @Composable
-private fun FollowListPage(vm: FollowListViewModel, tagId: Int, canManageTags: Boolean = true) {
+private fun FollowListPage(
+    vm: FollowListViewModel,
+    tagId: Int,
+    canManageTags: Boolean = true,
+    listName: String = "关注",
+) {
     val lazyPagingItems = vm.getFollowListFlow(tagId).collectAsLazyPagingItems()
-    var hasResumed by remember(lazyPagingItems) { mutableStateOf(false) }
-    LifecycleResumeEffect(lazyPagingItems) {
-        if (hasResumed || lazyPagingItems.itemCount > 0) lazyPagingItems.refresh()
-        hasResumed = true
-        onPauseOrDispose { }
+    LaunchedEffect(lazyPagingItems, tagId, vm.refreshVersion) {
+        vm.refreshListIfNeeded(tagId, lazyPagingItems::refresh)
+    }
+    val loadState = lazyPagingItems.loadState
+    val refresh = loadState.refresh
+    val append = loadState.append
+    val hasItems = lazyPagingItems.itemCount > 0
+    var lastEndReached by rememberSaveable(tagId) { mutableStateOf(false) }
+    val endReached = if (refresh is LoadState.NotLoading) {
+        append.endOfPaginationReached
+    } else {
+        lastEndReached
+    }
+    // 后台刷新期间，列表内容和已经确认的页尾提示一起保留。
+    SideEffect { lastEndReached = endReached }
+
+    val accessError = listOf(refresh, append, loadState.prepend).filterIsInstance<LoadState.Error>()
+        .mapNotNull { it.error as? ApiException }
+        .firstOrNull { it.code in listOf(-101, 22115, 22118) }
+    if (accessError != null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            if (accessError.code == -101) {
+                val navigation = LocalNavigation.currentOrThrow
+                TextButton(onClick = { navigation.push(SharedScreen.Login) }) {
+                    Text("请登录后查看${listName}列表")
+                }
+            } else {
+                Text("对方已设置隐私，${listName}列表不可见", color = TipColor)
+            }
+        }
+        return
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -176,14 +227,14 @@ private fun FollowListPage(vm: FollowListViewModel, tagId: Int, canManageTags: B
         items(
             count = lazyPagingItems.itemCount,
             key = lazyPagingItems.itemKey {
-                it.mid
+                it.user.mid
             }
         ) { index ->
             val relationUser = lazyPagingItems[index] ?: return@items
             UserItemUI(vm, relationUser, canManageTags)
         }
-        when (val refresh = lazyPagingItems.loadState.refresh) {
-            is LoadState.Loading -> if (lazyPagingItems.itemCount == 0) {
+        when (refresh) {
+            is LoadState.Loading -> if (!hasItems) {
                 item {
                     Box(Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
                         LoadingIndicator()
@@ -193,14 +244,14 @@ private fun FollowListPage(vm: FollowListViewModel, tagId: Int, canManageTags: B
 
             is LoadState.Error -> item {
                 TextButton(onClick = lazyPagingItems::retry, modifier = Modifier.fillMaxWidth()) {
-                    Text(refresh.error.message ?: "关注列表加载失败，点击重试")
+                    Text(refresh.error.listLoadMessage("${listName}列表加载失败，点击重试"))
                 }
             }
 
-            is LoadState.NotLoading -> if (lazyPagingItems.itemCount == 0) {
+            is LoadState.NotLoading -> if (!hasItems) {
                 item {
                     Text(
-                        text = "暂无关注",
+                        text = "暂无$listName",
                         modifier = Modifier.fillMaxWidth().padding(10.dp),
                         textAlign = TextAlign.Center,
                         color = TipColor
@@ -209,56 +260,73 @@ private fun FollowListPage(vm: FollowListViewModel, tagId: Int, canManageTags: B
             }
 
         }
-        if (lazyPagingItems.itemCount > 0 && lazyPagingItems.loadState.refresh is LoadState.NotLoading) {
-            when (val append = lazyPagingItems.loadState.append) {
-                is LoadState.Loading -> item { LoadingIndicator() }
-                is LoadState.Error -> item {
-                    TextButton(
-                        onClick = lazyPagingItems::retry,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(append.error.message ?: "加载失败，点击重试")
-                    }
-                }
-
-                is LoadState.NotLoading -> if (append.endOfPaginationReached) item {
+        if (hasItems) {
+            when {
+                endReached -> item(key = "relationListEnd") {
                     Text(
-                        text = "没有更多了",
+                        text = "没有更多可查看的${listName}了",
                         modifier = Modifier.fillMaxWidth().padding(10.dp),
                         textAlign = TextAlign.Center,
                         color = TipColor,
                     )
                 }
+
+                refresh !is LoadState.NotLoading -> Unit
+
+                append is LoadState.Loading -> item {
+                    Box(
+                        Modifier.fillMaxWidth().padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(Modifier.size(24.dp))
+                    }
+                }
+
+                append is LoadState.Error -> item {
+                    TextButton(
+                        onClick = lazyPagingItems::retry,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(append.error.listLoadMessage("加载失败，点击重试"))
+                    }
+                }
+
             }
         }
     }
 }
 
+private fun Throwable.listLoadMessage(fallback: String): String {
+    if (this is ApiException && code == -352) return "请求被拦截，请稍后重试"
+    return message ?: fallback
+}
+
 @Composable
-private fun LazyItemScope.UserItemUI(
+private fun UserItemUI(
     vm: FollowListViewModel,
-    item: FollowingUser,
+    item: RelationListUser,
     canManageTags: Boolean,
 ) {
     val navigation = LocalNavigation.currentOrThrow
-    val isSelf = item.mid == LoginMapper.getMid()
-    var userState by remember(item) { mutableStateOf(item) }
-    val showFollowButton = !isSelf && userState.attribute in listOf(0, 2, 6)
-    val actionState = vm.followList[item.mid]
+    val user = item.user
+    val isSelf = user.mid == LoginMapper.getMid()
+    LaunchedEffect(item) { vm.resolveMissingRelation(item) }
+    val attribute = item.attribute
+    val showFollowButton = !isSelf && attribute in listOf(null, 0, 2, 6)
+    val isActionRunning = vm.isRelationActionRunning(user.mid)
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth()
             .height(70.dp)
             .combinedClickable(
-                onClick = { navigation.push(SharedScreen.UserProfile(item.mid)) },
+                onClick = { navigation.push(SharedScreen.UserProfile(user.mid)) },
                 onLongClick = if (canManageTags) ({
-                    vm.showSettingTagsDialog(item.mid)
+                    vm.showSettingTagsDialog(user.mid)
                 }) else null,
             ).padding(10.dp)
     ) {
-        //元素内容 头像 昵称 签名 关注按钮 头像左下角会员标识
         val (avatar, text, followBtn, actionLoading) = createRefs()
         AsyncImage(
-            model = userState.face,
+            model = user.face,
             contentDescription = "avatar",
             modifier = Modifier.constrainAs(avatar) {
                 top.linkTo(parent.top)
@@ -280,12 +348,12 @@ private fun LazyItemScope.UserItemUI(
             verticalArrangement = Arrangement.spacedBy((-2).dp)
         ) {
             Text(
-                text = userState.uname,
+                text = user.uname,
                 color = TextColor,
                 fontSize = 15.sp
             )
             Text(
-                text = userState.sign,
+                text = user.sign,
                 color = TipColor,
                 fontSize = 14.sp,
                 maxLines = 1,
@@ -293,7 +361,7 @@ private fun LazyItemScope.UserItemUI(
             )
         }
 
-        if (actionState is BiliResponse.Loading) {
+        if (isActionRunning) {
             CircularProgressIndicator(
                 modifier = Modifier.size(30.dp)
                     .constrainAs(actionLoading) {
@@ -304,46 +372,49 @@ private fun LazyItemScope.UserItemUI(
                     }
             )
         }
-        if (showFollowButton) ButtonByAttribute(
-            modifier = Modifier
-                .isInvisible(actionState is BiliResponse.Loading)
-                .constrainAs(followBtn) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    end.linkTo(parent.end)
-                },
-            attribute = userState.attribute,
-            mid = userState.mid,
-            vm = vm
-        ) {
-            userState = userState.copy(attribute = it)
+        val buttonPosition = Modifier.constrainAs(followBtn) {
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+            end.linkTo(parent.end)
+        }
+        if (item.needsRelationLookup && attribute == null) {
+            Spacer(buttonPosition.size(85.dp, 30.dp))
+        } else if (showFollowButton) {
+            ButtonByAttribute(
+                modifier = buttonPosition.isInvisible(isActionRunning),
+                attribute = attribute,
+                mid = user.mid,
+                vm = vm,
+            ) {
+                item.needsRelationLookup = false
+                item.attribute = it
+            }
         }
     }
 }
 
 
 @Composable
-private fun ConstraintLayoutScope.ButtonByAttribute(
-    modifier: Modifier = Modifier,
-    attribute: Int,
+private fun ButtonByAttribute(
+    modifier: Modifier,
+    attribute: Int?,
     mid: Long,
     vm: FollowListViewModel,
-    onChange: (newAttribute: Int) -> Unit
+    onChange: (newAttribute: Int?) -> Unit,
 ) {
     when (attribute) {
+        null -> TextButton(
+            onClick = { vm.retryRelation(mid, onChange) },
+            modifier = modifier,
+        ) {
+            Text("重试关注状态")
+        }
+
         0 ->
             OutlinedButton(
-                onClick = {
-                    vm.addFollow(mid) {
-                        onChange(it)
-                    }
-                },
-                contentPadding = PaddingValues(
-                    vertical = 0.dp,
-                    horizontal = 0.dp
-                ),
-                modifier = modifier
-                    .size(85.dp, 30.dp)
+                onClick = { vm.addFollow(mid, onChange) },
+                contentPadding = PaddingValues(0.dp),
+                modifier = modifier.size(85.dp, 30.dp),
             ) {
                 Icon(imageVector = Icons.Outlined.Add, contentDescription = "Add")
                 Text(text = "关注")
@@ -351,17 +422,9 @@ private fun ConstraintLayoutScope.ButtonByAttribute(
 
         2, 6 ->
             FilledTonalButton(
-                onClick = {
-                    vm.cancelFollow(mid) {
-                        onChange(it)
-                    }
-                },
-                contentPadding = PaddingValues(
-                    vertical = 0.dp,
-                    horizontal = 0.dp
-                ),
-                modifier = modifier
-                    .size(85.dp, 30.dp)
+                onClick = { vm.cancelFollow(mid, onChange) },
+                contentPadding = PaddingValues(0.dp),
+                modifier = modifier.size(85.dp, 30.dp),
             ) {
                 Icon(imageVector = Icons.Outlined.Menu, contentDescription = "Menu")
                 Text(text = if (attribute == 2) "已关注" else "已互粉")
