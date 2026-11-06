@@ -25,6 +25,9 @@ sealed class SharedScreen(val path: String) : BiliScreenProvider {
     data class FollowList(@SerialName("mid") val mid: Long? = null) : SharedScreen("/followList")
 
     @Serializable
+    data class FansList(@SerialName("mid") val mid: Long? = null) : SharedScreen("/fansList")
+
+    @Serializable
     data class VideoPlayer(
         @SerialName("aid") val aid: Long? = null,
         @SerialName("bvid") val bvid: String? = null,

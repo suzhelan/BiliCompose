@@ -618,18 +618,27 @@ private fun ColumnScope.CardHeader(userSpace: UserSpace, profileActions: @Compos
             )
         }
         //粉丝数
-        Text(
-            text = userSpace.card.fans.toStringCount(),
-            fontSize = 20.sp,
-            color = TextColor,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 10.dp)
-        )
-        Text(
-            text = "粉丝",
-            modifier = Modifier.padding(start = 5.dp),
-            color = TipColor
-        )
+        Row(
+            modifier = Modifier.clickable {
+                navigation.push(
+                    if (isLoggedIn) SharedScreen.FansList(userSpace.card.mid.toLong())
+                    else SharedScreen.Login
+                )
+            }.padding(start = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = userSpace.card.fans.toStringCount(),
+                fontSize = 20.sp,
+                color = TextColor,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "粉丝",
+                modifier = Modifier.padding(start = 5.dp),
+                color = TipColor,
+            )
+        }
     }
 
     //简介

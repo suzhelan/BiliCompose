@@ -18,6 +18,11 @@ data class Relation(
     val tag: List<Int>? // null
 )
 
+@Serializable
+data class RelationAttribute(
+    @SerialName("attribute") val attribute: Int? = null,
+)
+
 
 /**
  * 查询分组列表

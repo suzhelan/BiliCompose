@@ -12,9 +12,11 @@ import top.suzhelan.bili.api.AppConfig
 import top.suzhelan.bili.api.BiliResponse
 import top.suzhelan.bili.api.bodyBiliSuccess
 import top.suzhelan.bili.api.getKtorClient
+import top.suzhelan.bili.biz.user.entity.FansPage
 import top.suzhelan.bili.biz.user.entity.FollowingUser
 import top.suzhelan.bili.biz.user.entity.FollowingsPage
 import top.suzhelan.bili.biz.user.entity.Relation
+import top.suzhelan.bili.biz.user.entity.RelationAttribute
 import top.suzhelan.bili.biz.user.entity.RelationTags
 import top.suzhelan.bili.shared.auth.config.LoginMapper
 
@@ -28,7 +30,12 @@ import top.suzhelan.bili.shared.auth.config.LoginMapper
  */
 class RelationApi {
 
+    companion object {
+        const val LIST_PAGE_SIZE = 50
+    }
+
     private val ktor = getKtorClient(baseUrl = AppConfig.API_BASE_URL)
+    private val webClient by lazy { getKtorClient(AppConfig.API_BASE_URL, withCookie = true) }
 
     /**
      * 关注
@@ -65,13 +72,12 @@ class RelationApi {
         tagId: Int = -20,
         page: Int = 1,
     ): BiliResponse.Success<List<FollowingUser>> {
-        val pageSize = 50
         return ktor.get("/x/relation/tag") {
             url {
                 parameter("access_key", LoginMapper.getAccessKey())
                 parameter("tagid", tagId.toString())
                 parameter("order_type", "")
-                parameter("ps", pageSize.toString())
+                parameter("ps", LIST_PAGE_SIZE.toString())
                 parameter("pn", page.toString())
             }
         }.bodyBiliSuccess()
@@ -84,8 +90,18 @@ class RelationApi {
             parameter("access_key", LoginMapper.getAccessKey())
             parameter("vmid", mid)
             parameter("pn", page)
-            parameter("ps", 50)
+            parameter("ps", LIST_PAGE_SIZE)
             parameter("order_type", "")
+        }.bodyBiliSuccess()
+    }
+
+    suspend fun queryFans(mid: Long, page: Int, offset: String?): BiliResponse.Success<FansPage> {
+        return webClient.get("/x/relation/fans") {
+            header("Referer", "https://space.bilibili.com/$mid")
+            parameter("vmid", mid)
+            parameter("pn", page)
+            parameter("ps", LIST_PAGE_SIZE)
+            offset?.let { parameter("offset", it) }
         }.bodyBiliSuccess()
     }
 
@@ -108,13 +124,11 @@ class RelationApi {
      * @param midList 用户mid列表
      * @return
      */
-    suspend fun queryRelations(midList: List<Long>): BiliResponse.Success<Map<String, Relation>> {
-        //拼接为 mid1,mid2,mid3这样的字符串
-        val mids = midList.joinToString(",")
+    suspend fun queryRelations(midList: List<Long>): BiliResponse.Success<Map<String, RelationAttribute>> {
         return ktor.get("/x/relation/relations") {
             url {
                 parameter("access_key", LoginMapper.getAccessKey())
-                parameter("fids", mids)
+                parameter("fids", midList.joinToString(","))
             }
         }.bodyBiliSuccess()
     }
