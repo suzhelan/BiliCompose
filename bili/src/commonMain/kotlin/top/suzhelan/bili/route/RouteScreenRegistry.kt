@@ -17,6 +17,7 @@ import top.suzhelan.bili.biz.login.ui.WebViewScreen
 import top.suzhelan.bili.biz.search.ui.SEARCH_EDIT_KEY
 import top.suzhelan.bili.biz.search.ui.SearchInputScreen
 import top.suzhelan.bili.biz.search.ui.SearchResultsScreen
+import top.suzhelan.bili.biz.user.ui.DynamicDetailScreen
 import top.suzhelan.bili.biz.user.ui.FansListScreen
 import top.suzhelan.bili.biz.user.ui.FavoriteDetailScreen
 import top.suzhelan.bili.biz.user.ui.FavoriteFoldersScreen
@@ -126,6 +127,9 @@ fun NavGraphBuilder.routingScreenRegistration() {
     }
     composable<SharedScreen.WatchHistory> {
         WatchHistoryScreen()
+    }
+    composable<SharedScreen.DynamicDetail> { entry ->
+        DynamicDetailScreen(entry.toRoute<SharedScreen.DynamicDetail>().id)
     }
     composable<SharedScreen.WatchLater> {
         WatchLaterScreen()

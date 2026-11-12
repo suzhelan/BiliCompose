@@ -305,7 +305,7 @@ fun UserCollectionScreen(mid: Long, id: Long, kind: String, title: String) {
 }
 
 @Composable
-private fun <T> ProfilePagedList(
+internal fun <T> ProfilePagedList(
     state: ProfileListState<T>,
     listState: LazyListState,
     isActive: Boolean,
