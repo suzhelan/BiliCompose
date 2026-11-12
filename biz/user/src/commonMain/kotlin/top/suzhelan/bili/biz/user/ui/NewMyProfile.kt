@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -84,6 +83,7 @@ import top.suzhelan.bili.biz.user.entity.UserSpace
 import top.suzhelan.bili.biz.user.viewmodel.FavoriteFoldersViewModel
 import top.suzhelan.bili.biz.user.viewmodel.MoreLikeViewModel
 import top.suzhelan.bili.biz.user.viewmodel.ProfileRelationState
+import top.suzhelan.bili.biz.user.viewmodel.UserDynamicsViewModel
 import top.suzhelan.bili.biz.user.viewmodel.UserProfileViewModel
 import top.suzhelan.bili.biz.user.viewmodel.UserSubmissionsViewModel
 import top.suzhelan.bili.shared.auth.config.LoginMapper
@@ -115,6 +115,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
     val moreLikeViewModel = viewModel { MoreLikeViewModel() }
     val favoriteFoldersViewModel = viewModel { FavoriteFoldersViewModel() }
     val submissionsViewModel = viewModel { UserSubmissionsViewModel() }
+    val dynamicsViewModel = viewModel { UserDynamicsViewModel() }
     var showCollections by rememberSaveable(mid) { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { 4 })
     val userSpaceRes by vm.userSpace.collectAsStateWithLifecycle()
@@ -122,6 +123,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
     val favoriteState by favoriteFoldersViewModel.state.collectAsStateWithLifecycle()
     val submissionState by submissionsViewModel.videos.state.collectAsStateWithLifecycle()
     val collectionState by submissionsViewModel.collections.state.collectAsStateWithLifecycle()
+    val dynamicState by dynamicsViewModel.dynamics.state.collectAsStateWithLifecycle()
     val likesRefreshing by moreLikeViewModel.isRefreshing(mid).collectAsStateWithLifecycle()
     val refreshError by vm.refreshError.collectAsStateWithLifecycle()
     val relationState by vm.relationState.collectAsStateWithLifecycle()
@@ -137,6 +139,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
         moreLikeViewModel,
         favoriteFoldersViewModel,
         submissionsViewModel,
+        dynamicsViewModel,
         isLoggedIn
     ) {
         vm.getUserSpace(mid)
@@ -146,6 +149,8 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
         if (pagerState.currentPage == 2) favoriteFoldersViewModel.load(mid, force = true)
         submissionsViewModel.videos.invalidate()
         submissionsViewModel.collections.invalidate()
+        dynamicsViewModel.dynamics.invalidate()
+        if (pagerState.currentPage == 1) dynamicsViewModel.load(mid, force = true)
         if (pagerState.currentPage == 0) {
             if (showCollections) submissionsViewModel.loadCollections(mid, force = true)
             else submissionsViewModel.loadVideos(mid, force = true)
@@ -165,6 +170,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
         likesRefreshing,
         submissionState.isRefreshing,
         collectionState.isRefreshing,
+        dynamicState.isRefreshing,
     ) {
         pullRefreshingPage?.let { page ->
             // 请求同步设置状态，直接读取以避开 Flow 尚未收集时提前结束的窗口。
@@ -172,6 +178,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
                 0 -> submissionsViewModel.videos.state.value.isRefreshing ||
                         submissionsViewModel.collections.state.value.isRefreshing
                 2 -> favoriteFoldersViewModel.state.value.isLoading
+                1 -> dynamicsViewModel.dynamics.state.value.isRefreshing
                 3 -> moreLikeViewModel.isRefreshing(mid).value
                 else -> false
             }
@@ -189,6 +196,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
                 0 -> if (showCollections) submissionsViewModel.loadCollections(mid, force = true)
                 else submissionsViewModel.loadVideos(mid, force = true)
                 2 -> favoriteFoldersViewModel.load(mid, force = true)
+                1 -> dynamicsViewModel.load(mid, force = true)
                 3 -> moreLikeViewModel.refresh(mid)
             }
         },
@@ -229,6 +237,7 @@ private fun UserProfilePage(mid: Long, showBackButton: Boolean) {
                         moreLikeViewModel,
                         favoriteFoldersViewModel,
                         submissionsViewModel,
+                        dynamicsViewModel,
                         showCollections,
                         { showCollections = it },
                         pagerState,
@@ -260,6 +269,7 @@ private fun UserProfile(
     moreLikeViewModel: MoreLikeViewModel,
     favoriteFoldersViewModel: FavoriteFoldersViewModel,
     submissionsViewModel: UserSubmissionsViewModel,
+    dynamicsViewModel: UserDynamicsViewModel,
     showCollections: Boolean,
     onShowCollections: (Boolean) -> Unit,
     pagerState: PagerState,
@@ -326,6 +336,13 @@ private fun UserProfile(
                     onShowCollections = onShowCollections,
                     showInitialIndicator = pullRefreshingPage != page,
                 )
+                1 -> UserDynamicsContent(
+                    mid = userSpace.card.mid.toLong(),
+                    viewModel = dynamicsViewModel,
+                    listState = listStates[page],
+                    isActive = pagerState.settledPage == page,
+                    showInitialIndicator = pullRefreshingPage != page,
+                )
                 2 -> FavoriteFoldersProfileContent(
                     mid = userSpace.card.mid.toLong(),
                     viewModel = favoriteFoldersViewModel,
@@ -344,14 +361,6 @@ private fun UserProfile(
                     showRefreshIndicator = pullRefreshingPage != page,
                 )
 
-                else -> LazyColumn(
-                    state = listStates[page],
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    item {
-                        Spacer(Modifier.fillParentMaxHeight())
-                    }
-                }
             }
         }
     }

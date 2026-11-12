@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
@@ -39,7 +40,7 @@ import top.suzhelan.bili.shared.navigation.currentOrThrow
 
 
 @Composable
-fun CommentContent(oid: String, type: CommentSourceType) {
+fun CommentContent(oid: String, type: CommentSourceType, header: LazyListScope.() -> Unit = {}) {
     val viewModel = viewModel { CommentViewModel() }
     val navigation = LocalNavigation.currentOrThrow
     val lazyPagingItems = viewModel.getCommentList(oid, type).collectAsLazyPagingItems()
@@ -77,6 +78,7 @@ fun CommentContent(oid: String, type: CommentSourceType) {
             state = listState,
             modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
+            header()
             items(
                 items = publishedRootComments,
                 key = { comment -> "published-root-${comment.rpid}" }
@@ -112,34 +114,35 @@ fun CommentContent(oid: String, type: CommentSourceType) {
                     )
                 }
             }
-            when (lazyPagingItems.loadState.append) {
-                is LoadState.Loading -> {
-                    item {
-                        LoadingIndicator()
-                    }
+            val refresh = lazyPagingItems.loadState.refresh
+            val append = lazyPagingItems.loadState.append
+            when {
+                refresh is LoadState.Loading && lazyPagingItems.itemCount == 0 -> item {
+                    LoadingIndicator()
                 }
 
-                is LoadState.NotLoading -> {
-                    item {
-                        Text(
-                            text = "没有更多了",
-                            modifier = Modifier.fillMaxWidth().padding(10.dp),
-                            textAlign = TextAlign.Center,
-                            color = TipColor
-                        )
-                    }
+                refresh is LoadState.Error -> item {
+                    CommentLoadError(
+                        refresh.error.message ?: "评论加载失败",
+                        lazyPagingItems::retry
+                    )
                 }
 
-                is LoadState.Error -> {
-                    item {
-                        CommentLoadError(
-                            message = (lazyPagingItems.loadState.append as LoadState.Error).error.message
-                                ?: "未知错误",
-                            onRetry = {
-                                lazyPagingItems.retry()
-                            }
-                        )
-                    }
+                append is LoadState.Loading -> item {
+                    LoadingIndicator()
+                }
+
+                append is LoadState.Error -> item {
+                    CommentLoadError(append.error.message ?: "评论加载失败", lazyPagingItems::retry)
+                }
+
+                refresh is LoadState.NotLoading && append.endOfPaginationReached -> item {
+                    Text(
+                        text = if (lazyPagingItems.itemCount == 0 && publishedRootComments.isEmpty()) "暂无评论" else "没有更多了",
+                        modifier = Modifier.fillMaxWidth().padding(10.dp),
+                        textAlign = TextAlign.Center,
+                        color = TipColor,
+                    )
                 }
             }
         }

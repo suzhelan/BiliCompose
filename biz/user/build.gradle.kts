@@ -18,6 +18,7 @@ kotlin {
             implementation(libs.constraintlayout.compose.multiplatform)
             //尽可能只引用公共模块，避免引用不必要的模块
             implementation(projects.biz.base)
+            implementation(projects.biz.comment)
             implementation(projects.biz.login)
             implementation(projects.shared.common)
             implementation(projects.shared.auth)
